@@ -1,0 +1,24 @@
+{
+  "name": "tiktok-animation",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio",
+    "sfx": "node scripts/make-sfx.mjs",
+    "render": "remotion render PapaVakhta out/papa-vakhta.mp4"
+  },
+  "dependencies": {
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@fontsource/montserrat": "^5.3.0",
+    "@remotion/cli": "^4.0.543",
+    "@types/react": "^19.3.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.543",
+    "typescript": "^7.0.2"
+  },
+  "devDependencies": {
+    "@remotion/bundler": "^4.0.543",
+    "@remotion/renderer": "^4.0.543"
+  }
+}

@@ -21,9 +21,9 @@
     {"id": "b17", "shot": 15, "offset": 8, "text": "Тишина. А потом — сообщение от папы: «Сынок, *ты один*?»"},
     {"id": "b18", "shot": 16, "offset": 6, "text": "А под дверью — *его тень*. И свет телефона."},
     {"id": "b19", "shot": 17, "offset": 6, "text": "Ответить «да»? Или позвонить папе по видеосвязи?", "nocap": true},
-    {"id": "b20", "shot": 17, "offset": 150, "text": "Три.", "nocap": true},
-    {"id": "b21", "shot": 17, "offset": 180, "text": "Два.", "nocap": true},
-    {"id": "b22", "shot": 17, "offset": 210, "text": "Один.", "nocap": true},
+    {"id": "b20", "shot": 17, "offset": 150, "text": "Три.", "nocap": true, "minDur": 0.8},
+    {"id": "b21", "shot": 17, "offset": 180, "text": "Два.", "nocap": true, "minDur": 0.8},
+    {"id": "b22", "shot": 17, "offset": 210, "text": "Один.", "nocap": true, "minDur": 0.8},
     {"id": "b23", "shot": 17, "offset": 238, "text": "Пиши в комментариях!", "nocap": true}
   ]
 }

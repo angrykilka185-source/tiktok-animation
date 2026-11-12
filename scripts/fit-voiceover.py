@@ -42,7 +42,8 @@ BASE_TEMPO = float(os.environ.get('BASE_TEMPO', '1.15'))  # gentle speed-up for 
 PACK = '--anchor' not in sys.argv
 LINE_GAP = 0.1  # pause between lines of the same shot (s)
 SHOT_GAP = 0.2  # pause when the next line starts a new shot (s)
-MIN_RATIO = 0.55  # the picture is never sped up more than 1/0.55 = 1.8x
+MIN_RATIO = 0.3  # the picture is never sped up more than 1/0.3 = 3.3x
+END_HOLD = 1.6  # the end card stays this long after the last line (s)
 SR = 44100
 
 
@@ -219,46 +220,36 @@ def main(src):
                     if n_ > anchors[-1][1] and o > anchors[-1][0]:
                         anchors.append((o, n_))
             prev_old, prev_new = anchors[-1]
-        F_old = shot_start(finale) / FPS
-        F_new = None
         for i, cl in enumerate(clips):
             tempo = BASE_TEMPO
             dur = cl['dur'] / tempo
             old = desired[i]
             shot = lines[i]['shot']
             first_of_shot = i == 0 or shot != lines[i - 1]['shot']
-            if shot == finale:
-                # the finale keeps its own timing (countdown on the numbers)
-                if F_new is None:
-                    F_new = prev_end + 0.35
-                    if prev_new is not None:
-                        F_new = max(F_new, prev_new + MIN_RATIO * (F_old - prev_old))
-                    anchors.append((F_old, F_new))
-                    prev_old, prev_new = F_old, F_new
-                st = max(F_new + (old - F_old), prev_end + LINE_GAP)
-            else:
-                st = prev_end + (SHOT_GAP if first_of_shot else LINE_GAP)
+            # every shot ends when its voice ends: the next line (and the cut) follow right away
+            st = prev_end + (SHOT_GAP if first_of_shot else LINE_GAP)
+            if i > 0 and lines[i - 1].get('minDur'):
+                st = max(st, plan[-1][0] + lines[i - 1]['minDur'])
+            if prev_new is not None:
+                st = max(st, prev_new + MIN_RATIO * (old - prev_old))
+            if i == 0 and not reused:
+                st = max(st, old)
+            if first_of_shot:
+                cut_old = shot_start(shot) / FPS
+                lead = min(old - cut_old, 0.2)
+                cut_new = st - lead if cut_old > 0 else 0.0
                 if prev_new is not None:
-                    st = max(st, prev_new + MIN_RATIO * (old - prev_old))
-                if i == 0 and not reused:
-                    st = max(st, old)
-                if first_of_shot:
-                    # the cut lands just before the first line of the shot
-                    cut_old = shot_start(shot) / FPS
-                    lead = min(old - cut_old, 0.2)
-                    cut_new = st - lead if cut_old > 0 else 0.0
-                    if prev_new is not None:
-                        cut_new = max(cut_new, prev_new + MIN_RATIO * (cut_old - prev_old))
-                        st = max(st, cut_new + lead)
-                    if not anchors or (cut_old > anchors[-1][0] and cut_new > anchors[-1][1]):
-                        anchors.append((cut_old, cut_new))
+                    cut_new = max(cut_new, prev_new + MIN_RATIO * (cut_old - prev_old))
+                    st = max(st, cut_new + lead)
+                if not anchors or (cut_old > anchors[-1][0] and cut_new > anchors[-1][1]):
+                    anchors.append((cut_old, cut_new))
             if not anchors or (old > anchors[-1][0] and st > anchors[-1][1]):
                 anchors.append((old, st))
             prev_old, prev_new = old, st
             plan.append((st, tempo, dur))
             prev_end = st + dur
         old_total = TOTAL / FPS
-        new_total = (F_new + (old_total - F_old)) if F_new is not None else prev_end + 0.6
+        new_total = prev_end + END_HOLD
         anchors.append((old_total, new_total))
         anchors.insert(0, (0.0, 0.0))
         clean = []
@@ -269,6 +260,18 @@ def main(src):
         json.dump({'anchors': [[round(a * FPS, 2), round(b * FPS, 2)] for a, b in anchors], 'total': round(new_total * FPS)},
                   open(os.path.join(ROOT, PATHS['edit']), 'w', encoding='utf-8'), indent=1)
         print(f'packed: {old_total:.1f}s -> {new_total:.1f}s')
+        def fwd(o):
+            for (a, b), (c, d) in zip(anchors, anchors[1:]):
+                if a <= o <= c:
+                    return b + (o - a) * (d - b) / (c - a)
+            return anchors[-1][1]
+        for sh in range(1, len(SHOT) + 1):
+            idx = [k for k, l in enumerate(lines) if l['shot'] == sh]
+            if not idx:
+                continue
+            end_new = fwd(shot_start(sh + 1) / FPS) if sh < len(SHOT) else new_total
+            voice_end = plan[idx[-1]][0] + plan[idx[-1]][2]
+            print(f'  shot {sh:2d}: {fwd(shot_start(sh) / FPS):5.1f}-{end_new:5.1f}s, picture after the voice: {end_new - voice_end:+.2f}s')
     else:
         prev_end = start_after
         for i, cl in enumerate(clips):

@@ -1,7 +1,7 @@
 // Time remap between the authored timeline ("old" frames: scenes, effects, plaques)
 // and the final edit ("new" frames) that follows the voice-over (scripts/fit-voiceover.py).
 import React from 'react';
-import {Freeze, useCurrentFrame} from 'remotion';
+import {Sequence, useCurrentFrame} from 'remotion';
 import type {Episode} from './components/Overlays';
 
 export type Edit = {anchors: number[][]; total: number};
@@ -25,11 +25,13 @@ export const makeRemap = (edit: Edit | null, oldTotal: number) => {
 };
 export type Remap = ReturnType<typeof makeRemap>;
 
-// plays a scene authored on the old timeline at the new timing
+// plays a scene authored on the old timeline at the new timing.
+// (A shifted <Sequence> instead of <Freeze>: Freeze moves the timeline position and
+// Remotion clamps it to the composition length, which broke the last shot.)
 export const Retimed: React.FC<{r: Remap; newFrom: number; oldFrom: number; oldDur: number; children: React.ReactNode}> = ({r, newFrom, oldFrom, oldDur, children}) => {
 	const f = useCurrentFrame();
-	const old = Math.round(r.inv(newFrom + f) - oldFrom);
-	return React.createElement(Freeze, {frame: Math.max(0, Math.min(oldDur - 1, old)), children});
+	const old = Math.max(0, Math.min(oldDur - 1, Math.round(r.inv(newFrom + f) - oldFrom)));
+	return React.createElement(Sequence, {from: f - old, layout: 'none', children});
 };
 
 export const remapEpisode = (ep: Episode, r: Remap): Episode => ({

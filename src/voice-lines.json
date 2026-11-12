@@ -33,9 +33,9 @@
     {"id": "a28", "shot": 15, "offset": 4, "text": "Шаги. Он заходит… и смотрит прямо на твой *телефон*."},
     {"id": "a29", "shot": 15, "offset": 100, "text": "«Кто пишет, *парень*?»"},
     {"id": "a30", "shot": 16, "offset": 6, "text": "Скажешь *маме*? Или задашь вопрос, ответ на который знает только *папа*?", "nocap": true},
-    {"id": "a31", "shot": 16, "offset": 150, "text": "Три.", "nocap": true},
-    {"id": "a32", "shot": 16, "offset": 180, "text": "Два.", "nocap": true},
-    {"id": "a33", "shot": 16, "offset": 210, "text": "Один.", "nocap": true},
+    {"id": "a31", "shot": 16, "offset": 150, "text": "Три.", "nocap": true, "minDur": 0.8},
+    {"id": "a32", "shot": 16, "offset": 180, "text": "Два.", "nocap": true, "minDur": 0.8},
+    {"id": "a33", "shot": 16, "offset": 210, "text": "Один.", "nocap": true, "minDur": 0.8},
     {"id": "a34", "shot": 16, "offset": 238, "text": "Пиши в комментариях!", "nocap": true}
   ]
 }

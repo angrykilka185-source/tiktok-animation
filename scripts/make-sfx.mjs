@@ -718,3 +718,50 @@ write('lift_ding', room(add(ping([1318.5, 2637], 1.2, 0.35), ping([1046.5, 2093]
 	for (let k = 0; k < 7; k++) add(x, click(0.012, 2400 + rnd() * 800, 2), k * 0.09 + rnd() * 0.02, 0.5);
 	write('typing', x, 0.35);
 }
+
+// ---------- «Голосовые из завтра», серия 2 ----------
+// PE whistle (pea whistle: a tone with a fast warble)
+{
+	const dur = 0.9;
+	const x = buf(dur);
+	let ph = 0;
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		const f = 2750 + 180 * Math.sin(2 * Math.PI * 34 * t) + 60 * Math.sin(2 * Math.PI * 7 * t);
+		ph += (2 * Math.PI * f) / SR;
+		const e = Math.min(1, t / 0.02) * Math.min(1, (dur - t) / 0.06) * (0.85 + 0.15 * Math.sin(2 * Math.PI * 34 * t));
+		x[i] = (Math.sin(ph) + 0.25 * Math.sin(2 * ph) + 0.15 * noise()) * e;
+	}
+	write('whistle', room(x, 0.3, 1.5), 0.5);
+}
+// glass shatter: a crash and many tinkling shards
+{
+	const x = buf(1.6);
+	add(x, thump(70, 0.35, 0.08, 0.7), 0, 0.8);
+	const burst = buf(0.5);
+	for (let i = 0; i < burst.length; i++) burst[i] = noise() * Math.exp(-i / SR / 0.08);
+	add(x, highpass(burst, 2500), 0, 0.9);
+	for (let k = 0; k < 40; k++) {
+		const f = 3000 + rnd() * 6000;
+		add(x, ping([f, f * 1.51], 0.12 + rnd() * 0.2, 0.03 + rnd() * 0.05, 0.4), 0.02 + rnd() * 0.9 * rnd(), 0.25 + 0.3 * rnd());
+	}
+	write('glass', room(x, 0.3, 1.4), 0.9);
+}
+// electric sparks: irregular crackle
+{
+	const x = buf(1.0);
+	for (let k = 0; k < 26; k++) add(x, click(0.008 + rnd() * 0.02, 1500 + rnd() * 5000, 2), rnd() * 0.9, 0.3 + rnd() * 0.7);
+	write('sparks', x, 0.6);
+}
+// playback slowed down: a falling pitch sweep
+{
+	const dur = 0.9;
+	const x = buf(dur);
+	let ph = 0;
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		ph += (2 * Math.PI * 520 * Math.pow(0.35, t / dur)) / SR;
+		x[i] = (Math.sin(ph) + 0.4 * Math.sin(2 * ph) + 0.2 * Math.sin(3 * ph)) * Math.min(1, t / 0.02) * Math.min(1, (dur - t) / 0.2);
+	}
+	write('slowdown', lowpass(x, 2500), 0.45);
+}

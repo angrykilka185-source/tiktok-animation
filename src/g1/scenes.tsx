@@ -10,15 +10,15 @@ import {Cam, Stage, toScreen} from '../components/Stage';
 import {Phone as PhoneBase, SANS} from '../scenes/S12_S16';
 import envJson from './env.json';
 
-const YELLOW = '#ffd34a';
-const RED = '#ff3b30';
-const NIGHT = '#0b1638';
-const BLUE = '#2d6cdf';
+export const YELLOW = '#ffd34a';
+export const RED = '#ff3b30';
+export const NIGHT = '#0b1638';
+export const BLUE = '#2d6cdf';
 const NEIGHBOUR = {hair: '#d6d2dc', top: '#7a4e8a', topDark: '#5e3a6c', pants: '#d9b49a', shoes: '#3a2a30'};
-const PHONE_BG = 'radial-gradient(circle at 50% 55%, #1c2a4a 0%, #05070f 65%)';
+export const PHONE_BG = 'radial-gradient(circle at 50% 55%, #1c2a4a 0%, #05070f 65%)';
 
 // the hero's phone: his red sleeve and hand
-const Phone: React.FC<React.ComponentProps<typeof PhoneBase>> = (p) => <PhoneBase sleeve="#cf4a3c" skin="#e8b48e" {...p} />;
+export const Phone: React.FC<React.ComponentProps<typeof PhoneBase>> = (p) => <PhoneBase sleeve="#cf4a3c" skin="#e8b48e" {...p} />;
 
 // loudness of a fitted voice line, frame by frame (scripts: see src/g1/env.json)
 const ENV = envJson as Record<string, number[]>;
@@ -28,14 +28,14 @@ const level = (k: string, i: number) => {
 	return a[Math.floor(i)];
 };
 
-const rnd = (i: number) => {
+export const rnd = (i: number) => {
 	const v = Math.sin(i * 12.9898 + 4.1) * 43758.5453;
 	return v - Math.floor(v);
 };
 const BARS = Array.from({length: 26}, (_, i) => 0.2 + 0.8 * rnd(i) * (0.6 + 0.4 * Math.sin(i / 3)));
 
 // place the phone so that a point of its screen (cx, cy) lands on (X, Y) at zoom s
-const focus = (w: number, cx: number, cy: number, X: number, Y: number, s: number) => {
+export const focus = (w: number, cx: number, cy: number, X: number, Y: number, s: number) => {
 	const h = w * 2.05;
 	return {x: X - s * (cx + 16 - w / 2), y: Y - s * (cy + 16 - h / 2)};
 };
@@ -48,7 +48,7 @@ const PauseIcon: React.FC = () => (
 		<div style={{width: 11, height: 36, borderRadius: 3, background: '#fff'}} />
 	</div>
 );
-const Mic: React.FC<{size: number; color?: string}> = ({size, color = '#fff'}) => (
+export const Mic: React.FC<{size: number; color?: string}> = ({size, color = '#fff'}) => (
 	<svg width={size} height={size} viewBox="0 0 24 24">
 		<rect x={8.5} y={2} width={7} height={12} rx={3.5} fill={color} />
 		<path d="M 5,11 a 7,7 0 0 0 14,0" stroke={color} strokeWidth={2} fill="none" />
@@ -56,7 +56,7 @@ const Mic: React.FC<{size: number; color?: string}> = ({size, color = '#fff'}) =
 	</svg>
 );
 
-const StatusBar: React.FC<{time: string}> = ({time}) => (
+export const StatusBar: React.FC<{time: string}> = ({time}) => (
 	<div style={{position: 'absolute', left: 54, right: 44, top: 22, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: SANS, fontWeight: 800, fontSize: 27, color: '#fff', zIndex: 3}}>
 		<span>{time}</span>
 		<span style={{display: 'flex', gap: 6, alignItems: 'flex-end'}}>
@@ -70,7 +70,7 @@ const StatusBar: React.FC<{time: string}> = ({time}) => (
 	</div>
 );
 
-const OwnHeader: React.FC<{typing?: boolean}> = ({typing}) => (
+export const OwnHeader: React.FC<{typing?: boolean}> = ({typing}) => (
 	<div style={{position: 'absolute', left: 0, right: 0, top: 0, height: 200, background: '#1b1d22', display: 'flex', alignItems: 'flex-end', padding: '0 30px 22px', gap: 18, fontFamily: SANS, boxSizing: 'border-box', zIndex: 2}}>
 		<div style={{fontSize: 64, lineHeight: '84px', color: '#5aa0ff', fontWeight: 600}}>‹</div>
 		<div style={{width: 84, height: 84, borderRadius: 42, background: '#8a5a32', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 40, flex: 'none'}}>Я</div>
@@ -81,7 +81,7 @@ const OwnHeader: React.FC<{typing?: boolean}> = ({typing}) => (
 	</div>
 );
 
-const ChatScreen: React.FC<{time: string; typing?: boolean; input?: string; caret?: boolean; children?: React.ReactNode}> = ({time, typing, input, caret, children}) => (
+export const ChatScreen: React.FC<{time: string; typing?: boolean; input?: string; caret?: boolean; children?: React.ReactNode}> = ({time, typing, input, caret, children}) => (
 	<div style={{position: 'absolute', inset: 0, background: '#0f1115', overflow: 'hidden'}}>
 		<div style={{position: 'absolute', top: 214, width: '100%', textAlign: 'center', fontFamily: SANS, fontSize: 22, fontWeight: 700, color: '#6b7280'}}>сегодня</div>
 		{children}
@@ -97,7 +97,7 @@ const ChatScreen: React.FC<{time: string; typing?: boolean; input?: string; care
 );
 
 // voice message bubble: play button + waveform + length + send time
-const VoiceBubble: React.FC<{top: number; f: number; progress?: number; lvl?: number; sent?: string; ring?: number; redTail?: number}> = ({
+export const VoiceBubble: React.FC<{top: number; f: number; progress?: number; lvl?: number; sent?: string; ring?: number; redTail?: number}> = ({
 	top,
 	f,
 	progress = 0,
@@ -142,7 +142,7 @@ const VoiceBubble: React.FC<{top: number; f: number; progress?: number; lvl?: nu
 	);
 };
 
-const TextBubble: React.FC<{top: number; text: string; out?: boolean; time: string; p?: number; timeRed?: boolean}> = ({top, text, out, time, p = 1, timeRed}) => (
+export const TextBubble: React.FC<{top: number; text: string; out?: boolean; time: string; p?: number; timeRed?: boolean}> = ({top, text, out, time, p = 1, timeRed}) => (
 	<div
 		style={{
 			position: 'absolute',
@@ -166,7 +166,7 @@ const TextBubble: React.FC<{top: number; text: string; out?: boolean; time: stri
 	</div>
 );
 
-const TypingDots: React.FC<{f: number; top: number}> = ({f, top}) => (
+export const TypingDots: React.FC<{f: number; top: number}> = ({f, top}) => (
 	<div style={{position: 'absolute', left: 24, top, background: '#262a33', borderRadius: '30px 30px 30px 8px', padding: '26px 30px', display: 'flex', gap: 12}}>
 		{[0, 1, 2].map((k) => (
 			<div key={k} style={{width: 18, height: 18, borderRadius: 9, background: '#9aa3b2', opacity: 0.35 + 0.65 * Math.max(0, Math.sin((f - k * 5) / 4))}} />
@@ -174,7 +174,7 @@ const TypingDots: React.FC<{f: number; top: number}> = ({f, top}) => (
 	</div>
 );
 
-const LockScreen: React.FC<{notif: number; ring?: number; time?: string}> = ({notif, ring = 0, time = '23:41'}) => (
+export const LockScreen: React.FC<{notif: number; ring?: number; time?: string}> = ({notif, ring = 0, time = '23:41'}) => (
 	<div style={{position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 30%, #2a3c6e 0%, #121a33 55%, #070a14 100%)', fontFamily: SANS, color: '#fff'}}>
 		<div style={{position: 'absolute', top: 110, width: '100%', textAlign: 'center'}}>
 			<div style={{fontSize: 32, fontWeight: 700, opacity: 0.85}}>четверг, 12 ноября</div>
@@ -214,7 +214,7 @@ const LockScreen: React.FC<{notif: number; ring?: number; time?: string}> = ({no
 	</div>
 );
 
-const Empty: React.FC<{p: number}> = ({p}) => (
+export const Empty: React.FC<{p: number}> = ({p}) => (
 	<div style={{position: 'absolute', top: 430, width: '100%', textAlign: 'center', fontFamily: SANS, opacity: p}}>
 		<div style={{width: 140, height: 140, borderRadius: 70, background: '#1d2027', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
 			<Mic size={74} color="#3a3f4a" />
@@ -224,7 +224,7 @@ const Empty: React.FC<{p: number}> = ({p}) => (
 );
 
 // the messages tear into slices and colour fringes, then vanish
-const Glitch: React.FC<{f: number; from: number; to: number; children: React.ReactNode}> = ({f, from, to, children}) => {
+export const Glitch: React.FC<{f: number; from: number; to: number; children: React.ReactNode}> = ({f, from, to, children}) => {
 	const fade = interpolate(f, [to - 10, to], [1, 0], clamp);
 	const blink = Math.floor((f - from) / 2) % 3 === 2 ? 0.25 : 1;
 	return (
@@ -245,7 +245,7 @@ const Glitch: React.FC<{f: number; from: number; to: number; children: React.Rea
 };
 
 // ======================================================= scene pieces =====
-const PhoneLight: React.FC<{id: string; x: number; y: number; r: number; o?: number}> = ({id, x, y, r, o = 1}) => (
+export const PhoneLight: React.FC<{id: string; x: number; y: number; r: number; o?: number}> = ({id, x, y, r, o = 1}) => (
 	<g>
 		<defs>
 			<radialGradient id={id}>
@@ -259,7 +259,7 @@ const PhoneLight: React.FC<{id: string; x: number; y: number; r: number; o?: num
 );
 
 // Your room at night, the bed seen from the side, the phone on the bedside table.
-const Bedroom: React.FC<{f: number; id: string; glow: number; buzz: boolean; eyes: 'closed' | 'open' | 'wide'}> = ({f, id, glow, buzz, eyes}) => {
+export const Bedroom: React.FC<{f: number; id: string; glow: number; buzz: boolean; eyes: 'closed' | 'open' | 'wide'}> = ({f, id, glow, buzz, eyes}) => {
 	const jx = buzz ? Math.sin(f * 2.9) * 5 : 0;
 	const face: Face =
 		eyes === 'closed'
@@ -343,7 +343,7 @@ const Bedroom: React.FC<{f: number; id: string; glow: number; buzz: boolean; eye
 };
 
 // Stairwell landing with the lift (walls: white top, green bottom, like in old blocks).
-const LiftLanding: React.FC<{f: number; id: string; open?: number; floor?: string; err?: boolean; win?: boolean; stencil?: string; jolt?: number; btn?: boolean}> = ({
+export const LiftLanding: React.FC<{f: number; id: string; open?: number; floor?: string; err?: boolean; win?: boolean; stencil?: string; jolt?: number; btn?: boolean}> = ({
 	f,
 	id,
 	open = 0,
@@ -461,7 +461,7 @@ const Dust: React.FC<{t: number}> = ({t}) => (
 );
 
 // small fluffy dog; local origin = body centre
-const Dog: React.FC<{bark?: number}> = ({bark = 0}) => (
+export const Dog: React.FC<{bark?: number}> = ({bark = 0}) => (
 	<g>
 		<path d="M 70,-10 C 125,-40 115,-95 72,-82" stroke="#e8c79a" strokeWidth={28} fill="none" strokeLinecap="round" />
 		<ellipse cx={0} cy={10} rx={95} ry={70} fill="#f1d9b5" />
@@ -481,7 +481,7 @@ const Dog: React.FC<{bark?: number}> = ({bark = 0}) => (
 );
 
 // the neighbour holding her dog against her chest
-const Neighbour: React.FC<{id: string; x: number; y: number; scale: number; bark: number; face: Face; breathe?: number}> = ({id, x, y, scale, bark, face, breathe}) => (
+export const Neighbour: React.FC<{id: string; x: number; y: number; scale: number; bark: number; face: Face; breathe?: number}> = ({id, x, y, scale, bark, face, breathe}) => (
 	<g>
 		<Person kind="mom" id={id} colors={NEIGHBOUR} x={x} y={y} scale={scale} face={face} breathe={breathe} armL={{target: [-70, -600], bend: 1, kf: 0.9}} armR={{target: [80, -575], bend: -1, kf: 0.9}} />
 		<g transform={`translate(${x + 10 * scale},${y - 600 * scale}) scale(${scale * 0.9})`}>
@@ -521,7 +521,7 @@ const Cabin: React.FC<{f: number}> = ({f}) => {
 };
 
 // cutaway: the shaft between the 3rd and the 2nd floor, the cabin stuck in the middle
-const Cutaway: React.FC<{f: number; id: string; cabinY: number}> = ({f, id, cabinY}) => {
+export const Cutaway: React.FC<{f: number; id: string; cabinY: number}> = ({f, id, cabinY}) => {
 	const alarm = Math.floor(f / 5) % 2 === 0;
 	const storeys: [string, number, number][] = [
 		['4', -400, 180],
@@ -577,7 +577,7 @@ const Cutaway: React.FC<{f: number; id: string; cabinY: number}> = ({f, id, cabi
 };
 
 // gym (PE lesson)
-const Gym: React.FC<{ball?: {x: number; y: number; s: number; rot: number}; shadow?: number}> = ({ball, shadow = 1}) => (
+export const Gym: React.FC<{ball?: {x: number; y: number; s: number; rot: number}; shadow?: number}> = ({ball, shadow = 1}) => (
 	<g>
 		<rect x={-400} y={-400} width={1880} height={1300} fill="#dfe6d8" />
 		<rect x={-400} y={900} width={1880} height={560} fill="#8fb3a0" />
@@ -616,7 +616,7 @@ const Gym: React.FC<{ball?: {x: number; y: number; s: number; rot: number}; shad
 );
 
 // "vision of tomorrow": red tint, scan lines, jumps, a timestamp
-const Vision: React.FC<{f: number; label: string; children: React.ReactNode}> = ({f, label, children}) => {
+export const Vision: React.FC<{f: number; label: string; children: React.ReactNode}> = ({f, label, children}) => {
 	const jump = Math.floor(f / 3) % 7 === 3 ? 14 : 0;
 	const flash = interpolate(f, [0, 6], [0.8, 0], clamp);
 	return (
@@ -634,7 +634,7 @@ const Vision: React.FC<{f: number; label: string; children: React.ReactNode}> = 
 };
 
 // red "no entry" sign stamped over something (screen coords)
-const NoSign: React.FC<{p: number; x: number; y: number; r: number}> = ({p, x, y, r}) =>
+export const NoSign: React.FC<{p: number; x: number; y: number; r: number}> = ({p, x, y, r}) =>
 	p > 0.01 ? (
 		<div style={{position: 'absolute', left: x - r, top: y - r, width: 2 * r, height: 2 * r, transform: `scale(${0.4 + 0.6 * p}) rotate(${(1 - p) * -30}deg)`, opacity: Math.min(1, p * 2)}}>
 			<svg width={2 * r} height={2 * r} viewBox="-100 -100 200 200" style={{filter: 'drop-shadow(0 6px 10px rgba(0,0,0,0.5))'}}>
@@ -645,7 +645,7 @@ const NoSign: React.FC<{p: number; x: number; y: number; r: number}> = ({p, x, y
 	) : null;
 
 // big close-up of your face, lit by the phone
-const FaceClose: React.FC<{t: number; id: string; face: Face; red?: number; zoom?: [number, number]}> = ({t, id, face, red = 0, zoom = [1, 1.1]}) => (
+export const FaceClose: React.FC<{t: number; id: string; face: Face; red?: number; zoom?: [number, number]}> = ({t, id, face, red = 0, zoom = [1, 1.1]}) => (
 	<Stage cam={{s: lerp(t, 0, 45, zoom[0], zoom[1]) * kick(t), cx: 540, cy: 960}} light={{glow: 0, vignette: 0.85}} bg="#05070f">
 		<rect x={-500} y={-500} width={2200} height={3000} fill="#1c2747" />
 		<Bust kind="teen" id={id} x={540} y={1000} scale={6.6} face={{blush: false, ...face}} />

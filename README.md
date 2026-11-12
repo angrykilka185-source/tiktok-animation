@@ -95,3 +95,15 @@ python3 scripts/fit-voiceover.py assets/golosovye-1.mp3 --part g1
 npx remotion render Golosovye1 out/golosovye-1.mp4
 ffmpeg -i out/golosovye-1.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k deliverables/golosovye-1-s-ozvuchkoy.mp4
 ```
+
+## «Голосовые из завтра», серия 2 «Мяч»
+
+Код: `src/g2/` (детали телефона, спортзал и видения берутся из `src/g1/scenes.tsx`). Начало — короткий пересказ
+серии 1 (замороженные кадры серии 1 в стиле VHS). Счётчик на 3: лифт ✓ (сразу), мяч «?» → ✓ когда падает лампа,
+новое предсказание «?». Реплика с `"fx": "eerie"` (шёпот «Это не ты») делается ниже и с эхом, `"holdAfter"` даёт паузу после неё.
+
+```bash
+python3 scripts/fit-voiceover.py assets/golosovye-2.mp3 --part g2
+npx remotion render Golosovye2 out/golosovye-2.mp4
+ffmpeg -i out/golosovye-2.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k deliverables/golosovye-2-s-ozvuchkoy.mp4
+```

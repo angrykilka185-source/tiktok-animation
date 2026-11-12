@@ -33,6 +33,7 @@ PATHS = {
     '2': {'lines': 'src/p2/voice-lines.json', 'timeline': 'src/p2/timeline.ts', 'out': 'public/voice2', 'timings': 'src/p2/voice-timings.json', 'edit': 'src/p2/edit.json'},
     '3': {'lines': 'src/p3/voice-lines.json', 'timeline': 'src/p3/timeline.ts', 'out': 'public/voice3', 'timings': 'src/p3/voice-timings.json', 'edit': 'src/p3/edit.json'},
     'g1': {'lines': 'src/g1/voice-lines.json', 'timeline': 'src/g1/timeline.ts', 'out': 'public/voice-g1', 'timings': 'src/g1/voice-timings.json', 'edit': 'src/g1/edit.json'},
+    'g2': {'lines': 'src/g2/voice-lines.json', 'timeline': 'src/g2/timeline.ts', 'out': 'public/voice-g2', 'timings': 'src/g2/voice-timings.json', 'edit': 'src/g2/edit.json'},
 }[PART]
 SHOT = [float(x) for x in re.search(r'SHOT_SECONDS = \[([^\]]+)\]', open(os.path.join(ROOT, PATHS['timeline']), encoding='utf-8').read()).group(1).split(',')]
 TOTAL = round(sum(SHOT) * FPS)
@@ -256,7 +257,7 @@ def main(src):
                 anchors.append((old, st))
             prev_old, prev_new = old, st
             plan.append((st, tempo, dur))
-            prev_end = st + dur
+            prev_end = st + dur + lines[i].get('holdAfter', 0)  # optional beat of silence after a line
         old_total = TOTAL / FPS
         new_total = prev_end + END_HOLD
         anchors.append((old_total, new_total))
@@ -320,6 +321,10 @@ def main(src):
             # sounds like a voice message played from a phone speaker
             af = ['highpass=f=330', 'lowpass=f=3300', 'acompressor=threshold=0.1:ratio=5:attack=4:release=80',
                   'acrusher=bits=11:mix=0.25', f'volume={gain_db + cl["gain"] + 6:.2f}dB', 'alimiter=limit=0.95']
+        if l.get('fx') == 'eerie':
+            # a lower, distant, unfamiliar voice; pitch down without changing the length
+            af = [f'asetrate={int(SR * 0.84)}', f'aresample={SR}', f'atempo={1 / 0.84:.4f}', 'highpass=f=220', 'lowpass=f=3600',
+                  'aecho=0.8:0.55:45|95:0.35|0.22', f'volume={gain_db + cl["gain"] + 4:.2f}dB', 'alimiter=limit=0.95']
         if tempo > 1.001:
             af.insert(0, f'atempo={tempo:.4f}')
         filt = ['-filter:a', ','.join(af)]

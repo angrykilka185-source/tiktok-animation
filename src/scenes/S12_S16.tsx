@@ -9,17 +9,26 @@ import {Cam, Stage} from '../components/Stage';
 export const SANS = "'Montserrat', 'DejaVu Sans', sans-serif";
 
 // Phone in hand (HTML for crisp UI). `children` = screen content.
-export const Phone: React.FC<{x: number; y: number; w: number; scale?: number; rot?: number; children: React.ReactNode}> = ({x, y, w, scale = 1, rot = 0, children}) => {
+export const Phone: React.FC<{x: number; y: number; w: number; scale?: number; rot?: number; sleeve?: string; skin?: string; children: React.ReactNode}> = ({
+	x,
+	y,
+	w,
+	scale = 1,
+	rot = 0,
+	sleeve = '#f0a032',
+	skin = '#f2c3a0',
+	children,
+}) => {
 	const h = w * 2.05;
 	return (
 		<div style={{position: 'absolute', left: x, top: y, width: w, height: h, transform: `translate(-50%,-50%) rotate(${rot}deg) scale(${scale})`}}>
 			{/* hand behind the phone: plain ovals like the rest of the film */}
-			<div style={{position: 'absolute', right: -50, top: h * 0.5, width: 120, height: 170, borderRadius: '50%', background: '#f2c3a0'}} />
+			<div style={{position: 'absolute', right: -50, top: h * 0.5, width: 120, height: 170, borderRadius: '50%', background: skin}} />
 			<div style={{position: 'absolute', inset: 0, borderRadius: w * 0.13, background: '#15161a', boxShadow: '0 30px 60px rgba(0,0,0,0.45)'}} />
 			<div style={{position: 'absolute', inset: 16, borderRadius: w * 0.11, overflow: 'hidden', background: '#0f1218'}}>{children}</div>
 			<div style={{position: 'absolute', left: '50%', top: 30, width: w * 0.28, height: 30, marginLeft: -w * 0.14, borderRadius: 15, background: '#000'}} />
-			<div style={{position: 'absolute', left: -150, top: h * 0.66, width: 170, height: h * 0.6, borderRadius: 70, background: '#f0a032', transform: 'rotate(8deg)'}} />
-			<div style={{position: 'absolute', left: -78, top: h * 0.6, width: 130, height: 160, borderRadius: '50%', background: '#f2c3a0', transform: 'rotate(-20deg)'}} />
+			<div style={{position: 'absolute', left: -150, top: h * 0.66, width: 170, height: h * 0.6, borderRadius: 70, background: sleeve, transform: 'rotate(8deg)'}} />
+			<div style={{position: 'absolute', left: -78, top: h * 0.6, width: 130, height: 160, borderRadius: '50%', background: skin, transform: 'rotate(-20deg)'}} />
 		</div>
 	);
 };

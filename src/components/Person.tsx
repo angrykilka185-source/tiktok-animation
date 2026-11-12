@@ -30,7 +30,7 @@ export type ArmPose =
 	| {shoulder: number; elbow: number; ku?: number; kf?: number}
 	| {target: [number, number]; bend?: 1 | -1; ku?: number; kf?: number};
 
-export type Kind = 'dad' | 'mom' | 'son';
+export type Kind = 'dad' | 'mom' | 'son' | 'teen'; // teen = hero of «Голосовые из завтра»
 
 export type Colors = Partial<Pick<Spec, 'top' | 'topDark' | 'pants' | 'shoes' | 'hair' | 'skin'>>;
 
@@ -105,7 +105,16 @@ export const SPECS: Record<Kind, Spec> = {
 		upper: 160, fore: 150, armW: 52, hand: 24,
 		top: '#f0a032', topDark: '#d8862a', pants: '#2f3f68', shoes: '#22252b', hair: '#8a5a32', skin: '#f2c3a0',
 	},
+	teen: {
+		leg: 370, legW: 60, legGap: 12,
+		torso: 320, shoulderW: 220, hipW: 190,
+		neck: 38, neckW: 44,
+		hw: 76, hh: 96,
+		upper: 170, fore: 160, armW: 50, hand: 24,
+		top: '#cf4a3c', topDark: '#b13c30', pants: '#2b2d33', shoes: '#e8e6e0', hair: '#1f1a1a', skin: '#e8b48e',
+	},
 };
+export const isHoodie = (k: Kind) => k === 'son' || k === 'teen';
 
 const deg = (r: number) => (r * 180) / Math.PI;
 
@@ -176,6 +185,17 @@ export const Head: React.FC<{
 					/>
 				)}
 			</>
+		);
+	} else if (kind === 'teen') {
+		const P = (x: number, y: number) => `${hw * x},${hh * y}`;
+		hairFront = (
+			<path
+				d={`M ${P(-1.04, -0.02)} L ${P(-1.13, -0.6)} L ${P(-0.98, -1.22)} L ${P(-0.66, -0.98)} L ${P(-0.46, -1.42)} L ${P(-0.2, -1.06)} L ${P(0.1, -1.5)} L ${P(0.3, -1.08)} L ${P(0.7, -1.36)} L ${P(0.76, -0.98)} L ${P(1.16, -1.02)} L ${P(1.1, -0.55)} L ${P(1.04, -0.02)} L ${P(0.9, -0.36)} L ${P(0.58, -0.52)} L ${P(0.4, -0.38)} L ${P(0.16, -0.56)} L ${P(-0.16, -0.4)} L ${P(-0.42, -0.58)} L ${P(-0.8, -0.44)} Z`}
+				fill={hair}
+				stroke={hair}
+				strokeWidth={hw * 0.08}
+				strokeLinejoin="round"
+			/>
 		);
 	} else {
 		hairFront = (
@@ -346,6 +366,17 @@ export const Head: React.FC<{
 				)}
 				{eye(-ex)}
 				{eye(ex)}
+				{kind === 'teen' && (
+					<g stroke="#1d1d22" strokeWidth={hw * 0.065} fill="none" strokeLinecap="round">
+						<circle cx={-ex} cy={ey} r={hw * 0.33} fill="#ffffff" fillOpacity={0.08} />
+						<circle cx={ex} cy={ey} r={hw * 0.33} fill="#ffffff" fillOpacity={0.08} />
+						<path d={`M ${-ex + hw * 0.31},${ey - hw * 0.08} Q 0,${ey - hw * 0.2} ${ex - hw * 0.31},${ey - hw * 0.08}`} />
+						<path d={`M ${-ex - hw * 0.33},${ey - hw * 0.04} L ${-hw * 0.98},${ey - hh * 0.06}`} />
+						<path d={`M ${ex + hw * 0.33},${ey - hw * 0.04} L ${hw * 0.98},${ey - hh * 0.06}`} />
+						<path d={`M ${-ex + hw * 0.06},${ey - hw * 0.22} q ${hw * 0.12},${-hw * 0.02} ${hw * 0.18},${hw * 0.1}`} stroke="#ffffff" strokeOpacity={0.55} strokeWidth={hw * 0.045} />
+						<path d={`M ${ex + hw * 0.06},${ey - hw * 0.22} q ${hw * 0.12},${-hw * 0.02} ${hw * 0.18},${hw * 0.1}`} stroke="#ffffff" strokeOpacity={0.55} strokeWidth={hw * 0.045} />
+					</g>
+				)}
 				<path d={browPath(-ex, -1)} stroke={PALETTE.brow} strokeWidth={hh * 0.085} fill="none" strokeLinecap="round" />
 				<path d={browPath(ex, 1)} stroke={PALETTE.brow} strokeWidth={hh * 0.085} fill="none" strokeLinecap="round" />
 				{/* nose */}
@@ -540,7 +571,7 @@ export const Person: React.FC<PersonProps> = (p) => {
 						<rect x={-hwid - 6} y={hipY - 6} width={hwid * 2 + 12} height={26} fill="#2b2e33" />
 					</>
 				)}
-				{!sil && p.kind === 'son' && (
+				{!sil && isHoodie(p.kind) && (
 					<>
 						{!p.back ? (
 							<>
@@ -560,18 +591,19 @@ export const Person: React.FC<PersonProps> = (p) => {
 		);
 	}
 
+	const [bpMain, bpDark, bpBuckle] = p.kind === 'teen' ? ['#33363d', '#24262b', '#9aa0aa'] : ['#4d5a3a', '#3f4a30', '#c9b37a'];
 	const backpack =
 		p.backpack && !sil ? (
 			p.back ? (
 				<g>
-					<rect x={-sw + 20} y={shY - 30} width={sw * 2 - 40} height={sp.torso * 0.88} rx={40} fill="#4d5a3a" />
-					<rect x={-sw + 46} y={shY + sp.torso * 0.42} width={sw * 2 - 92} height={sp.torso * 0.36} rx={22} fill="#3f4a30" />
-					<rect x={-sw + 70} y={shY - 18} width={sw * 2 - 140} height={22} rx={8} fill="#3f4a30" />
-					<rect x={-30} y={shY + sp.torso * 0.5} width={60} height={14} rx={7} fill="#c9b37a" />
+					<rect x={-sw + 20} y={shY - 30} width={sw * 2 - 40} height={sp.torso * 0.88} rx={40} fill={bpMain} />
+					<rect x={-sw + 46} y={shY + sp.torso * 0.42} width={sw * 2 - 92} height={sp.torso * 0.36} rx={22} fill={bpDark} />
+					<rect x={-sw + 70} y={shY - 18} width={sw * 2 - 140} height={22} rx={8} fill={bpDark} />
+					<rect x={-30} y={shY + sp.torso * 0.5} width={60} height={14} rx={7} fill={bpBuckle} />
 				</g>
 			) : (
 				<g>
-					<rect x={-sw - 22} y={shY - 18} width={sw * 2 + 44} height={sp.torso * 0.8} rx={36} fill="#4d5a3a" />
+					<rect x={-sw - 22} y={shY - 18} width={sw * 2 + 44} height={sp.torso * 0.8} rx={36} fill={bpMain} />
 				</g>
 			)
 		) : null;
@@ -579,8 +611,8 @@ export const Person: React.FC<PersonProps> = (p) => {
 	const backpackStraps =
 		p.backpack && !sil && !p.back ? (
 			<g>
-				<rect x={-sw + 26} y={shY - 4} width={26} height={sp.torso * 0.7} rx={8} fill="#3f4a30" />
-				<rect x={sw - 52} y={shY - 4} width={26} height={sp.torso * 0.7} rx={8} fill="#3f4a30" />
+				<rect x={-sw + 26} y={shY - 4} width={26} height={sp.torso * 0.7} rx={8} fill={bpDark} />
+				<rect x={sw - 52} y={shY - 4} width={26} height={sp.torso * 0.7} rx={8} fill={bpDark} />
 			</g>
 		) : null;
 
@@ -644,7 +676,7 @@ export const Bust: React.FC<{kind: Kind; id: string; face?: Face; x?: number; y?
 				<g>
 					<rect x={-sp.neckW / 2} y={neckTop - 30} width={sp.neckW} height={sp.neck + 60} fill={sp.skin} />
 					<path d={`M ${-sw - 60},${shY + 600} L ${-sw},${shY + 60} Q ${-sw},${shY} ${-sw + 60},${shY} L ${sw - 60},${shY} Q ${sw},${shY} ${sw},${shY + 60} L ${sw + 60},${shY + 600} Z`} fill={sp.top} />
-					{kind === 'son' && (
+					{isHoodie(kind) && (
 						<>
 							<path d={`M -70,${shY - 2} Q 0,${shY + 60} 70,${shY - 2}`} fill={sp.topDark} />
 							<line x1={-22} y1={shY + 30} x2={-26} y2={shY + 150} stroke="#f7efe3" strokeWidth={7} strokeLinecap="round" />

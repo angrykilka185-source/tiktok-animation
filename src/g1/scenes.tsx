@@ -7,7 +7,7 @@ import {HEAVY, MONO} from '../components/Overlays';
 import {Bust, Face, Person} from '../components/Person';
 import {PlankFloor, Wallpaper, WindowBox} from '../components/Set';
 import {Cam, Stage, toScreen} from '../components/Stage';
-import {Phone, SANS} from '../scenes/S12_S16';
+import {Phone as PhoneBase, SANS} from '../scenes/S12_S16';
 import envJson from './env.json';
 
 const YELLOW = '#ffd34a';
@@ -16,6 +16,9 @@ const NIGHT = '#0b1638';
 const BLUE = '#2d6cdf';
 const NEIGHBOUR = {hair: '#d6d2dc', top: '#7a4e8a', topDark: '#5e3a6c', pants: '#d9b49a', shoes: '#3a2a30'};
 const PHONE_BG = 'radial-gradient(circle at 50% 55%, #1c2a4a 0%, #05070f 65%)';
+
+// the hero's phone: his red sleeve and hand
+const Phone: React.FC<React.ComponentProps<typeof PhoneBase>> = (p) => <PhoneBase sleeve="#cf4a3c" skin="#e8b48e" {...p} />;
 
 // loudness of a fitted voice line, frame by frame (scripts: see src/g1/env.json)
 const ENV = envJson as Record<string, number[]>;
@@ -301,7 +304,7 @@ const Bedroom: React.FC<{f: number; id: string; glow: number; buzz: boolean; eye
 			</defs>
 			<g clipPath={`url(#${id}clip)`}>
 				<g transform="rotate(-90 228 1176)">
-					<Bust kind="son" id={`${id}b`} x={228} y={1176} scale={0.95} face={face} />
+					<Bust kind="teen" id={`${id}b`} x={228} y={1176} scale={0.95} face={face} />
 				</g>
 			</g>
 			<path d="M 300,1350 L 296,1130 C 300,1050 390,1010 470,1030 C 540,1050 570,1100 630,1108 C 700,1116 760,1150 785,1240 L 792,1350 Z" fill="#4b69a6" />
@@ -552,7 +555,7 @@ const Cutaway: React.FC<{f: number; id: string; cabinY: number}> = ({f, id, cabi
 			<rect x={540} y={480} width={20} height={300} fill="#c4ccd4" />
 			<rect x={540} y={1060} width={20} height={300} fill="#c4ccd4" />
 			{/* you, on the 3rd floor */}
-			<Person kind="son" id={`${id}son`} x={330} y={780} scale={0.28} backpack face={{eyes: 'wide', mouth: 'o', brows: 'raised', look: [0.9, 0]}} headTurn={0.6} />
+			<Person kind="teen" id={`${id}son`} x={330} y={780} scale={0.28} backpack face={{eyes: 'wide', mouth: 'o', brows: 'raised', look: [0.9, 0]}} headTurn={0.6} />
 			{/* cables + cabin */}
 			<line x1={705} y1={-400} x2={705} y2={cabinY} stroke="#9aa0aa" strokeWidth={5} />
 			<line x1={755} y1={-400} x2={755} y2={cabinY} stroke="#9aa0aa" strokeWidth={5} />
@@ -645,7 +648,7 @@ const NoSign: React.FC<{p: number; x: number; y: number; r: number}> = ({p, x, y
 const FaceClose: React.FC<{t: number; id: string; face: Face; red?: number; zoom?: [number, number]}> = ({t, id, face, red = 0, zoom = [1, 1.1]}) => (
 	<Stage cam={{s: lerp(t, 0, 45, zoom[0], zoom[1]) * kick(t), cx: 540, cy: 960}} light={{glow: 0, vignette: 0.85}} bg="#05070f">
 		<rect x={-500} y={-500} width={2200} height={3000} fill="#1c2747" />
-		<Bust kind="son" id={id} x={540} y={1000} scale={6.6} face={{blush: false, ...face}} />
+		<Bust kind="teen" id={id} x={540} y={1000} scale={6.6} face={{blush: false, ...face}} />
 		<rect x={-500} y={-500} width={2200} height={3000} fill={NIGHT} opacity={0.35} />
 		<PhoneLight id={`${id}pl`} x={640} y={1900} r={1300} />
 		{red > 0 && <rect x={-500} y={-500} width={2200} height={3000} fill="url(#redVignette)" opacity={red} />}
@@ -660,7 +663,7 @@ export const S01: React.FC = () => {
 	if (i === 0) {
 		const buzz = (t >= 8 && t < 22) || (t >= 30 && t < 44);
 		return (
-			<Stage cam={{s: lerp(t, 0, 60, 1.05, 1.18), cx: lerp(t, 0, 60, 560, 600), cy: 1130}} light={{glow: 0, vignette: 0.8}} bg="#05070f">
+			<Stage cam={{s: lerp(t, 0, 60, 1.05, 1.15), cx: 560, cy: 1130}} light={{glow: 0, vignette: 0.8}} bg="#05070f">
 				<Bedroom f={t} id="g1s1" glow={interpolate(t, [8, 12], [0, 1], clamp)} buzz={buzz} eyes={t < 26 ? 'closed' : 'open'} />
 			</Stage>
 		);
@@ -817,7 +820,7 @@ export const S06: React.FC = () => {
 		<Stage cam={{s: lerp(f, 0, 135, 1.0, 1.12) * kick(f), cx: 600, cy: 1000}} light={{glow: 0.35, vignette: 0.5}} bg="#e6e9dd">
 			<LiftLanding f={f} id="g1s6" open={lerp(f, 76, 106, 0, 1)} floor={f < 26 ? '5' : f < 52 ? '6' : '7'} btn />
 			<Person
-				kind="son"
+				kind="teen"
 				id="g1s6son"
 				x={x}
 				y={1490}
@@ -877,7 +880,7 @@ export const S07: React.FC = () => {
 					<rect x={640} y={150} width={900} height={2000} fill="#f4e2b4" />
 					<rect x={760} y={150} width={8} height={2000} fill="#e2cd98" />
 					<rect x={600} y={150} width={40} height={2000} fill="#8b939c" />
-					<Bust kind="son" id="g1s7" x={450} y={1080} scale={4.8} turn={0.35} face={{eyes: 'open', look: [0.9, 0], brows: 'worried', mouth: 'flat', blush: false}} />
+					<Bust kind="teen" id="g1s7" x={450} y={1080} scale={4.8} turn={0.35} face={{eyes: 'open', look: [0.9, 0], brows: 'worried', mouth: 'flat', blush: false}} />
 				</Stage>
 				<Echo f={t} />
 			</AbsoluteFill>
@@ -888,7 +891,7 @@ export const S07: React.FC = () => {
 	return (
 		<Stage cam={{s: 0.95 * kick(t), cx: lerp(t, 0, 43, 640, 560), cy: 1130}} light={{glow: 0.3, vignette: 0.55}} bg="#e6e9dd">
 			<Stairs stencil="6" />
-			<Person kind="son" id="g1s7son" x={x} y={y} scale={0.85} backpack walk={t * 0.45} face={{eyes: 'open', brows: 'worried', mouth: 'flat', look: [-0.6, 0.3]}} />
+			<Person kind="teen" id="g1s7son" x={x} y={y} scale={0.85} backpack walk={t * 0.45} face={{eyes: 'open', brows: 'worried', mouth: 'flat', look: [-0.6, 0.3]}} />
 			<Railing />
 		</Stage>
 	);
@@ -906,7 +909,7 @@ export const S08: React.FC = () => {
 			<Stage cam={{s: 1.05 * kick(t), cx: 560 + sx, cy: 1000 + sy}} light={{glow: 0.3, vignette: 0.6}} bg="#e6e9dd">
 				<LiftLanding f={t} id="g1s8" floor={t < 12 ? '5' : t < 24 ? '4' : '3'} err={hit} win={false} stencil="3" jolt={hit ? Math.sin(t * 3) * 8 * bump : 0} />
 				<Person
-					kind="son"
+					kind="teen"
 					id="g1s8son"
 					x={400}
 					y={1490 - 30 * bump}
@@ -1026,7 +1029,7 @@ export const S11: React.FC = () => {
 		const punch = t >= 21 && t < 38 ? kick(t - 21, 0.06) : 1;
 		const buzz = (t >= 50 && t < 64) || (t >= 70 && t < 82);
 		return (
-			<Stage cam={{s: (2.5 + (1.15 - 2.5) * z) * punch, cx: 865 + (640 - 865) * z, cy: 1135 + (1130 - 1135) * z}} light={{glow: 0, vignette: 0.8}} bg="#05070f">
+			<Stage cam={{s: (2.5 + (1.12 - 2.5) * z) * punch, cx: 865 + (575 - 865) * z, cy: 1135 + (1130 - 1135) * z}} light={{glow: 0, vignette: 0.8}} bg="#05070f">
 				<Bedroom f={t} id="g1s11" glow={interpolate(t, [50, 54], [0, 1], clamp)} buzz={buzz} eyes={t < 56 ? 'open' : 'wide'} />
 			</Stage>
 		);

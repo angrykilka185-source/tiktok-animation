@@ -228,7 +228,7 @@ export const S05: React.FC = () => {
 // He freezes. "ДУМАЕТ" timer counts the seconds.
 export const S06: React.FC = () => {
 	const f = useCurrentFrame();
-	const sec = Math.max(0, Math.min(5, Math.floor((f - 20) / 22) + 1));
+	const sec = Math.max(1, Math.min(5, Math.floor((f - 20) / 22) + 1));
 	const box = pop(f, 16, 11);
 	const prog = Math.min(1, Math.max(0, (f - 20) / 110));
 	return (

@@ -3,6 +3,7 @@ import {Audio, Sequence, interpolate, staticFile} from 'remotion';
 import {SIGN_FLY} from '../timeline';
 import {SIGNS, TOTAL, shotStart as s} from './timeline';
 import {HAS_VOICE, VOICE} from './voice';
+import type {Remap} from '../edit';
 
 type Cue = {at: number; file: string; vol?: number; len?: number};
 const W = (shot: number, ...offs: number[]): Cue[] => offs.map((o) => ({at: s(shot) + o, file: 'whoosh', vol: 0.32}));
@@ -86,18 +87,19 @@ const CUES: Cue[] = [
 const SFX_GAIN = HAS_VOICE ? 0.55 : 1;
 const BED_END = s(17) + 252;
 
-export const SFX2: React.FC = () => (
+export const SFX2: React.FC<{r: Remap}> = ({r}) => (
 	<>
-		<Sequence from={0} durationInFrames={BED_END + 30} name="sfx drone bed">
-			<Audio src={staticFile('sfx/drone.wav')} volume={(f) => 0.32 * interpolate(f, [0, 60, BED_END - 10, BED_END + 20], [0, 1, 1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'})} />
+		<Sequence from={0} durationInFrames={Math.round(r.fwd(BED_END)) + 30} name="sfx drone bed">
+			<Audio src={staticFile('sfx/drone.wav')} volume={(f) => 0.32 * interpolate(f, [0, 60, r.fwd(BED_END) - 10, r.fwd(BED_END) + 20], [0, 1, 1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'})} />
 		</Sequence>
 		{CUES.map((c, i) => {
 			// every effect fades out at the end of its slot instead of being cut off
-			const len = Math.min(c.len ?? 200, TOTAL - c.at);
+			const at = Math.round(r.fwd(c.at));
+			const len = Math.max(6, Math.min(Math.round(r.fwd(c.at + (c.len ?? 200))) - at, r.total - at));
 			const fadeLen = Math.min(18, Math.floor(len / 3));
 			const vol = (c.vol ?? 1) * SFX_GAIN;
 			return (
-				<Sequence key={i} from={c.at} durationInFrames={len} name={`sfx ${c.file}`}>
+				<Sequence key={i} from={at} durationInFrames={len} name={`sfx ${c.file}`}>
 					<Audio
 						src={staticFile(`sfx/${c.file}.wav`)}
 						volume={(f) => (fadeLen >= 2 ? vol * interpolate(f, [len - fadeLen, len - 1], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}) : vol)}
@@ -106,7 +108,7 @@ export const SFX2: React.FC = () => (
 			);
 		})}
 		{VOICE.filter((l) => l.hasAudio).map((l) => (
-			<Sequence key={l.id} from={l.at} durationInFrames={Math.min(Math.ceil(l.duration * 30) + 20, TOTAL - l.at)} name={`voice ${l.id}`}>
+			<Sequence key={l.id} from={l.at} durationInFrames={Math.min(Math.ceil(l.duration * 30) + 20, r.total - l.at)} name={`voice ${l.id}`}>
 				<Audio src={staticFile(l.src)} volume={1} />
 			</Sequence>
 		))}

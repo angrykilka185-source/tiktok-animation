@@ -107,7 +107,7 @@ export const makeVoice = (
 		const out: CapChunk[] = [];
 		for (const l of VOICE) {
 			if (l.nocap) continue;
-			const lineEnd = l.at + Math.round(l.duration * fps) + 12;
+			const lineEnd = l.at + Math.round(l.duration * fps) + 5;
 			const start = out.length;
 			let cur: CapWord[] = [];
 			const flush = () => {

@@ -26,17 +26,23 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 FPS = 30
 PART = int(sys.argv[sys.argv.index('--part') + 1]) if '--part' in sys.argv else 1
 PATHS = {
-    1: {'lines': 'src/voice-lines.json', 'timeline': 'src/timeline.ts', 'out': 'public/voice', 'timings': 'src/voice-timings.json'},
-    2: {'lines': 'src/p2/voice-lines.json', 'timeline': 'src/p2/timeline.ts', 'out': 'public/voice2', 'timings': 'src/p2/voice-timings.json'},
+    1: {'lines': 'src/voice-lines.json', 'timeline': 'src/timeline.ts', 'out': 'public/voice', 'timings': 'src/voice-timings.json', 'edit': 'src/edit.json'},
+    2: {'lines': 'src/p2/voice-lines.json', 'timeline': 'src/p2/timeline.ts', 'out': 'public/voice2', 'timings': 'src/p2/voice-timings.json', 'edit': 'src/p2/edit.json'},
 }[PART]
 SHOT = [float(x) for x in re.search(r'SHOT_SECONDS = \[([^\]]+)\]', open(os.path.join(ROOT, PATHS['timeline']), encoding='utf-8').read()).group(1).split(',')]
 TOTAL = round(sum(SHOT) * FPS)
-MAX_INNER_GAP = 0.28  # longest pause kept inside a line (s)
+MAX_INNER_GAP = 0.22  # longest pause kept inside a line (s)
 LEAD = 0.5  # a line may start this much before its planned moment (s)
 LATE = 1.0  # ...and end this much after the next line's planned moment (s)
 GAP = 0.12  # minimal pause between lines (s)
 MAX_TEMPO = 1.25
-BASE_TEMPO = float(os.environ.get('BASE_TEMPO', '1.12'))  # gentle speed-up for the whole voice-over
+BASE_TEMPO = float(os.environ.get('BASE_TEMPO', '1.15'))  # gentle speed-up for the whole voice-over
+# "pack" (default): lines follow each other without dead air and the picture is
+# retimed to the voice (src/edit.json). "--anchor": old mode, lines wait for the picture.
+PACK = '--anchor' not in sys.argv
+LINE_GAP = 0.1  # pause between lines of the same shot (s)
+SHOT_GAP = 0.2  # pause when the next line starts a new shot (s)
+MIN_RATIO = 0.55  # the picture is never sped up more than 1/0.55 = 1.8x
 SR = 44100
 
 
@@ -195,23 +201,90 @@ def main(src):
             diff -= 1.5
         cl['gain'] = max(-6.0, min(10.0, diff)) if abs(diff) > 1.5 else 0.0
 
-    # --- schedule: each line near its planned moment ------------------------------
+    # --- schedule ----------------------------------------------------------------
     desired = [(shot_start(l['shot']) + l['offset']) / FPS for l in lines]
-    prev_end = start_after
     plan = []
-    for i, cl in enumerate(clips):
-        nxt = desired[i + 1] if i + 1 < m else TOTAL / FPS - 0.2
-        tempo = BASE_TEMPO
-        # start exactly on the planned moment; start earlier only if the line does not fit
-        s = max(desired[i], prev_end + GAP, 0.0)
-        if cl['dur'] / tempo > nxt + LATE - s - GAP:
-            s = max(desired[i] - LEAD, prev_end + GAP, 0.0)
-        avail = nxt + LATE - s - GAP
-        if cl['dur'] / tempo > avail:
-            tempo = min(MAX_TEMPO, cl['dur'] / max(avail, 0.1))
-        dur = cl['dur'] / tempo
-        plan.append((s, tempo, dur))
-        prev_end = s + dur
+    anchors = []  # (old time, new time) in seconds: how the picture is retimed
+    if PACK:
+        finale = len(SHOT)
+        prev_end = start_after
+        prev_old = prev_new = None
+        if reused:
+            p1 = json.load(open(os.path.join(ROOT, 'src/voice-timings.json'), encoding='utf-8')).get('lines', {})
+            anchors.append((0.0, 0.0))
+            for l in reused:
+                t = p1.get(l['reuse'])
+                if t:
+                    o, n_ = (shot_start(l['shot']) + l['offset']) / FPS, t['at'] / FPS
+                    if n_ > anchors[-1][1] and o > anchors[-1][0]:
+                        anchors.append((o, n_))
+            prev_old, prev_new = anchors[-1]
+        F_old = shot_start(finale) / FPS
+        F_new = None
+        for i, cl in enumerate(clips):
+            tempo = BASE_TEMPO
+            dur = cl['dur'] / tempo
+            old = desired[i]
+            shot = lines[i]['shot']
+            first_of_shot = i == 0 or shot != lines[i - 1]['shot']
+            if shot == finale:
+                # the finale keeps its own timing (countdown on the numbers)
+                if F_new is None:
+                    F_new = prev_end + 0.35
+                    if prev_new is not None:
+                        F_new = max(F_new, prev_new + MIN_RATIO * (F_old - prev_old))
+                    anchors.append((F_old, F_new))
+                    prev_old, prev_new = F_old, F_new
+                st = max(F_new + (old - F_old), prev_end + LINE_GAP)
+            else:
+                st = prev_end + (SHOT_GAP if first_of_shot else LINE_GAP)
+                if prev_new is not None:
+                    st = max(st, prev_new + MIN_RATIO * (old - prev_old))
+                if i == 0 and not reused:
+                    st = max(st, old)
+                if first_of_shot:
+                    # the cut lands just before the first line of the shot
+                    cut_old = shot_start(shot) / FPS
+                    lead = min(old - cut_old, 0.2)
+                    cut_new = st - lead if cut_old > 0 else 0.0
+                    if prev_new is not None:
+                        cut_new = max(cut_new, prev_new + MIN_RATIO * (cut_old - prev_old))
+                        st = max(st, cut_new + lead)
+                    if not anchors or (cut_old > anchors[-1][0] and cut_new > anchors[-1][1]):
+                        anchors.append((cut_old, cut_new))
+            if not anchors or (old > anchors[-1][0] and st > anchors[-1][1]):
+                anchors.append((old, st))
+            prev_old, prev_new = old, st
+            plan.append((st, tempo, dur))
+            prev_end = st + dur
+        old_total = TOTAL / FPS
+        new_total = (F_new + (old_total - F_old)) if F_new is not None else prev_end + 0.6
+        anchors.append((old_total, new_total))
+        anchors.insert(0, (0.0, 0.0))
+        clean = []
+        for a, b in anchors:
+            if not clean or (a > clean[-1][0] + 1e-6 and b > clean[-1][1] + 1e-6):
+                clean.append((a, b))
+        anchors = clean
+        json.dump({'anchors': [[round(a * FPS, 2), round(b * FPS, 2)] for a, b in anchors], 'total': round(new_total * FPS)},
+                  open(os.path.join(ROOT, PATHS['edit']), 'w', encoding='utf-8'), indent=1)
+        print(f'packed: {old_total:.1f}s -> {new_total:.1f}s')
+    else:
+        prev_end = start_after
+        for i, cl in enumerate(clips):
+            nxt = desired[i + 1] if i + 1 < m else TOTAL / FPS - 0.2
+            tempo = BASE_TEMPO
+            # start exactly on the planned moment; start earlier only if the line does not fit
+            st = max(desired[i], prev_end + GAP, 0.0)
+            if cl['dur'] / tempo > nxt + LATE - st - GAP:
+                st = max(desired[i] - LEAD, prev_end + GAP, 0.0)
+            avail = nxt + LATE - st - GAP
+            if cl['dur'] / tempo > avail:
+                tempo = min(MAX_TEMPO, cl['dur'] / max(avail, 0.1))
+            dur = cl['dur'] / tempo
+            plan.append((st, tempo, dur))
+            prev_end = st + dur
+        json.dump({'anchors': [[0, 0], [TOTAL, TOTAL]], 'total': TOTAL}, open(os.path.join(ROOT, PATHS['edit']), 'w', encoding='utf-8'), indent=1)
 
     # --- export -----------------------------------------------------------------
     out_dir = os.path.join(ROOT, PATHS['out'])
@@ -270,7 +343,7 @@ def main(src):
 
 
 if __name__ == '__main__':
-    args = [a for i, a in enumerate(sys.argv[1:]) if a != '--part' and (i == 0 or sys.argv[i] != '--part')]
+    args = [a for i, a in enumerate(sys.argv[1:]) if not a.startswith('--') and sys.argv[i] != '--part']
     if not args:
         sys.exit(__doc__)
     main(args[0])

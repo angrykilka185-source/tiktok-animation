@@ -3,8 +3,8 @@
   "model": "eleven_multilingual_v2",
   "voices": {
     "narrator": {"id": "TX3LPaxmHKxFdv7VOQHJ", "name": "Liam", "settings": {"stability": 0.45, "similarity_boost": 0.8, "style": 0.35, "use_speaker_boost": true, "speed": 1.05}},
-    "dad": {"id": "pqHfZKP75CyZ1OOrNyrH", "name": "Bill", "settings": {"stability": 0.6, "similarity_boost": 0.8, "style": 0.2, "use_speaker_boost": true, "speed": 0.95}},
-    "mom": {"id": "XrExE9yKIg1WHnYxQkwB", "name": "Matilda", "settings": {"stability": 0.4, "similarity_boost": 0.8, "style": 0.3, "use_speaker_boost": true, "speed": 1.0}}
+    "dad": {"id": "nPczCjzI2devNBz1zQrb", "name": "Brian", "settings": {"stability": 0.6, "similarity_boost": 0.8, "style": 0.2, "use_speaker_boost": true, "speed": 0.95}},
+    "mom": {"id": "FGY2WhTYpPnrIDTdsKH5", "name": "Laura", "settings": {"stability": 0.4, "similarity_boost": 0.8, "style": 0.3, "use_speaker_boost": true, "speed": 1.0}}
   },
   "lines": [
     {"id": "n01", "shot": 1, "offset": 48, "voice": "narrator", "text": "Папа три месяца был на вахте. И вдруг вернулся на два дня раньше."},
@@ -24,11 +24,11 @@
     {"id": "n13", "shot": 13, "offset": 40, "voice": "narrator", "text": "От папы. Рейс задержали. Прилечу завтра."},
     {"id": "n14", "shot": 14, "offset": 24, "voice": "narrator", "text": "Тогда кто… сидит у нас на кухне?"},
     {"id": "d15", "shot": 15, "offset": 96, "voice": "dad", "text": "Кто пишет, парень?"},
-    {"id": "n16a", "shot": 16, "offset": 10, "voice": "narrator", "text": "Он или не он?"},
-    {"id": "n16b", "shot": 16, "offset": 52, "voice": "narrator", "text": "Сказать маме… или задать контрольный вопрос?"},
+    {"id": "n16a", "shot": 16, "offset": 6, "voice": "narrator", "text": "Он или не он?"},
+    {"id": "n16b", "shot": 16, "offset": 44, "voice": "narrator", "text": "Сказать маме… или задать контрольный вопрос?"},
     {"id": "n16c", "shot": 16, "offset": 135, "voice": "narrator", "text": "Три."},
     {"id": "n16d", "shot": 16, "offset": 165, "voice": "narrator", "text": "Два."},
     {"id": "n16e", "shot": 16, "offset": 195, "voice": "narrator", "text": "Один."},
-    {"id": "n16f", "shot": 16, "offset": 225, "voice": "narrator", "text": "Выбирай! Пиши в комментариях."}
+    {"id": "n16f", "shot": 16, "offset": 228, "voice": "narrator", "text": "Выбирай! Пиши в комментариях."}
   ]
 }

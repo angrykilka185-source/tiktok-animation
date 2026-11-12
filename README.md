@@ -25,3 +25,16 @@ npm run render     # итоговый файл: out/papa-vakhta.mp4
 | Сцены 1–16 | `src/scenes/` |
 | Расстановка звуков | `src/SFX.tsx` |
 | Синтез звуков | `scripts/make-sfx.mjs` |
+
+## Озвучка (ElevenLabs)
+
+Текст реплик, голоса и время появления: `src/voice-lines.json`.
+
+```bash
+npm run voice      # нужен ключ ElevenLabs с правом Text to Speech (ELEVENLABS_API_KEY или прокси)
+npm run render
+# громкость под TikTok (-14 LUFS):
+ffmpeg -i out/papa-vakhta.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5 -c:a aac -b:a 192k out/papa-vakhta-final.mp4
+```
+
+Скрипт кеширует реплики и перегенерирует только изменённые; субтитры подсвечивают слова по таймкодам из ElevenLabs.

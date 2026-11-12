@@ -20,12 +20,19 @@ export type Episode = {
 	mark?: 'cross' | 'check'; // what a filled box shows
 	accent?: string; // colour of the counter frame / filled boxes
 	plaqueLabel?: string; // default «ПРИЗНАК»
+	pending?: {n: number; at: number}[]; // boxes that show «?» from frame `at` (not checked yet)
 };
 
 // ------------------------------- HUD ---------------------------------------
 const COUNTER_X = 1040; // right edge
 const COUNTER_Y = 96;
 const geom = (slots: number) => {
+	if (slots <= 3) {
+		// few wide boxes in a compact counter
+		const gap = 16;
+		const boxW = 300;
+		return {w: (boxW - 44 - (slots - 1) * gap) / slots, gap, boxW, left: COUNTER_X - boxW};
+	}
 	const w = slots > 9 ? 26 : slots > 6 ? 34 : 44;
 	const gap = slots > 9 ? 6 : slots > 6 ? 9 : 16;
 	const boxW = slots > 6 ? 44 + slots * w + (slots - 1) * gap : 404;
@@ -111,6 +118,10 @@ export const HUD: React.FC<{ep: Episode}> = ({ep}) => {
 							const land = n <= (ep.prefilled ?? 0) ? -1000 : s ? s.at + s.hold + SIGN_FLY : Infinity;
 							const filled = f >= land;
 							const p = filled ? pop(f, land, 9) : 0;
+							const pend = ep.pending?.find((x) => x.n === n);
+							const q = !filled && !!pend && f >= pend.at;
+							const qp = q ? pop(f, pend!.at, 8) : 0;
+							const qPulse = q ? 0.5 + 0.5 * Math.sin((f - pend!.at) / 5) : 0;
 							return (
 								<div
 									key={n}
@@ -118,16 +129,17 @@ export const HUD: React.FC<{ep: Episode}> = ({ep}) => {
 										width: g.w,
 										height: 40,
 										borderRadius: 8,
-										background: filled ? ep.accent ?? '#e0342b' : 'rgba(255,255,255,0.08)',
-										border: '3px solid ' + (filled ? '#ffffff88' : 'rgba(255,255,255,0.18)'),
+										background: filled ? ep.accent ?? '#e0342b' : q ? `rgba(255,211,74,${0.14 + 0.16 * qPulse})` : 'rgba(255,255,255,0.08)',
+										border: '3px solid ' + (filled ? '#ffffff88' : q ? ep.accent ?? '#ffd34a' : 'rgba(255,255,255,0.18)'),
 										display: 'flex',
 										alignItems: 'center',
 										justifyContent: 'center',
-										transform: `scale(${filled ? 0.6 + 0.4 * p : 1})`,
+										transform: `scale(${filled ? 0.6 + 0.4 * p : q ? (0.5 + 0.5 * qp) * (1 + 0.05 * qPulse) : 1})`,
 										boxSizing: 'border-box',
 									}}
 								>
 									{filled && (ep.mark === 'check' ? <Check size={g.w > 40 ? 24 : 20} /> : <Cross size={g.w > 40 ? 24 : 20} />)}
+									{q && <span style={{fontFamily: HEAVY, fontWeight: 900, fontSize: 30, lineHeight: 1, color: ep.accent ?? '#ffd34a'}}>?</span>}
 								</div>
 							);
 						})}

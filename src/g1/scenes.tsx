@@ -659,11 +659,11 @@ const FaceClose: React.FC<{t: number; id: string; face: Face; red?: number; zoom
 // 1. 23:41, the phone lights up on the bedside table → lock screen: «Мой номер».
 export const S01: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [60]);
+	const {i, t} = seg(f, [68]);
 	if (i === 0) {
 		const buzz = (t >= 8 && t < 22) || (t >= 30 && t < 44);
 		return (
-			<Stage cam={{s: lerp(t, 0, 60, 1.05, 1.15), cx: 560, cy: 1130}} light={{glow: 0, vignette: 0.8}} bg="#05070f">
+			<Stage cam={{s: lerp(t, 0, 68, 1.05, 1.15), cx: 560, cy: 1130}} light={{glow: 0, vignette: 0.8}} bg="#05070f">
 				<Bedroom f={t} id="g1s1" glow={interpolate(t, [8, 12], [0, 1], clamp)} buzz={buzz} eyes={t < 26 ? 'closed' : 'open'} />
 			</Stage>
 		);
@@ -671,8 +671,8 @@ export const S01: React.FC = () => {
 	const buzz = t >= 4 && t < 18;
 	return (
 		<AbsoluteFill style={{background: PHONE_BG}}>
-			<Phone x={540 + (buzz ? Math.sin(t * 2.9) * 8 : 0)} y={1000} w={680} scale={lerp(t, 0, 69, 1.0, 1.1) * kick(t)}>
-				<LockScreen notif={pop(t, 4, 12)} ring={pop(t, 22, 12)} />
+			<Phone x={540 + (buzz ? Math.sin(t * 2.9) * 8 : 0)} y={1000} w={680} scale={lerp(t, 0, 61, 1.0, 1.1) * kick(t)}>
+				<LockScreen notif={pop(t, 4, 12)} ring={pop(t, 30, 12)} />
 			</Phone>
 		</AbsoluteFill>
 	);
@@ -683,13 +683,13 @@ export const S02: React.FC = () => {
 	const f = useCurrentFrame();
 	const {i, t} = seg(f, [62]);
 	if (i === 0) {
-		const rip = interpolate(t, [34, 50], [0, 1], clamp);
-		const touch = t >= 28 && t < 40;
+		const rip = interpolate(t, [26, 42], [0, 1], clamp);
+		const touch = t >= 20 && t < 32;
 		return (
 			<AbsoluteFill style={{background: PHONE_BG}}>
 				<Phone x={540} y={1000} w={680} scale={lerp(t, 0, 62, 1.0, 1.12) * kick(t)}>
 					<ChatScreen time="23:41">
-						<VoiceBubble top={250} f={t} progress={t >= 36 ? interpolate(t, [36, 62], [0.01, 0.14], clamp) : 0} lvl={t >= 38 ? 0.5 + 0.5 * Math.abs(Math.sin(t / 3)) : 0} />
+						<VoiceBubble top={250} f={t} progress={t >= 28 ? interpolate(t, [28, 62], [0.01, 0.16], clamp) : 0} lvl={t >= 30 ? 0.5 + 0.5 * Math.abs(Math.sin(t / 3)) : 0} />
 					</ChatScreen>
 					{touch && <div style={{position: 'absolute', left: 94 - 40, top: 318 - 40, width: 80, height: 80, borderRadius: 40, background: 'rgba(255,255,255,0.45)'}} />}
 					{rip > 0 && rip < 1 && (
@@ -704,11 +704,11 @@ export const S02: React.FC = () => {
 			t={t}
 			id="g1s2"
 			face={{
-				eyes: t < 10 ? 'open' : 'wide',
-				pupil: interpolate(t, [12, 26], [1, 0.45], {...clamp, easing: Easing.out(Easing.cubic)}),
+				eyes: t < 7 ? 'open' : 'wide',
+				pupil: interpolate(t, [24, 36], [1, 0.45], {...clamp, easing: Easing.out(Easing.cubic)}),
 				look: [0.15, 0.5],
-				brows: t < 10 ? 'neutral' : 'raised',
-				mouth: t < 14 ? 'flat' : 'o',
+				brows: t < 7 ? 'neutral' : 'raised',
+				mouth: t < 26 ? 'flat' : 'o',
 			}}
 		/>
 	);
@@ -717,9 +717,9 @@ export const S02: React.FC = () => {
 // 3. The voice message plays: «…в 8:15 не садись в лифт» → vision of tomorrow.
 export const S03: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [80]);
+	const {i, t} = seg(f, [68]);
 	if (i === 0) {
-		const s = lerp(t, 0, 80, 1.55, 1.75) * kick(t, 0.05);
+		const s = lerp(t, 0, 68, 1.55, 1.72) * kick(t, 0.05);
 		const p = focus(680, 304, 330, 540, 760, s);
 		return (
 			<AbsoluteFill style={{background: PHONE_BG}}>
@@ -731,14 +731,14 @@ export const S03: React.FC = () => {
 			</AbsoluteFill>
 		);
 	}
-	const c: Cam = {s: lerp(t, 0, 58, 1.05, 1.16), cx: 690, cy: 1000};
+	const c: Cam = {s: lerp(t, 0, 70, 1.05, 1.16), cx: 690, cy: 1000};
 	const sp = toScreen(c, 690, 1050);
 	return (
 		<Vision f={t} label="ЗАВТРА · 08:15">
 			<Stage cam={c} light={{glow: 0.1, vignette: 0.6}} bg="#000">
 				<LiftLanding f={t} id="g1s3" floor="1" win={false} />
 			</Stage>
-			<NoSign p={pop(t, 16, 9)} x={sp.x} y={sp.y} r={250} />
+			<NoSign p={pop(t, 36, 9)} x={sp.x} y={sp.y} r={250} />
 		</Vision>
 	);
 };
@@ -746,27 +746,27 @@ export const S03: React.FC = () => {
 // 4. Sent at 23:59 (circled) → the alarm clock: it is 23:41 now.
 export const S04: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [125]);
+	const {i, t} = seg(f, [106]);
 	if (i === 0) {
-		const z = lerp(t, 8, 100, 0, 1, Easing.inOut(Easing.cubic));
-		const s = (1 + 0.75 * z) * (t >= 106 ? kick(t - 106, 0.06) : 1);
+		const z = lerp(t, 4, 46, 0, 1, Easing.inOut(Easing.cubic));
+		const s = (1 + 0.75 * z + 0.002 * Math.max(0, t - 50)) * (t >= 50 ? kick(t - 50, 0.06) : 1);
 		const p = focus(680, 512, 387, 728 + (680 - 728) * z, 706 + (760 - 706) * z, s);
 		return (
 			<AbsoluteFill style={{background: PHONE_BG}}>
 				<Phone x={p.x} y={p.y} w={680} scale={s}>
 					<ChatScreen time="23:41">
-						<VoiceBubble top={250} f={t} progress={1} ring={pop(t, 106, 10)} />
+						<VoiceBubble top={250} f={t} progress={1} ring={pop(t, 50, 10)} />
 					</ChatScreen>
 				</Phone>
 			</AbsoluteFill>
 		);
 	}
 	const colon = Math.floor(f / 15) % 2 === 0;
-	const sent = pop(t, 3, 12);
-	const now = pop(t, 37, 10);
+	const sent = pop(t, 2, 12);
+	const now = pop(t, 7, 10);
 	return (
 		<Stage
-			cam={{s: lerp(t, 0, 55, 1.0, 1.08) * kick(t) * (t >= 39 ? kick(t - 39, 0.06) : 1), cx: 540, cy: 940}}
+			cam={{s: lerp(t, 0, 74, 1.0, 1.08) * kick(t) * (t >= 27 ? kick(t - 27, 0.06) : 1), cx: 540, cy: 940}}
 			light={{glow: 0, vignette: 0.85}}
 			bg="#05070f"
 			overlay={
@@ -794,17 +794,17 @@ export const S04: React.FC = () => {
 // 5. «Кто это?» → «Ты. Просто не садись.» (sent at 23:59 again).
 export const S05: React.FC = () => {
 	const f = useCurrentFrame();
-	const typed = 'Кто это?'.slice(0, Math.max(0, Math.min(8, Math.floor((f - 9) / 2.2))));
-	const sent = f >= 30;
-	const typing = f >= 44 && f < 92;
+	const typed = 'Кто это?'.slice(0, Math.max(0, Math.min(8, Math.floor((f - 6) / 2))));
+	const sent = f >= 24;
+	const typing = f >= 40 && f < 88;
 	return (
 		<AbsoluteFill style={{background: PHONE_BG}}>
-			<Phone x={540} y={1000} w={680} scale={lerp(f, 0, 138, 1.06, 1.16) * kick(f) * (f >= 92 ? kick(f - 92, 0.05) : 1)}>
+			<Phone x={540} y={1000} w={680} scale={lerp(f, 0, 138, 1.06, 1.16) * kick(f) * (f >= 88 ? kick(f - 88, 0.05) : 1)}>
 				<ChatScreen time="23:41" typing={typing} input={sent ? '' : typed} caret={!sent && Math.floor(f / 8) % 2 === 0}>
 					<VoiceBubble top={250} f={f} progress={1} />
-					{sent && <TextBubble out top={440} text="Кто это?" time="23:41" p={pop(f, 30, 11)} />}
+					{sent && <TextBubble out top={440} text="Кто это?" time="23:41" p={pop(f, 24, 11)} />}
 					{typing && <TypingDots f={f} top={570} />}
-					{f >= 92 && <TextBubble top={570} text="Ты. Просто не садись." time="23:59" p={pop(f, 92, 11)} timeRed />}
+					{f >= 88 && <TextBubble top={570} text="Ты. Просто не садись." time="23:59" p={pop(f, 88, 11)} timeRed />}
 				</ChatScreen>
 			</Phone>
 		</AbsoluteFill>
@@ -814,11 +814,11 @@ export const S05: React.FC = () => {
 // 6. Morning, 8:14, you're late: you run to the lift, the doors open.
 export const S06: React.FC = () => {
 	const f = useCurrentFrame();
-	const running = f < 46;
-	const x = lerp(f, 0, 46, -160, 320, Easing.out(Easing.quad));
+	const running = f < 50;
+	const x = lerp(f, 0, 50, -160, 320, Easing.out(Easing.quad));
 	return (
 		<Stage cam={{s: lerp(f, 0, 135, 1.0, 1.12) * kick(f), cx: 600, cy: 1000}} light={{glow: 0.35, vignette: 0.5}} bg="#e6e9dd">
-			<LiftLanding f={f} id="g1s6" open={lerp(f, 76, 106, 0, 1)} floor={f < 26 ? '5' : f < 52 ? '6' : '7'} btn />
+			<LiftLanding f={f} id="g1s6" open={lerp(f, 92, 122, 0, 1)} floor={f < 34 ? '5' : f < 64 ? '6' : '7'} btn />
 			<Person
 				kind="teen"
 				id="g1s6son"
@@ -870,11 +870,11 @@ const Echo: React.FC<{f: number}> = ({f}) => (
 );
 export const S07: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [50]);
+	const {i, t} = seg(f, [56]);
 	if (i === 0) {
 		return (
 			<AbsoluteFill>
-				<Stage cam={{s: lerp(t, 0, 50, 1.0, 1.08) * kick(t), cx: 540, cy: 960}} light={{glow: 0.2, vignette: 0.75}} bg="#e6e9dd">
+				<Stage cam={{s: lerp(t, 0, 56, 1.0, 1.08) * kick(t), cx: 540, cy: 960}} light={{glow: 0.2, vignette: 0.75}} bg="#e6e9dd">
 					<rect x={-500} y={-500} width={2200} height={3000} fill="#e6e9dd" />
 					<rect x={-500} y={1250} width={1100} height={1300} fill="#5f9a83" />
 					<rect x={640} y={150} width={900} height={2000} fill="#f4e2b4" />
@@ -886,10 +886,10 @@ export const S07: React.FC = () => {
 			</AbsoluteFill>
 		);
 	}
-	const x = lerp(t, 0, 43, 860, 400, Easing.linear);
+	const x = lerp(t, 0, 37, 860, 430, Easing.linear);
 	const y = x >= 700 ? 1200 : 1200 + (700 - x) * (400 / 450);
 	return (
-		<Stage cam={{s: 0.95 * kick(t), cx: lerp(t, 0, 43, 640, 560), cy: 1130}} light={{glow: 0.3, vignette: 0.55}} bg="#e6e9dd">
+		<Stage cam={{s: 0.95 * kick(t), cx: lerp(t, 0, 37, 640, 570), cy: 1130}} light={{glow: 0.3, vignette: 0.55}} bg="#e6e9dd">
 			<Stairs stencil="6" />
 			<Person kind="teen" id="g1s7son" x={x} y={y} scale={0.85} backpack walk={t * 0.45} face={{eyes: 'open', brows: 'worried', mouth: 'flat', look: [-0.6, 0.3]}} />
 			<Railing />
@@ -900,14 +900,14 @@ export const S07: React.FC = () => {
 // 8. 3rd floor. CRASH. → cutaway: the cabin stuck between the floors.
 export const S08: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [44]);
+	const {i, t} = seg(f, [50]);
 	if (i === 0) {
-		const hit = t >= 30;
-		const [sx, sy] = shake(t, 30, 26, 14);
-		const bump = hit ? Math.exp(-(t - 30) / 4) : 0;
+		const hit = t >= 34;
+		const [sx, sy] = shake(t, 34, 26, 14);
+		const bump = hit ? Math.exp(-(t - 34) / 4) : 0;
 		return (
 			<Stage cam={{s: 1.05 * kick(t), cx: 560 + sx, cy: 1000 + sy}} light={{glow: 0.3, vignette: 0.6}} bg="#e6e9dd">
-				<LiftLanding f={t} id="g1s8" floor={t < 12 ? '5' : t < 24 ? '4' : '3'} err={hit} win={false} stencil="3" jolt={hit ? Math.sin(t * 3) * 8 * bump : 0} />
+				<LiftLanding f={t} id="g1s8" floor={t < 14 ? '5' : t < 26 ? '4' : '3'} err={hit} win={false} stencil="3" jolt={hit ? Math.sin(t * 3) * 8 * bump : 0} />
 				<Person
 					kind="teen"
 					id="g1s8son"
@@ -919,14 +919,14 @@ export const S08: React.FC = () => {
 					headTurn={0.5}
 					face={hit ? {eyes: 'wide', pupil: 0.5, brows: 'raised', mouth: 'o', look: [0.9, -0.2]} : {eyes: 'open', brows: 'neutral', mouth: 'flat', look: [0.9, -0.3]}}
 				/>
-				{hit && <Dust t={t - 30} />}
-				{hit && <rect x={-400} y={-400} width={1880} height={2800} fill="#fff" opacity={interpolate(t, [30, 36], [0.55, 0], clamp)} />}
+				{hit && <Dust t={t - 34} />}
+				{hit && <rect x={-400} y={-400} width={1880} height={2800} fill="#fff" opacity={interpolate(t, [34, 40], [0.55, 0], clamp)} />}
 			</Stage>
 		);
 	}
 	const fall = t < 6 ? -40 + (40 * t) / 6 : 10 * Math.sin((t - 6) * 1.1) * Math.exp(-(t - 6) / 7);
 	return (
-		<Stage cam={{s: lerp(t, 0, 64, 1.0, 1.06) * kick(t), cx: 540, cy: 805}} light={{glow: 0, vignette: 0.7}} bg="#141824">
+		<Stage cam={{s: lerp(t, 0, 58, 1.0, 1.06) * kick(t), cx: 540, cy: 805}} light={{glow: 0, vignette: 0.7}} bg="#141824">
 			<Cutaway f={t} id="g1s8b" cabinY={650 + fall} />
 		</Stage>
 	);
@@ -970,10 +970,10 @@ export const S09: React.FC = () => {
 			))}
 			<Bust kind="mom" id="g1s9nbc" colors={NEIGHBOUR} x={660} y={780} scale={2.9} face={{eyes: 'wide', brows: 'worried', mouth: 'wobble', look: [-0.4, 0.2], blush: false}} />
 			<g transform="translate(330,1120) scale(2.1)">
-				<Dog bark={barking(8) || barking(24)} />
+				<Dog bark={barking(14)} />
 			</g>
-			<Gav f={t} at={8} x={300} y={760} size={110} />
-			<Gav f={t} at={24} x={420} y={640} size={90} />
+			<Gav f={t} at={14} x={300} y={760} size={110} />
+			<Gav f={t} at={23} x={430} y={640} size={86} />
 			<Flicker f={f} />
 		</Stage>
 	);
@@ -992,8 +992,8 @@ const DayBlur: React.FC = () => (
 );
 export const S10: React.FC = () => {
 	const f = useCurrentFrame();
-	const G0 = 44;
-	const G1 = 68;
+	const G0 = 40;
+	const G1 = 62;
 	const msgs = (
 		<>
 			<VoiceBubble top={250} f={f} progress={1} />
@@ -1023,22 +1023,22 @@ export const S10: React.FC = () => {
 // 11. Night again, 23:41 on the clock, the phone buzzes → «Мой номер» again.
 export const S11: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [82]);
+	const {i, t} = seg(f, [100]);
 	if (i === 0) {
-		const z = lerp(t, 38, 54, 0, 1, Easing.inOut(Easing.cubic));
+		const z = lerp(t, 56, 70, 0, 1, Easing.inOut(Easing.cubic));
 		const punch = t >= 21 && t < 38 ? kick(t - 21, 0.06) : 1;
-		const buzz = (t >= 50 && t < 64) || (t >= 70 && t < 82);
+		const buzz = (t >= 70 && t < 84) || (t >= 88 && t < 100);
 		return (
 			<Stage cam={{s: (2.5 + (1.12 - 2.5) * z) * punch, cx: 865 + (575 - 865) * z, cy: 1135 + (1130 - 1135) * z}} light={{glow: 0, vignette: 0.8}} bg="#05070f">
-				<Bedroom f={t} id="g1s11" glow={interpolate(t, [50, 54], [0, 1], clamp)} buzz={buzz} eyes={t < 56 ? 'open' : 'wide'} />
+				<Bedroom f={t} id="g1s11" glow={interpolate(t, [70, 74], [0, 1], clamp)} buzz={buzz} eyes={t < 76 ? 'open' : 'wide'} />
 			</Stage>
 		);
 	}
 	const buzz = t >= 2 && t < 16;
 	return (
 		<AbsoluteFill style={{background: PHONE_BG}}>
-			<Phone x={540 + (buzz ? Math.sin(t * 2.9) * 8 : 0)} y={1000} w={680} scale={lerp(t, 0, 56, 1.0, 1.1) * kick(t)}>
-				<LockScreen notif={pop(t, 2, 12)} ring={pop(t, 24, 12)} />
+			<Phone x={540 + (buzz ? Math.sin(t * 2.9) * 8 : 0)} y={1000} w={680} scale={lerp(t, 0, 38, 1.0, 1.1) * kick(t)}>
+				<LockScreen notif={pop(t, 2, 12)} ring={pop(t, 16, 12)} />
 			</Phone>
 		</AbsoluteFill>
 	);
@@ -1047,9 +1047,9 @@ export const S11: React.FC = () => {
 // 12. Second message: «Завтра на физре не трогай мяч…» → vision: the gym, the ball.
 export const S12: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [40]);
+	const {i, t} = seg(f, [24, 86]);
 	if (i === 0) {
-		const s = lerp(t, 0, 40, 1.55, 1.68) * kick(t, 0.05);
+		const s = lerp(t, 0, 24, 1.55, 1.62) * kick(t, 0.05);
 		const p = focus(680, 304, 330, 540, 760, s);
 		return (
 			<AbsoluteFill style={{background: PHONE_BG}}>
@@ -1061,20 +1061,21 @@ export const S12: React.FC = () => {
 			</AbsoluteFill>
 		);
 	}
-	// the ball bounces once (t = 4) and flies at you, then hangs in front of you
-	const fly = interpolate(t, [4, 18], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
-	const bs = 0.6 + 1.7 * fly + 0.002 * Math.max(0, t - 18);
-	const bx = t < 4 ? 930 - 8 * t : 898 + (540 - 898) * fly;
+	if (i === 2) return <FaceClose t={t} id="g1s12c" zoom={[1.0, 1.08]} face={{eyes: 'open', look: [-0.85, 0.15], brows: 'worried', mouth: 'flat'}} />;
+	// the ball bounces once (t = 14) and flies at you, then hangs in front of you
+	const fly = interpolate(t, [14, 30], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
+	const bs = 0.6 + 1.7 * fly + 0.002 * Math.max(0, t - 30);
+	const bx = t < 14 ? 990 - 6 * t : 906 + (540 - 906) * fly;
 	const floorY = 1460 + 40 * 0.6 - 86 * 0.6;
-	const by = t < 4 ? floorY - (4 - t) ** 2 * 14 : floorY + (760 - floorY) * fly + (t > 18 ? 10 * Math.sin((t - 18) / 7) : 0);
+	const by = t < 14 ? floorY - (14 - t) ** 2 * 2.2 : floorY + (760 - floorY) * fly + (t > 30 ? 10 * Math.sin((t - 30) / 7) : 0);
 	const c: Cam = {s: lerp(t, 0, 83, 1.0, 1.06), cx: 540, cy: 960};
 	const sp = toScreen(c, bx, by);
 	return (
 		<Vision f={t} label="ЗАВТРА · ФИЗРА">
 			<Stage cam={c} light={{glow: 0.2, vignette: 0.6}} bg="#000">
-				<Gym ball={{x: bx, y: by, s: bs, rot: t * 7 - Math.max(0, t - 18) * 5}} shadow={1 - fly} />
+				<Gym ball={{x: bx, y: by, s: bs, rot: t * 7 - Math.max(0, t - 30) * 5}} shadow={1 - fly} />
 			</Stage>
-			<NoSign p={pop(t, 18, 9)} x={sp.x} y={sp.y} r={250} />
+			<NoSign p={pop(t, 34, 9)} x={sp.x} y={sp.y} r={250} />
 		</Vision>
 	);
 };
@@ -1082,9 +1083,9 @@ export const S12: React.FC = () => {
 // 13. At the very end of the recording — a whisper. Not your voice.
 export const S13: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [58]);
+	const {i, t} = seg(f, [62]);
 	if (i === 0) {
-		const s = lerp(t, 0, 58, 1.7, 1.95);
+		const s = lerp(t, 0, 62, 1.7, 1.95);
 		const sh = t >= 44 ? (rnd(t) - 0.5) * 10 : 0;
 		const p = focus(680, 304, 330, 540 + sh, 760, s);
 		const progress = interpolate(t, [0, 50], [0.86, 1], clamp);
@@ -1092,10 +1093,10 @@ export const S13: React.FC = () => {
 			<AbsoluteFill style={{background: PHONE_BG}}>
 				<Phone x={p.x} y={p.y} w={680} scale={s}>
 					<ChatScreen time="23:42">
-						<VoiceBubble top={250} f={t} progress={progress} lvl={t >= 40 ? 0.15 + 0.15 * rnd(t) : 0.3 + 0.3 * Math.abs(Math.sin(t / 2))} redTail={interpolate(t, [24, 50], [0, 1], clamp)} />
+						<VoiceBubble top={250} f={t} progress={progress} lvl={t >= 40 ? 0.15 + 0.15 * rnd(t) : 0.3 + 0.3 * Math.abs(Math.sin(t / 2))} redTail={interpolate(t, [36, 56], [0, 1], clamp)} />
 					</ChatScreen>
 				</Phone>
-				<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 45%, transparent 35%, rgba(90,0,0,0.85) 100%)', opacity: interpolate(t, [20, 50], [0, 1], clamp)}} />
+				<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 45%, transparent 35%, rgba(90,0,0,0.85) 100%)', opacity: interpolate(t, [30, 58], [0, 1], clamp)}} />
 			</AbsoluteFill>
 		);
 	}
@@ -1172,26 +1173,31 @@ export const S14: React.FC = () => {
 				ЧТО <span style={{color: YELLOW}}>ВЫБЕРЕШЬ?</span>
 				<div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10, marginTop: 18}}>
 					<span style={{fontSize: 34, color: YELLOW, marginRight: 8}}>СБЫЛОСЬ</span>
-					{Array.from({length: 7}).map((_, k) => (
+					{[0, 1].map((k) => (
 						<div
 							key={k}
 							style={{
-								width: 52,
-								height: 52,
-								borderRadius: 10,
-								background: k === 0 ? YELLOW : 'rgba(255,255,255,0.08)',
-								border: `3px solid ${k === 0 ? '#fff3c4' : 'rgba(255,255,255,0.25)'}`,
+								width: 96,
+								height: 56,
+								borderRadius: 12,
+								background: k === 0 ? YELLOW : `rgba(255,211,74,${0.18 + 0.12 * Math.sin(f / 5)})`,
+								border: `3px solid ${k === 0 ? '#fff3c4' : YELLOW}`,
 								display: 'flex',
 								alignItems: 'center',
 								justifyContent: 'center',
-								transform: `scale(${pop(f, 18 + k * 2, 9)})`,
+								transform: `scale(${pop(f, 18 + k * 4, 9) * (k === 1 ? 1 + 0.06 * Math.sin(f / 5) : 1)})`,
 								boxSizing: 'border-box',
+								fontSize: 44,
+								color: YELLOW,
+								textShadow: 'none',
 							}}
 						>
-							{k === 0 && (
-								<svg width={30} height={30} viewBox="0 0 24 24">
+							{k === 0 ? (
+								<svg width={34} height={34} viewBox="0 0 24 24">
 									<path d="M 4,13 L 10,19 L 20,5" stroke="#111" strokeWidth={4.5} fill="none" strokeLinecap="round" strokeLinejoin="round" />
 								</svg>
+							) : (
+								'?'
 							)}
 						</div>
 					))}
@@ -1238,7 +1244,9 @@ export const S14: React.FC = () => {
 						<div style={{fontSize: 190, lineHeight: 1, color: '#fff', marginTop: 18, transform: `scale(${pop(f, 254, 10)})`}}>СЕРИЯ 2</div>
 						<div style={{fontSize: 56, color: RED, marginTop: 8}}>СКОРО</div>
 						<div style={{display: 'inline-block', marginTop: 50, background: YELLOW, color: '#111', borderRadius: 18, padding: '10px 30px', fontSize: 38}}>ПИШИ 1 ИЛИ 2 В КОММЕНТАРИЯХ</div>
-						<div style={{fontSize: 32, color: '#9fb0d6', marginTop: 30, letterSpacing: 2}}>СБЫЛОСЬ: 1 ИЗ 7</div>
+						<div style={{fontSize: 30, color: '#9fb0d6', marginTop: 30, letterSpacing: 1}}>
+							ЛИФТ — <span style={{color: '#7ee08a'}}>СБЫЛОСЬ</span> · МЯЧ — <span style={{color: YELLOW}}>ПОД ВОПРОСОМ</span>
+						</div>
 						<div style={{display: 'inline-block', marginTop: 46, background: '#ff2d3d', borderRadius: 60, padding: '22px 70px', fontSize: 52, color: '#fff', boxShadow: '0 0 40px rgba(255,45,61,0.6)', transform: `scale(${1 + Math.sin(f / 5) * 0.04})`}}>
 							ПОДПИШИСЬ
 						</div>

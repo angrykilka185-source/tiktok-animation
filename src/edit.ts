@@ -46,6 +46,7 @@ export const remapEpisode = (ep: Episode, r: Remap): Episode => ({
 	hideFrom: Math.round(r.fwd(ep.hideFrom)),
 	night: ep.night.map(([a, b]) => [Math.round(r.fwd(a)), Math.round(r.fwd(b))] as [number, number]),
 	prefilled: ep.prefilled,
+	pending: ep.pending?.map((x) => ({...x, at: Math.round(r.fwd(x.at))})),
 });
 
 // small camera "punch" on the key (red) words, like in the reference

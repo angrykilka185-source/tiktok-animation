@@ -10,7 +10,7 @@ export {FPS};
 
 const s = shotStart;
 
-export const SIGNS: Sign[] = [{n: 1, title: 'ЛИФТ\nЗАСТРЯЛ', at: s(8) + 44, hold: 40}];
+export const SIGNS: Sign[] = [{n: 1, title: 'ЛИФТ\nЗАСТРЯЛ', at: s(8) + 54, hold: 34}];
 
 export const CLOCK: {from: number; text: string}[] = [
 	{from: 0, text: 'ДЕНЬ 1 · 23:41'},
@@ -23,7 +23,8 @@ export const CLOCK: {from: number; text: string}[] = [
 export const EPG1 = {
 	clock: CLOCK,
 	signs: SIGNS,
-	slots: 7,
+	slots: 2, // the lift (came true) and the ball (still a question)
+	pending: [{n: 2, at: s(12) + 58}],
 	counterFrom: 10,
 	hideFrom: s(14) + 248,
 	night: [[0, s(6)], [s(11), s(14) + 300]] as [number, number][],

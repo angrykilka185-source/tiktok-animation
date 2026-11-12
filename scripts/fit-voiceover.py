@@ -22,6 +22,9 @@ import wave
 
 import numpy as np
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from word_timing import word_timings  # noqa: E402
+
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 FPS = 30
 PART = sys.argv[sys.argv.index('--part') + 1] if '--part' in sys.argv else '1'
@@ -322,26 +325,9 @@ def main(src):
         filt = ['-filter:a', ','.join(af)]
         run(['ffmpeg', '-v', 'error', '-y', '-i', raw, *filt, '-ar', str(SR), '-b:a', '160k', os.path.join(out_dir, f"{l['id']}.mp3")])
 
-        # word timings: spread the words over the phrases by length
+        # word timings for the captions, measured on the clip itself (scripts/word_timing.py)
         text = tts_text(l['text'])
-        words = text.split()
-        wl = [len(re.sub(r'[^\w]', '', x)) or 1 for x in words]
-        seg_len = [b - a for a, b in cl['segs']]
-        tot_w, tot_s = sum(wl), sum(seg_len)
-        out_words, acc = [], 0
-        for wi, word in enumerate(words):
-            frac0, frac1 = acc / tot_w, (acc + wl[wi]) / tot_w
-            acc += wl[wi]
-
-            def at(frac):
-                target = frac * tot_s
-                for (a, b), ln in zip(cl['segs'], seg_len):
-                    if target <= ln + 1e-9:
-                        return a + target
-                    target -= ln
-                return cl['segs'][-1][1]
-
-            out_words.append({'w': word, 's': round(at(frac0) / tempo + 0.02, 3), 'e': round(at(frac1) / tempo, 3)})
+        out_words = word_timings(os.path.join(out_dir, f"{l['id']}.mp3"), text)
         timings['lines'][l['id']] = {
             'text': text,
             'at': round(s * FPS),

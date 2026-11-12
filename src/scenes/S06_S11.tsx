@@ -11,10 +11,10 @@ import {BigHand} from './S01_S05';
 // Photo → his face now → your eyes (rule 1).
 export const S06: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [36, 72]);
+	const {i, t} = seg(f, [48, 86]);
 	if (i === 0) {
 		return (
-			<Stage cam={{s: lerp(t, 0, 36, 2.1, 2.3) * kick(t), cx: 480, cy: 820}} light={{glow: 0.3, vignette: 0.6}}>
+			<Stage cam={{s: lerp(t, 0, 48, 2.1, 2.3) * kick(t), cx: 480, cy: 820}} light={{glow: 0.3, vignette: 0.6}}>
 				<Wallpaper id="s6wp" x={-600} y={-400} w={2400} h={2800} base="#f0dcb0" line="#dfc490" />
 				<FamilyPhoto x={170} y={600} w={740} h={640} variant="fork" id="s6ph" />
 			</Stage>
@@ -22,7 +22,7 @@ export const S06: React.FC = () => {
 	}
 	if (i === 1) {
 		return (
-			<Stage cam={{s: lerp(t, 0, 36, 1.0, 1.08) * kick(t), cx: 540, cy: 900}} light={{glow: 0.25, vignette: 0.7}} bg="#e9d6b0">
+			<Stage cam={{s: lerp(t, 0, 38, 1.0, 1.08) * kick(t), cx: 540, cy: 900}} light={{glow: 0.25, vignette: 0.7}} bg="#e9d6b0">
 				<Wallpaper id="s6wp2" x={-300} y={-300} w={1700} h={1500} base="#f0dcb0" line="#dfc490" />
 				<Tiles y={1150} h={1200} />
 				<Bust kind="dad" id="s6cu" x={540} y={880} scale={3.4} face={{eyes: 'open', mouth: 'flat', stubble: true, brows: 'flat', look: [0, 0.2], blush: false}} />
@@ -64,7 +64,7 @@ const Corridor: React.FC = () => (
 
 export const S07: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [92, 140]);
+	const {i, t} = seg(f, [112, 160]);
 	if (i === 1) {
 		const pan = lerp(t, 6, 40, 0, 1, Easing.inOut(Easing.cubic));
 		const labels = pop(t, 4, 12);
@@ -97,21 +97,21 @@ export const S07: React.FC = () => {
 			</Stage>
 		);
 	}
-	const [sx, sy] = shake(f, 82, 22, 14);
-	const k = lerp(f, 0, 80, 0, 1, Easing.inOut(Easing.sin));
-	const walking = f < 80;
-	const dy = lerp(f, 82, 86, 0, -14) + lerp(f, 86, 92, 0, 14);
+	const [sx, sy] = shake(f, 100, 22, 14);
+	const k = lerp(f, 0, 98, 0, 1, Easing.inOut(Easing.sin));
+	const walking = f < 98;
+	const dy = lerp(f, 100, 104, 0, -14) + lerp(f, 104, 110, 0, 14);
 	const y = 2350 + (1400 - 2350) * k + dy;
 	const sc = 1.45 + (0.62 - 1.45) * k;
 	const x = 420 + (500 - 420) * k;
-	const stars = f > 82;
+	const stars = f > 100;
 	return (
 		<Stage cam={{s: 1.0, cx: 540, cy: 960, dx: sx, dy: sy}} light={{glow: 0.3, vignette: 0.55}}>
 			<Corridor />
 			<Person kind="dad" id="s7dad" back x={x} y={y} scale={sc} walk={walking ? f / 4 : undefined} armL={{shoulder: walking ? Math.sin(f / 4) * 12 : 4, elbow: -4}} armR={{shoulder: walking ? -Math.sin(f / 4) * 12 : -4, elbow: 4}} />
 			{stars &&
 				[0, 1, 2].map((k2) => {
-					const a = (f - 82) / 6 + (k2 * Math.PI * 2) / 3;
+					const a = (f - 100) / 6 + (k2 * Math.PI * 2) / 3;
 					return (
 						<text key={k2} x={x + Math.cos(a) * 120} y={y - 1090 * sc + Math.sin(a) * 30} fontSize={56} textAnchor="middle" fill="#ffd34a" stroke="#111" strokeWidth={4} paintOrder="stroke">
 							★

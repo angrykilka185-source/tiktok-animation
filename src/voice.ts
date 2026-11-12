@@ -22,7 +22,7 @@ export type VoiceLine = {
 	words: CapWord[];
 };
 
-type Timing = {text: string; duration: number; words: {w: string; s: number; e: number}[]};
+type Timing = {text: string; duration: number; at?: number; words: {w: string; s: number; e: number}[]};
 const T = ((timings as unknown as {lines?: Record<string, Timing>}).lines ?? {}) as Record<string, Timing>;
 
 const ttsText = (text: string, whisper?: boolean) => {
@@ -63,11 +63,12 @@ const tokens = (text: string) => {
 const CHARS_PER_SEC = 15;
 
 export const VOICE: VoiceLine[] = (cfg.lines as {id: string; shot: number; offset: number; text: string; nocap?: boolean; whisper?: boolean}[]).map((l) => {
-	const at = shotStart(l.shot) + l.offset;
 	const tk = tokens(l.text);
 	const tts = ttsText(l.text, l.whisper);
 	const t = T[l.id];
 	const real = !!t && t.text === tts && t.words.length > 0;
+	// a fitted voice-over (scripts/fit-voiceover.py) stores where each line was placed
+	const at = real && typeof t.at === 'number' ? t.at : shotStart(l.shot) + l.offset;
 	let words: CapWord[];
 	let duration: number;
 	if (real) {

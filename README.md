@@ -41,3 +41,17 @@ ffmpeg -i out/papa-vakhta.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5 -c:a aac -b:a
 
 Ключу ElevenLabs нужны права **Text to Speech**, а для выбора русского голоса из библиотеки ещё **Voices: Read/Write**.
 Пока озвучки нет, субтитры идут по расчётному времени, поэтому видео можно смотреть как превью.
+
+## Своя озвучка из ElevenLabs (готовый mp3)
+
+Озвучку можно сделать вручную на сайте ElevenLabs по тексту из `src/voice-lines.json` и подставить в видео:
+
+```bash
+python3 scripts/fit-voiceover.py assets/voiceover.mp3   # режет на фразы, ставит каждую на свой кадр
+npm run render
+ffmpeg -i out/papa-vakhta.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5 -c:a aac -b:a 192k out/papa-vakhta-final.mp4
+```
+
+Скрипт находит фразы по паузам, сопоставляет их с репликами, укорачивает длинные паузы,
+слегка ускоряет весь голос (по умолчанию в 1.12 раза, `BASE_TEMPO=1.0` — без ускорения),
+выравнивает громкость и пишет время каждого слова для субтитров.

@@ -27,9 +27,9 @@ const KEY = process.env.ELEVENLABS_API_KEY || 'proxy-injected';
 const FPS = 30;
 const MAX_TEMPO = 1.25;
 const CHARS_PER_SEC = 15;
-const SHOT_SECONDS = [6, 4, 5, 6, 5, 6, 6, 4, 5, 6, 6, 4, 6, 5, 6, 10];
-const shotStart = (n) => SHOT_SECONDS.slice(0, n - 1).reduce((a, b) => a + b, 0) * FPS;
-const TOTAL = SHOT_SECONDS.reduce((a, b) => a + b, 0) * FPS;
+const SHOT_SECONDS = fs.readFileSync(path.join(root, 'src/timeline.ts'), 'utf8').match(/SHOT_SECONDS = \[([^\]]+)\]/)[1].split(',').map(Number);
+const shotStart = (n) => SHOT_SECONDS.slice(0, n - 1).reduce((a, b) => a + Math.round(b * FPS), 0);
+const TOTAL = SHOT_SECONDS.reduce((a, b) => a + Math.round(b * FPS), 0);
 
 const ttsText = (l) => {
 	let t = l.text.replace(/\*/g, '');

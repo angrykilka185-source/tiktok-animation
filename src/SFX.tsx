@@ -30,13 +30,13 @@ const CUES: Cue[] = [
 	{at: s(5) + 10, file: 'fork', vol: 0.9},
 	...W(5, 58),
 	// 6 photo → face → eyes
-	{at: s(6), file: 'tick', vol: 0.5, len: 180},
-	{at: s(6) + 72, file: 'heart', vol: 0.8, len: 108},
-	...W(6, 36, 72),
+	{at: s(6), file: 'tick', vol: 0.5, len: 192},
+	{at: s(6) + 86, file: 'heart', vol: 0.8, len: 106},
+	...W(6, 48, 86),
 	// 7 wall
 	{at: s(7), file: 'steps', vol: 0.8},
-	{at: s(7) + 82, file: 'bump', vol: 1},
-	...W(7, 92, 140),
+	{at: s(7) + 100, file: 'bump', vol: 1},
+	...W(7, 112, 160),
 	// 8 scar
 	...W(8, 0, 58),
 	// 9 whisper + tap water

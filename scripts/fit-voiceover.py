@@ -129,26 +129,59 @@ def main(src):
     groups.reverse()
 
     # --- build one clip per line (long inner pauses shortened) -------------------
+    # The phrase borders come from a -38 dB silence gate, but soft word endings
+    # ("пять", "три", breath, room decay) are quieter than that. Every phrase is
+    # therefore extended until the sound really fades out (-56 dB), then faded.
+    hop = int(0.01 * SR)
+    env = np.array([20 * math.log10(max(1e-9, float(np.sqrt(np.mean((audio[i:i + hop] / 32768.0) ** 2))))) for i in range(0, len(audio), hop)])
+
+    def level(t):
+        k = int(t / 0.01)
+        return env[k] if 0 <= k < len(env) else -120.0
+
+    def ext_end(e, limit):
+        t = e
+        while t < min(limit, e + 0.45) and max(level(t), level(t + 0.01)) > -56:
+            t += 0.01
+        return min(limit, t + 0.05)
+
+    def ext_start(s0, limit):
+        t = s0
+        while t > max(limit, s0 - 0.2) and level(t - 0.01) > -56:
+            t -= 0.01
+        return max(limit, t - 0.02)
+
+    def fade(chunk, fin, fout):
+        fi = min(len(chunk) // 3, int(fin * SR))
+        fo = min(len(chunk) // 3, int(fout * SR))
+        if fi > 0:
+            chunk[:fi] *= np.linspace(0, 1, fi)
+        if fo > 0:
+            chunk[-fo:] *= np.linspace(1, 0, fo) ** 2
+        return chunk
+
     clips = []
     for i, (k, j) in enumerate(groups):
         parts, offs = [], []
         pos = 0.0
         for q in range(k, j):
-            a = max(0.0, segs[q][0] - 0.03)
-            b = min(total, segs[q][1] + 0.05)
+            prev_end = segs[q - 1][1] + 0.02 if q > 0 else 0.0
+            next_start = segs[q + 1][0] - 0.02 if q + 1 < len(segs) else total
+            a = ext_start(segs[q][0], prev_end)
+            b = ext_end(segs[q][1], next_start)
             if q > k:
-                pause = min(gaps[q - 1], MAX_INNER_GAP)
+                # keep the real (quiet) pause, only shorten a long one
+                pa = offs[-1][2]
+                pause = max(0.0, min(a - pa, MAX_INNER_GAP))
                 parts.append(np.zeros(int(pause * SR), dtype=np.float32))
                 pos += pause
-            chunk = audio[int(a * SR): int(b * SR)].copy()
-            fade = min(len(chunk) // 4, int(0.01 * SR))
-            if fade > 0:
-                chunk[:fade] *= np.linspace(0, 1, fade)
-                chunk[-fade:] *= np.linspace(1, 0, fade)
-            offs.append((pos, pos + len(chunk) / SR))
+            chunk = fade(audio[int(a * SR): int(b * SR)].copy(), 0.008, 0.06)
+            offs.append((pos, pos + len(chunk) / SR, b))
             parts.append(chunk)
             pos += len(chunk) / SR
-        clips.append({'pcm': np.concatenate(parts), 'segs': offs, 'dur': pos})
+        # a little silence at the end so the tempo filter never eats the last word
+        parts.append(np.zeros(int(0.12 * SR), dtype=np.float32))
+        clips.append({'pcm': np.concatenate(parts), 'segs': [(x, y) for x, y, _ in offs], 'dur': pos})
 
     # --- even out loudness between lines (a whisper may stay ~3 dB quieter) --------------
     def rms_db(x):

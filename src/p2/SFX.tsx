@@ -61,7 +61,7 @@ const CUES: Cue[] = [
 	{at: s(14) + 70, file: 'breath', vol: 0.4, len: 110},
 	...W(14, 70),
 	// 15 message
-	{at: s(15) + 20, file: 'vibrate', vol: 0.9, len: 50},
+	{at: s(15) + 20, file: 'vibrate', vol: 0.9, len: 46},
 	{at: s(15) + 26, file: 'message', vol: 0.7},
 	// 16 under the door
 	{at: s(16), file: 'breath', vol: 0.6, len: 150},
@@ -91,11 +91,20 @@ export const SFX2: React.FC = () => (
 		<Sequence from={0} durationInFrames={BED_END + 30} name="sfx drone bed">
 			<Audio src={staticFile('sfx/drone.wav')} volume={(f) => 0.32 * interpolate(f, [0, 60, BED_END - 10, BED_END + 20], [0, 1, 1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'})} />
 		</Sequence>
-		{CUES.map((c, i) => (
-			<Sequence key={i} from={c.at} durationInFrames={Math.min(c.len ?? 200, TOTAL - c.at)} name={`sfx ${c.file}`}>
-				<Audio src={staticFile(`sfx/${c.file}.wav`)} volume={(c.vol ?? 1) * SFX_GAIN} />
-			</Sequence>
-		))}
+		{CUES.map((c, i) => {
+			// every effect fades out at the end of its slot instead of being cut off
+			const len = Math.min(c.len ?? 200, TOTAL - c.at);
+			const fadeLen = Math.min(18, Math.floor(len / 3));
+			const vol = (c.vol ?? 1) * SFX_GAIN;
+			return (
+				<Sequence key={i} from={c.at} durationInFrames={len} name={`sfx ${c.file}`}>
+					<Audio
+						src={staticFile(`sfx/${c.file}.wav`)}
+						volume={(f) => (fadeLen >= 2 ? vol * interpolate(f, [len - fadeLen, len - 1], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}) : vol)}
+					/>
+				</Sequence>
+			);
+		})}
 		{VOICE.filter((l) => l.hasAudio).map((l) => (
 			<Sequence key={l.id} from={l.at} durationInFrames={Math.min(Math.ceil(l.duration * 30) + 20, TOTAL - l.at)} name={`voice ${l.id}`}>
 				<Audio src={staticFile(l.src)} volume={1} />

@@ -28,13 +28,16 @@ npm run render     # итоговый файл: out/papa-vakhta.mp4
 
 ## Озвучка (ElevenLabs)
 
-Текст реплик, голоса и время появления: `src/voice-lines.json`.
+Один рассказчик на всё видео (как в референсе), модель `eleven_v3`. Текст, голос и время каждой реплики: `src/voice-lines.json`.
+Разметка для субтитров: `*слово*` — красный, `«цитата»` — жёлтый; `whisper` — цитата шёпотом.
 
 ```bash
-npm run voice      # нужен ключ ElevenLabs с правом Text to Speech (ELEVENLABS_API_KEY или прокси)
+npm run voice -- --dry        # проверить тексты и тайминг без запросов (ничего не тратит)
+npm run voice                 # сгенерировать новые/изменённые реплики
+npm run voice -- --voice <id> # попробовать другой голос
 npm run render
-# громкость под TikTok (-14 LUFS):
 ffmpeg -i out/papa-vakhta.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5 -c:a aac -b:a 192k out/papa-vakhta-final.mp4
 ```
 
-Скрипт кеширует реплики и перегенерирует только изменённые; субтитры подсвечивают слова по таймкодам из ElevenLabs.
+Ключу ElevenLabs нужны права **Text to Speech**, а для выбора русского голоса из библиотеки ещё **Voices: Read/Write**.
+Пока озвучки нет, субтитры идут по расчётному времени, поэтому видео можно смотреть как превью.

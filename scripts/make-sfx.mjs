@@ -488,3 +488,29 @@ const beat = (gain = 1) => {
 	}
 	write('pop', x, 0.5);
 }
+
+// low tension bed (not music): detuned low drones + rumble + faint air, 92 s
+{
+	const dur = 92;
+	const x = buf(dur);
+	const tones = [
+		[55, 0.5, 0.031],
+		[55.35, 0.35, 0.047],
+		[82.4, 0.22, 0.023],
+		[110.6, 0.12, 0.061],
+		[164.8, 0.05, 0.017],
+	];
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		let v = 0;
+		for (const [f, a, lfo] of tones) v += Math.sin(2 * Math.PI * f * t) * a * (0.65 + 0.35 * Math.sin(2 * Math.PI * lfo * t + f));
+		x[i] = v;
+	}
+	const rumble = lowpass(lowpass(Float32Array.from({length: x.length}, () => noise()), 180), 180);
+	const air = bandpass(Float32Array.from({length: x.length}, () => noise()), 2500, 4500);
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		x[i] += rumble[i] * 1.6 + air[i] * 0.04 * (0.5 + 0.5 * Math.sin(2 * Math.PI * 0.07 * t));
+	}
+	write('drone', x, 0.6);
+}

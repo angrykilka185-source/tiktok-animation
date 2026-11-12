@@ -24,9 +24,11 @@ export type Face = {
 	blush?: boolean;
 };
 
+// ku / kf: visible length of the upper arm / forearm (0..1). Values < 1 fake
+// foreshortening when the arm points towards the camera (hand to mouth, etc).
 export type ArmPose =
-	| {shoulder: number; elbow: number}
-	| {target: [number, number]; bend?: 1 | -1};
+	| {shoulder: number; elbow: number; ku?: number; kf?: number}
+	| {target: [number, number]; bend?: 1 | -1; ku?: number; kf?: number};
 
 export type Kind = 'dad' | 'mom' | 'son';
 
@@ -401,41 +403,45 @@ export const Shaded: React.FC<{id: string; x0?: number; enabled?: boolean; opaci
 };
 
 // ---------------------------------------------------------------------------
-// Mitten-style flat hand. Local coords: wrist at (0,0), fingers point to +y.
-// `grip` = fist around an object, `thumb` = which side the thumb is on (-1/1).
-export const Hand: React.FC<{r: number; skin: string; grip?: boolean; thumb?: -1 | 1; line?: string}> = ({r, skin, grip, thumb = 1, line = 'rgba(120,60,35,0.55)'}) => {
+// Simple flat "mitten" hand like in the reference style.
+// Local coords: wrist at (0,0), fingers point to +y. thumb = side of the thumb.
+// grip = closed fist around an object.
+export const Hand: React.FC<{r: number; skin: string; grip?: boolean; thumb?: -1 | 1; line?: string}> = ({
+	r,
+	skin,
+	grip,
+	thumb = 1,
+	line = 'rgba(120,60,35,0.5)',
+}) => {
+	const t = thumb;
 	const parts = (fill: string, stroke: string, sw: number) => {
-		const common = {fill, stroke, strokeWidth: sw, strokeLinejoin: 'round' as const};
+		const c = {fill, stroke, strokeWidth: sw, strokeLinejoin: 'round' as const};
 		if (grip) {
 			return (
 				<g>
-					<rect x={-r * 0.42} y={-r * 0.2} width={r * 0.84} height={r * 0.7} rx={r * 0.3} {...common} />
-					<rect x={-r * 0.85} y={r * 0.25} width={r * 1.7} height={r * 1.35} rx={r * 0.55} {...common} />
-					{[-0.5, -0.17, 0.17, 0.5].map((k) => (
-						<rect key={k} x={k * r * 1.5 - r * 0.25 - thumb * r * 0.2} y={r * 1.15} width={r * 0.5} height={r * 0.62} rx={r * 0.25} {...common} />
-					))}
-					<rect x={thumb > 0 ? r * 0.25 : -r * 1.05} y={r * 0.55} width={r * 0.8} height={r * 0.42} rx={r * 0.21} {...common} />
+					<rect x={-r * 0.82} y={r * 0.05} width={r * 1.64} height={r * 1.5} rx={r * 0.62} {...c} />
+					<rect x={t > 0 ? -r * 0.25 : -r * 0.95} y={r * 0.5} width={r * 1.2} height={r * 0.46} rx={r * 0.23} {...c} />
 				</g>
 			);
 		}
 		return (
 			<g>
-				<rect x={-r * 0.42} y={-r * 0.2} width={r * 0.84} height={r * 0.7} rx={r * 0.3} {...common} />
-				{[-0.48, -0.16, 0.16, 0.48].map((k, i) => {
-					const len = [1.0, 1.2, 1.12, 0.88][thumb > 0 ? i : 3 - i];
-					return <rect key={k} x={k * r * 1.45 - r * 0.21} y={r * 0.9} width={r * 0.42} height={r * len} rx={r * 0.21} {...common} transform={`rotate(${-k * 10} ${k * r * 1.45} ${r})`} />;
-				})}
-				<rect x={-r * 0.8} y={r * 0.2} width={r * 1.6} height={r * 1.15} rx={r * 0.5} {...common} />
-				<rect x={-r * 0.2} y={r * 0.3} width={r * 0.42} height={r * 1.0} rx={r * 0.21} {...common} transform={`rotate(${thumb * -38} 0 ${r * 0.4}) translate(${thumb * r * 0.72},0)`} />
+				<path
+					d={`M ${-r * 0.5},0 C ${-r * 0.88},${r * 0.45} ${-r * 0.92},${r * 1.45} ${-r * 0.42},${r * 1.82} C ${-r * 0.1},${r * 2.05} ${r * 0.42},${r * 1.98} ${r * 0.68},${r * 1.55} C ${r * 0.88},${r * 1.15} ${r * 0.8},${r * 0.45} ${r * 0.5},0 Z`}
+					{...c}
+				/>
+				<ellipse cx={t * r * 0.72} cy={r * 0.78} rx={r * 0.26} ry={r * 0.52} transform={`rotate(${-t * 28} ${t * r * 0.72} ${r * 0.78})`} {...c} />
 			</g>
 		);
 	};
 	return (
 		<g>
-			{parts(line, line, r * 0.16)}
+			{parts(line, line, r * 0.14)}
 			{parts(skin, 'none', 0)}
-			{!grip && (
-				<path d={`M ${-r * 0.3},${r * 1.1} l 0,${r * 0.2} M ${r * 0.02},${r * 1.12} l 0,${r * 0.22} M ${r * 0.33},${r * 1.1} l 0,${r * 0.2}`} stroke={line} strokeWidth={r * 0.07} strokeLinecap="round" opacity={0.6} />
+			{grip ? (
+				<path d={`M ${-r * 0.5},${r * 1.3} l ${r * 1.0},0`} stroke={line} strokeWidth={r * 0.08} strokeLinecap="round" opacity={0.5} />
+			) : (
+				<path d={`M ${-r * 0.18},${r * 1.42} l ${r * 0.02},${r * 0.36} M ${r * 0.2},${r * 1.38} l ${r * 0.02},${r * 0.34}`} stroke={line} strokeWidth={r * 0.07} strokeLinecap="round" opacity={0.45} />
 			)}
 		</g>
 	);
@@ -454,22 +460,26 @@ const Arm: React.FC<{
 	sil?: boolean;
 }> = ({sx, sy, side, pose, sp, color, skin, item, stripe, sil}) => {
 	const r = sp.hand * 0.95;
-	const gripY = sp.fore + r * 0.85;
-	const L2 = gripY;
-	const target = pose && 'target' in pose ? {target: [pose.target[0] - sx, pose.target[1] - sy] as [number, number], bend: pose.bend} : pose;
-	const {shoulder, elbow} = solveArm(target, sp.upper, L2, side);
+	const ku = pose?.ku ?? 1;
+	const kf = pose?.kf ?? 1;
+	const upper = sp.upper * ku;
+	const fore = sp.fore * kf;
+	const gripY = fore + r * 0.85;
+	const target =
+		pose && 'target' in pose ? {target: [pose.target[0] - sx, pose.target[1] - sy] as [number, number], bend: pose.bend} : pose;
+	const {shoulder, elbow} = solveArm(target, upper, gripY, side);
 	const w = sp.armW;
 	return (
 		<g transform={`translate(${sx},${sy}) rotate(${shoulder})`}>
-			<rect x={-w / 2} y={-w / 2} width={w} height={sp.upper + w / 2} rx={w / 2} fill={color} />
-			<g transform={`translate(0,${sp.upper}) rotate(${elbow})`}>
+			<rect x={-w / 2} y={-w / 2} width={w} height={upper + w / 2} rx={w / 2} fill={color} />
+			<g transform={`translate(0,${upper}) rotate(${elbow})`}>
 				<circle cx={0} cy={0} r={w / 2} fill={color} />
-				<path d={`M ${-w / 2},0 L ${w / 2},0 L ${w * 0.42},${sp.fore - 4} L ${-w * 0.42},${sp.fore - 4} Z`} fill={color} />
-				{stripe && <rect x={-w * 0.47} y={sp.fore * 0.45} width={w * 0.94} height={w * 0.26} fill={stripe} />}
-				<g transform={`translate(0,${sp.fore - 10})`}>
+				<path d={`M ${-w / 2},0 L ${w / 2},0 L ${w * 0.44},${Math.max(4, fore - 4)} L ${-w * 0.44},${Math.max(4, fore - 4)} Z`} fill={color} />
+				{stripe && kf > 0.6 && <rect x={-w * 0.47} y={fore * 0.45} width={w * 0.94} height={w * 0.26} fill={stripe} />}
+				<g transform={`translate(0,${fore - 8})`}>
 					<Hand r={r} skin={skin} grip={!!item} thumb={(-side) as -1 | 1} line={sil ? skin : undefined} />
 				</g>
-				{!sil && <rect x={-w * 0.5} y={sp.fore - 22} width={w} height={16} rx={6} fill="#000" opacity={0.18} />}
+				{!sil && <rect x={-w * 0.48} y={fore - 18} width={w * 0.96} height={12} rx={6} fill="#000" opacity={0.16} />}
 				{item && <g transform={`translate(0,${gripY})`}>{item}</g>}
 			</g>
 		</g>

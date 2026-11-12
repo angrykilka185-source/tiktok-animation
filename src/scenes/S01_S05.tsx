@@ -2,7 +2,7 @@ import React from 'react';
 import {Easing, interpolate, useCurrentFrame} from 'remotion';
 import {blinkAt, clamp, lerp, pop, shake} from '../anim';
 import {Bubble, HEAVY, NameTag} from '../components/Overlays';
-import {Bust, Person} from '../components/Person';
+import {Bust, Hand, Person} from '../components/Person';
 import {BorschtBowl, FamilyPhoto, Fork, Glass, Hallway, Kitchen, Table, Wallpaper} from '../components/Set';
 import {Cam, Stage, toScreen} from '../components/Stage';
 
@@ -45,8 +45,8 @@ export const S01: React.FC = () => {
 						backpack
 						face={dadFace}
 						breathe={f}
-						armL={{shoulder: 4, elbow: -4}}
-						armR={{target: [100, -560]}}
+						armL={{target: [-104, -735], kf: 0.42, bend: 1}}
+						armR={{target: [104, -735], kf: 0.42, bend: -1}}
 					/>
 				}
 			/>
@@ -64,8 +64,8 @@ export const S01: React.FC = () => {
 					blink: blinkAt(f, 3),
 					brows: f > 70 ? 'raised' : 'neutral',
 				}}
-				armL={{target: [-30, -650]}}
-				armR={{target: [30, -640]}}
+				armL={{target: [-34, -640], kf: 0.5, bend: 1}}
+				armR={{target: [34, -632], kf: 0.5, bend: -1}}
 				itemL={<Towel rot={10} />}
 			/>
 		</Stage>
@@ -127,42 +127,65 @@ export const S02: React.FC = () => {
 };
 
 // ---------------------------------------------------------------- SHOT 3 ---
-// Dad puts his hand on the son's head: "Привет, парень."
+// Dad puts his hand on your head: «Привет, парень». Then two close-ups.
 export const S03: React.FC = () => {
 	const f = useCurrentFrame();
-	const cam: Cam = {s: lerp(f, 0, 150, 1.0, 1.06), cx: 540, cy: 960};
-	const dadX = lerp(f, 0, 38, -160, 300, Easing.out(Easing.quad));
-	const walking = f < 38;
+	const cut1 = 58; // close-up: dad
+	const cut2 = 92; // close-up: you, his hand still on your head
+	if (f >= cut2) {
+		const t = f - cut2;
+		const pat = t < 18 ? Math.sin(t / 2.2) * 10 * (1 - t / 18) : 0;
+		return (
+			<Stage cam={{s: lerp(t, 0, 58, 1.0, 1.08), cx: 540, cy: 960}} light={{glow: 0.3, vignette: 0.6}} bg="#e9d1a2">
+				<Wallpaper id="s3c2wp" x={-300} y={-300} w={1700} h={2600} />
+				<rect x={-300} y={-300} width={1700} height={2600} fill="#000" opacity={0.08} />
+				<Bust
+					kind="son"
+					id="s3cu2"
+					x={540}
+					y={1010}
+					scale={3.5}
+					face={{eyes: 'wide', brows: 'worried', mouth: 'flat', look: [-0.7, -0.9], pupil: 0.85, blink: blinkAt(t, 3, 70)}}
+				/>
+				<g transform={`translate(0,${pat})`}>
+					<rect x={-160} y={330} width={600} height={190} rx={90} fill="#263c55" transform="rotate(18 140 425)" />
+					<rect x={330} y={430} width={70} height={190} fill="#f39a2e" transform="rotate(18 140 425)" />
+					<g transform="translate(470,560) rotate(-62) scale(3.3)">
+						<Hand r={29} skin="#e9b892" thumb={-1} />
+					</g>
+				</g>
+			</Stage>
+		);
+	}
+	if (f >= cut1) {
+		const t = f - cut1;
+		return (
+			<Stage cam={{s: lerp(t, 0, 34, 1.0, 1.07), cx: 540, cy: 900}} light={{glow: 0.3, vignette: 0.6}} bg="#e9d1a2">
+				<Wallpaper id="s3c1wp" x={-300} y={-300} w={1700} h={2600} />
+				<rect x={760} y={-300} width={600} height={2600} fill="#f6f7ef" opacity={0.9} />
+				<rect x={740} y={-300} width={30} height={2600} fill="#6e3f22" />
+				<Bust kind="dad" id="s3cu1" x={520} y={900} scale={3.4} turn={0.4} face={{eyes: 'open', mouth: 'smile', stubble: true, look: [0.6, 0.7], blink: blinkAt(t, 2, 60)}} />
+			</Stage>
+		);
+	}
+	const cam: Cam = {s: lerp(f, 0, cut1, 1.0, 1.05), cx: 540, cy: 960};
+	const dadX = lerp(f, 0, 36, -160, 300, Easing.out(Easing.quad));
+	const walking = f < 36;
 	const dadY = 1560;
-	// son head top in dad-local coordinates
 	const sonX = 770, sonY = 1640;
 	const headTop: [number, number] = [sonX - dadX, sonY - 830 - dadY - 10];
-	const reach = lerp(f, 40, 56, 0, 1, Easing.out(Easing.cubic));
-	const pat = f > 56 && f < 80 ? Math.sin((f - 56) / 2.5) * 8 * (1 - (f - 56) / 24) : 0;
+	const reach = lerp(f, 36, 50, 0, 1, Easing.out(Easing.cubic));
+	const pat = f > 50 && f < 58 ? Math.sin((f - 50) / 2.5) * 8 : 0;
 	const rest: [number, number] = [150, -470];
 	const armR: [number, number] = [rest[0] + (headTop[0] - rest[0]) * reach, rest[1] + (headTop[1] - rest[1]) * reach + pat];
 	const sonFace =
-		f < 56
+		f < 50
 			? {eyes: 'open' as const, mouth: 'smile' as const, look: [-0.9, -0.5] as [number, number], blink: blinkAt(f, 5)}
-			: f < 84
-				? {eyes: 'closed' as const, mouth: 'smile' as const}
-				: {eyes: 'open' as const, mouth: 'flat' as const, brows: 'worried' as const, look: [-0.8, -0.9] as [number, number]};
-	const sonSquash = f > 56 && f < 80 ? 1 - Math.abs(pat) * 0.004 : 1;
+			: {eyes: 'closed' as const, mouth: 'smile' as const};
 	return (
-		<Stage
-			cam={cam}
-			light={{glow: 0.35, vignette: 0.5}}
-			overlay={
-				<>
-					<NameTag x={770} y={640} title="Я" sub="СЫН" at={6} to={76} pin={40} />
-					<Bubble x={520} y={330} text="Привет, парень." from={44} to={88} />
-				</>
-			}
-		>
+		<Stage cam={cam} light={{glow: 0.35, vignette: 0.5}} overlay={<NameTag x={770} y={650} title="ТЫ" at={6} to={50} pin={40} />}>
 			<Hallway id="s3" open={1} />
-			<g transform={`translate(${sonX},${sonY}) scale(1,${sonSquash}) translate(${-sonX},${-sonY})`}>
-				<Person kind="son" id="s3son" x={sonX} y={sonY} scale={1.0} breathe={f} face={sonFace} />
-			</g>
+			<Person kind="son" id="s3son" x={sonX} y={sonY} scale={1.0} breathe={f} face={sonFace} />
 			<Person
 				kind="dad"
 				id="s3dad"
@@ -188,29 +211,40 @@ export const S04: React.FC = () => {
 	const D = {x: 340, y: 0, s: 1.05};
 	D.y = tableY + 470 * D.s - 30;
 	const toDad = (wx: number, wy: number): [number, number] => [(wx - D.x) / D.s, (wy - D.y) / D.s];
-	const M = {x: 830, y: tableY + 400 * 1.0 + 60, s: 1.0};
+	const M = {x: 790, y: tableY + 400 * 1.0 + 60, s: 1.0};
 	const toMom = (wx: number, wy: number): [number, number] => [(wx - M.x) / M.s, (wy - M.y) / M.s];
 
-	// bowl: carried by mom (0..28), on the table, then pushed away (46..64)
-	const place = lerp(f, 0, 28, 0, 1, Easing.inOut(Easing.cubic));
-	const push = lerp(f, 46, 64, 0, 1, Easing.out(Easing.cubic));
-	const bowlX = f < 28 ? 800 + (470 - 800) * place : 470 + 230 * push;
-	const bowlY = f < 28 ? 1240 + (tableY + 20 - 1240) * place - Math.sin(place * Math.PI) * 60 : tableY + 20;
+	// bowl: carried by mom with both hands (0..30), on the table, then pushed away (46..64)
+	const place = lerp(f, 18, 48, 0, 1, Easing.inOut(Easing.cubic));
+	const push = lerp(f, 102, 120, 0, 1, Easing.out(Easing.cubic));
+	const bowl0 = {x: 760, y: 1235};
+	const bowl1 = {x: 520, y: tableY + 20};
+	const bowlX = f < 48 ? bowl0.x + (bowl1.x - bowl0.x) * place : bowl1.x + 170 * push;
+	const bowlY = f < 48 ? bowl0.y + (bowl1.y - bowl0.y) * place - Math.sin(place * Math.PI) * 40 : bowl1.y;
 
-	// glass: lifted 80..100, drink 100..140, down 140..158
-	const lift = lerp(f, 80, 100, 0, 1) - lerp(f, 140, 158, 0, 1);
+	// glass (in dad's RIGHT hand = viewer-left): lifted 80..100, drink 100..140, down 140..158
+	const lift = lerp(f, 126, 142, 0, 1) - lerp(f, 166, 178, 0, 1);
 	const mouth = {x: D.x, y: D.y - 1024 * D.s + 0.58 * 104 * D.s};
-	const g0 = {x: 180, y: tableY + 26};
-	const gX = g0.x + (mouth.x - 30 - g0.x) * lift;
-	const gY = g0.y + (mouth.y + 80 - g0.y) * lift;
-	const tilt = lerp(f, 100, 112, 0, 32) - lerp(f, 132, 142, 0, 32);
-	const level = lerp(f, 102, 138, 0.8, 0.2);
+	const g0 = {x: 190, y: tableY + 26};
+	const gX = g0.x + (mouth.x - 46 - g0.x) * lift;
+	const gY = g0.y + (mouth.y + 96 - g0.y) * lift;
+	const tilt = lerp(f, 142, 150, 0, 30) - lerp(f, 160, 168, 0, 30);
+	const level = lerp(f, 144, 164, 0.8, 0.3);
 
-	const momArm: [number, number] = f < 34 ? toMom(bowlX + 90, bowlY - 20) : toMom(900, 1250 + lerp(f, 34, 50, 0, 140));
-	const dadArmR: [number, number] = f < 40 ? toDad(560, tableY + 10) : f < 70 ? toDad(bowlX - 110, tableY + 5) : toDad(560, tableY + 10);
-	const dadArmL: [number, number] = f < 74 ? toDad(200, tableY + 10) : toDad(gX + 10, gY - 50);
+	// mom: both hands on the bowl, then hands folded on the apron
+	const holding = f < 52;
+	const momL: [number, number] = holding ? toMom(bowlX - 70, bowlY - 26) : [-26, -560];
+	const momR: [number, number] = holding ? toMom(bowlX + 70, bowlY - 26) : [26, -556];
+	const restBlend = lerp(f, 52, 64, 0, 1);
+	const mL: [number, number] = holding ? momL : [toMom(bowl1.x - 70, bowl1.y - 26)[0] * (1 - restBlend) + -26 * restBlend, toMom(bowl1.x - 70, bowl1.y - 26)[1] * (1 - restBlend) + -560 * restBlend];
+	const mR: [number, number] = holding ? momR : [toMom(bowl1.x + 70, bowl1.y - 26)[0] * (1 - restBlend) + 26 * restBlend, toMom(bowl1.x + 70, bowl1.y - 26)[1] * (1 - restBlend) + -556 * restBlend];
 
-	const dadLook: [number, number] = f < 46 ? [0.6, 0.8] : f < 80 ? [-0.2, 0.2] : [-0.5, 0.4];
+	// dad: forearms resting on the table; left hand (viewer-right) pushes the bowl away
+	const pushHand = f >= 94 && f < 124;
+	const dadArmR: [number, number] = pushHand ? toDad(bowlX - 95, tableY + 6) : toDad(430, tableY + 8);
+	const dadArmL: [number, number] = f < 122 ? toDad(220, tableY + 8) : toDad(gX + 6, gY - 44);
+
+	const dadLook: [number, number] = f < 94 ? [0.6, 0.8] : f < 124 ? [-0.2, 0.2] : [-0.5, 0.4];
 	return (
 		<Stage cam={cam} light={{glow: 0.35, vignette: 0.5}}>
 			<Kitchen id="s4" floorY={1300} clock={[3, 5]} tick={f / 30} />
@@ -221,15 +255,16 @@ export const S04: React.FC = () => {
 				y={M.y}
 				scale={M.s}
 				breathe={f}
+				headTilt={holding ? -6 * place : -6 * (1 - restBlend)}
 				face={{
 					eyes: 'open',
-					mouth: f < 66 ? 'smile' : 'frown',
-					brows: f < 66 ? 'neutral' : 'worried',
-					look: f < 40 ? [-0.6, 0.5] : [-0.9, 0.1],
+					mouth: f < 112 ? 'smile' : 'frown',
+					brows: f < 112 ? 'neutral' : 'worried',
+					look: f < 60 ? [-0.6, 0.7] : [-0.9, 0.1],
 					blink: blinkAt(f, 7),
 				}}
-				armL={{target: momArm}}
-				armR={{target: [40, -560]}}
+				armL={{target: mL, bend: 1, ku: 0.9, kf: holding ? 0.9 : 0.55}}
+				armR={{target: mR, bend: -1, ku: 0.9, kf: holding ? 0.9 : 0.55}}
 			/>
 			<Person
 				kind="dad"
@@ -239,8 +274,8 @@ export const S04: React.FC = () => {
 				y={D.y}
 				scale={D.s}
 				face={{eyes: 'open', mouth: 'flat', stubble: true, look: dadLook, blink: blinkAt(f, 4, 80), brows: 'flat'}}
-				armL={{target: dadArmL, bend: f < 74 ? -1 : 1}}
-				armR={{target: dadArmR}}
+				armL={{target: dadArmL, bend: 1, ku: f < 122 ? 0.85 : 0.62, kf: f < 122 ? 0.7 : 0.85}}
+				armR={{target: dadArmR, bend: -1, ku: 0.85, kf: 0.7}}
 			/>
 			<Table y={tableY} />
 			<g transform={`translate(${bowlX},${bowlY})`}>

@@ -1,9 +1,17 @@
 import React from 'react';
 import {AbsoluteFill, Sequence} from 'remotion';
-import {Captions, HUD, SignPlaques} from './components/Overlays';
+import {Captions, HUD, RuleCards, SignPlaques} from './components/Overlays';
 import {SFX} from './SFX';
 import * as Scenes from './scenes';
-import {SHOTS} from './timeline';
+import {SHOTS, shotStart} from './timeline';
+import {VOICE} from './voice';
+
+// rule cards appear with the narrator's "Правило …" lines
+const rule = (n: number, id: string, title: string, icon: 'eye' | 'shh', maxTo: number) => {
+	const l = VOICE.find((v) => v.id === id)!;
+	return {n, title, icon, from: l.at - 4, to: Math.min(maxTo, l.at + Math.round(l.duration * 30) + 16)};
+};
+const RULES = [rule(1, 'a11', 'НЕ ПОДАВАЙ ВИДУ', 'eye', shotStart(7)), rule(2, 'a16', 'МАМЕ — НИ СЛОВА', 'shh', shotStart(10) + 14)];
 
 export const Main: React.FC = () => (
 	<AbsoluteFill style={{background: '#000'}}>
@@ -15,6 +23,7 @@ export const Main: React.FC = () => (
 				</Sequence>
 			);
 		})}
+		<RuleCards rules={RULES} />
 		<HUD />
 		<Captions />
 		<SignPlaques />

@@ -1,7 +1,7 @@
 import React from 'react';
 import {Easing, useCurrentFrame} from 'remotion';
 import {blinkAt, lerp, pop, shake} from '../anim';
-import {Bubble, HEAVY} from '../components/Overlays';
+import {HEAVY} from '../components/Overlays';
 import {Bust, Head, Person} from '../components/Person';
 import {FamilyPhoto, Kitchen, PlankFloor, Baseboard, Table, Wallpaper, WindowBox} from '../components/Set';
 import {Cam, Stage} from '../components/Stage';
@@ -26,8 +26,8 @@ export const S06: React.FC = () => {
 					y={1400 + 470 - 30}
 					scale={1.0}
 					face={{eyes: 'open', mouth: 'flat', stubble: true, look: [-0.3, 0.6], brows: 'flat', blink: blinkAt(f, 2, 120)}}
-					armL={{target: [-60, -440]}}
-					armR={{target: [60, -440]}}
+					armL={{target: [-120, -470], ku: 0.85, kf: 0.7, bend: 1}}
+					armR={{target: [120, -470], ku: 0.85, kf: 0.7, bend: -1}}
 				/>
 				<Table y={1400} x={480} w={900} />
 				<Person
@@ -57,16 +57,16 @@ export const S06: React.FC = () => {
 // He walks to the bathroom by the old route and bumps into the wall.
 export const S07: React.FC = () => {
 	const f = useCurrentFrame();
-	const [sx, sy] = shake(f, 60, 22, 14);
+	const [sx, sy] = shake(f, 72, 22, 14);
 	const cam: Cam = {s: 1.0, cx: 540, cy: 960, dx: sx, dy: sy};
-	const k = lerp(f, 0, 60, 0, 1, Easing.inOut(Easing.sin));
-	const walking = f < 60;
-	const dy = lerp(f, 60, 64, 0, -14) + lerp(f, 64, 72, 0, 14);
+	const k = lerp(f, 0, 70, 0, 1, Easing.inOut(Easing.sin));
+	const walking = f < 70;
+	const dy = lerp(f, 72, 76, 0, -14) + lerp(f, 76, 84, 0, 14);
 	const y = 2350 + (1400 - 2350) * k + dy;
 	const sc = 1.45 + (0.62 - 1.45) * k;
 	const x = 420 + (500 - 420) * k;
-	const labels = pop(f, 74, 12);
-	const stars = f > 60 && f < 100;
+	const labels = pop(f, 96, 12);
+	const stars = f > 72 && f < 112;
 	return (
 		<Stage
 			cam={cam}
@@ -100,7 +100,7 @@ export const S07: React.FC = () => {
 			<Person kind="dad" id="s7dad" back x={x} y={y} scale={sc} walk={walking ? f / 4 : undefined} armL={{shoulder: walking ? Math.sin(f / 4) * 12 : 4, elbow: -4}} armR={{shoulder: walking ? -Math.sin(f / 4) * 12 : -4, elbow: 4}} />
 			{stars &&
 				[0, 1, 2].map((i) => {
-					const a = (f - 60) / 8 + (i * Math.PI * 2) / 3;
+					const a = (f - 72) / 8 + (i * Math.PI * 2) / 3;
 					return (
 						<text key={i} x={x + Math.cos(a) * 120} y={y - 1090 * sc + Math.sin(a) * 30} fontSize={56} textAnchor="middle" fill="#ffd34a" stroke="#111" strokeWidth={4} paintOrder="stroke">
 							★
@@ -162,7 +162,6 @@ export const S09: React.FC = () => {
 		<Stage
 			cam={cam}
 			light={{glow: 0.3, vignette: 0.6}}
-			overlay={<Bubble x={430} y={360} text="Он просто устал..." from={18} to={92} whisper />}
 		>
 			<Kitchen id="s9" floorY={1300} clock={[3, 40]} tick={f / 30} />
 			{/* sink counter */}
@@ -179,9 +178,9 @@ export const S09: React.FC = () => {
 				scale={0.9}
 				headTilt={lean}
 				breathe={f}
-				face={{eyes: 'open', mouth: f > 18 && f < 90 && f % 6 < 3 ? 'o' : 'tight', brows: 'worried', look: [0.9, 0.2], blink: blinkAt(f, 3)}}
-				armL={{target: [-40, -640]}}
-				armR={{target: [88, -842], bend: 1}}
+				face={{eyes: 'open', mouth: f > 34 && f < 72 && f % 6 < 3 ? 'o' : 'tight', brows: 'worried', look: [0.9, 0.2], blink: blinkAt(f, 3)}}
+				armL={{target: [-30, -560], kf: 0.55, bend: 1}}
+				armR={{target: [58, -828], ku: 0.5, kf: 0.72, bend: -1}}
 			/>
 			<Person
 				kind="son"
@@ -247,7 +246,7 @@ export const S11: React.FC = () => {
 	return (
 		<Stage cam={cam} light={{glow: 0, vignette: 0.9}} bg="#05070f">
 			<Kitchen id="s11" floorY={1300} clock={[3, 17]} tick={0} sky="url(#skyNight)" />
-			<Person kind="dad" id="s11dad" hideLegs x={560} y={1400 + 470 - 30} scale={1.0} face={{eyes: 'stare', mouth: 'flat', stubble: true, pupil: 0.7, brows: 'flat', blush: false}} armL={{target: [-80, -430]}} armR={{target: [80, -430]}} />
+			<Person kind="dad" id="s11dad" hideLegs x={560} y={1400 + 470 - 30} scale={1.0} face={{eyes: 'stare', mouth: 'flat', stubble: true, pupil: 0.7, brows: 'flat', blush: false}} armL={{target: [-130, -460], ku: 0.85, kf: 0.7, bend: 1}} armR={{target: [130, -460], ku: 0.85, kf: 0.7, bend: -1}} />
 			<Table y={1400} />
 			<rect x={-1000} y={-1000} width={3200} height={4000} fill="#0a1433" style={{mixBlendMode: 'multiply'}} opacity={0.8} />
 			<path d="M 120,340 L 400,340 L 760,1400 L 260,1400 Z" fill="#9fb6ff" opacity={0.12} />

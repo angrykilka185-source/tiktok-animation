@@ -1,8 +1,8 @@
 import React from 'react';
 import {interpolate, useCurrentFrame} from 'remotion';
 import {clamp, pop} from '../anim';
-import {CAPTIONS, CLOCK, SIGN_FLY, SIGNS, shotStart} from '../timeline';
-import {HAS_VOICE, VOICE_CAPTIONS} from '../voice';
+import {CLOCK, SIGN_FLY, SIGNS, shotStart} from '../timeline';
+import {CapWord, VOICE_CAPTIONS} from '../voice';
 
 const HEAVY = "'Montserrat', 'DejaVu Sans', sans-serif";
 const MONO = "'JetBrains Mono', 'DejaVu Sans Mono', monospace";
@@ -28,9 +28,10 @@ export const HUD: React.FC = () => {
 	const done = signsDone(f);
 	const night = f >= shotStart(10) && f < shotStart(12);
 	const hudIn = pop(f, 8, 13);
+	const hudOut = interpolate(f, [shotStart(16) + 244, shotStart(16) + 252], [1, 0], clamp);
 
 	return (
-		<div style={{position: 'absolute', inset: 0, pointerEvents: 'none'}}>
+		<div style={{position: 'absolute', inset: 0, pointerEvents: 'none', opacity: hudOut}}>
 			{/* clock */}
 			<div
 				style={{
@@ -208,38 +209,43 @@ export const SignPlaques: React.FC = () => {
 };
 
 // ------------------------------ captions -----------------------------------
-const CapWords: React.FC<{words: {w: string; at: number}[]}> = ({words}) => {
+// Reference style: 2-3 words, upcoming words dimmed, key words red, quotes yellow.
+const RED = '#ff3b30';
+const QUOTE = '#ffd34a';
+const CapWords: React.FC<{words: CapWord[]}> = ({words}) => {
 	const f = useCurrentFrame();
 	const len = words.reduce((a, w) => a + w.w.length + 1, 0);
 	return (
 		<div
 			style={{
 				position: 'absolute',
-				left: 40,
-				width: 860,
-				top: 1175,
+				left: 30,
+				width: 880,
+				top: 1170,
 				textAlign: 'center',
 				fontFamily: HEAVY,
 				fontWeight: 900,
-				fontSize: len > 16 ? 80 : 94,
+				fontSize: len > 18 ? 78 : 92,
 				lineHeight: 1.05,
 				color: '#fff',
+				textTransform: 'uppercase',
 			}}
 		>
 			{words.map((w, i) => {
 				const p = pop(f, w.at, 12);
 				const active = f >= w.at;
+				const color = w.red ? RED : w.quote ? QUOTE : '#fff';
 				return (
 					<span
 						key={i + w.w}
 						style={{
 							display: 'inline-block',
-							margin: '0 12px',
-							transform: `scale(${active ? 0.75 + 0.25 * p : 0.95})`,
-							opacity: active ? 1 : 0.35,
-							color: active ? '#fff' : '#c9c3d6',
+							margin: '0 11px',
+							transform: `scale(${active ? 0.78 + 0.22 * p : 0.96})`,
+							opacity: active ? 1 : 0.4,
+							color: active ? color : '#cfc9db',
 							textShadow:
-								'0 6px 0 rgba(0,0,0,0.35), 0 0 18px rgba(0,0,0,0.55), 3px 3px 0 #2a2a33, -3px 3px 0 #2a2a33, 3px -3px 0 #2a2a33, -3px -3px 0 #2a2a33',
+								'0 6px 0 rgba(0,0,0,0.35), 0 0 18px rgba(0,0,0,0.55), 3px 3px 0 #22222a, -3px 3px 0 #22222a, 3px -3px 0 #22222a, -3px -3px 0 #22222a',
 						}}
 					>
 						{w.w}
@@ -252,56 +258,56 @@ const CapWords: React.FC<{words: {w: string; at: number}[]}> = ({words}) => {
 
 export const Captions: React.FC = () => {
 	const f = useCurrentFrame();
-	if (HAS_VOICE) {
-		const ch = VOICE_CAPTIONS.find((c) => f >= c.from - 2 && f < c.to);
-		return ch ? <CapWords words={ch.words} /> : null;
-	}
-	const c = CAPTIONS.find((c) => f >= c.from && f < c.to);
-	if (!c) return null;
-	const chunks = c.text.split('|');
-	const len = (c.to - c.from) / chunks.length;
-	const ci = Math.min(chunks.length - 1, Math.floor((f - c.from) / len));
-	const chunkStart = c.from + ci * len;
-	const words = chunks[ci].split(' ');
-	const per = Math.min(7, (len * 0.55) / words.length);
-	const big = chunks[ci].length > 16 ? 76 : 92;
+	const ch = VOICE_CAPTIONS.find((c) => f >= c.from - 2 && f < c.to);
+	return ch ? <CapWords words={ch.words} /> : null;
+};
+
+// ------------------------------ rule cards ---------------------------------
+export const RuleCards: React.FC<{rules: {n: number; title: string; icon: 'eye' | 'shh'; from: number; to: number}[]}> = ({rules}) => {
+	const f = useCurrentFrame();
+	const r = rules.find((x) => f >= x.from && f < x.to);
+	if (!r) return null;
+	const p = pop(f, r.from, 12);
+	const out = interpolate(f, [r.to - 8, r.to], [1, 0], clamp);
+	const ip = pop(f, r.from + 8, 10);
 	return (
-		<div
-			style={{
-				position: 'absolute',
-				left: 40,
-				width: 860,
-				top: (c.y ?? 1235) - 60,
-				textAlign: 'center',
-				fontFamily: HEAVY,
-				fontWeight: 900,
-				fontSize: big,
-				lineHeight: 1.05,
-				color: '#fff',
-				textTransform: 'uppercase',
-			}}
-		>
-			{words.map((w, i) => {
-				const at = chunkStart + i * per;
-				const p = pop(f, at, 12);
-				const active = f >= at;
-				return (
-					<span
-						key={i + w}
-						style={{
-							display: 'inline-block',
-							margin: '0 12px',
-							transform: `scale(${active ? 0.7 + 0.3 * p : 0.95})`,
-							opacity: active ? 1 : 0.35,
-							color: active ? '#fff' : '#c9c3d6',
-							textShadow:
-								'0 6px 0 rgba(0,0,0,0.35), 0 0 18px rgba(0,0,0,0.55), 3px 3px 0 #2a2a33, -3px 3px 0 #2a2a33, 3px -3px 0 #2a2a33, -3px -3px 0 #2a2a33',
-						}}
-					>
-						{w}
-					</span>
-				);
-			})}
+		<div style={{position: 'absolute', inset: 0, opacity: out}}>
+			<div style={{position: 'absolute', inset: 0, background: 'rgba(8,8,12,0.55)'}} />
+			<div style={{position: 'absolute', top: 300, width: '100%', textAlign: 'center', transform: `scale(${p})`}}>
+				<div
+					style={{
+						display: 'inline-block',
+						background: '#111',
+						border: '5px solid #f4efe6',
+						borderRadius: 18,
+						padding: '8px 38px',
+						fontFamily: HEAVY,
+						fontWeight: 900,
+						fontSize: 54,
+						letterSpacing: 2,
+						color: '#fff',
+					}}
+				>
+					ПРАВИЛО {r.n}
+				</div>
+				<div style={{fontFamily: HEAVY, fontWeight: 900, fontSize: 70, color: RED, marginTop: 18, textShadow: '0 5px 0 rgba(0,0,0,0.5)'}}>{r.title}</div>
+			</div>
+			<div style={{position: 'absolute', left: 540, top: 820, transform: `translate(-50%,-50%) scale(${ip})`}}>
+				<svg width={260} height={260} viewBox="0 0 100 100">
+					{r.icon === 'eye' ? (
+						<g fill="none" stroke="#fff" strokeWidth={6} strokeLinecap="round" strokeLinejoin="round">
+							<path d="M 8,50 Q 50,12 92,50 Q 50,88 8,50 Z" />
+							<circle cx={50} cy={50} r={13} fill="#fff" />
+							<path d="M 18,84 L 82,16" stroke={RED} strokeWidth={8} />
+						</g>
+					) : (
+						<g fill="none" stroke="#fff" strokeWidth={6} strokeLinecap="round" strokeLinejoin="round">
+							<path d="M 16,30 Q 16,16 30,16 L 70,16 Q 84,16 84,30 L 84,58 Q 84,72 70,72 L 44,72 L 28,86 L 30,72 Q 16,72 16,58 Z" />
+							<path d="M 34,44 L 66,44" stroke={RED} strokeWidth={8} />
+						</g>
+					)}
+				</svg>
+			</div>
 		</div>
 	);
 };

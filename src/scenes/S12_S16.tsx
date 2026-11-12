@@ -1,7 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, Easing, interpolate, useCurrentFrame} from 'remotion';
 import {clamp, lerp, pop} from '../anim';
-import {Bubble, Cross, HEAVY} from '../components/Overlays';
+import {Cross, HEAVY} from '../components/Overlays';
 import {Bust, Hand, Person} from '../components/Person';
 import {Fridge, PlankFloor, Wallpaper, WindowBox, Tiles} from '../components/Set';
 import {Cam, Stage} from '../components/Stage';
@@ -176,7 +176,6 @@ export const S15: React.FC = () => {
 		<Stage
 			cam={cam}
 			light={{glow: 0.2, vignette: 0.7, tint: '#5a0000', tintOpacity: lerp(f, 100, 180, 0, 0.25)}}
-			overlay={<Bubble x={620} y={330} text="Кто пишет, парень?" from={96} to={176} dark tail="left" />}
 		>
 			<Wallpaper id="s15wp" x={-1000} y={-1000} w={3200} h={2300} base="#f0dcb0" line="#dfc490" />
 			<Tiles y={780} h={520} />
@@ -222,26 +221,30 @@ export const S16: React.FC = () => {
 	const f = useCurrentFrame();
 	const flash = lerp(f, 0, 10, 0.9, 0);
 	const title = pop(f, 6, 10);
-	const c1 = pop(f, 50, 11);
-	const c2 = pop(f, 66, 11);
+	const c1 = pop(f, 14, 11);
+	const c2 = pop(f, 46, 11);
 	const nums = [
-		{n: '3', at: 135},
-		{n: '2', at: 165},
-		{n: '1', at: 195},
+		{n: '3', at: 120},
+		{n: '2', at: 150},
+		{n: '1', at: 180},
 	];
 	const cur = [...nums].reverse().find((x) => f >= x.at);
-	const final = f >= 225;
-	const fp = pop(f, 225, 9);
-	const pulse = final ? 1 + Math.sin((f - 225) / 4) * 0.03 : 1;
-	const card = (p: number, top: number, num: string, text: string, color: string, icon: string) => (
+	const final = f >= 210;
+	const fp = pop(f, 210, 9);
+	const pulse = final ? 1 + Math.sin((f - 210) / 4) * 0.03 : 1;
+	// during the countdown the two answers blink in turn, like a vote
+	const counting = f >= 120 && f < 210;
+	const hot = counting ? (Math.floor((f - 120) / 15) % 2 === 0 ? 1 : 2) : 0;
+	const endCard = interpolate(f, [248, 256], [0, 1], clamp);
+	const card = (p: number, top: number, num: string, text: string, color: string, icon: string, idx: number) => (
 		<div
 			style={{
 				position: 'absolute',
 				left: 60,
 				top,
 				width: 720,
-				transform: `translateX(${(1 - p) * -800}px) scale(${pulse})`,
-				background: '#121214',
+				transform: `translateX(${(1 - p) * -800}px) scale(${pulse * (hot === idx ? 1.04 : 1)})`,
+				background: hot === idx ? color : '#121214',
 				border: `7px solid ${color}`,
 				borderRadius: 28,
 				padding: '26px 30px',
@@ -292,9 +295,9 @@ export const S16: React.FC = () => {
 					})}
 				</div>
 			</div>
-			{card(c1, 680, '1', 'СКАЗАТЬ МАМЕ', '#3b82f6', 'всё рассказать прямо сейчас')}
+			{card(c1, 680, '1', 'СКАЗАТЬ МАМЕ', '#3b82f6', 'всё рассказать прямо сейчас', 1)}
 			<div style={{position: 'absolute', left: 60, width: 720, top: 905, textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, fontSize: 44, color: '#e7c44a', opacity: c2}}>ИЛИ</div>
-			{card(c2, 970, '2', 'ЗАДАТЬ КОНТРОЛЬНЫЙ ВОПРОС', '#e0342b', 'то, что знает только папа')}
+			{card(c2, 970, '2', 'ЗАДАТЬ КОНТРОЛЬНЫЙ ВОПРОС', '#e0342b', 'то, что знает только папа', 2)}
 			{cur && !final && (
 				<div
 					style={{
@@ -325,6 +328,32 @@ export const S16: React.FC = () => {
 					<div style={{fontSize: 96, color: '#e7c44a', textShadow: '0 6px 0 #000'}}>ВЫБИРАЙ!</div>
 					<div style={{fontSize: 44, color: '#fff', textShadow: '0 4px 0 #000', marginTop: 6}}>ПИШИ 1 ИЛИ 2 В КОММЕНТАРИЯХ</div>
 				</div>
+			)}
+			{endCard > 0 && (
+				<AbsoluteFill style={{opacity: endCard, background: 'radial-gradient(circle at 50% 42%, #4a0d10 0%, #1a0607 55%, #0a0304 100%)'}}>
+					<div style={{position: 'absolute', top: 560, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900}}>
+						<div style={{fontSize: 36, letterSpacing: 12, color: '#ff4a3d'}}>ПАПА ВЕРНУЛСЯ С ВАХТЫ</div>
+						<div style={{fontSize: 190, lineHeight: 1, color: '#fff', marginTop: 18, transform: `scale(${pop(f, 250, 10)})`}}>ЧАСТЬ 2</div>
+						<div style={{fontSize: 56, color: '#ff3b30', marginTop: 8}}>СКОРО</div>
+						<div style={{fontSize: 44, color: '#fff', marginTop: 70}}>СКАЗАТЬ МАМЕ ИЛИ СПРОСИТЬ?</div>
+						<div style={{fontSize: 32, color: '#b9a9aa', marginTop: 10, letterSpacing: 2}}>ПИШИ В КОММЕНТАРИЯХ</div>
+						<div
+							style={{
+								display: 'inline-block',
+								marginTop: 60,
+								background: '#ff2d3d',
+								borderRadius: 60,
+								padding: '22px 70px',
+								fontSize: 52,
+								color: '#fff',
+								boxShadow: '0 0 40px rgba(255,45,61,0.6)',
+								transform: `scale(${1 + Math.sin(f / 5) * 0.04})`,
+							}}
+						>
+							ПОДПИШИСЬ
+						</div>
+					</div>
+				</AbsoluteFill>
 			)}
 			<AbsoluteFill style={{background: '#fff', opacity: flash}} />
 		</AbsoluteFill>

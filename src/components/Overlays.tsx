@@ -2,6 +2,7 @@ import React from 'react';
 import {interpolate, useCurrentFrame} from 'remotion';
 import {clamp, pop} from '../anim';
 import {CAPTIONS, CLOCK, SIGN_FLY, SIGNS, shotStart} from '../timeline';
+import {HAS_VOICE, VOICE_CAPTIONS} from '../voice';
 
 const HEAVY = "'Montserrat', 'DejaVu Sans', sans-serif";
 const MONO = "'JetBrains Mono', 'DejaVu Sans Mono', monospace";
@@ -207,8 +208,54 @@ export const SignPlaques: React.FC = () => {
 };
 
 // ------------------------------ captions -----------------------------------
+const CapWords: React.FC<{words: {w: string; at: number}[]}> = ({words}) => {
+	const f = useCurrentFrame();
+	const len = words.reduce((a, w) => a + w.w.length + 1, 0);
+	return (
+		<div
+			style={{
+				position: 'absolute',
+				left: 40,
+				width: 860,
+				top: 1175,
+				textAlign: 'center',
+				fontFamily: HEAVY,
+				fontWeight: 900,
+				fontSize: len > 16 ? 80 : 94,
+				lineHeight: 1.05,
+				color: '#fff',
+			}}
+		>
+			{words.map((w, i) => {
+				const p = pop(f, w.at, 12);
+				const active = f >= w.at;
+				return (
+					<span
+						key={i + w.w}
+						style={{
+							display: 'inline-block',
+							margin: '0 12px',
+							transform: `scale(${active ? 0.75 + 0.25 * p : 0.95})`,
+							opacity: active ? 1 : 0.35,
+							color: active ? '#fff' : '#c9c3d6',
+							textShadow:
+								'0 6px 0 rgba(0,0,0,0.35), 0 0 18px rgba(0,0,0,0.55), 3px 3px 0 #2a2a33, -3px 3px 0 #2a2a33, 3px -3px 0 #2a2a33, -3px -3px 0 #2a2a33',
+						}}
+					>
+						{w.w}
+					</span>
+				);
+			})}
+		</div>
+	);
+};
+
 export const Captions: React.FC = () => {
 	const f = useCurrentFrame();
+	if (HAS_VOICE) {
+		const ch = VOICE_CAPTIONS.find((c) => f >= c.from - 2 && f < c.to);
+		return ch ? <CapWords words={ch.words} /> : null;
+	}
 	const c = CAPTIONS.find((c) => f >= c.from && f < c.to);
 	if (!c) return null;
 	const chunks = c.text.split('|');

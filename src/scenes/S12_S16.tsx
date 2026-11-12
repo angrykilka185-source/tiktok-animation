@@ -198,7 +198,7 @@ export const S15: React.FC = () => {
 				armR={{shoulder: walking ? -Math.sin(f / 4) * 12 : -3, elbow: 3}}
 			/>
 			{/* son from behind, phone glowing in his hands */}
-			<Person kind="son" id="s15son" back x={220} y={2700} scale={1.9} armL={{target: [60, -600]}} armR={{target: [100, -600]}} />
+			<Person kind="son" id="s15son" back x={220} y={2700} scale={1.9} armL={{shoulder: 3, elbow: 0}} armR={{shoulder: -3, elbow: 0}} />
 			<rect x={330} y={1440} width={90} height={60} fill="#bfe0ff" opacity={0.0} />
 		</Stage>
 	);

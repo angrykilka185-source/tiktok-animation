@@ -5,6 +5,7 @@
   "scripts": {
     "studio": "remotion studio",
     "sfx": "node scripts/make-sfx.mjs",
+    "voice": "NODE_USE_ENV_PROXY=1 node scripts/make-voice.mjs",
     "render": "remotion render PapaVakhta out/papa-vakhta.mp4"
   },
   "dependencies": {

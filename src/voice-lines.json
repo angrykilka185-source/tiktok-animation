@@ -1,0 +1,34 @@
+{
+  "_comment": "Voice-over script. shot = кадр 1..16, offset = кадры (30 fps) от начала кадра. voice: narrator | dad | mom. Narrator lines become word-by-word captions; dad/mom lines are speech bubbles.",
+  "model": "eleven_multilingual_v2",
+  "voices": {
+    "narrator": {"id": "TX3LPaxmHKxFdv7VOQHJ", "name": "Liam", "settings": {"stability": 0.45, "similarity_boost": 0.8, "style": 0.35, "use_speaker_boost": true, "speed": 1.05}},
+    "dad": {"id": "pqHfZKP75CyZ1OOrNyrH", "name": "Bill", "settings": {"stability": 0.6, "similarity_boost": 0.8, "style": 0.2, "use_speaker_boost": true, "speed": 0.95}},
+    "mom": {"id": "XrExE9yKIg1WHnYxQkwB", "name": "Matilda", "settings": {"stability": 0.4, "similarity_boost": 0.8, "style": 0.3, "use_speaker_boost": true, "speed": 1.0}}
+  },
+  "lines": [
+    {"id": "n01", "shot": 1, "offset": 48, "voice": "narrator", "text": "Папа три месяца был на вахте. И вдруг вернулся на два дня раньше."},
+    {"id": "n02", "shot": 2, "offset": 22, "voice": "narrator", "text": "Мама плакала от счастья."},
+    {"id": "d03", "shot": 3, "offset": 44, "voice": "dad", "text": "Привет, парень."},
+    {"id": "n03", "shot": 3, "offset": 88, "voice": "narrator", "text": "Но он всегда звал меня тигрёнком."},
+    {"id": "n04", "shot": 4, "offset": 8, "voice": "narrator", "text": "Папа обожает мамин борщ. А тут пьёт только воду."},
+    {"id": "n05", "shot": 5, "offset": 4, "voice": "narrator", "text": "Вилка в правой руке. А на фото папа — левша."},
+    {"id": "n06", "shot": 6, "offset": 10, "voice": "narrator", "text": "Я смотрю на фото. Потом на него. Что-то не так."},
+    {"id": "n07", "shot": 7, "offset": 6, "voice": "narrator", "text": "Он пошёл в ванную по старой дороге. А дверь-то после ремонта перенесли."},
+    {"id": "n08", "shot": 8, "offset": 2, "voice": "narrator", "text": "А где шрам от пилы?"},
+    {"id": "m09", "shot": 9, "offset": 18, "voice": "mom", "text": "Он просто устал.", "whisper": true},
+    {"id": "n09", "shot": 9, "offset": 92, "voice": "narrator", "text": "А я не верю."},
+    {"id": "n10", "shot": 10, "offset": 24, "voice": "narrator", "text": "Ночью он стоял в дверях моей комнаты. И не двигался."},
+    {"id": "n11", "shot": 11, "offset": 14, "voice": "narrator", "text": "Потом сидел на кухне в темноте. И ни разу не моргнул."},
+    {"id": "n12", "shot": 12, "offset": 20, "voice": "narrator", "text": "А утром пришло сообщение."},
+    {"id": "n13", "shot": 13, "offset": 40, "voice": "narrator", "text": "От папы. Рейс задержали. Прилечу завтра."},
+    {"id": "n14", "shot": 14, "offset": 24, "voice": "narrator", "text": "Тогда кто… сидит у нас на кухне?"},
+    {"id": "d15", "shot": 15, "offset": 96, "voice": "dad", "text": "Кто пишет, парень?"},
+    {"id": "n16a", "shot": 16, "offset": 10, "voice": "narrator", "text": "Он или не он?"},
+    {"id": "n16b", "shot": 16, "offset": 52, "voice": "narrator", "text": "Сказать маме… или задать контрольный вопрос?"},
+    {"id": "n16c", "shot": 16, "offset": 135, "voice": "narrator", "text": "Три."},
+    {"id": "n16d", "shot": 16, "offset": 165, "voice": "narrator", "text": "Два."},
+    {"id": "n16e", "shot": 16, "offset": 195, "voice": "narrator", "text": "Один."},
+    {"id": "n16f", "shot": 16, "offset": 225, "voice": "narrator", "text": "Выбирай! Пиши в комментариях."}
+  ]
+}

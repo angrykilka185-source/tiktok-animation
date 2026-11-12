@@ -401,6 +401,46 @@ export const Shaded: React.FC<{id: string; x0?: number; enabled?: boolean; opaci
 };
 
 // ---------------------------------------------------------------------------
+// Mitten-style flat hand. Local coords: wrist at (0,0), fingers point to +y.
+// `grip` = fist around an object, `thumb` = which side the thumb is on (-1/1).
+export const Hand: React.FC<{r: number; skin: string; grip?: boolean; thumb?: -1 | 1; line?: string}> = ({r, skin, grip, thumb = 1, line = 'rgba(120,60,35,0.55)'}) => {
+	const parts = (fill: string, stroke: string, sw: number) => {
+		const common = {fill, stroke, strokeWidth: sw, strokeLinejoin: 'round' as const};
+		if (grip) {
+			return (
+				<g>
+					<rect x={-r * 0.42} y={-r * 0.2} width={r * 0.84} height={r * 0.7} rx={r * 0.3} {...common} />
+					<rect x={-r * 0.85} y={r * 0.25} width={r * 1.7} height={r * 1.35} rx={r * 0.55} {...common} />
+					{[-0.5, -0.17, 0.17, 0.5].map((k) => (
+						<rect key={k} x={k * r * 1.5 - r * 0.25 - thumb * r * 0.2} y={r * 1.15} width={r * 0.5} height={r * 0.62} rx={r * 0.25} {...common} />
+					))}
+					<rect x={thumb > 0 ? r * 0.25 : -r * 1.05} y={r * 0.55} width={r * 0.8} height={r * 0.42} rx={r * 0.21} {...common} />
+				</g>
+			);
+		}
+		return (
+			<g>
+				<rect x={-r * 0.42} y={-r * 0.2} width={r * 0.84} height={r * 0.7} rx={r * 0.3} {...common} />
+				{[-0.48, -0.16, 0.16, 0.48].map((k, i) => {
+					const len = [1.0, 1.2, 1.12, 0.88][thumb > 0 ? i : 3 - i];
+					return <rect key={k} x={k * r * 1.45 - r * 0.21} y={r * 0.9} width={r * 0.42} height={r * len} rx={r * 0.21} {...common} transform={`rotate(${-k * 10} ${k * r * 1.45} ${r})`} />;
+				})}
+				<rect x={-r * 0.8} y={r * 0.2} width={r * 1.6} height={r * 1.15} rx={r * 0.5} {...common} />
+				<rect x={-r * 0.2} y={r * 0.3} width={r * 0.42} height={r * 1.0} rx={r * 0.21} {...common} transform={`rotate(${thumb * -38} 0 ${r * 0.4}) translate(${thumb * r * 0.72},0)`} />
+			</g>
+		);
+	};
+	return (
+		<g>
+			{parts(line, line, r * 0.16)}
+			{parts(skin, 'none', 0)}
+			{!grip && (
+				<path d={`M ${-r * 0.3},${r * 1.1} l 0,${r * 0.2} M ${r * 0.02},${r * 1.12} l 0,${r * 0.22} M ${r * 0.33},${r * 1.1} l 0,${r * 0.2}`} stroke={line} strokeWidth={r * 0.07} strokeLinecap="round" opacity={0.6} />
+			)}
+		</g>
+	);
+};
+
 const Arm: React.FC<{
 	sx: number;
 	sy: number;
@@ -411,8 +451,11 @@ const Arm: React.FC<{
 	skin: string;
 	item?: React.ReactNode;
 	stripe?: string;
-}> = ({sx, sy, side, pose, sp, color, skin, item, stripe}) => {
-	const L2 = sp.fore + sp.hand * 0.6;
+	sil?: boolean;
+}> = ({sx, sy, side, pose, sp, color, skin, item, stripe, sil}) => {
+	const r = sp.hand * 0.95;
+	const gripY = sp.fore + r * 0.85;
+	const L2 = gripY;
 	const target = pose && 'target' in pose ? {target: [pose.target[0] - sx, pose.target[1] - sy] as [number, number], bend: pose.bend} : pose;
 	const {shoulder, elbow} = solveArm(target, sp.upper, L2, side);
 	const w = sp.armW;
@@ -420,10 +463,14 @@ const Arm: React.FC<{
 		<g transform={`translate(${sx},${sy}) rotate(${shoulder})`}>
 			<rect x={-w / 2} y={-w / 2} width={w} height={sp.upper + w / 2} rx={w / 2} fill={color} />
 			<g transform={`translate(0,${sp.upper}) rotate(${elbow})`}>
-				<rect x={-w / 2} y={-w / 2} width={w} height={sp.fore + w / 2 - 6} rx={w / 2.2} fill={color} />
-				{stripe && <rect x={-w / 2} y={sp.fore * 0.45} width={w} height={w * 0.28} fill={stripe} />}
-				<circle cx={0} cy={sp.fore + sp.hand * 0.4} r={sp.hand} fill={skin} stroke={skin === sp.skin ? 'rgba(140,70,40,0.45)' : 'none'} strokeWidth={3} />
-				{item && <g transform={`translate(0,${sp.fore + sp.hand * 0.4})`}>{item}</g>}
+				<circle cx={0} cy={0} r={w / 2} fill={color} />
+				<path d={`M ${-w / 2},0 L ${w / 2},0 L ${w * 0.42},${sp.fore - 4} L ${-w * 0.42},${sp.fore - 4} Z`} fill={color} />
+				{stripe && <rect x={-w * 0.47} y={sp.fore * 0.45} width={w * 0.94} height={w * 0.26} fill={stripe} />}
+				<g transform={`translate(0,${sp.fore - 10})`}>
+					<Hand r={r} skin={skin} grip={!!item} thumb={(-side) as -1 | 1} line={sil ? skin : undefined} />
+				</g>
+				{!sil && <rect x={-w * 0.5} y={sp.fore - 22} width={w} height={16} rx={6} fill="#000" opacity={0.18} />}
+				{item && <g transform={`translate(0,${gripY})`}>{item}</g>}
 			</g>
 		</g>
 	);
@@ -567,8 +614,8 @@ export const Person: React.FC<PersonProps> = (p) => {
 
 	const arms = (
 		<>
-			<Arm sx={-sw + sp.armW / 2 - 4} sy={shY + sp.armW / 2} side={-1} pose={p.armL} sp={sp} color={armColor} skin={skin} item={p.itemL} stripe={stripe} />
-			<Arm sx={sw - sp.armW / 2 + 4} sy={shY + sp.armW / 2} side={1} pose={p.armR} sp={sp} color={armColor} skin={skin} item={p.itemR} stripe={stripe} />
+			<Arm sx={-sw + sp.armW / 2 - 4} sy={shY + sp.armW / 2} side={-1} pose={p.armL} sp={sp} color={armColor} skin={skin} item={p.itemL} stripe={stripe} sil={!!sil} />
+			<Arm sx={sw - sp.armW / 2 + 4} sy={shY + sp.armW / 2} side={1} pose={p.armR} sp={sp} color={armColor} skin={skin} item={p.itemR} stripe={stripe} sil={!!sil} />
 		</>
 	);
 

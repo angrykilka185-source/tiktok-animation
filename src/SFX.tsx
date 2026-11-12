@@ -1,6 +1,7 @@
 import React from 'react';
 import {Audio, Sequence, staticFile} from 'remotion';
 import {SIGN_FLY, SIGNS, shotStart as s} from './timeline';
+import {HAS_VOICE, VOICE} from './voice';
 
 // Sound effects only: no music, no voice.
 type Cue = {at: number; file: string; vol?: number; len?: number};
@@ -69,11 +70,19 @@ const CUES: Cue[] = [
 	]),
 ];
 
+// with a voice-over the effects sit a bit lower in the mix
+const SFX_GAIN = HAS_VOICE ? 0.6 : 1;
+
 export const SFX: React.FC = () => (
 	<>
 		{CUES.map((c, i) => (
 			<Sequence key={i} from={c.at} durationInFrames={c.len ?? 200} name={`sfx ${c.file}`}>
-				<Audio src={staticFile(`sfx/${c.file}.wav`)} volume={c.vol ?? 1} />
+				<Audio src={staticFile(`sfx/${c.file}.wav`)} volume={(c.vol ?? 1) * SFX_GAIN} />
+			</Sequence>
+		))}
+		{VOICE.map((l) => (
+			<Sequence key={l.id} from={l.at} durationInFrames={Math.ceil(l.duration * 30) + 20} name={`voice ${l.id}`}>
+				<Audio src={staticFile(`voice/${l.id}.mp3`)} volume={l.whisper ? 0.8 : 1} />
 			</Sequence>
 		))}
 	</>

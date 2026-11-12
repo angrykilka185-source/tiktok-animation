@@ -180,7 +180,7 @@ export const S09: React.FC = () => {
 				breathe={f}
 				face={{eyes: 'open', mouth: f > 18 && f < 90 && f % 6 < 3 ? 'o' : 'tight', brows: 'worried', look: [0.9, 0.2], blink: blinkAt(f, 3)}}
 				armL={{target: [-40, -640]}}
-				armR={{target: [150, -840], bend: 1}}
+				armR={{target: [88, -842], bend: 1}}
 			/>
 			<Person
 				kind="son"

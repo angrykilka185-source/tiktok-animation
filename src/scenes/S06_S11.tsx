@@ -21,6 +21,7 @@ export const S06: React.FC = () => {
 				<Person
 					kind="dad"
 					id="s6dad"
+					hideLegs
 					x={800}
 					y={1400 + 470 - 30}
 					scale={1.0}
@@ -246,7 +247,7 @@ export const S11: React.FC = () => {
 	return (
 		<Stage cam={cam} light={{glow: 0, vignette: 0.9}} bg="#05070f">
 			<Kitchen id="s11" floorY={1300} clock={[3, 17]} tick={0} sky="url(#skyNight)" />
-			<Person kind="dad" id="s11dad" x={560} y={1400 + 470 - 30} scale={1.0} face={{eyes: 'stare', mouth: 'flat', stubble: true, pupil: 0.7, brows: 'flat', blush: false}} armL={{target: [-80, -430]}} armR={{target: [80, -430]}} />
+			<Person kind="dad" id="s11dad" hideLegs x={560} y={1400 + 470 - 30} scale={1.0} face={{eyes: 'stare', mouth: 'flat', stubble: true, pupil: 0.7, brows: 'flat', blush: false}} armL={{target: [-80, -430]}} armR={{target: [80, -430]}} />
 			<Table y={1400} />
 			<rect x={-1000} y={-1000} width={3200} height={4000} fill="#0a1433" style={{mixBlendMode: 'multiply'}} opacity={0.8} />
 			<path d="M 120,340 L 400,340 L 760,1400 L 260,1400 Z" fill="#9fb6ff" opacity={0.12} />

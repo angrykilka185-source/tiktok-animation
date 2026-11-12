@@ -2,7 +2,7 @@ import React from 'react';
 import {AbsoluteFill, Easing, interpolate, useCurrentFrame} from 'remotion';
 import {clamp, lerp, pop} from '../anim';
 import {Bubble, Cross, HEAVY} from '../components/Overlays';
-import {Bust, Person} from '../components/Person';
+import {Bust, Hand, Person} from '../components/Person';
 import {Fridge, PlankFloor, Wallpaper, WindowBox, Tiles} from '../components/Set';
 import {Cam, Stage} from '../components/Stage';
 
@@ -197,9 +197,21 @@ export const S15: React.FC = () => {
 				armL={{shoulder: walking ? Math.sin(f / 4) * 12 : 3, elbow: -3}}
 				armR={{shoulder: walking ? -Math.sin(f / 4) * 12 : -3, elbow: 3}}
 			/>
-			{/* son from behind, phone glowing in his hands */}
-			<Person kind="son" id="s15son" back x={220} y={2700} scale={1.9} armL={{shoulder: 3, elbow: 0}} armR={{shoulder: -3, elbow: 0}} />
-			<rect x={330} y={1440} width={90} height={60} fill="#bfe0ff" opacity={0.0} />
+			{/* foreground: the son's hand holding the glowing phone */}
+			<g transform={`translate(${250 + Math.sin(f / 9) * 4},${1560 + lerp(f, 60, 70, 0, -20)}) rotate(-12)`}>
+				<rect x={-170} y={60} width={150} height={700} rx={60} fill="#d8862a" />
+				<rect x={-150} y={-260} width={300} height={560} rx={44} fill="#15161a" />
+				<rect x={-134} y={-244} width={268} height={528} rx={34} fill="#e9e3da" />
+				<rect x={-134} y={-244} width={268} height={70} rx={20} fill="#f7f7f9" />
+				<rect x={-118} y={-130} width={220} height={120} rx={20} fill="#fff" />
+				<rect x={-104} y={-110} width={190} height={14} rx={7} fill="#c9c9cf" />
+				<rect x={-104} y={-84} width={150} height={14} rx={7} fill="#f2cc4a" />
+				<rect x={-104} y={-58} width={170} height={14} rx={7} fill="#c9c9cf" />
+				<g transform="translate(-160,40) rotate(-80) scale(2.4)">
+					<Hand r={24} skin="#f2c3a0" grip thumb={1} />
+				</g>
+				<rect x={-150} y={-260} width={300} height={560} rx={44} fill="#cfe6ff" opacity={0.08} />
+			</g>
 		</Stage>
 	);
 };

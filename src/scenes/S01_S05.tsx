@@ -234,6 +234,7 @@ export const S04: React.FC = () => {
 			<Person
 				kind="dad"
 				id="s4dad"
+				hideLegs
 				x={D.x}
 				y={D.y}
 				scale={D.s}

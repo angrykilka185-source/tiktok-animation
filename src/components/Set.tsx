@@ -306,19 +306,39 @@ export const BorschtBowl: React.FC<{steam?: number; scale?: number}> = ({steam =
 	</g>
 );
 
-export const Table: React.FC<{y: number; x?: number; w?: number; h?: number}> = ({y, x = -100, w = 1300, h = 900}) => (
-	<g>
-		<rect x={x} y={y} width={w} height={34} fill="#f1ece2" />
-		<rect x={x} y={y + 30} width={w} height={h} fill="#e7553f" />
-		{Array.from({length: Math.ceil(w / 70)}).map((_, i) => (
-			<rect key={'c' + i} x={x + i * 70} y={y + 30} width={35} height={h} fill="#f4efe6" opacity={0.55} />
-		))}
-		{Array.from({length: Math.ceil(h / 70)}).map((_, i) => (
-			<rect key={'r' + i} x={x} y={y + 30 + i * 70} width={w} height={35} fill="#f4efe6" opacity={0.45} />
-		))}
-		<rect x={x} y={y + 30} width={w} height={26} fill="#000" opacity={0.12} />
-	</g>
-);
+// Kitchen table: tablecloth top + short hanging front, dark space and legs below.
+export const Table: React.FC<{y: number; x?: number; w?: number; h?: number}> = ({y, x = -100, w = 1300}) => {
+	const top = 90; // visible tabletop depth
+	const drop = 220; // hanging cloth
+	const legH = 520;
+	const check = (y0: number, hh: number, key: string, op = 1) => (
+		<g opacity={op}>
+			<rect x={x} y={y0} width={w} height={hh} fill="#e7553f" />
+			{Array.from({length: Math.ceil(w / 70)}).map((_, i) => (
+				<rect key={key + 'c' + i} x={x + i * 70} y={y0} width={35} height={hh} fill="#f4efe6" opacity={0.55} />
+			))}
+			{Array.from({length: Math.ceil(hh / 35)}).map((_, i) => (
+				<rect key={key + 'r' + i} x={x} y={y0 + i * 70} width={w} height={35 * Math.min(1, (hh - i * 70) / 35)} fill="#f4efe6" opacity={0.45} />
+			))}
+		</g>
+	);
+	return (
+		<g>
+			{/* space under the table */}
+			<rect x={x + 30} y={y + top + drop - 10} width={w - 60} height={legH} fill="#2a1a10" opacity={0.55} />
+			{[x + 60, x + w - 110].map((lx) => (
+				<rect key={lx} x={lx} y={y + top + drop - 10} width={50} height={legH} fill="#7a4a2c" />
+			))}
+			{/* tabletop (seen from slightly above, squashed checks) */}
+			<g transform={`translate(0,${y}) scale(1,0.5) translate(0,${-y})`}>{check(y, top * 2, 't')}</g>
+			<rect x={x} y={y} width={w} height={6} fill="#fff" opacity={0.5} />
+			{/* hanging front */}
+			{check(y + top, drop, 'f')}
+			<rect x={x} y={y + top} width={w} height={22} fill="#000" opacity={0.14} />
+			<path d={`M ${x},${y + top + drop} ${Array.from({length: Math.ceil(w / 60)}).map((_, i) => `q 30,22 60,0`).join(' ')} L ${x + w},${y + top + drop - 4} L ${x},${y + top + drop - 4} Z`} fill="#e7553f" />
+		</g>
+	);
+};
 
 export const Fridge: React.FC<{x: number; y: number; h?: number}> = ({x, y, h = 760}) => (
 	<g>

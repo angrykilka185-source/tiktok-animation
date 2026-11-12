@@ -24,11 +24,12 @@ import numpy as np
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 FPS = 30
-PART = int(sys.argv[sys.argv.index('--part') + 1]) if '--part' in sys.argv else 1
+PART = sys.argv[sys.argv.index('--part') + 1] if '--part' in sys.argv else '1'
 PATHS = {
-    1: {'lines': 'src/voice-lines.json', 'timeline': 'src/timeline.ts', 'out': 'public/voice', 'timings': 'src/voice-timings.json', 'edit': 'src/edit.json'},
-    2: {'lines': 'src/p2/voice-lines.json', 'timeline': 'src/p2/timeline.ts', 'out': 'public/voice2', 'timings': 'src/p2/voice-timings.json', 'edit': 'src/p2/edit.json'},
-    3: {'lines': 'src/p3/voice-lines.json', 'timeline': 'src/p3/timeline.ts', 'out': 'public/voice3', 'timings': 'src/p3/voice-timings.json', 'edit': 'src/p3/edit.json'},
+    '1': {'lines': 'src/voice-lines.json', 'timeline': 'src/timeline.ts', 'out': 'public/voice', 'timings': 'src/voice-timings.json', 'edit': 'src/edit.json'},
+    '2': {'lines': 'src/p2/voice-lines.json', 'timeline': 'src/p2/timeline.ts', 'out': 'public/voice2', 'timings': 'src/p2/voice-timings.json', 'edit': 'src/p2/edit.json'},
+    '3': {'lines': 'src/p3/voice-lines.json', 'timeline': 'src/p3/timeline.ts', 'out': 'public/voice3', 'timings': 'src/p3/voice-timings.json', 'edit': 'src/p3/edit.json'},
+    'g1': {'lines': 'src/g1/voice-lines.json', 'timeline': 'src/g1/timeline.ts', 'out': 'public/voice-g1', 'timings': 'src/g1/voice-timings.json', 'edit': 'src/g1/edit.json'},
 }[PART]
 SHOT = [float(x) for x in re.search(r'SHOT_SECONDS = \[([^\]]+)\]', open(os.path.join(ROOT, PATHS['timeline']), encoding='utf-8').read()).group(1).split(',')]
 TOTAL = round(sum(SHOT) * FPS)
@@ -99,7 +100,11 @@ def main(src):
     gaps = [segs[k + 1][0] - segs[k][1] for k in range(len(segs) - 1)]
 
     # --- match phrases to lines -------------------------------------------------
-    C = [len(re.sub(r'[^\w]', '', tts_text(l['text']))) for l in lines]
+    # expected length in letters; a digit is spoken as a whole word ("23" -> "двадцать три")
+    def spoken_len(t):
+        t = tts_text(t)
+        return len(re.sub(r'[^\w]|\d', '', t)) + 4 * len(re.findall(r'\d', t))
+    C = [spoken_len(l['text']) for l in lines]
     n, m = len(segs), len(lines)
     rate = sum(e - s for s, e in segs) / sum(C)
     INF = 1e18
@@ -308,6 +313,10 @@ def main(src):
         ww.writeframes(np.clip(cl['pcm'], -32768, 32767).astype(np.int16).tobytes())
         ww.close()
         af = [f'volume={gain_db + cl["gain"]:.2f}dB', 'alimiter=limit=0.95']
+        if l.get('phone'):
+            # sounds like a voice message played from a phone speaker
+            af = ['highpass=f=330', 'lowpass=f=3300', 'acompressor=threshold=0.1:ratio=5:attack=4:release=80',
+                  'acrusher=bits=11:mix=0.25', f'volume={gain_db + cl["gain"] + 6:.2f}dB', 'alimiter=limit=0.95']
         if tempo > 1.001:
             af.insert(0, f'atempo={tempo:.4f}')
         filt = ['-filter:a', ','.join(af)]

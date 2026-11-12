@@ -75,3 +75,16 @@ npx remotion render PapaVakhta3 out/papa-vakhta-3.mp4
 ```
 
 Во всех частях картинка подстраивается под голос (`src/*/edit.json`): кадр заканчивается, как только закончилась его фраза.
+
+## Новый сериал «Голосовые из завтра», серия 1 «Не садись в лифт»
+
+Код: `src/g1/` (тайминг, текст озвучки, сцены, звуки). Сверху вместо «Он или не он?» счётчик
+«СБЫЛОСЬ: n/7» с галочками, таблички «СБЫЛОСЬ №n». Реплики с `"phone": true` в `voice-lines.json`
+скрипт обрабатывает как голосовое из телефона (узкая полоса частот, лёгкий «цифровой» хруст),
+а волна в пузыре голосового двигается по громкости этих реплик (`src/g1/env.json`).
+
+```bash
+python3 scripts/fit-voiceover.py assets/golosovye-1.mp3 --part g1
+npx remotion render Golosovye1 out/golosovye-1.mp4
+ffmpeg -i out/golosovye-1.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k deliverables/golosovye-1-s-ozvuchkoy.mp4
+```

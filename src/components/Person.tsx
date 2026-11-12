@@ -32,9 +32,12 @@ export type ArmPose =
 
 export type Kind = 'dad' | 'mom' | 'son';
 
+export type Colors = Partial<Pick<Spec, 'top' | 'topDark' | 'pants' | 'shoes' | 'hair' | 'skin'>>;
+
 export type PersonProps = {
 	kind: Kind;
 	id: string;
+	colors?: Colors; // outfit / hair overrides (neighbours, extras)
 	x?: number;
 	y?: number;
 	scale?: number;
@@ -127,8 +130,9 @@ export const Head: React.FC<{
 	turn?: number;
 	silhouette?: string;
 	uid?: string;
-}> = ({kind, face = {}, back, turn = 0, silhouette, uid = 'h'}) => {
-	const sp = SPECS[kind];
+	colors?: Colors;
+}> = ({kind, face = {}, back, turn = 0, silhouette, uid = 'h', colors}) => {
+	const sp = {...SPECS[kind], ...(colors ?? {})};
 	const {hw, hh} = sp;
 	const skin = silhouette ?? sp.skin;
 	const hair = silhouette ?? sp.hair;
@@ -449,7 +453,7 @@ const Arm: React.FC<{
 
 // ---------------------------------------------------------------------------
 export const Person: React.FC<PersonProps> = (p) => {
-	const sp = SPECS[p.kind];
+	const sp = {...SPECS[p.kind], ...(p.colors ?? {})};
 	const sil = p.silhouette;
 	const top = sil ?? sp.top;
 	const topDark = sil ?? sp.topDark;
@@ -592,7 +596,7 @@ export const Person: React.FC<PersonProps> = (p) => {
 
 	const head = (
 		<g transform={`translate(0,${headCY}) rotate(${p.headTilt ?? 0})`}>
-			<Head kind={p.kind} face={p.face} back={p.back} turn={p.headTurn} silhouette={sil} uid={p.id} />
+			<Head kind={p.kind} face={p.face} back={p.back} turn={p.headTurn} silhouette={sil} uid={p.id} colors={p.colors} />
 		</g>
 	);
 
@@ -619,7 +623,7 @@ export const Person: React.FC<PersonProps> = (p) => {
 };
 
 // Head-and-shoulders bust for close-ups (head centred at 0,0).
-export const Bust: React.FC<{kind: Kind; id: string; face?: Face; x?: number; y?: number; scale?: number; tilt?: number; turn?: number}> = ({
+export const Bust: React.FC<{kind: Kind; id: string; face?: Face; x?: number; y?: number; scale?: number; tilt?: number; turn?: number; colors?: Colors}> = ({
 	kind,
 	id,
 	face,
@@ -628,8 +632,9 @@ export const Bust: React.FC<{kind: Kind; id: string; face?: Face; x?: number; y?
 	scale = 1,
 	tilt = 0,
 	turn = 0,
+	colors,
 }) => {
-	const sp = SPECS[kind];
+	const sp = {...SPECS[kind], ...(colors ?? {})};
 	const neckTop = sp.hh * 0.85;
 	const shY = neckTop + sp.neck - 10;
 	const sw = sp.shoulderW / 2 + 40;
@@ -654,7 +659,7 @@ export const Bust: React.FC<{kind: Kind; id: string; face?: Face; x?: number; y?
 					)}
 					{kind === 'mom' && <path d={`M -48,${shY} Q 0,${shY + 60} 48,${shY}`} fill={sp.skin} />}
 					<g transform={`rotate(${tilt})`}>
-						<Head kind={kind} face={face} turn={turn} uid={id} />
+						<Head kind={kind} face={face} turn={turn} uid={id} colors={colors} />
 					</g>
 				</g>
 			</Shaded>

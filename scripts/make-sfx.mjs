@@ -628,3 +628,93 @@ write('ringtone_door', room(lowpass(lowpass(ringtone(), 700), 900), 0.5, 1.6), 0
 	add(x, ping([470, 940], 0.35, 0.18), 0.27, 1);
 	write('decline', x, 0.55);
 }
+
+// ---------- «Голосовые из завтра» ----------
+// lift arrival chime
+write('lift_ding', room(add(ping([1318.5, 2637], 1.2, 0.35), ping([1046.5, 2093], 1.0, 0.3), 0.18, 0.9), 0.3), 0.6);
+// lift doors sliding (motor hum + rumble)
+{
+	const dur = 1.4;
+	const x = buf(dur);
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		const env = Math.sin((Math.PI * t) / dur) ** 0.7;
+		x[i] = (Math.sin(2 * Math.PI * 95 * t) * 0.3 + noise() * 0.5) * env;
+	}
+	const y = add(lowpass(x, 900), click(0.03, 1500, 4), 1.25, 0.6);
+	write('lift_doors', room(y, 0.25), 0.6);
+}
+// alarm bell in the lift
+{
+	const dur = 2.4;
+	const x = buf(dur);
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		const gate = Math.sin(2 * Math.PI * 22 * t) > 0 ? 1 : 0.2;
+		x[i] = (Math.sin(2 * Math.PI * 1150 * t) + 0.6 * Math.sin(2 * Math.PI * 2310 * t)) * gate * Math.min(1, t / 0.02) * Math.min(1, (dur - t) / 0.1);
+	}
+	write('alarm', room(x, 0.35, 1.4), 0.45);
+}
+// digital glitch (message disappearing)
+{
+	const dur = 0.7;
+	const x = buf(dur);
+	let hold = 0;
+	for (let i = 0; i < x.length; i++) {
+		if (i % 600 === 0) hold = rnd() < 0.5 ? noise() : 0;
+		x[i] = (hold * 0.8 + Math.sign(Math.sin(2 * Math.PI * (300 + 2000 * rnd()) * i / SR)) * 0.15) * (rnd() < 0.7 ? 1 : 0);
+	}
+	write('glitch', bandpass(x, 200, 7000), 0.6);
+}
+// small dog barking (two yaps)
+{
+	const x = buf(0.8);
+	const yap = (at, f0) => {
+		const dur = 0.13;
+		const y = buf(dur);
+		let ph = 0;
+		for (let i = 0; i < y.length; i++) {
+			const t = i / SR;
+			ph += (2 * Math.PI * f0 * (1.15 - (0.45 * t) / dur)) / SR;
+			const e = Math.min(1, t / 0.008) * Math.exp(-t / 0.06);
+			let s = 0;
+			for (let h = 1; h <= 8; h++) s += Math.sin(ph * h) / h;
+			y[i] = (s * 0.8 + noise() * 0.35) * e;
+		}
+		add(x, reso(y, 1400, 2.5), at, 1);
+	};
+	yap(0, 620);
+	yap(0.24, 560);
+	write('bark', room(x, 0.25, 0.8), 0.7);
+}
+// lift crash: metal bang + rattle
+{
+	const x = buf(1.6);
+	add(x, thump(55, 0.6, 0.18, 0.6), 0, 1);
+	const m = buf(1.4);
+	for (let i = 0; i < m.length; i++) {
+		const t = i / SR;
+		const e = Math.exp(-t / 0.35);
+		m[i] =
+			(Math.sin(2 * Math.PI * 347 * t) + 0.8 * Math.sin(2 * Math.PI * 523 * t) + 0.6 * Math.sin(2 * Math.PI * 811 * t) + 0.4 * Math.sin(2 * Math.PI * 1290 * t)) * e * 0.4 +
+			noise() * Math.exp(-t / 0.05) * 0.8;
+	}
+	add(x, m, 0, 0.8);
+	for (let k = 0; k < 6; k++) add(x, click(0.03, 900 + 400 * k, 3), 0.15 + k * 0.09 + rnd() * 0.04, 0.5 * (1 - k / 7));
+	write('crash', room(lowpass(x, 6000), 0.3, 1.3), 0.95);
+}
+// ball bouncing on a gym floor (3 bounces)
+{
+	const x = buf(1.6);
+	[0, 0.55, 0.95].forEach((at, k) => {
+		add(x, thump(120, 0.25, 0.05, 0.4), at, 1 - k * 0.25);
+		add(x, ping([340, 680], 0.2, 0.05, 0.4), at, 0.5 - k * 0.12);
+	});
+	write('ball', room(x, 0.35, 1.5), 0.8);
+}
+// phone keyboard taps
+{
+	const x = buf(0.8);
+	for (let k = 0; k < 7; k++) add(x, click(0.012, 2400 + rnd() * 800, 2), k * 0.09 + rnd() * 0.02, 0.5);
+	write('typing', x, 0.35);
+}

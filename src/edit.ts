@@ -35,6 +35,7 @@ export const Retimed: React.FC<{r: Remap; newFrom: number; oldFrom: number; oldD
 };
 
 export const remapEpisode = (ep: Episode, r: Remap): Episode => ({
+	...ep,
 	clock: ep.clock.map((c) => ({...c, from: Math.round(r.fwd(c.from))})),
 	signs: ep.signs.map((s) => {
 		const at = Math.round(r.fwd(s.at));

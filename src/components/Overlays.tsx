@@ -16,6 +16,10 @@ export type Episode = {
 	hideFrom: number; // frame when the HUD fades out (end card)
 	night: [number, number][]; // frame ranges with the night colour on the clock
 	prefilled?: number; // boxes already filled at the start (signs from earlier parts)
+	counterTitle?: string; // default «ОН ИЛИ НЕ ОН?»
+	mark?: 'cross' | 'check'; // what a filled box shows
+	accent?: string; // colour of the counter frame / filled boxes
+	plaqueLabel?: string; // default «ПРИЗНАК»
 };
 
 // ------------------------------- HUD ---------------------------------------
@@ -88,7 +92,7 @@ export const HUD: React.FC<{ep: Episode}> = ({ep}) => {
 						width: g.boxW,
 						transform: `translateX(${(1 - cIn) * 460}px)`,
 						background: 'rgba(14,14,16,0.9)',
-						border: '4px solid #e0342b',
+						border: `4px solid ${ep.accent ?? '#e0342b'}`,
 						borderRadius: 14,
 						padding: '10px 18px 14px',
 						boxShadow: '0 6px 18px rgba(0,0,0,0.35)',
@@ -96,7 +100,7 @@ export const HUD: React.FC<{ep: Episode}> = ({ep}) => {
 					}}
 				>
 					<div style={{display: 'flex', justifyContent: 'space-between', fontFamily: HEAVY, fontWeight: 900, fontSize: 30, letterSpacing: 1}}>
-						<span style={{color: '#ff4a3d'}}>ОН ИЛИ НЕ ОН?</span>
+						<span style={{color: ep.accent ?? '#ff4a3d'}}>{ep.counterTitle ?? 'ОН ИЛИ НЕ ОН?'}</span>
 						<span style={{color: '#f4efe6'}}>
 							{done}/{ep.slots}
 						</span>
@@ -114,8 +118,8 @@ export const HUD: React.FC<{ep: Episode}> = ({ep}) => {
 										width: g.w,
 										height: 40,
 										borderRadius: 8,
-										background: filled ? '#e0342b' : 'rgba(255,255,255,0.08)',
-										border: '3px solid ' + (filled ? '#ff6b5f' : 'rgba(255,255,255,0.18)'),
+										background: filled ? ep.accent ?? '#e0342b' : 'rgba(255,255,255,0.08)',
+										border: '3px solid ' + (filled ? '#ffffff88' : 'rgba(255,255,255,0.18)'),
 										display: 'flex',
 										alignItems: 'center',
 										justifyContent: 'center',
@@ -123,7 +127,7 @@ export const HUD: React.FC<{ep: Episode}> = ({ep}) => {
 										boxSizing: 'border-box',
 									}}
 								>
-									{filled && <Cross size={g.w > 40 ? 24 : 20} />}
+									{filled && (ep.mark === 'check' ? <Check size={g.w > 40 ? 24 : 20} /> : <Cross size={g.w > 40 ? 24 : 20} />)}
 								</div>
 							);
 						})}
@@ -133,6 +137,12 @@ export const HUD: React.FC<{ep: Episode}> = ({ep}) => {
 		</div>
 	);
 };
+
+const Check: React.FC<{size: number; color?: string}> = ({size, color = '#111'}) => (
+	<svg width={size} height={size} viewBox="0 0 24 24">
+		<path d="M 4,13 L 10,19 L 20,5" stroke={color} strokeWidth={4.5} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+	</svg>
+);
 
 const Cross: React.FC<{size: number; color?: string; width?: number}> = ({size, color = '#fff', width = 5}) => (
 	<svg width={size} height={size} viewBox="0 0 24 24">
@@ -187,7 +197,7 @@ export const SignPlaques: React.FC<{ep: Episode}> = ({ep}) => {
 								marginRight: 120,
 							}}
 						>
-							ПРИЗНАК №{s.n}
+							{ep.plaqueLabel ?? 'ПРИЗНАК'} №{s.n}
 						</div>
 						<div
 							style={{
@@ -213,7 +223,7 @@ export const SignPlaques: React.FC<{ep: Episode}> = ({ep}) => {
 								width: 112,
 								height: 112,
 								borderRadius: 56,
-								background: '#e8392f',
+								background: ep.accent ?? '#e8392f',
 								border: '6px solid #fff',
 								display: 'flex',
 								alignItems: 'center',
@@ -222,7 +232,7 @@ export const SignPlaques: React.FC<{ep: Episode}> = ({ep}) => {
 								boxSizing: 'border-box',
 							}}
 						>
-							<Cross size={54} width={5.5} />
+							{ep.mark === 'check' ? <Check size={54} /> : <Cross size={54} width={5.5} />}
 						</div>
 					</div>
 				);

@@ -22,12 +22,12 @@ export const shotStart = (n: number) => SHOTS[n - 1].from;
 // ---- signs ("признаки") ----
 export type Sign = {n: number; title: string; at: number; hold: number};
 export const SIGNS: Sign[] = [
-	{n: 1, title: 'НЕ НАЗВАЛ\nТИГРЁНКОМ', at: shotStart(3) + 112, hold: 60},
-	{n: 2, title: 'ОТКАЗАЛСЯ\nОТ БОРЩА', at: shotStart(4) + 140, hold: 46},
-	{n: 3, title: 'ЛЕВША\nСТАЛ ПРАВШОЙ', at: shotStart(5) + 84, hold: 50},
-	{n: 4, title: 'НЕ ЗНАЕТ\nПРО РЕМОНТ', at: shotStart(7) + 120, hold: 50},
-	{n: 5, title: 'НЕТ ШРАМА\nНА РУКЕ', at: shotStart(8) + 62, hold: 44},
-	{n: 6, title: 'НАСТОЯЩИЙ ПАПА\nЕЩЁ НА ВАХТЕ', at: shotStart(13) + 126, hold: 60},
+	{n: 1, title: 'НЕ НАЗВАЛ\nТИГРЁНКОМ', at: shotStart(3) + 112, hold: 50},
+	{n: 2, title: 'ОТКАЗАЛСЯ\nОТ БОРЩА', at: shotStart(4) + 150, hold: 40},
+	{n: 3, title: 'ЛЕВША\nСТАЛ ПРАВШОЙ', at: shotStart(5) + 100, hold: 36},
+	{n: 4, title: 'НЕ ЗНАЕТ\nПРО РЕМОНТ', at: shotStart(7) + 150, hold: 40},
+	{n: 5, title: 'НЕТ ШРАМА\nНА РУКЕ', at: shotStart(8) + 70, hold: 36},
+	{n: 6, title: 'НАСТОЯЩИЙ ПАПА\nЕЩЁ НА ВАХТЕ', at: shotStart(13) + 118, hold: 46},
 ];
 export const SIGN_FLY = 14; // frames for the plaque to fly into the counter
 

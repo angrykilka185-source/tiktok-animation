@@ -60,7 +60,7 @@ const tokens = (text: string) => {
 	return out;
 };
 
-const CHARS_PER_SEC = 14;
+const CHARS_PER_SEC = 15;
 
 export const VOICE: VoiceLine[] = (cfg.lines as {id: string; shot: number; offset: number; text: string; nocap?: boolean; whisper?: boolean}[]).map((l) => {
 	const at = shotStart(l.shot) + l.offset;

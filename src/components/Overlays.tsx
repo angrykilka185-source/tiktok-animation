@@ -28,7 +28,7 @@ export const HUD: React.FC = () => {
 	const done = signsDone(f);
 	const night = f >= shotStart(10) && f < shotStart(12);
 	const hudIn = pop(f, 8, 13);
-	const hudOut = interpolate(f, [shotStart(16) + 244, shotStart(16) + 252], [1, 0], clamp);
+	const hudOut = interpolate(f, [shotStart(16) + 248, shotStart(16) + 256], [1, 0], clamp);
 
 	return (
 		<div style={{position: 'absolute', inset: 0, pointerEvents: 'none', opacity: hudOut}}>

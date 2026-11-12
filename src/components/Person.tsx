@@ -403,49 +403,11 @@ export const Shaded: React.FC<{id: string; x0?: number; enabled?: boolean; opaci
 };
 
 // ---------------------------------------------------------------------------
-// Simple flat "mitten" hand like in the reference style.
-// Local coords: wrist at (0,0), fingers point to +y. thumb = side of the thumb.
-// grip = closed fist around an object.
-export const Hand: React.FC<{r: number; skin: string; grip?: boolean; thumb?: -1 | 1; line?: string}> = ({
-	r,
-	skin,
-	grip,
-	thumb = 1,
-	line = 'rgba(120,60,35,0.5)',
-}) => {
-	const t = thumb;
-	const parts = (fill: string, stroke: string, sw: number) => {
-		const c = {fill, stroke, strokeWidth: sw, strokeLinejoin: 'round' as const};
-		if (grip) {
-			return (
-				<g>
-					<rect x={-r * 0.82} y={r * 0.05} width={r * 1.64} height={r * 1.5} rx={r * 0.62} {...c} />
-					<rect x={t > 0 ? -r * 0.25 : -r * 0.95} y={r * 0.5} width={r * 1.2} height={r * 0.46} rx={r * 0.23} {...c} />
-				</g>
-			);
-		}
-		return (
-			<g>
-				<path
-					d={`M ${-r * 0.5},0 C ${-r * 0.88},${r * 0.45} ${-r * 0.92},${r * 1.45} ${-r * 0.42},${r * 1.82} C ${-r * 0.1},${r * 2.05} ${r * 0.42},${r * 1.98} ${r * 0.68},${r * 1.55} C ${r * 0.88},${r * 1.15} ${r * 0.8},${r * 0.45} ${r * 0.5},0 Z`}
-					{...c}
-				/>
-				<ellipse cx={t * r * 0.72} cy={r * 0.78} rx={r * 0.26} ry={r * 0.52} transform={`rotate(${-t * 28} ${t * r * 0.72} ${r * 0.78})`} {...c} />
-			</g>
-		);
-	};
-	return (
-		<g>
-			{parts(line, line, r * 0.14)}
-			{parts(skin, 'none', 0)}
-			{grip ? (
-				<path d={`M ${-r * 0.5},${r * 1.3} l ${r * 1.0},0`} stroke={line} strokeWidth={r * 0.08} strokeLinecap="round" opacity={0.5} />
-			) : (
-				<path d={`M ${-r * 0.18},${r * 1.42} l ${r * 0.02},${r * 0.36} M ${r * 0.2},${r * 1.38} l ${r * 0.02},${r * 0.34}`} stroke={line} strokeWidth={r * 0.07} strokeLinecap="round" opacity={0.45} />
-			)}
-		</g>
-	);
-};
+// Hand in the reference style: a plain skin-coloured oval, no fingers, no outline.
+// Local coords: wrist at (0,0), the hand extends to +y.
+export const Hand: React.FC<{r: number; skin: string; grip?: boolean; thumb?: -1 | 1; line?: string}> = ({r, skin}) => (
+	<ellipse cx={0} cy={r * 0.95} rx={r * 0.98} ry={r * 1.1} fill={skin} />
+);
 
 const Arm: React.FC<{
 	sx: number;
@@ -459,12 +421,12 @@ const Arm: React.FC<{
 	stripe?: string;
 	sil?: boolean;
 }> = ({sx, sy, side, pose, sp, color, skin, item, stripe, sil}) => {
-	const r = sp.hand * 0.95;
+	const r = sp.armW * 0.56;
 	const ku = pose?.ku ?? 1;
 	const kf = pose?.kf ?? 1;
 	const upper = sp.upper * ku;
 	const fore = sp.fore * kf;
-	const gripY = fore + r * 0.85;
+	const gripY = fore + r * 0.8;
 	const target =
 		pose && 'target' in pose ? {target: [pose.target[0] - sx, pose.target[1] - sy] as [number, number], bend: pose.bend} : pose;
 	const {shoulder, elbow} = solveArm(target, upper, gripY, side);
@@ -476,11 +438,10 @@ const Arm: React.FC<{
 				<circle cx={0} cy={0} r={w / 2} fill={color} />
 				<path d={`M ${-w / 2},0 L ${w / 2},0 L ${w * 0.44},${Math.max(4, fore - 4)} L ${-w * 0.44},${Math.max(4, fore - 4)} Z`} fill={color} />
 				{stripe && kf > 0.6 && <rect x={-w * 0.47} y={fore * 0.45} width={w * 0.94} height={w * 0.26} fill={stripe} />}
-				<g transform={`translate(0,${fore - 8})`}>
-					<Hand r={r} skin={skin} grip={!!item} thumb={(-side) as -1 | 1} line={sil ? skin : undefined} />
-				</g>
-				{!sil && <rect x={-w * 0.48} y={fore - 18} width={w * 0.96} height={12} rx={6} fill="#000" opacity={0.16} />}
 				{item && <g transform={`translate(0,${gripY})`}>{item}</g>}
+				<g transform={`translate(0,${fore - 10})`}>
+					<Hand r={r} skin={skin} />
+				</g>
 			</g>
 		</g>
 	);

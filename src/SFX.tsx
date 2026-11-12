@@ -5,76 +5,88 @@ import {HAS_VOICE, VOICE} from './voice';
 
 // Sound design: effects + a quiet low tension bed (no music), plus the narrator.
 type Cue = {at: number; file: string; vol?: number; len?: number};
+const W = (shot: number, ...offs: number[]): Cue[] => offs.map((o) => ({at: s(shot) + o, file: 'whoosh', vol: 0.32}));
 const CUES: Cue[] = [
-	// 1 hallway
-	{at: s(1) + 4, file: 'keys', vol: 0.8},
-	{at: s(1) + 36, file: 'lock'},
-	{at: s(1) + 42, file: 'creak', vol: 0.8},
-	{at: s(1) + 86, file: 'pop', vol: 0.35},
+	// 1 hallway → lock → door → close-up
+	{at: s(1) + 72, file: 'keys', vol: 0.8},
+	{at: s(1) + 102, file: 'lock'},
+	{at: s(1) + 116, file: 'creak', vol: 0.8},
+	{at: s(1) + 134, file: 'pop', vol: 0.35},
+	...W(1, 70, 120, 156),
 	// 2 mom
-	{at: s(2) + 4, file: 'pop', vol: 0.3},
-	{at: s(2) + 14, file: 'gasp', vol: 0.8},
-	{at: s(2) + 26, file: 'cloth', vol: 0.8},
-	// 3 hand on head, close-ups
+	{at: s(2) + 4, file: 'gasp', vol: 0.8},
+	{at: s(2) + 28, file: 'cloth', vol: 0.8},
+	...W(2, 38),
+	// 3 pat on the head, close-ups
 	{at: s(3), file: 'steps', vol: 0.8},
-	{at: s(3) + 52, file: 'pat', vol: 0.9},
-	{at: s(3) + 58, file: 'whoosh', vol: 0.4},
-	{at: s(3) + 92, file: 'whoosh', vol: 0.4},
+	{at: s(3) + 40, file: 'pat', vol: 0.9},
+	...W(3, 46, 86),
 	// 4 kitchen
-	{at: s(4) + 48, file: 'plate', vol: 0.8},
-	{at: s(4) + 104, file: 'plate', vol: 0.35},
+	{at: s(4) + 40, file: 'plate', vol: 0.8},
+	{at: s(4) + 98, file: 'plate', vol: 0.35},
 	{at: s(4) + 140, file: 'gulp', vol: 0.9},
+	...W(4, 90, 125),
 	// 5 fork
-	{at: s(5) + 11, file: 'fork', vol: 0.9},
-	{at: s(5) + 48, file: 'whoosh', vol: 0.6},
-	// 6 eyes
-	{at: s(6), file: 'tick', vol: 0.6, len: 180},
-	{at: s(6) + 84, file: 'heart', vol: 0.8, len: 96},
+	{at: s(5) + 10, file: 'fork', vol: 0.9},
+	...W(5, 58),
+	// 6 photo → face → eyes
+	{at: s(6), file: 'tick', vol: 0.5, len: 180},
+	{at: s(6) + 72, file: 'heart', vol: 0.8, len: 108},
+	...W(6, 36, 72),
 	// 7 wall
 	{at: s(7), file: 'steps', vol: 0.8},
-	{at: s(7) + 72, file: 'bump', vol: 1},
+	{at: s(7) + 82, file: 'bump', vol: 1},
+	...W(7, 92, 140),
 	// 8 scar
-	{at: s(8), file: 'whoosh', vol: 0.6},
+	...W(8, 0, 58),
 	// 9 whisper + tap water
-	{at: s(9), file: 'water', vol: 0.4, len: 150},
+	{at: s(9), file: 'water', vol: 0.35, len: 150},
+	...W(9, 70),
 	// 10 night
-	{at: s(10), file: 'breath', vol: 0.6, len: 180},
-	{at: s(10) + 12, file: 'floorcreak', vol: 0.8},
-	{at: s(10) + 120, file: 'floorcreak', vol: 0.6},
+	{at: s(10), file: 'breath', vol: 0.5, len: 180},
+	{at: s(10) + 6, file: 'floorcreak', vol: 0.8},
+	{at: s(10) + 100, file: 'floorcreak', vol: 0.6},
+	...W(10, 84),
 	// 11 dark kitchen
-	{at: s(11), file: 'fridge', vol: 0.55, len: 180},
-	{at: s(11), file: 'tick', vol: 0.5, len: 180},
+	{at: s(11), file: 'fridge', vol: 0.5, len: 180},
+	{at: s(11), file: 'tick', vol: 0.45, len: 180},
+	{at: s(11) + 80, file: 'pop', vol: 0.4},
+	...W(11, 62),
 	// 12 phone
 	{at: s(12), file: 'vibrate', vol: 0.9, len: 120},
+	...W(12, 70),
 	// 13 message
-	{at: s(13) + 34, file: 'message', vol: 0.8},
+	{at: s(13) + 30, file: 'message', vol: 0.8},
+	...W(13, 90),
 	// 14 face
-	{at: s(14) + 16, file: 'heart_big', vol: 1},
-	{at: s(14) + 60, file: 'heart', vol: 0.7, len: 90},
+	{at: s(14) + 8, file: 'heart_big', vol: 1},
+	{at: s(14) + 88, file: 'heart', vol: 0.7, len: 62},
+	...W(14, 88),
 	// 15 he enters
 	{at: s(15) + 2, file: 'steps_slow', vol: 0.8},
-	{at: s(15) + 48, file: 'floorcreak', vol: 0.8},
-	{at: s(15) + 160, file: 'swell', vol: 0.8},
+	{at: s(15) + 50, file: 'floorcreak', vol: 0.8},
+	{at: s(15) + 150, file: 'swell', vol: 0.8},
+	...W(15, 92),
 	// 16 finale
 	{at: s(16), file: 'boom', vol: 1},
-	{at: s(16) + 50, file: 'pop', vol: 0.5},
-	{at: s(16) + 66, file: 'pop', vol: 0.5},
-	{at: s(16) + 120, file: 'beep', vol: 0.8},
+	{at: s(16) + 8, file: 'pop', vol: 0.5},
+	{at: s(16) + 40, file: 'pop', vol: 0.5},
 	{at: s(16) + 150, file: 'beep', vol: 0.8},
 	{at: s(16) + 180, file: 'beep', vol: 0.8},
-	{at: s(16) + 210, file: 'beep_final', vol: 0.9},
-	{at: s(16) + 248, file: 'whoosh', vol: 0.7},
+	{at: s(16) + 210, file: 'beep', vol: 0.8},
+	{at: s(16) + 236, file: 'beep_final', vol: 0.9},
+	{at: s(16) + 252, file: 'whoosh', vol: 0.7},
 	// sign plaques: stamp on appear, whoosh + pop when they land in the counter
 	...SIGNS.flatMap((g) => [
 		{at: g.at, file: 'stamp', vol: 1},
-		{at: g.at + g.hold, file: 'whoosh', vol: 0.35},
+		{at: g.at + g.hold, file: 'whoosh', vol: 0.3},
 		{at: g.at + g.hold + SIGN_FLY, file: 'pop', vol: 0.4},
 	]),
 ];
 
 // with a voice-over the effects sit lower in the mix
 const SFX_GAIN = HAS_VOICE ? 0.55 : 1;
-const BED_END = s(16) + 248;
+const BED_END = s(16) + 252;
 
 export const SFX: React.FC = () => (
 	<>

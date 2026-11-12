@@ -11,12 +11,12 @@ const rule = (n: number, id: string, title: string, icon: 'eye' | 'shh', maxTo: 
 	const l = VOICE.find((v) => v.id === id)!;
 	return {n, title, icon, from: l.at - 4, to: Math.min(maxTo, l.at + Math.round(l.duration * 30) + 16)};
 };
-const RULES = [rule(1, 'a11', 'НЕ ПОДАВАЙ ВИДУ', 'eye', shotStart(7)), rule(2, 'a16', 'МАМЕ — НИ СЛОВА', 'shh', shotStart(10) + 14)];
+const RULES = [rule(1, 'a13', 'НЕ ПОДАВАЙ ВИДУ', 'eye', shotStart(7)), rule(2, 'a18', 'МАМЕ — НИ СЛОВА', 'shh', shotStart(10) + 4)];
 
 export const Main: React.FC = () => (
 	<AbsoluteFill style={{background: '#000'}}>
 		{SHOTS.map((s) => {
-			const C = (Scenes as Record<string, React.FC>)[`S${String(s.index).padStart(2, '0')}`];
+			const C = (Scenes as unknown as Record<string, React.FC>)[`S${String(s.index).padStart(2, '0')}`];
 			return (
 				<Sequence key={s.index} from={s.from} durationInFrames={s.duration} name={`Кадр ${s.index}`}>
 					{C ? <C /> : <AbsoluteFill style={{background: '#333'}} />}

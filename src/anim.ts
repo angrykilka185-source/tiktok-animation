@@ -26,3 +26,14 @@ export const shake = (f: number, at: number, amp = 14, len = 12) => {
 	const k = (1 - t / len) * amp;
 	return [Math.sin(t * 2.7) * k, Math.cos(t * 3.3) * k];
 };
+
+// which sub-shot of a scene is active: cuts = start frames of sub-shots 2..n
+export const seg = (f: number, cuts: number[]) => {
+	let i = 0;
+	while (i < cuts.length && f >= cuts[i]) i++;
+	const start = i === 0 ? 0 : cuts[i - 1];
+	return {i, t: f - start};
+};
+
+// small "impact zoom" right after a cut (reference-style punch-in)
+export const kick = (t: number, amount = 0.07, len = 8) => 1 + amount * Math.max(0, 1 - t / len) ** 2;

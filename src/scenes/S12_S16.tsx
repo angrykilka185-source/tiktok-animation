@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill, Easing, interpolate, useCurrentFrame} from 'remotion';
-import {clamp, lerp, pop} from '../anim';
+import {clamp, kick, lerp, pop, seg} from '../anim';
 import {Cross, HEAVY} from '../components/Overlays';
 import {Bust, Hand, Person} from '../components/Person';
 import {Fridge, PlankFloor, Wallpaper, WindowBox, Tiles} from '../components/Set';
@@ -13,16 +13,13 @@ const Phone: React.FC<{x: number; y: number; w: number; scale?: number; rot?: nu
 	const h = w * 2.05;
 	return (
 		<div style={{position: 'absolute', left: x, top: y, width: w, height: h, transform: `translate(-50%,-50%) rotate(${rot}deg) scale(${scale})`}}>
-			{/* fingers behind */}
-			<div style={{position: 'absolute', left: -46, top: h * 0.45, width: 90, height: 70, borderRadius: 35, background: '#f2c3a0', boxShadow: 'inset -8px 0 0 rgba(0,0,0,0.06)'}} />
-			<div style={{position: 'absolute', left: -40, top: h * 0.45 + 80, width: 80, height: 66, borderRadius: 33, background: '#f2c3a0'}} />
-			<div style={{position: 'absolute', right: -44, top: h * 0.52, width: 84, height: 64, borderRadius: 32, background: '#f2c3a0'}} />
+			{/* hand behind the phone: plain ovals like the rest of the film */}
+			<div style={{position: 'absolute', right: -50, top: h * 0.5, width: 120, height: 170, borderRadius: '50%', background: '#f2c3a0'}} />
 			<div style={{position: 'absolute', inset: 0, borderRadius: w * 0.13, background: '#15161a', boxShadow: '0 30px 60px rgba(0,0,0,0.45)'}} />
 			<div style={{position: 'absolute', inset: 16, borderRadius: w * 0.11, overflow: 'hidden', background: '#0f1218'}}>{children}</div>
 			<div style={{position: 'absolute', left: '50%', top: 30, width: w * 0.28, height: 30, marginLeft: -w * 0.14, borderRadius: 15, background: '#000'}} />
-			{/* thumb */}
-			<div style={{position: 'absolute', left: -70, top: h * 0.62, width: 150, height: 74, borderRadius: 37, background: '#f2c3a0', transform: 'rotate(-28deg)', boxShadow: '-4px 6px 0 rgba(0,0,0,0.08)'}} />
-			<div style={{position: 'absolute', left: -150, top: h * 0.62, width: 160, height: h * 0.6, borderRadius: 60, background: '#f0a032', transform: 'rotate(8deg)'}} />
+			<div style={{position: 'absolute', left: -150, top: h * 0.66, width: 170, height: h * 0.6, borderRadius: 70, background: '#f0a032', transform: 'rotate(8deg)'}} />
+			<div style={{position: 'absolute', left: -78, top: h * 0.6, width: 130, height: 160, borderRadius: '50%', background: '#f2c3a0', transform: 'rotate(-20deg)'}} />
 		</div>
 	);
 };
@@ -47,10 +44,11 @@ export const S12: React.FC = () => {
 	const jr = buzzing ? Math.sin(f * 3.7) * 2 : 0;
 	const rise = lerp(f, 0, 16, 300, 0, Easing.out(Easing.cubic));
 	const note = pop(f, 6, 11);
+	const punch = f >= 70 ? 1.75 * kick(f - 70, 0.1) : 1;
 	return (
 		<AbsoluteFill>
 			<Wallpaper2 sky="url(#skyMorning)" />
-			<Phone x={540 + jx} y={1000 + rise} w={560} rot={-4 + jr}>
+			<Phone x={540 + jx} y={(f >= 70 ? 1130 : 1000) + rise} w={560} rot={(f >= 70 ? 0 : -4) + jr} scale={punch}>
 				<div style={{position: 'absolute', inset: 0, background: 'linear-gradient(160deg,#2b3f6e,#13192b)'}} />
 				<div style={{position: 'absolute', top: 120, width: '100%', textAlign: 'center', color: '#fff', fontFamily: SANS, fontWeight: 800}}>
 					<div style={{fontSize: 30, opacity: 0.8}}>вторник, 12 ноября</div>
@@ -86,17 +84,17 @@ export const S12: React.FC = () => {
 // --------------------------------------------------------------- SHOT 13 ---
 export const S13: React.FC = () => {
 	const f = useCurrentFrame();
-	const typing = f < 34;
-	const msg = pop(f, 34, 12);
-	const mark = lerp(f, 58, 76, 0, 1);
-	const zoom = lerp(f, 0, 180, 1.0, 1.1);
+	const typing = f < 30;
+	const msg = pop(f, 30, 12);
+	const mark = lerp(f, 92, 108, 0, 1);
+	const zoom = f < 90 ? lerp(f, 0, 90, 1.0, 1.06) : lerp(f, 90, 180, 1.5, 1.62) * kick(f - 90, 0.1);
 	const Hi: React.FC<{children: React.ReactNode}> = ({children}) => (
 		<span style={{background: `linear-gradient(90deg, rgba(255,214,60,0.85) ${mark * 100}%, transparent ${mark * 100}%)`, borderRadius: 6, padding: '0 4px'}}>{children}</span>
 	);
 	return (
 		<AbsoluteFill>
 			<Wallpaper2 sky="url(#skyMorning)" dim={0.25} />
-			<Phone x={500} y={1080} w={700} scale={zoom}>
+			<Phone x={f < 90 ? 500 : 560} y={f < 90 ? 1080 : 1110} w={700} scale={zoom}>
 				<div style={{position: 'absolute', inset: 0, background: '#e9e3da'}} />
 				<div style={{position: 'absolute', left: 0, right: 0, top: 0, height: 190, background: '#f7f7f9', display: 'flex', alignItems: 'flex-end', padding: '0 30px 22px', gap: 20, fontFamily: SANS, boxSizing: 'border-box'}}>
 					<div style={{width: 84, height: 84, borderRadius: 42, background: '#33506e', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 40}}>П</div>
@@ -146,16 +144,22 @@ export const S13: React.FC = () => {
 };
 
 // --------------------------------------------------------------- SHOT 14 ---
+// Your face: pupils shrink → extreme close-up of the eyes.
 export const S14: React.FC = () => {
 	const f = useCurrentFrame();
-	const pupil = interpolate(f, [16, 26], [1.1, 0.35], {...clamp, easing: Easing.out(Easing.cubic)});
-	const beat = Math.max(0, 1 - Math.abs(f - 18) / 10);
-	const cam: Cam = {s: lerp(f, 0, 150, 1.0, 1.18) + beat * 0.05, cx: 540, cy: 960};
+	const {i, t} = seg(f, [88]);
+	const pupil = interpolate(f, [10, 20], [1.1, 0.35], {...clamp, easing: Easing.out(Easing.cubic)});
+	const beat = Math.max(0, 1 - Math.abs(f - 12) / 10);
+	const cam: Cam = i === 0 ? {s: lerp(f, 0, 88, 1.0, 1.12) + beat * 0.05, cx: 540, cy: 960} : {s: lerp(t, 0, 62, 1.0, 1.12) * kick(t), cx: 540, cy: 960};
 	return (
 		<Stage cam={cam} light={{glow: 0.1, vignette: 0.8}} bg="#2a1a14">
 			<rect x={-500} y={-500} width={2200} height={3000} fill="#7a5a44" />
-			<Bust kind="son" id="s14" x={540} y={900} scale={4.2} face={{eyes: 'wide', pupil, look: [0, 0], brows: 'worried', mouth: 'o', sweat: lerp(f, 30, 120, 0.2, 1), blush: false}} />
-			<rect x={-500} y={-500} width={2200} height={3000} fill="url(#redVignette)" opacity={0.35 + beat * 0.5 + lerp(f, 30, 150, 0, 0.3)} />
+			{i === 0 ? (
+				<Bust kind="son" id="s14" x={540} y={900} scale={4.2} face={{eyes: 'wide', pupil, look: [0, 0], brows: 'worried', mouth: 'o', sweat: lerp(f, 20, 88, 0.2, 1), blush: false}} />
+			) : (
+				<Bust kind="son" id="s14b" x={540} y={1000} scale={7.5} face={{eyes: 'wide', pupil: 0.35, look: [Math.sin(t / 4) > 0 ? 0.5 : -0.5, 0], brows: 'worried', mouth: 'o', sweat: 1, blush: false}} />
+			)}
+			<rect x={-500} y={-500} width={2200} height={3000} fill="url(#redVignette)" opacity={0.35 + beat * 0.5 + lerp(f, 20, 150, 0, 0.35)} />
 		</Stage>
 	);
 };
@@ -164,18 +168,29 @@ export const S14: React.FC = () => {
 // "Dad" walks into the kitchen smiling, looking at the phone.
 export const S15: React.FC = () => {
 	const f = useCurrentFrame();
-	const k = lerp(f, 0, 50, 0, 1, Easing.out(Easing.quad));
-	const walking = f < 50;
+	const {i, t} = seg(f, [92]);
+	if (i === 1) {
+		return (
+			<Stage cam={{s: lerp(t, 0, 88, 1.0, 1.15) * kick(t), cx: 540, cy: 900, rot: lerp(t, 0, 88, 0, -5)}} light={{glow: 0.15, vignette: 0.85, tint: '#5a0000', tintOpacity: lerp(t, 0, 88, 0.15, 0.32)}} bg="#2a1d18">
+				<rect x={-500} y={-500} width={2200} height={3000} fill="#2a1d18" />
+				<rect x={-500} y={-500} width={420} height={3000} fill="#6e3f22" />
+				<rect x={1160} y={-500} width={420} height={3000} fill="#6e3f22" />
+				<Bust kind="dad" id="s15cu" x={540} y={880} scale={3.6} face={{eyes: 'open', mouth: 'grin', look: [-0.7, 0.9], pupil: 0.7, brows: 'flat', stubble: true, blush: false}} />
+			</Stage>
+		);
+	}
+	const k = lerp(f, 0, 56, 0, 1, Easing.out(Easing.quad));
+	const walking = f < 56;
 	const dadY = 1310 + 90 * k;
 	const dadS = 0.62 + 0.18 * k;
-	const zoom = lerp(f, 80, 180, 1.0, 1.75, Easing.inOut(Easing.cubic));
+	const zoom = lerp(f, 56, 92, 1.0, 1.25, Easing.inOut(Easing.cubic));
 	const headY = dadY - 1024 * dadS;
-	const cam: Cam = {s: zoom, cx: 540 + (560 - 540) * lerp(f, 80, 180, 0, 1), cy: 960 + (headY + 120 - 960) * lerp(f, 80, 180, 0, 1, Easing.inOut(Easing.cubic)), rot: lerp(f, 100, 180, 0, -4)};
-	const grin = f > 56;
+	const cam: Cam = {s: zoom, cx: 550, cy: 960 + (headY + 200 - 960) * lerp(f, 56, 92, 0, 1, Easing.inOut(Easing.cubic))};
+	const grin = f > 62;
 	return (
 		<Stage
 			cam={cam}
-			light={{glow: 0.2, vignette: 0.7, tint: '#5a0000', tintOpacity: lerp(f, 100, 180, 0, 0.25)}}
+			light={{glow: 0.2, vignette: 0.7, tint: '#5a0000', tintOpacity: lerp(f, 60, 92, 0, 0.15)}}
 		>
 			<Wallpaper id="s15wp" x={-1000} y={-1000} w={3200} h={2300} base="#f0dcb0" line="#dfc490" />
 			<Tiles y={780} h={520} />
@@ -221,21 +236,21 @@ export const S16: React.FC = () => {
 	const f = useCurrentFrame();
 	const flash = lerp(f, 0, 10, 0.9, 0);
 	const title = pop(f, 6, 10);
-	const c1 = pop(f, 14, 11);
-	const c2 = pop(f, 46, 11);
+	const c1 = pop(f, 8, 11);
+	const c2 = pop(f, 40, 11);
 	const nums = [
-		{n: '3', at: 120},
-		{n: '2', at: 150},
-		{n: '1', at: 180},
+		{n: '3', at: 150},
+		{n: '2', at: 180},
+		{n: '1', at: 210},
 	];
 	const cur = [...nums].reverse().find((x) => f >= x.at);
-	const final = f >= 210;
-	const fp = pop(f, 210, 9);
-	const pulse = final ? 1 + Math.sin((f - 210) / 4) * 0.03 : 1;
+	const final = f >= 236;
+	const fp = pop(f, 236, 9);
+	const pulse = final ? 1 + Math.sin((f - 236) / 4) * 0.03 : 1;
 	// during the countdown the two answers blink in turn, like a vote
-	const counting = f >= 120 && f < 210;
-	const hot = counting ? (Math.floor((f - 120) / 15) % 2 === 0 ? 1 : 2) : 0;
-	const endCard = interpolate(f, [248, 256], [0, 1], clamp);
+	const counting = f >= 150 && f < 236;
+	const hot = counting ? (Math.floor((f - 150) / 15) % 2 === 0 ? 1 : 2) : 0;
+	const endCard = interpolate(f, [252, 260], [0, 1], clamp);
 	const card = (p: number, top: number, num: string, text: string, color: string, icon: string, idx: number) => (
 		<div
 			style={{
@@ -333,7 +348,7 @@ export const S16: React.FC = () => {
 				<AbsoluteFill style={{opacity: endCard, background: 'radial-gradient(circle at 50% 42%, #4a0d10 0%, #1a0607 55%, #0a0304 100%)'}}>
 					<div style={{position: 'absolute', top: 560, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900}}>
 						<div style={{fontSize: 36, letterSpacing: 12, color: '#ff4a3d'}}>ПАПА ВЕРНУЛСЯ С ВАХТЫ</div>
-						<div style={{fontSize: 190, lineHeight: 1, color: '#fff', marginTop: 18, transform: `scale(${pop(f, 250, 10)})`}}>ЧАСТЬ 2</div>
+						<div style={{fontSize: 190, lineHeight: 1, color: '#fff', marginTop: 18, transform: `scale(${pop(f, 254, 10)})`}}>ЧАСТЬ 2</div>
 						<div style={{fontSize: 56, color: '#ff3b30', marginTop: 8}}>СКОРО</div>
 						<div style={{fontSize: 44, color: '#fff', marginTop: 70}}>СКАЗАТЬ МАМЕ ИЛИ СПРОСИТЬ?</div>
 						<div style={{fontSize: 32, color: '#b9a9aa', marginTop: 10, letterSpacing: 2}}>ПИШИ В КОММЕНТАРИЯХ</div>

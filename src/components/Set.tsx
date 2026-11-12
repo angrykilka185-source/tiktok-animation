@@ -364,12 +364,13 @@ export const Tiles: React.FC<{y: number; h: number; color?: string}> = ({y, h, c
 );
 
 // Whole kitchen backdrop (wall, window, fridge, clock, photo). Floor line at y = floorY.
-export const Kitchen: React.FC<{floorY?: number; clock?: [number, number]; tick?: number; sky?: string; photoHighlight?: number; id: string}> = ({
+export const Kitchen: React.FC<{floorY?: number; clock?: [number, number]; tick?: number; sky?: string; photoHighlight?: number; photoMissing?: boolean; id: string}> = ({
 	floorY = 1300,
 	clock = [3, 5],
 	tick = 0,
 	sky,
 	photoHighlight = 0,
+	photoMissing = false,
 	id,
 }) => (
 	<g>
@@ -378,7 +379,15 @@ export const Kitchen: React.FC<{floorY?: number; clock?: [number, number]; tick?
 		<PlankFloor y={floorY} color="#b9824d" seam="#9a6638" />
 		<WindowBox x={90} y={300} w={330} h={420} sky={sky} />
 		<WallClock x={510} y={260} h={clock[0]} m={clock[1]} tick={tick} />
-		<FamilyPhoto x={620} y={330} w={180} h={215} id={`${id}-ph`} highlight={photoHighlight} />
+		{photoMissing ? (
+			<g>
+				{/* a lighter patch of wallpaper and the nail: the photo is gone */}
+				<rect x={604} y={314} width={212} height={247} fill="#f7ead0" />
+				<circle cx={710} cy={300} r={6} fill="#6a5a48" />
+			</g>
+		) : (
+			<FamilyPhoto x={620} y={330} w={180} h={215} id={`${id}-ph`} highlight={photoHighlight} />
+		)}
 		<Fridge x={880} y={floorY - 780} h={780} />
 		{/* counter + sink */}
 		<rect x={-300} y={floorY - 360} width={420} height={360} fill="#d8c3a0" />

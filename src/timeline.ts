@@ -6,18 +6,22 @@ export const H = 1920;
 // durations in seconds, as in the script
 export const SHOT_SECONDS = [6, 3.6, 5, 6, 5, 6.4, 6.6, 4, 5, 6, 6, 3.8, 6, 4.6, 6, 10];
 
-export const SHOTS = (() => {
+export type Shot = {index: number; from: number; duration: number};
+export const makeShots = (seconds: number[]) => {
 	let from = 0;
-	return SHOT_SECONDS.map((s, i) => {
+	const shots: Shot[] = seconds.map((s, i) => {
 		const r = {index: i + 1, from, duration: Math.round(s * FPS)};
 		from += Math.round(s * FPS);
 		return r;
 	});
-})();
+	const total = shots[shots.length - 1].from + shots[shots.length - 1].duration;
+	return {shots, total, shotStart: (n: number) => shots[n - 1].from};
+};
 
-export const TOTAL = SHOTS[SHOTS.length - 1].from + SHOTS[SHOTS.length - 1].duration; // 2700
-
-export const shotStart = (n: number) => SHOTS[n - 1].from;
+const built = makeShots(SHOT_SECONDS);
+export const SHOTS = built.shots;
+export const TOTAL = built.total; // 2700
+export const shotStart = built.shotStart;
 
 // ---- signs ("признаки") ----
 export type Sign = {n: number; title: string; at: number; hold: number};
@@ -43,3 +47,13 @@ export const CLOCK: {from: number; text: string}[] = [
 	{from: shotStart(15), text: 'ДЕНЬ 2 · 07:12'},
 ];
 
+
+// everything the HUD / plaques need for part 1
+export const EP1 = {
+	clock: CLOCK,
+	signs: SIGNS,
+	slots: 6,
+	counterFrom: shotStart(3) - 4,
+	hideFrom: shotStart(16) + 248,
+	night: [[shotStart(10), shotStart(12)]] as [number, number][],
+};

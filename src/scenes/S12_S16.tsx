@@ -6,10 +6,10 @@ import {Bust, Hand, Person} from '../components/Person';
 import {Fridge, PlankFloor, Wallpaper, WindowBox, Tiles} from '../components/Set';
 import {Cam, Stage} from '../components/Stage';
 
-const SANS = "'Montserrat', 'DejaVu Sans', sans-serif";
+export const SANS = "'Montserrat', 'DejaVu Sans', sans-serif";
 
 // Phone in hand (HTML for crisp UI). `children` = screen content.
-const Phone: React.FC<{x: number; y: number; w: number; scale?: number; rot?: number; children: React.ReactNode}> = ({x, y, w, scale = 1, rot = 0, children}) => {
+export const Phone: React.FC<{x: number; y: number; w: number; scale?: number; rot?: number; children: React.ReactNode}> = ({x, y, w, scale = 1, rot = 0, children}) => {
 	const h = w * 2.05;
 	return (
 		<div style={{position: 'absolute', left: x, top: y, width: w, height: h, transform: `translate(-50%,-50%) rotate(${rot}deg) scale(${scale})`}}>
@@ -24,7 +24,7 @@ const Phone: React.FC<{x: number; y: number; w: number; scale?: number; rot?: nu
 	);
 };
 
-const Wallpaper2: React.FC<{sky: string; dim?: number}> = ({sky, dim = 0}) => (
+export const Wallpaper2: React.FC<{sky: string; dim?: number}> = ({sky, dim = 0}) => (
 	<Stage cam={{s: 1, cx: 540, cy: 960}} light={{glow: 0.45, vignette: 0.6}}>
 		<g style={{filter: 'blur(14px)'}}>
 			<Wallpaper id="s12wp" x={-200} y={-200} w={1500} h={2400} base="#f0dcb0" line="#dfc490" />

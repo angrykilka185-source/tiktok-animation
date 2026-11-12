@@ -3,8 +3,8 @@ import {AbsoluteFill, Sequence} from 'remotion';
 import {Captions, HUD, RuleCards, SignPlaques} from './components/Overlays';
 import {SFX} from './SFX';
 import * as Scenes from './scenes';
-import {SHOTS, shotStart} from './timeline';
-import {VOICE} from './voice';
+import {EP1, SHOTS, shotStart} from './timeline';
+import {VOICE, VOICE_CAPTIONS} from './voice';
 
 // rule cards appear with the narrator's "Правило …" lines
 const rule = (n: number, id: string, title: string, icon: 'eye' | 'shh', maxTo: number) => {
@@ -24,9 +24,9 @@ export const Main: React.FC = () => (
 			);
 		})}
 		<RuleCards rules={RULES} />
-		<HUD />
-		<Captions />
-		<SignPlaques />
+		<HUD ep={EP1} />
+		<Captions captions={VOICE_CAPTIONS} />
+		<SignPlaques ep={EP1} />
 		<SFX />
 	</AbsoluteFill>
 );

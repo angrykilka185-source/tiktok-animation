@@ -1,34 +1,54 @@
 import React from 'react';
 import {interpolate, useCurrentFrame} from 'remotion';
 import {clamp, pop} from '../anim';
-import {CLOCK, SIGN_FLY, SIGNS, shotStart} from '../timeline';
-import {CapWord, VOICE_CAPTIONS} from '../voice';
+import {Sign, SIGN_FLY} from '../timeline';
+import {CapChunk, CapWord} from '../voiceCore';
 
 const HEAVY = "'Montserrat', 'DejaVu Sans', sans-serif";
 const MONO = "'JetBrains Mono', 'DejaVu Sans Mono', monospace";
 
+// Everything an episode needs for its HUD and plaques.
+export type Episode = {
+	clock: {from: number; text: string}[];
+	signs: Sign[];
+	slots: number; // number of boxes in the "ОН ИЛИ НЕ ОН?" counter
+	counterFrom: number; // frame when the counter slides in
+	hideFrom: number; // frame when the HUD fades out (end card)
+	night: [number, number][]; // frame ranges with the night colour on the clock
+};
+
 // ------------------------------- HUD ---------------------------------------
 const COUNTER_X = 1040; // right edge
 const COUNTER_Y = 96;
-export const SLOT_POS = (n: number) => ({x: COUNTER_X - 404 + 24 + (n - 1) * 60 + 22, y: COUNTER_Y + 70});
+const geom = (slots: number) => {
+	const w = slots > 6 ? 34 : 44;
+	const gap = slots > 6 ? 9 : 16;
+	const boxW = slots > 6 ? 44 + slots * w + (slots - 1) * gap : 404;
+	return {w, gap, boxW, left: COUNTER_X - boxW};
+};
+export const slotPos = (slots: number, n: number) => {
+	const g = geom(slots);
+	return {x: g.left + 4 + 18 + (n - 1) * (g.w + g.gap) + g.w / 2, y: COUNTER_Y + 70};
+};
 
-export const signsDone = (f: number) => SIGNS.filter((s) => f >= s.at + s.hold + SIGN_FLY).length;
+export const signsDone = (signs: Sign[], f: number) => signs.filter((s) => f >= s.at + s.hold + SIGN_FLY).length;
 
-export const HUD: React.FC = () => {
+export const HUD: React.FC<{ep: Episode}> = ({ep}) => {
 	const f = useCurrentFrame();
 	let idx = 0;
-	CLOCK.forEach((c, i) => {
+	ep.clock.forEach((c, i) => {
 		if (f >= c.from) idx = i;
 	});
-	const clock = CLOCK[idx];
+	const clock = ep.clock[idx];
 	const flip = pop(f, clock.from, 14);
 	const dot = Math.floor(f / 15) % 2 === 0;
-	const showCounter = f >= shotStart(3) - 4;
-	const cIn = pop(f, shotStart(3) - 4, 13);
-	const done = signsDone(f);
-	const night = f >= shotStart(10) && f < shotStart(12);
+	const showCounter = f >= ep.counterFrom;
+	const cIn = pop(f, ep.counterFrom, 13);
+	const done = signsDone(ep.signs, f);
+	const night = ep.night.some(([a, b]) => f >= a && f < b);
 	const hudIn = pop(f, 8, 13);
-	const hudOut = interpolate(f, [shotStart(16) + 248, shotStart(16) + 256], [1, 0], clamp);
+	const hudOut = interpolate(f, [ep.hideFrom, ep.hideFrom + 8], [1, 0], clamp);
+	const g = geom(ep.slots);
 
 	return (
 		<div style={{position: 'absolute', inset: 0, pointerEvents: 'none', opacity: hudOut}}>
@@ -49,7 +69,7 @@ export const HUD: React.FC = () => {
 					gap: 16,
 					fontFamily: MONO,
 					fontWeight: 700,
-					fontSize: 40,
+					fontSize: ep.slots > 6 ? 36 : 40,
 					color: night ? '#b9c9ff' : '#f4efe6',
 					boxShadow: '0 6px 18px rgba(0,0,0,0.35)',
 				}}
@@ -64,7 +84,7 @@ export const HUD: React.FC = () => {
 						position: 'absolute',
 						right: 1080 - COUNTER_X,
 						top: COUNTER_Y - 10,
-						width: 404,
+						width: g.boxW,
 						transform: `translateX(${(1 - cIn) * 460}px)`,
 						background: 'rgba(14,14,16,0.9)',
 						border: '4px solid #e0342b',
@@ -76,19 +96,21 @@ export const HUD: React.FC = () => {
 				>
 					<div style={{display: 'flex', justifyContent: 'space-between', fontFamily: HEAVY, fontWeight: 900, fontSize: 30, letterSpacing: 1}}>
 						<span style={{color: '#ff4a3d'}}>ОН ИЛИ НЕ ОН?</span>
-						<span style={{color: '#f4efe6'}}>{done}/6</span>
+						<span style={{color: '#f4efe6'}}>
+							{done}/{ep.slots}
+						</span>
 					</div>
-					<div style={{display: 'flex', gap: 16, marginTop: 10}}>
-						{[1, 2, 3, 4, 5, 6].map((n) => {
-							const s = SIGNS[n - 1];
-							const land = s.at + s.hold + SIGN_FLY;
+					<div style={{display: 'flex', gap: g.gap, marginTop: 10}}>
+						{Array.from({length: ep.slots}, (_, k) => k + 1).map((n) => {
+							const s = ep.signs.find((x) => x.n === n);
+							const land = s ? s.at + s.hold + SIGN_FLY : Infinity;
 							const filled = f >= land;
 							const p = filled ? pop(f, land, 9) : 0;
 							return (
 								<div
 									key={n}
 									style={{
-										width: 44,
+										width: g.w,
 										height: 40,
 										borderRadius: 8,
 										background: filled ? '#e0342b' : 'rgba(255,255,255,0.08)',
@@ -100,7 +122,7 @@ export const HUD: React.FC = () => {
 										boxSizing: 'border-box',
 									}}
 								>
-									{filled && <Cross size={24} />}
+									{filled && <Cross size={g.w > 40 ? 24 : 20} />}
 								</div>
 							);
 						})}
@@ -118,18 +140,18 @@ const Cross: React.FC<{size: number; color?: string; width?: number}> = ({size, 
 );
 
 // ----------------------------- sign plaque ---------------------------------
-export const SignPlaques: React.FC = () => {
+export const SignPlaques: React.FC<{ep: Episode}> = ({ep}) => {
 	const f = useCurrentFrame();
 	return (
 		<>
-			{SIGNS.map((s) => {
+			{ep.signs.map((s) => {
 				if (f < s.at || f > s.at + s.hold + SIGN_FLY) return null;
 				const t = f - s.at;
 				const p = pop(f, s.at, 10);
 				const fly = interpolate(t, [s.hold, s.hold + SIGN_FLY], [0, 1], clamp);
 				const flyE = fly * fly;
 				const cx = 540, cy = 650;
-				const target = SLOT_POS(s.n);
+				const target = slotPos(ep.slots, s.n);
 				const x = cx + (target.x - cx) * flyE;
 				const y = cy + (target.y - cy) * flyE - Math.sin(fly * Math.PI) * 120;
 				const sc = (0.5 + 0.5 * p) * (1 - 0.92 * flyE);
@@ -256,14 +278,14 @@ const CapWords: React.FC<{words: CapWord[]}> = ({words}) => {
 	);
 };
 
-export const Captions: React.FC = () => {
+export const Captions: React.FC<{captions: CapChunk[]}> = ({captions}) => {
 	const f = useCurrentFrame();
-	const ch = VOICE_CAPTIONS.find((c) => f >= c.from - 2 && f < c.to);
+	const ch = captions.find((c) => f >= c.from - 2 && f < c.to);
 	return ch ? <CapWords words={ch.words} /> : null;
 };
 
 // ------------------------------ rule cards ---------------------------------
-export const RuleCards: React.FC<{rules: {n: number; title: string; icon: 'eye' | 'shh'; from: number; to: number}[]}> = ({rules}) => {
+export const RuleCards: React.FC<{rules: {n: number; title: string; icon: 'eye' | 'shh' | 'lock'; from: number; to: number}[]}> = ({rules}) => {
 	const f = useCurrentFrame();
 	const r = rules.find((x) => f >= x.from && f < x.to);
 	if (!r) return null;
@@ -294,7 +316,13 @@ export const RuleCards: React.FC<{rules: {n: number; title: string; icon: 'eye' 
 			</div>
 			<div style={{position: 'absolute', left: 540, top: 820, transform: `translate(-50%,-50%) scale(${ip})`}}>
 				<svg width={260} height={260} viewBox="0 0 100 100">
-					{r.icon === 'eye' ? (
+					{r.icon === 'lock' ? (
+						<g fill="none" stroke="#fff" strokeWidth={6} strokeLinecap="round" strokeLinejoin="round">
+							<rect x={22} y={44} width={56} height={42} rx={8} />
+							<path d="M 34,44 L 34,32 Q 34,14 50,14 Q 66,14 66,32 L 66,44" />
+							<circle cx={50} cy={64} r={6} fill={RED} stroke={RED} />
+						</g>
+					) : r.icon === 'eye' ? (
 						<g fill="none" stroke="#fff" strokeWidth={6} strokeLinecap="round" strokeLinejoin="round">
 							<path d="M 8,50 Q 50,12 92,50 Q 50,88 8,50 Z" />
 							<circle cx={50} cy={50} r={13} fill="#fff" />

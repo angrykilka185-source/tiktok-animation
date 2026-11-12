@@ -104,7 +104,7 @@ export const SFX: React.FC = () => (
 		))}
 		{VOICE.filter((l) => l.hasAudio).map((l) => (
 			<Sequence key={l.id} from={l.at} durationInFrames={Math.min(Math.ceil(l.duration * 30) + 20, TOTAL - l.at)} name={`voice ${l.id}`}>
-				<Audio src={staticFile(`voice/${l.id}.mp3`)} volume={1} />
+				<Audio src={staticFile(l.src)} volume={1} />
 			</Sequence>
 		))}
 	</>

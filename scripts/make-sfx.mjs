@@ -514,3 +514,66 @@ const beat = (gain = 1) => {
 	}
 	write('drone', x, 0.6);
 }
+
+// ---------- part 2 ----------
+// tape rewind: fast chirps rising
+{
+	const dur = 1.2;
+	const x = buf(dur);
+	let ph = 0;
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		const f = 900 + 2600 * (t / dur) + 300 * Math.sin(2 * Math.PI * 23 * t);
+		ph += (2 * Math.PI * f) / SR;
+		x[i] = (Math.sign(Math.sin(ph)) * 0.25 + noise() * 0.25) * Math.sin((Math.PI * t) / dur) * (0.6 + 0.4 * Math.sin(2 * Math.PI * 31 * t));
+	}
+	write('rewind', bandpass(x, 400, 6000), 0.5);
+}
+// lake: water lapping against a boat (5 s)
+{
+	const dur = 5.2;
+	const x = buf(dur);
+	const n = lowpass(Float32Array.from({length: x.length}, () => noise()), 900);
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		x[i] = n[i] * (0.4 + 0.6 * Math.max(0, Math.sin(2 * Math.PI * 0.55 * t)) ** 2);
+	}
+	for (let k = 0; k < 18; k++) add(x, ping([400 + rnd() * 500], 0.08, 0.02, 0.4), rnd() * (dur - 0.2));
+	write('lake', room(x, 0.25), 0.55);
+}
+// paper tear
+{
+	const dur = 0.9;
+	const x = buf(dur);
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		const crackle = rnd() < 0.02 ? 1 : 0.25;
+		x[i] = noise() * crackle * Math.sin((Math.PI * t) / dur) ** 0.5;
+	}
+	write('tear', room(bandpass(x, 1500, 9000), 0.15), 0.8);
+}
+// door handle: metallic creak + latch click
+{
+	const dur = 1.6;
+	const x = buf(dur);
+	let ph = 0;
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		ph += (60 + 40 * Math.sin(t * 5)) / SR;
+		x[i] = Math.exp(-((ph % 1) * 50)) * Math.sin((Math.PI * Math.min(t, 1.3)) / 1.3) * 0.8;
+	}
+	let y = add(reso(x, 1800, 14), reso(x, 3100, 16), 0, 0.6);
+	add(y, click(0.04, 2200, 5), 1.35, 1.4);
+	write('handle', room(y, 0.3), 0.7);
+}
+// electric flicker / buzz
+{
+	const dur = 1.0;
+	const x = buf(dur);
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		const gate = Math.sin(2 * Math.PI * 7 * t) > 0.2 ? 1 : 0.1;
+		x[i] = (Math.sign(Math.sin(2 * Math.PI * 100 * t)) * 0.5 + noise() * 0.3) * gate;
+	}
+	write('flicker', lowpass(x, 2500), 0.4);
+}

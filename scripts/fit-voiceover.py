@@ -7,7 +7,9 @@
 4. places each line at its moment in the video (speeding a line up only when it does not fit),
 5. writes public/voice/<id>.mp3 and src/voice-timings.json (line positions + word timings for captions).
 
-usage: python3 scripts/fit-voiceover.py path/to/voiceover.mp3
+usage: python3 scripts/fit-voiceover.py path/to/voiceover.mp3            (part 1)
+       python3 scripts/fit-voiceover.py path/to/voiceover.mp3 --part 2   (part 2)
+Lines marked "reuse" (part 2 opening) are taken from part 1 and are not expected in the recording.
 """
 import json
 import math
@@ -22,7 +24,12 @@ import numpy as np
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 FPS = 30
-SHOT = [float(x) for x in re.search(r'SHOT_SECONDS = \[([^\]]+)\]', open(os.path.join(ROOT, 'src/timeline.ts'), encoding='utf-8').read()).group(1).split(',')]
+PART = int(sys.argv[sys.argv.index('--part') + 1]) if '--part' in sys.argv else 1
+PATHS = {
+    1: {'lines': 'src/voice-lines.json', 'timeline': 'src/timeline.ts', 'out': 'public/voice', 'timings': 'src/voice-timings.json'},
+    2: {'lines': 'src/p2/voice-lines.json', 'timeline': 'src/p2/timeline.ts', 'out': 'public/voice2', 'timings': 'src/p2/voice-timings.json'},
+}[PART]
+SHOT = [float(x) for x in re.search(r'SHOT_SECONDS = \[([^\]]+)\]', open(os.path.join(ROOT, PATHS['timeline']), encoding='utf-8').read()).group(1).split(',')]
 TOTAL = round(sum(SHOT) * FPS)
 MAX_INNER_GAP = 0.28  # longest pause kept inside a line (s)
 LEAD = 0.5  # a line may start this much before its planned moment (s)
@@ -46,8 +53,17 @@ def tts_text(text):
 
 
 def main(src):
-    cfg = json.load(open(os.path.join(ROOT, 'src/voice-lines.json'), encoding='utf-8'))
-    lines = cfg['lines']
+    cfg = json.load(open(os.path.join(ROOT, PATHS['lines']), encoding='utf-8'))
+    reused = [l for l in cfg['lines'] if l.get('reuse')]
+    lines = [l for l in cfg['lines'] if not l.get('reuse')]
+    # the recording starts after the reused lines (taken from part 1)
+    start_after = 0.0
+    if reused:
+        p1 = json.load(open(os.path.join(ROOT, 'src/voice-timings.json'), encoding='utf-8')).get('lines', {})
+        for l in reused:
+            t = p1.get(l['reuse'])
+            if t:
+                start_after = max(start_after, t['at'] / FPS + t['duration'])
 
     tmp = tempfile.mkdtemp()
     wav = os.path.join(tmp, 'vo.wav')
@@ -148,7 +164,7 @@ def main(src):
 
     # --- schedule: each line near its planned moment ------------------------------
     desired = [(shot_start(l['shot']) + l['offset']) / FPS for l in lines]
-    prev_end = 0.0
+    prev_end = start_after
     plan = []
     for i, cl in enumerate(clips):
         nxt = desired[i + 1] if i + 1 < m else TOTAL / FPS - 0.2
@@ -165,7 +181,7 @@ def main(src):
         prev_end = s + dur
 
     # --- export -----------------------------------------------------------------
-    out_dir = os.path.join(ROOT, 'public/voice')
+    out_dir = os.path.join(ROOT, PATHS['out'])
     os.makedirs(out_dir, exist_ok=True)
     for f in os.listdir(out_dir):
         if f.endswith('.mp3'):
@@ -216,11 +232,12 @@ def main(src):
         }
         late = s - desired[i]
         print(f"{l['id']} {s:6.2f}s ({'+' if late >= 0 else ''}{late:.2f}) x{tempo:.2f} {dur:4.2f}s  {text}")
-    json.dump(timings, open(os.path.join(ROOT, 'src/voice-timings.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
-    print('wrote public/voice/*.mp3 and src/voice-timings.json')
+    json.dump(timings, open(os.path.join(ROOT, PATHS['timings']), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+    print(f"wrote {PATHS['out']}/*.mp3 and {PATHS['timings']}")
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
+    args = [a for i, a in enumerate(sys.argv[1:]) if a != '--part' and (i == 0 or sys.argv[i] != '--part')]
+    if not args:
         sys.exit(__doc__)
-    main(sys.argv[1])
+    main(args[0])

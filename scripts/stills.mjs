@@ -11,7 +11,7 @@ const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
 const serveUrl = await bundle({entryPoint: path.join(root, 'src/index.ts'), enableCaching: true});
 const exe = '/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell';
 const browser = await openBrowser('chrome', {browserExecutable: fs.existsSync(exe) ? exe : null});
-const composition = await selectComposition({serveUrl, id: 'PapaVakhta', puppeteerInstance: browser});
+const composition = await selectComposition({serveUrl, id: process.env.COMP || 'PapaVakhta', puppeteerInstance: browser});
 fs.mkdirSync(path.join(root, 'out/frames'), {recursive: true});
 const files = [];
 for (const fr of frames) {

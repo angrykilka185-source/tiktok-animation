@@ -64,3 +64,14 @@ ffmpeg -i out/papa-vakhta.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5 -c:a aac -b:a
 python3 scripts/fit-voiceover.py assets/voiceover-2.mp3 --part 2   # озвучка без первого абзаца
 npx remotion render PapaVakhta2 out/papa-vakhta-2.mp4
 ```
+
+## Часть 3 «Видеозвонок»
+
+Код: `src/p3/`. Начало — как в частях 1–2 (тот же голос), затем пересказ части 2.
+
+```bash
+python3 scripts/fit-voiceover.py assets/voiceover-3.mp3 --part 3
+npx remotion render PapaVakhta3 out/papa-vakhta-3.mp4
+```
+
+Во всех частях картинка подстраивается под голос (`src/*/edit.json`): кадр заканчивается, как только закончилась его фраза.

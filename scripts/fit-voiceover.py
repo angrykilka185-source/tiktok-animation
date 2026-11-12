@@ -28,6 +28,7 @@ PART = int(sys.argv[sys.argv.index('--part') + 1]) if '--part' in sys.argv else 
 PATHS = {
     1: {'lines': 'src/voice-lines.json', 'timeline': 'src/timeline.ts', 'out': 'public/voice', 'timings': 'src/voice-timings.json', 'edit': 'src/edit.json'},
     2: {'lines': 'src/p2/voice-lines.json', 'timeline': 'src/p2/timeline.ts', 'out': 'public/voice2', 'timings': 'src/p2/voice-timings.json', 'edit': 'src/p2/edit.json'},
+    3: {'lines': 'src/p3/voice-lines.json', 'timeline': 'src/p3/timeline.ts', 'out': 'public/voice3', 'timings': 'src/p3/voice-timings.json', 'edit': 'src/p3/edit.json'},
 }[PART]
 SHOT = [float(x) for x in re.search(r'SHOT_SECONDS = \[([^\]]+)\]', open(os.path.join(ROOT, PATHS['timeline']), encoding='utf-8').read()).group(1).split(',')]
 TOTAL = round(sum(SHOT) * FPS)

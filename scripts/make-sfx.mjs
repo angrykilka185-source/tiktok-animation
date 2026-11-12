@@ -577,3 +577,54 @@ const beat = (gain = 1) => {
 	}
 	write('flicker', lowpass(x, 2500), 0.4);
 }
+
+// ---------- part 3 ----------
+// an original marimba-like ringtone (two phrases)
+const ringtone = () => {
+	const notes = [659, 784, 1047, 784, 659, 784, 1047, 1319];
+	const x = buf(3.3);
+	for (let rep = 0; rep < 2; rep++) {
+		notes.forEach((f, k) => {
+			const n = buf(0.35);
+			for (let i = 0; i < n.length; i++) {
+				const t = i / SR;
+				n[i] = (Math.sin(2 * Math.PI * f * t) + 0.35 * Math.sin(2 * Math.PI * f * 4 * t) * Math.exp(-t / 0.02)) * Math.exp(-t / 0.12);
+			}
+			add(x, n, rep * 1.6 + k * 0.17, 0.8);
+		});
+	}
+	return x;
+};
+write('ringtone', room(ringtone(), 0.15), 0.7);
+// the same ringtone heard through a closed door
+write('ringtone_door', room(lowpass(lowpass(ringtone(), 700), 900), 0.5, 1.6), 0.6);
+// three knocks on a wooden door
+{
+	const x = buf(1.6);
+	[0, 0.42, 0.84].forEach((t0) => {
+		add(x, thump(110, 0.25, 0.05, 0.3), t0, 1);
+		add(x, reso(click(0.05, 400, 1), 420, 6), t0, 0.6);
+	});
+	write('knock', room(x, 0.3), 0.9);
+}
+// camera "record" beep
+{
+	const x = buf(0.4);
+	add(x, ping([1000], 0.12, 0.05), 0, 1);
+	add(x, ping([1500], 0.15, 0.06), 0.13, 1);
+	write('recbeep', x, 0.5);
+}
+// light switch
+{
+	const x = buf(0.3);
+	add(x, click(0.03, 3200, 4), 0, 1);
+	add(x, click(0.03, 1900, 4), 0.03, 0.6);
+	write('switch', room(x, 0.2), 0.7);
+}
+// call ended / declined tone
+{
+	const x = buf(0.7);
+	add(x, ping([620, 1240], 0.25, 0.15), 0, 1);
+	add(x, ping([470, 940], 0.35, 0.18), 0.27, 1);
+	write('decline', x, 0.55);
+}

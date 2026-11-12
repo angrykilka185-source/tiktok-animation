@@ -390,7 +390,7 @@ export const S10: React.FC = () => {
 
 // --------------------------------------------------------------- SHOT 11 ---
 // Your phone: yesterday's message used exactly the same words.
-const ChatHeader: React.FC<{status: string; dark?: boolean}> = ({status, dark}) => (
+export const ChatHeader: React.FC<{status: string; dark?: boolean}> = ({status, dark}) => (
 	<div style={{position: 'absolute', left: 0, right: 0, top: 0, height: 190, background: dark ? '#1b1d22' : '#f7f7f9', display: 'flex', alignItems: 'flex-end', padding: '0 30px 22px', gap: 20, fontFamily: SANS, boxSizing: 'border-box'}}>
 		<div style={{width: 84, height: 84, borderRadius: 42, background: '#33506e', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 40}}>П</div>
 		<div>

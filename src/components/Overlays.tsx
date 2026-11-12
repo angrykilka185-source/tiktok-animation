@@ -15,14 +15,15 @@ export type Episode = {
 	counterFrom: number; // frame when the counter slides in
 	hideFrom: number; // frame when the HUD fades out (end card)
 	night: [number, number][]; // frame ranges with the night colour on the clock
+	prefilled?: number; // boxes already filled at the start (signs from earlier parts)
 };
 
 // ------------------------------- HUD ---------------------------------------
 const COUNTER_X = 1040; // right edge
 const COUNTER_Y = 96;
 const geom = (slots: number) => {
-	const w = slots > 6 ? 34 : 44;
-	const gap = slots > 6 ? 9 : 16;
+	const w = slots > 9 ? 26 : slots > 6 ? 34 : 44;
+	const gap = slots > 9 ? 6 : slots > 6 ? 9 : 16;
 	const boxW = slots > 6 ? 44 + slots * w + (slots - 1) * gap : 404;
 	return {w, gap, boxW, left: COUNTER_X - boxW};
 };
@@ -31,7 +32,7 @@ export const slotPos = (slots: number, n: number) => {
 	return {x: g.left + 4 + 18 + (n - 1) * (g.w + g.gap) + g.w / 2, y: COUNTER_Y + 70};
 };
 
-export const signsDone = (signs: Sign[], f: number) => signs.filter((s) => f >= s.at + s.hold + SIGN_FLY).length;
+export const signsDone = (signs: Sign[], f: number, prefilled = 0) => prefilled + signs.filter((s) => s.n > prefilled && f >= s.at + s.hold + SIGN_FLY).length;
 
 export const HUD: React.FC<{ep: Episode}> = ({ep}) => {
 	const f = useCurrentFrame();
@@ -44,7 +45,7 @@ export const HUD: React.FC<{ep: Episode}> = ({ep}) => {
 	const dot = Math.floor(f / 15) % 2 === 0;
 	const showCounter = f >= ep.counterFrom;
 	const cIn = pop(f, ep.counterFrom, 13);
-	const done = signsDone(ep.signs, f);
+	const done = signsDone(ep.signs, f, ep.prefilled ?? 0);
 	const night = ep.night.some(([a, b]) => f >= a && f < b);
 	const hudIn = pop(f, 8, 13);
 	const hudOut = interpolate(f, [ep.hideFrom, ep.hideFrom + 8], [1, 0], clamp);
@@ -103,7 +104,7 @@ export const HUD: React.FC<{ep: Episode}> = ({ep}) => {
 					<div style={{display: 'flex', gap: g.gap, marginTop: 10}}>
 						{Array.from({length: ep.slots}, (_, k) => k + 1).map((n) => {
 							const s = ep.signs.find((x) => x.n === n);
-							const land = s ? s.at + s.hold + SIGN_FLY : Infinity;
+							const land = n <= (ep.prefilled ?? 0) ? -1000 : s ? s.at + s.hold + SIGN_FLY : Infinity;
 							const filled = f >= land;
 							const p = filled ? pop(f, land, 9) : 0;
 							return (
@@ -285,7 +286,7 @@ export const Captions: React.FC<{captions: CapChunk[]}> = ({captions}) => {
 };
 
 // ------------------------------ rule cards ---------------------------------
-export const RuleCards: React.FC<{rules: {n: number; title: string; icon: 'eye' | 'shh' | 'lock'; from: number; to: number}[]}> = ({rules}) => {
+export const RuleCards: React.FC<{rules: {n: number; title: string; icon: 'eye' | 'shh' | 'lock' | 'rec'; from: number; to: number}[]}> = ({rules}) => {
 	const f = useCurrentFrame();
 	const r = rules.find((x) => f >= x.from && f < x.to);
 	if (!r) return null;
@@ -316,7 +317,13 @@ export const RuleCards: React.FC<{rules: {n: number; title: string; icon: 'eye' 
 			</div>
 			<div style={{position: 'absolute', left: 540, top: 820, transform: `translate(-50%,-50%) scale(${ip})`}}>
 				<svg width={260} height={260} viewBox="0 0 100 100">
-					{r.icon === 'lock' ? (
+					{r.icon === 'rec' ? (
+						<g fill="none" stroke="#fff" strokeWidth={6} strokeLinecap="round" strokeLinejoin="round">
+							<rect x={10} y={26} width={58} height={48} rx={10} />
+							<path d="M 68,42 L 90,30 L 90,70 L 68,58 Z" />
+							<circle cx={30} cy={50} r={9} fill={RED} stroke={RED} />
+						</g>
+					) : r.icon === 'lock' ? (
 						<g fill="none" stroke="#fff" strokeWidth={6} strokeLinecap="round" strokeLinejoin="round">
 							<rect x={22} y={44} width={56} height={42} rx={8} />
 							<path d="M 34,44 L 34,32 Q 34,14 50,14 Q 66,14 66,32 L 66,44" />

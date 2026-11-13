@@ -163,7 +163,7 @@ const Slit: React.FC<{f: number; id: string; pan?: number; children: React.React
 );
 
 // inside the garage: walls, tool board, a bare bulb; dad tied to a chair
-const GarageInside: React.FC<{f: number; id: string; lean?: number; dadFace: Face; dadTilt?: number; shadowX?: number}> = ({f, id, lean = 0, dadFace, dadTilt = 0, shadowX = 330}) => {
+const GarageInside: React.FC<{f: number; id: string; lean?: number; dadFace: Face; dadTilt?: number; shadowX?: number}> = ({f, id, lean = 0, dadFace, dadTilt = 0, shadowX = 330 + 140 * lean}) => {
 	const sway = Math.sin(f / 14) * 3;
 	return (
 		<g>
@@ -195,7 +195,7 @@ const GarageInside: React.FC<{f: number; id: string; lean?: number; dadFace: Fac
 				<Legs x={770} y={1440} s={0.6} pants="#4b4f55" boots="#5a3a24" />
 			</g>
 			{/* «он» — dark against the light, leaning towards dad */}
-			<g transform={`rotate(${18 * lean} ${shadowX} 1450)`}>
+			<g transform={`rotate(${6 * lean} ${shadowX} 1450)`}>
 				<Shadow id={`${id}sh`} x={shadowX} y={1450} scale={1.0} />
 			</g>
 			<rect x={-500} y={-500} width={2200} height={3000} fill="#2a1a08" opacity={0.18} />
@@ -297,10 +297,10 @@ export const S05: React.FC = () => {
 	const f = useCurrentFrame();
 	const jacket = f >= 30;
 	const puff = f >= 30 && f < 42 ? 1 - (f - 30) / 12 : 0;
-	const x = f < 72 ? 300 : lerp(f, 72, 123, 300, 520, Easing.linear);
+	const x = f < 72 ? 380 : lerp(f, 72, 123, 380, 560, Easing.linear);
 	return (
 		<Stage cam={{s: lerp(f, 0, 123, 1.0, 1.08), cx: 520, cy: 1040}} light={{glow: 0, vignette: 0.85}} bg="#05070f">
-			<Hall id="p6s5" dark={0.55} />
+			<Hall id="p6s5" dark={0.55} noBag />
 			<Person kind="son" id="p6s5son" colors={jacket ? JACKET : PYJAMA} x={x} y={1560} scale={0.95} walk={f >= 72 ? f * 0.18 : undefined} breathe={f} face={{eyes: 'open', brows: 'worried', mouth: 'flat', look: [0.6, 0], blush: false}} />
 			{puff > 0 && <circle cx={x} cy={1560 - 560} r={260 * (1 - puff) + 60} fill="#fff" opacity={0.35 * puff} />}
 			<Flashlight id="p6s5fl" x={x + 60} y={1100} r={760} dark={0.62} />
@@ -361,7 +361,7 @@ export const S07: React.FC = () => {
 				<PlankFloor y={1460} color="#6a5a4a" seam="#5a4a3a" />
 				<Flashlight id="p6s7fl" x={540} y={1000} r={640} dark={0.8} />
 			</Stage>
-			{f >= 4 && <P3.CameraUI f={f - 4} />}
+			{f >= 4 && f < 34 && <P3.CameraUI f={f - 4} />}
 			<AbsoluteFill style={{background: '#fff', opacity: interpolate(f, [4, 7, 10], [0, 0.4, 0], clamp)}} />
 		</AbsoluteFill>
 	);
@@ -382,16 +382,17 @@ export const S08: React.FC = () => {
 	);
 };
 
-// 9. You follow him, hiding behind the cars.
+// 9. You follow him, hiding behind the cars (only your eyes peek over the roof).
 export const S09: React.FC = () => {
 	const f = useCurrentFrame();
-	const peek = interpolate(f, [8, 22], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
+	const peek = interpolate(f, [6, 20], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
 	return (
-		<Stage cam={{s: 1.0, cx: 540, cy: 960}} light={{glow: 0, vignette: 0.8}} bg="#05070f">
-			<Yard f={f} id="p6s9" light={0.9} walker={{x: lerp(f, 0, 66, 520, 660, Easing.linear), y: 1260, s: 0.26}} />
-			<Person kind="son" id="p6s9son" colors={JACKET} x={820} y={1880 - 150 * peek} scale={1.0} face={{eyes: 'wide', look: [-0.9, -0.2], brows: 'worried', mouth: 'flat', blush: false}} />
-			<Car x={420} y={1820} s={1.9} color="#5a6a7a" />
-			<rect x={-500} y={1800} width={2200} height={800} fill="#1c1e25" />
+		<Stage cam={{s: lerp(f, 0, 66, 1.0, 1.06), cx: 540, cy: 1000}} light={{glow: 0, vignette: 0.8}} bg="#05070f">
+			<Yard f={f} id="p6s9" light={0.9} walker={{x: lerp(f, 0, 66, 520, 640, Easing.linear), y: 1260, s: 0.26}} />
+			<Person kind="son" id="p6s9son" colors={JACKET} x={520} y={2290 - 70 * peek} scale={1.0} face={{eyes: 'wide', pupil: 0.7, look: [0.6, -0.2], brows: 'worried', mouth: 'flat', blush: false}} />
+			<rect x={-300} y={1850} width={1400} height={90} fill="#121317" />
+			<Car x={430} y={1940} s={1.9} color="#5a6a7a" />
+			<rect x={-500} y={1920} width={2200} height={800} fill="#1c1e25" />
 		</Stage>
 	);
 };
@@ -412,33 +413,41 @@ export const S10: React.FC = () => {
 	);
 };
 
-// 11. You lie down on the cold asphalt and look through the gap.
+// 11. You lie down on the cold asphalt (the camera sinks to the ground) → seen from inside: your eyes in the gap.
 export const S11: React.FC = () => {
 	const f = useCurrentFrame();
 	const {i, t} = seg(f, [50]);
 	if (i === 0) {
-		const down = interpolate(t, [4, 26], [0, 1], {...clamp, easing: Easing.inOut(Easing.cubic)});
+		const down = interpolate(t, [2, 40], [0, 1], {...clamp, easing: Easing.inOut(Easing.cubic)});
 		return (
-			<Stage cam={{s: lerp(t, 0, 50, 1.0, 1.15), cx: 540, cy: 1250}} light={{glow: 0, vignette: 0.8}} bg="#05070f">
-				<GarageFront f={f} id="p6s11" />
-				<g transform={`rotate(${-90 * down} 1000 1560)`}>
-					<Person kind="son" id="p6s11son" back colors={JACKET} x={1000} y={1560} scale={0.95} />
-				</g>
-				<rect x={-500} y={-500} width={2200} height={3000} fill={NIGHT} opacity={0.25} />
-			</Stage>
+			<AbsoluteFill>
+				<Stage cam={{s: 1.0 + 1.6 * down, cx: 540, cy: 1000 + 470 * down, rot: -4 * Math.sin(down * Math.PI)}} light={{glow: 0, vignette: 0.8}} bg="#05070f">
+					<GarageFront f={f} id="p6s11" />
+					<rect x={-500} y={-500} width={2200} height={3000} fill={NIGHT} opacity={0.2} />
+				</Stage>
+				<P3.CameraUI f={t} startSec={16} />
+			</AbsoluteFill>
 		);
 	}
-	// close: your face at the ground, the strip of light across your eye
 	return (
-		<Stage cam={{s: lerp(t, 0, 43, 1.0, 1.08), cx: 540, cy: 960}} light={{glow: 0, vignette: 0.85}} bg="#05070f">
-			<rect x={-500} y={-500} width={2200} height={3000} fill="#1a1b20" />
-			<rect x={-500} y={-500} width={2200} height={1300} fill="#5a4b3e" />
-			<rect x={-500} y={800} width={2200} height={60} fill="#fff3c4" />
-			<rect x={-500} y={860} width={2200} height={300} fill="#ffe08a" opacity={0.15} />
-			<g transform="rotate(90 380 1180)">
-				<Bust kind="son" id="p6s11b" x={380} y={1180} scale={3.4} face={{eyes: 'narrow', look: [-1, 0], brows: 'worried', mouth: 'flat', blush: false}} />
+		<Stage cam={{s: lerp(t, 0, 43, 1.0, 1.08), cx: 540, cy: 960}} light={{glow: 0, vignette: 0.85}} bg="#020203">
+			<defs>
+				<clipPath id="p6s11slit">
+					<path d="M -100,880 L 1180,872 L 1180,1040 L -100,1048 Z" />
+				</clipPath>
+			</defs>
+			<rect x={-500} y={-500} width={2200} height={3000} fill="#2e261f" />
+			{Array.from({length: 7}).map((_, k) => (
+				<rect key={k} x={-500} y={120 + k * 104} width={2200} height={8} fill="#251e18" />
+			))}
+			<g clipPath="url(#p6s11slit)">
+				<rect x={-500} y={600} width={2200} height={800} fill="#0d0f16" />
+				<Bust kind="son" id="p6s11eyes" x={540} y={1010} scale={4.4} face={{eyes: 'wide', pupil: 0.6, look: [0, -0.2], brows: 'worried', mouth: 'flat', blush: false}} />
+				<rect x={-500} y={600} width={2200} height={800} fill="#ffe08a" opacity={0.22} />
 			</g>
-			<rect x={-500} y={820} width={2200} height={140} fill="#fff3c4" opacity={0.18} />
+			<path d="M -100,872 L 1180,864 L 1180,880 L -100,888 Z" fill="#4a3d31" />
+			<rect x={-500} y={1048} width={2200} height={1000} fill="#6b6658" />
+			<rect x={-500} y={1048} width={2200} height={14} fill="#ffe08a" opacity={0.25} />
 		</Stage>
 	);
 };
@@ -473,8 +482,8 @@ export const S14: React.FC = () => {
 	const {i, t} = seg(f, [62]);
 	if (i === 0) {
 		return (
-			<Stage cam={{s: lerp(t, 0, 62, 2.0, 2.3), cx: 560, cy: 860}} light={{glow: 0.2, vignette: 0.85}} bg="#05070f">
-				<GarageInside f={f} id="p6s14" dadFace={{eyes: 'closed', brows: 'sad', mouth: 'flat'}} dadTilt={14} shadowX={-300} />
+			<Stage cam={{s: lerp(t, 0, 62, 2.2, 2.4), cx: 770, cy: 1150}} light={{glow: 0.2, vignette: 0.85}} bg="#05070f">
+				<GarageInside f={f} id="p6s14" dadFace={{eyes: 'closed', brows: 'sad', mouth: 'flat'}} dadTilt={0} shadowX={-500} />
 				<rect x={-500} y={-500} width={2200} height={3000} fill="url(#redVignette)" opacity={0.2} />
 			</Stage>
 		);
@@ -512,7 +521,7 @@ export const S16: React.FC = () => {
 	const lean = interpolate(f, [8, 36], [0, 1], {...clamp, easing: Easing.inOut(Easing.cubic)});
 	return (
 		<Stage cam={{s: lerp(f, 0, 138, 1.0, 1.1) * (f >= 109 ? kick(f - 109, 0.05) : 1), cx: 560, cy: 1000}} light={{glow: 0.2, vignette: 0.85}} bg="#2a2218">
-			<GarageInside f={f} id="p6s16" lean={lean} dadFace={{eyes: 'narrow', brows: 'sad', mouth: 'flat'}} dadTilt={10} />
+			<GarageInside f={f} id="p6s16" lean={lean} dadFace={{eyes: 'open', brows: 'worried', mouth: 'tight', look: [-0.7, -0.2]}} dadTilt={4} />
 		</Stage>
 	);
 };
@@ -532,21 +541,33 @@ export const S17: React.FC = () => {
 	);
 };
 
-// 18. He takes out dad's phone — its light shows his face… (it's dad's face)
+// 18. He takes out dad's phone — its light from below shows his face… (it's dad's face)
 export const S18: React.FC = () => {
 	const f = useCurrentFrame();
 	const light = interpolate(f, [30, 46], [0, 1], clamp);
+	const mid = 0.9 - 0.85 * light;
 	return (
 		<Stage cam={{s: lerp(f, 0, 132, 1.0, 1.12), cx: 540, cy: 960}} light={{glow: 0, vignette: 0.9}} bg="#05070f">
+			<defs>
+				<linearGradient id="p6s18shade" gradientUnits="userSpaceOnUse" x1="0" y1="400" x2="0" y2="1500">
+					<stop offset="0%" stopColor="#05070f" stopOpacity={0.96} />
+					<stop offset="38%" stopColor="#05070f" stopOpacity={0.9 - 0.45 * light} />
+					<stop offset="58%" stopColor="#05070f" stopOpacity={mid} />
+					<stop offset="100%" stopColor="#05070f" stopOpacity={mid} />
+				</linearGradient>
+			</defs>
 			<rect x={-500} y={-500} width={2200} height={3000} fill="#121418" />
 			<Bust kind="dad" id="p6s18" x={540} y={940} scale={3.4} face={{eyes: 'narrow', brows: 'angry', mouth: f >= 74 ? 'smile' : 'flat', stubble: true, look: [0, 0.8], blush: false}} />
-			<rect x={-500} y={-500} width={2200} height={3000} fill="#05070f" opacity={0.92 - 0.45 * light} />
-			<Flashlight id="p6s18fl" x={540} y={1500} r={900} dark={0.95 - 0.35 * light} />
+			<rect x={-500} y={-500} width={2200} height={3000} fill="url(#p6s18shade)" />
+			<rect x={-500} y={-500} width={2200} height={3000} fill="#05070f" opacity={0.9 * (1 - light)} />
+			<ellipse cx={540} cy={1420} rx={520} ry={420} fill="#cfe2ff" opacity={0.1 * light} />
 			<g transform={`translate(540,${1520 - 60 * light})`}>
 				<rect x={-110} y={-200} width={220} height={400} rx={30} fill="#15161a" />
 				<rect x={-96} y={-186} width={192} height={372} rx={22} fill="#cfe2ff" opacity={light} />
-				<ellipse cx={-130} cy={60} rx={70} ry={100} fill="#06080d" />
-				<ellipse cx={130} cy={60} rx={70} ry={100} fill="#06080d" />
+				<ellipse cx={-118} cy={70} rx={50} ry={74} fill={DAD_SKIN} />
+				<ellipse cx={118} cy={70} rx={50} ry={74} fill={DAD_SKIN} />
+				<ellipse cx={-118} cy={70} rx={50} ry={74} fill="#05070f" opacity={0.5 - 0.25 * light} />
+				<ellipse cx={118} cy={70} rx={50} ry={74} fill="#05070f" opacity={0.5 - 0.25 * light} />
 			</g>
 		</Stage>
 	);

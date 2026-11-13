@@ -172,7 +172,7 @@ const Ceiling: React.FC<{f: number; spark: number}> = ({f, spark}) => {
 };
 
 // apartment entrance: front door, coat hooks, a trash bag by the door
-export const Hall: React.FC<{id: string; bag?: number; dark?: number}> = ({id, bag = 0, dark = 0}) => (
+export const Hall: React.FC<{id: string; bag?: number; dark?: number; noBag?: boolean}> = ({id, bag = 0, dark = 0, noBag = false}) => (
 	<g>
 		<Wallpaper id={`${id}wp`} x={-400} y={-400} w={1880} h={1880} base="#d9c7a0" line="#c8b48a" />
 		<rect x={-400} y={1440} width={1880} height={30} fill="#8a5a34" />
@@ -190,7 +190,7 @@ export const Hall: React.FC<{id: string; bag?: number; dark?: number}> = ({id, b
 		))}
 		<path d="M 900,640 Q 860,760 890,900 L 1000,900 Q 1020,760 980,640 Z" fill="#3a5a7a" />
 		{/* trash bag */}
-		<g transform="translate(250,1470)">
+		<g transform="translate(250,1470)" opacity={noBag ? 0 : 1}>
 			{bag > 0 && <ellipse cx={0} cy={-110} rx={170} ry={170} fill={YELLOW} opacity={0.18 * bag} />}
 			<path d="M -95,0 Q -125,-120 -40,-180 L -20,-215 Q 0,-235 20,-215 L 40,-180 Q 125,-120 95,0 Z" fill="#1d1f24" />
 			<path d="M -18,-212 L -38,-250 M 18,-212 L 38,-250" stroke="#1d1f24" strokeWidth={12} strokeLinecap="round" />

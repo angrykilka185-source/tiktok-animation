@@ -172,7 +172,7 @@ const Ceiling: React.FC<{f: number; spark: number}> = ({f, spark}) => {
 };
 
 // apartment entrance: front door, coat hooks, a trash bag by the door
-const Hall: React.FC<{id: string; bag?: number; dark?: number}> = ({id, bag = 0, dark = 0}) => (
+export const Hall: React.FC<{id: string; bag?: number; dark?: number}> = ({id, bag = 0, dark = 0}) => (
 	<g>
 		<Wallpaper id={`${id}wp`} x={-400} y={-400} w={1880} h={1880} base="#d9c7a0" line="#c8b48a" />
 		<rect x={-400} y={1440} width={1880} height={30} fill="#8a5a34" />

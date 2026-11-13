@@ -153,6 +153,7 @@ if __name__ == '__main__':
         '2': ('public/voice2', 'src/p2/voice-timings.json'),
         '3': ('public/voice3', 'src/p3/voice-timings.json'),
         '4': ('public/voice4', 'src/p4/voice-timings.json'),
+        '5': ('public/voice5', 'src/p5/voice-timings.json'),
         'g1': ('public/voice-g1', 'src/g1/voice-timings.json'),
         'g2': ('public/voice-g2', 'src/g2/voice-timings.json'),
     }[part]

@@ -21,7 +21,7 @@ const rnd = (i: number) => {
 
 // ======================================================= scene pieces =====
 // phone flashlight: darkness everywhere except a soft circle of light at (x, y)
-const Flashlight: React.FC<{id: string; x: number; y: number; r?: number; dark?: number}> = ({id, x, y, r = 560, dark = 0.82}) => (
+export const Flashlight: React.FC<{id: string; x: number; y: number; r?: number; dark?: number}> = ({id, x, y, r = 560, dark = 0.82}) => (
 	<g pointerEvents="none">
 		<defs>
 			<radialGradient id={id} cx={x} cy={y} r={r} gradientUnits="userSpaceOnUse">
@@ -36,7 +36,7 @@ const Flashlight: React.FC<{id: string; x: number; y: number; r?: number; dark?:
 );
 
 // the man in the dark: a black silhouette, eyes glinting when `eyes` > 0
-const Shadow: React.FC<{id: string; x: number; y: number; scale: number; eyes?: number; opacity?: number}> = ({id, x, y, scale, eyes = 0, opacity = 1}) => {
+export const Shadow: React.FC<{id: string; x: number; y: number; scale: number; eyes?: number; opacity?: number}> = ({id, x, y, scale, eyes = 0, opacity = 1}) => {
 	const headY = y - 1024 * scale;
 	return (
 		<g opacity={opacity}>
@@ -52,7 +52,7 @@ const Shadow: React.FC<{id: string; x: number; y: number; scale: number; eyes?: 
 };
 
 // glinting eyes, drawn on top of the darkness (same placement as <Shadow/>); both = false when the wardrobe hides one
-const Glint: React.FC<{x: number; y: number; scale: number; o: number; both?: boolean}> = ({x, y, scale, o, both = true}) => {
+export const Glint: React.FC<{x: number; y: number; scale: number; o: number; both?: boolean}> = ({x, y, scale, o, both = true}) => {
 	if (o <= 0) return null;
 	const headY = y - 1024 * scale;
 	const eye = (ex: number) => (
@@ -66,7 +66,7 @@ const Glint: React.FC<{x: number; y: number; scale: number; o: number; both?: bo
 
 // the parents' bedroom at night, seen from the foot of the bed.
 // pulled 0..1 = the blanket on dad's side pulled off (pillows underneath); shadow = the man by the wardrobe
-const ParentsRoom: React.FC<{f: number; id: string; pulled?: number; shadow?: number; eyes?: number}> = ({f, id, pulled = 0, shadow = 0, eyes = 0}) => {
+export const ParentsRoom: React.FC<{f: number; id: string; pulled?: number; shadow?: number; eyes?: number}> = ({f, id, pulled = 0, shadow = 0, eyes = 0}) => {
 	const pl = Math.max(0, Math.min(1, pulled));
 	const edge = 1150 + 330 * pl; // top edge of the blanket on dad's half
 	return (
@@ -124,7 +124,7 @@ const ParentsRoom: React.FC<{f: number; id: string; pulled?: number; shadow?: nu
 };
 
 // dark corridor in perspective, the parents' door at the end (ajar = black gap)
-const Corridor: React.FC<{id: string; gap?: number}> = ({id, gap = 0.25}) => (
+export const Corridor: React.FC<{id: string; gap?: number}> = ({id, gap = 0.25}) => (
 	<g>
 		<rect x={-600} y={-600} width={2400} height={3200} fill="#1a1f33" />
 		<path d="M -600,-600 L 380,640 L 380,1180 L -600,2600 Z" fill="#2c3454" />
@@ -207,7 +207,7 @@ const Player: React.FC<{f: number; at: number; total?: number; rewinding?: boole
 };
 
 // your face in the dark, lit by the phone
-const FaceDark: React.FC<{t: number; id: string; face: React.ComponentProps<typeof Bust>['face']; zoom?: [number, number]; red?: number; behind?: React.ReactNode}> = ({t, id, face, zoom = [1, 1.1], red = 0, behind}) => (
+export const FaceDark: React.FC<{t: number; id: string; face: React.ComponentProps<typeof Bust>['face']; zoom?: [number, number]; red?: number; behind?: React.ReactNode}> = ({t, id, face, zoom = [1, 1.1], red = 0, behind}) => (
 	<Stage cam={{s: lerp(t, 0, 60, zoom[0], zoom[1]) * kick(t), cx: 540, cy: 960}} light={{glow: 0, vignette: 0.85}} bg="#05070f">
 		<rect x={-500} y={-500} width={2200} height={3000} fill="#1c2747" />
 		{behind}

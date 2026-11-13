@@ -119,3 +119,15 @@ python3 scripts/fit-voiceover.py assets/voiceover-4.mp3 --part 4
 npx remotion render PapaVakhta4 out/papa-vakhta-4.mp4
 ffmpeg -i out/papa-vakhta-4.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k deliverables/papa-vakhta-4-s-ozvuchkoy.mp4
 ```
+
+## «Папа вернулся с вахты», часть 5 «Лунатик» (≈1,5 минуты)
+
+Код: `src/p5/` (переиспользует силуэт, тёмную спальню и коридор из `src/p4/`, комнату героя из `src/g1/`,
+прихожую из `src/g2/`). Длина видео задаётся длиной текста: кадр кончается вместе со своей фразой,
+поэтому для 1,5 минуты текст длиннее (≈ 970 букв без начала). Счётчик на 19 клеток (15 заполнены).
+
+```bash
+python3 scripts/fit-voiceover.py assets/voiceover-5.mp3 --part 5
+npx remotion render PapaVakhta5 out/papa-vakhta-5.mp4
+ffmpeg -i out/papa-vakhta-5.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k deliverables/papa-vakhta-5-s-ozvuchkoy.mp4
+```

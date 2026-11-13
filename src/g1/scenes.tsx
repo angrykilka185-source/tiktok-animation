@@ -259,12 +259,12 @@ export const PhoneLight: React.FC<{id: string; x: number; y: number; r: number; 
 );
 
 // Your room at night, the bed seen from the side, the phone on the bedside table.
-export const Bedroom: React.FC<{f: number; id: string; glow: number; buzz: boolean; eyes: 'closed' | 'open' | 'wide'}> = ({f, id, glow, buzz, eyes}) => {
+export const Bedroom: React.FC<{f: number; id: string; glow: number; buzz: boolean; eyes: 'closed' | 'open' | 'wide'; kind?: 'son' | 'teen'; look?: [number, number]}> = ({f, id, glow, buzz, eyes, kind = 'teen', look = [0, 0.85]}) => {
 	const jx = buzz ? Math.sin(f * 2.9) * 5 : 0;
 	const face: Face =
 		eyes === 'closed'
 			? {eyes: 'closed', mouth: 'flat', brows: 'neutral', blush: false}
-			: {eyes: eyes === 'wide' ? 'wide' : 'open', look: [0, 0.85], pupil: eyes === 'wide' ? 0.6 : 1, mouth: eyes === 'wide' ? 'o' : 'flat', brows: eyes === 'wide' ? 'raised' : 'worried', blush: false};
+			: {eyes: eyes === 'wide' ? 'wide' : 'open', look, pupil: eyes === 'wide' ? 0.6 : 1, mouth: eyes === 'wide' ? 'o' : 'flat', brows: eyes === 'wide' ? 'raised' : 'worried', blush: false};
 	return (
 		<g>
 			<rect x={-400} y={-400} width={1880} height={2800} fill="#232c52" />
@@ -304,7 +304,7 @@ export const Bedroom: React.FC<{f: number; id: string; glow: number; buzz: boole
 			</defs>
 			<g clipPath={`url(#${id}clip)`}>
 				<g transform="rotate(-90 228 1176)">
-					<Bust kind="teen" id={`${id}b`} x={228} y={1176} scale={0.95} face={face} />
+					<Bust kind={kind} id={`${id}b`} x={228} y={1176} scale={0.95} face={face} />
 				</g>
 			</g>
 			<path d="M 300,1350 L 296,1130 C 300,1050 390,1010 470,1030 C 540,1050 570,1100 630,1108 C 700,1116 760,1150 785,1240 L 792,1350 Z" fill="#4b69a6" />

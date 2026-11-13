@@ -765,3 +765,22 @@ write('lift_ding', room(add(ping([1318.5, 2637], 1.2, 0.35), ping([1046.5, 2093]
 	}
 	write('slowdown', lowpass(x, 2500), 0.45);
 }
+
+// ---------- «Папа вернулся с вахты», часть 5 ----------
+// finger snap
+{
+	const x = buf(0.35);
+	add(x, click(0.012, 2200, 3), 0, 1);
+	const n = buf(0.06);
+	for (let i = 0; i < n.length; i++) n[i] = noise() * Math.exp(-i / SR / 0.012);
+	add(x, bandpass(n, 1200, 5000), 0.002, 0.8);
+	write('snap', room(x, 0.2, 0.8), 0.8);
+}
+// the front door slams
+{
+	const x = buf(1.2);
+	add(x, thump(60, 0.5, 0.12, 0.5), 0, 1);
+	add(x, click(0.04, 600, 2), 0.005, 0.8);
+	for (let k = 0; k < 4; k++) add(x, click(0.02, 1800 + 300 * k, 3), 0.06 + k * 0.05, 0.3);
+	write('slam', room(x, 0.35, 1.3), 0.95);
+}

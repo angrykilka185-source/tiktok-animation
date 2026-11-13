@@ -33,8 +33,8 @@ const geom = (slots: number) => {
 		const boxW = 300;
 		return {w: (boxW - 44 - (slots - 1) * gap) / slots, gap, boxW, left: COUNTER_X - boxW};
 	}
-	const w = slots > 9 ? 26 : slots > 6 ? 34 : 44;
-	const gap = slots > 9 ? 6 : slots > 6 ? 9 : 16;
+	const w = slots > 15 ? 22 : slots > 9 ? 26 : slots > 6 ? 34 : 44;
+	const gap = slots > 15 ? 5 : slots > 9 ? 6 : slots > 6 ? 9 : 16;
 	const boxW = slots > 6 ? 44 + slots * w + (slots - 1) * gap : 404;
 	return {w, gap, boxW, left: COUNTER_X - boxW};
 };

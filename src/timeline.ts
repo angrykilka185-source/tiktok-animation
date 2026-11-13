@@ -24,7 +24,7 @@ export const TOTAL = built.total; // 2700
 export const shotStart = built.shotStart;
 
 // ---- signs ("признаки") ----
-export type Sign = {n: number; title: string; at: number; hold: number};
+export type Sign = {n: number; title: string; at: number; hold: number; y?: number}; // y = plaque centre (default 650)
 export const SIGNS: Sign[] = [
 	{n: 1, title: 'НЕ НАЗВАЛ\nТИГРЁНКОМ', at: shotStart(3) + 112, hold: 50},
 	{n: 2, title: 'ОТКАЗАЛСЯ\nОТ БОРЩА', at: shotStart(4) + 150, hold: 40},

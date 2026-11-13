@@ -16,7 +16,7 @@ const NIGHT = '#0b1638';
 
 // ------------------------------------------------------------- pieces ------
 // Your bedroom door seen from inside, at night. light = brightness of the corridor light.
-const InsideDoor: React.FC<{f: number; light?: number; handle?: number; shake?: number; feet?: boolean; pulse?: number}> = ({
+export const InsideDoor: React.FC<{f: number; light?: number; handle?: number; shake?: number; feet?: boolean; pulse?: number}> = ({
 	f,
 	light = 0.6,
 	handle = 0,
@@ -66,7 +66,7 @@ const InsideDoor: React.FC<{f: number; light?: number; handle?: number; shake?: 
 );
 
 // The corridor outside your door, as seen through "dad's" phone.
-const OutsideView: React.FC<{f: number; hand?: number; handle?: number}> = ({f, hand = 0, handle = 0}) => {
+export const OutsideView: React.FC<{f: number; hand?: number; handle?: number}> = ({f, hand = 0, handle = 0}) => {
 	const sx = Math.sin(f / 7) * 6;
 	const sy = Math.cos(f / 9) * 5;
 	return (
@@ -103,7 +103,7 @@ const OutsideView: React.FC<{f: number; hand?: number; handle?: number}> = ({f, 
 };
 
 // phone camera "recording" frame
-const CameraUI: React.FC<{f: number; startSec?: number}> = ({f, startSec = 0}) => {
+export const CameraUI: React.FC<{f: number; startSec?: number}> = ({f, startSec = 0}) => {
 	const sec = startSec + Math.floor(f / 30);
 	const dot = Math.floor(f / 15) % 2 === 0;
 	const corner = (style: React.CSSProperties) => <div style={{position: 'absolute', width: 90, height: 90, borderColor: '#fff', borderStyle: 'solid', borderWidth: 0, ...style}} />;
@@ -121,7 +121,7 @@ const CameraUI: React.FC<{f: number; startSec?: number}> = ({f, startSec = 0}) =
 	);
 };
 
-const CallScreen: React.FC<{mode: 'out' | 'in' | 'declined' | 'ended'; f: number}> = ({mode, f}) => {
+export const CallScreen: React.FC<{mode: 'out' | 'in' | 'declined' | 'ended'; f: number}> = ({mode, f}) => {
 	const ring = (f % 30) / 30;
 	const btn = 1 + Math.sin(f / 4) * 0.06;
 	return (

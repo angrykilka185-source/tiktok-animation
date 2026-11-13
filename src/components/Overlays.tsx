@@ -173,7 +173,7 @@ export const SignPlaques: React.FC<{ep: Episode}> = ({ep}) => {
 				const p = pop(f, s.at, 10);
 				const fly = interpolate(t, [s.hold, s.hold + SIGN_FLY], [0, 1], clamp);
 				const flyE = fly * fly;
-				const cx = 540, cy = 650;
+				const cx = 540, cy = s.y ?? 650;
 				const target = slotPos(ep.slots, s.n);
 				const x = cx + (target.x - cx) * flyE;
 				const y = cy + (target.y - cy) * flyE - Math.sin(fly * Math.PI) * 120;

@@ -107,3 +107,15 @@ python3 scripts/fit-voiceover.py assets/golosovye-2.mp3 --part g2
 npx remotion render Golosovye2 out/golosovye-2.mp4
 ffmpeg -i out/golosovye-2.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k deliverables/golosovye-2-s-ozvuchkoy.mp4
 ```
+
+## «Папа вернулся с вахты», часть 4 «Спальня»
+
+Код: `src/p4/`. Начало — как в частях 1–3 (тот же голос из части 1), затем пересказ части 3 (кадры части 3 в стиле VHS).
+Счётчик «ОН ИЛИ НЕ ОН?» на 15 клеток, 12 уже заполнены; признаки 13–15. Табличке можно задать высоту (`y` в `Sign`),
+чтобы она не закрывала главное в кадре.
+
+```bash
+python3 scripts/fit-voiceover.py assets/voiceover-4.mp3 --part 4
+npx remotion render PapaVakhta4 out/papa-vakhta-4.mp4
+ffmpeg -i out/papa-vakhta-4.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k deliverables/papa-vakhta-4-s-ozvuchkoy.mp4
+```

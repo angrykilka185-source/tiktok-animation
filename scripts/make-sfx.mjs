@@ -784,3 +784,19 @@ write('lift_ding', room(add(ping([1318.5, 2637], 1.2, 0.35), ping([1046.5, 2093]
 	for (let k = 0; k < 4; k++) add(x, click(0.02, 1800 + 300 * k, 3), 0.06 + k * 0.05, 0.3);
 	write('slam', room(x, 0.35, 1.3), 0.95);
 }
+
+// ---------- «Папа вернулся с вахты», часть 6 ----------
+// a dog howling far away
+{
+	const dur = 2.4;
+	const x = buf(dur);
+	let ph = 0;
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		const f0 = 520 + 180 * Math.sin(Math.min(1, t / 1.6) * Math.PI) - 90 * Math.max(0, t - 1.6);
+		ph += (2 * Math.PI * f0 * (1 + 0.02 * Math.sin(2 * Math.PI * 5.5 * t))) / SR;
+		const e = Math.min(1, t / 0.25) * Math.min(1, (dur - t) / 0.5);
+		x[i] = (Math.sin(ph) + 0.35 * Math.sin(2 * ph) + 0.15 * Math.sin(3 * ph)) * e;
+	}
+	write('howl', room(lowpass(x, 1800), 0.6, 2.0), 0.35);
+}

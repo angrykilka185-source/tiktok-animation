@@ -35,7 +35,7 @@ const SLEEPWALK = {
 
 // ======================================================= scene pieces =====
 // recap frames from the previous part: VHS look
-const Recap: React.FC<{f: number; label: string; children: React.ReactNode}> = ({f, label, children}) => {
+export const Recap: React.FC<{f: number; label: string; children: React.ReactNode}> = ({f, label, children}) => {
 	const flash = interpolate(f, [0, 4], [0.55, 0], clamp);
 	const jitter = f < 3 ? (f % 2 ? 8 : -8) : 0;
 	return (
@@ -67,7 +67,7 @@ const PillowFace: React.FC<{t: number; id: string; face: Face; zoom?: [number, n
 );
 
 // the door of your room seen from inside; behind it the dark corridor. open 0..1, hinge on the left
-const SonDoor: React.FC<{id: string; open: number; inside?: React.ReactNode}> = ({id, open, inside}) => {
+export const SonDoor: React.FC<{id: string; open: number; inside?: React.ReactNode}> = ({id, open, inside}) => {
 	const o = Math.max(0, Math.min(1, open));
 	return (
 		<g>
@@ -93,7 +93,7 @@ const SonDoor: React.FC<{id: string; open: number; inside?: React.ReactNode}> = 
 };
 
 // the yard at night seen from your window: blocks of flats, a streetlight, a row of garages (№17 is dad's)
-const Yard: React.FC<{f: number; id: string; light?: number; walker?: {x: number; y: number; s: number; eyes?: number; walk?: boolean}}> = ({f, id, light = 0, walker}) => (
+export const Yard: React.FC<{f: number; id: string; light?: number; walker?: {x: number; y: number; s: number; eyes?: number; walk?: boolean}}> = ({f, id, light = 0, walker}) => (
 	<g>
 		<rect x={-500} y={-500} width={2200} height={1700} fill="url(#skyNight)" />
 		{Array.from({length: 26}).map((_, k) => (
@@ -210,7 +210,7 @@ const RuleBroken: React.FC<{f: number; from: number; stampAt: number}> = ({f, fr
 };
 
 // big face of the dark man (head + shoulders), glinting eyes, a thin smile
-const ShadowFace: React.FC<{x: number; headY: number; s: number; eyes: number; smile?: number}> = ({x, headY, s, eyes, smile = 0}) => (
+export const ShadowFace: React.FC<{x: number; headY: number; s: number; eyes: number; smile?: number}> = ({x, headY, s, eyes, smile = 0}) => (
 	<g>
 		<Shadow id={`sf${Math.round(x)}`} x={x} y={headY + 1024 * s} scale={s} />
 		<Glint x={x} y={headY + 1024 * s} scale={s} o={eyes} />
@@ -324,7 +324,7 @@ export const S06: React.FC = () => {
 };
 
 // a dark corridor wall seen straight on (for walking past him)
-const Hallwall: React.FC<{id: string}> = ({id}) => (
+export const Hallwall: React.FC<{id: string}> = ({id}) => (
 	<g>
 		<rect x={-500} y={-500} width={2200} height={3000} fill="#262a42" />
 		<Wallpaper id={`${id}wp`} x={-500} y={-500} w={2200} h={1980} base="#363a5a" line="#30344f" />

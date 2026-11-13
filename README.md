@@ -131,3 +131,15 @@ python3 scripts/fit-voiceover.py assets/voiceover-5.mp3 --part 5
 npx remotion render PapaVakhta5 out/papa-vakhta-5.mp4
 ffmpeg -i out/papa-vakhta-5.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k deliverables/papa-vakhta-5-s-ozvuchkoy.mp4
 ```
+
+## «Папа вернулся с вахты», часть 6 «Гараж» (≈1,5 минуты)
+
+Код: `src/p6/` (силуэт и спальня — из `src/p4/`, двор с гаражами и пересказ — из `src/p5/`). Новое: машины во дворе,
+гараж №17 снаружи (ворота поднимаются), вид через щель под воротами, гараж изнутри, папин телефон с перепиской.
+Счётчик на 21 клетку (19 заполнены).
+
+```bash
+python3 scripts/fit-voiceover.py assets/voiceover-6.mp3 --part 6
+npx remotion render PapaVakhta6 out/papa-vakhta-6.mp4
+ffmpeg -i out/papa-vakhta-6.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k deliverables/papa-vakhta-6-s-ozvuchkoy.mp4
+```

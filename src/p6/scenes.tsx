@@ -110,6 +110,28 @@ const Legs: React.FC<{x: number; y: number; s: number; ph?: number; pants?: stri
 	);
 };
 
+// dad's legs when he sits: thighs towards us (a lap as wide as the hips), shins down to the floor, work boots, ropes
+const SitLegs: React.FC<{x: number; hipY: number; floorY: number; s: number}> = ({x, hipY, floorY, s}) => {
+	const legW = 78 * s;
+	const kneeY = hipY + 70 * s;
+	const off = legW / 2 + 12 * s;
+	return (
+		<g>
+			{[-1, 1].map((d) => (
+				<g key={d}>
+					<rect x={x + d * off - legW / 2} y={kneeY - 10 * s} width={legW} height={floorY - kneeY - 20 * s} fill="#43474d" />
+					<path d={`M ${x + d * off - legW / 2 - 8 * s},${floorY - 46 * s} L ${x + d * off + legW / 2 + 8 * s},${floorY - 46 * s} Q ${x + d * off + legW / 2 + 22 * s},${floorY - 20 * s} ${x + d * off + legW / 2 + 16 * s},${floorY} L ${x + d * off - legW / 2 - 16 * s},${floorY} Q ${x + d * off - legW / 2 - 22 * s},${floorY - 20 * s} ${x + d * off - legW / 2 - 8 * s},${floorY - 46 * s} Z`} fill="#5a3a24" />
+					{[0, 1].map((k) => (
+						<rect key={k} x={x + d * off - legW / 2 - 6 * s} y={floorY - 110 * s + k * 26 * s} width={legW + 12 * s} height={13 * s} rx={6 * s} fill="#d8c690" />
+					))}
+				</g>
+			))}
+			<rect x={x - 116 * s} y={hipY - 14 * s} width={232 * s} height={kneeY - hipY + 36 * s} rx={34 * s} fill="#4b4f55" />
+			<rect x={x - 116 * s} y={kneeY + 4 * s} width={232 * s} height={18 * s} rx={9 * s} fill="#3e4247" />
+		</g>
+	);
+};
+
 // the chair with dad's tied feet (view through the gap)
 const TiedFeet: React.FC<{x: number; y: number; s: number; ring?: number}> = ({x, y, s, ring = 0}) => (
 	<g transform={`translate(${x},${y}) scale(${s})`}>
@@ -192,7 +214,7 @@ const GarageInside: React.FC<{f: number; id: string; lean?: number; dadFace: Fac
 					<rect x={650} y={930} width={240} height={16} rx={8} fill="#d8c690" />
 					<rect x={650} y={980} width={240} height={16} rx={8} fill="#d8c690" />
 				</g>
-				<Legs x={770} y={1440} s={0.6} pants="#4b4f55" boots="#5a3a24" />
+				<SitLegs x={770} hipY={1186} floorY={1452} s={0.95} />
 			</g>
 			{/* «он» — dark against the light, leaning towards dad */}
 			<g transform={`rotate(${6 * lean} ${shadowX} 1450)`}>
@@ -456,10 +478,9 @@ export const S11: React.FC = () => {
 export const S12: React.FC = () => {
 	const f = useCurrentFrame();
 	const x = 540 + Math.sin((f - 26) / 22) * 380;
-	const vis = f >= 24;
 	return (
 		<Slit f={f} id="p6s12">
-			{vis && <Legs x={x} y={1110} s={0.9} ph={f * 0.28} />}
+			<Legs x={x} y={1110} s={0.9} ph={f * 0.28} />
 		</Slit>
 	);
 };
@@ -564,6 +585,10 @@ export const S18: React.FC = () => {
 			<g transform={`translate(540,${1520 - 60 * light})`}>
 				<rect x={-110} y={-200} width={220} height={400} rx={30} fill="#15161a" />
 				<rect x={-96} y={-186} width={192} height={372} rx={22} fill="#cfe2ff" opacity={light} />
+				<path d="M -330,620 L -150,110" stroke="#2c4158" strokeWidth={128} strokeLinecap="round" />
+				<path d="M 330,620 L 150,110" stroke="#2c4158" strokeWidth={128} strokeLinecap="round" />
+				<path d="M -330,620 L -150,110" stroke="#f39a2e" strokeWidth={128} strokeDasharray="0 260 36 1000" />
+				<path d="M 330,620 L 150,110" stroke="#f39a2e" strokeWidth={128} strokeDasharray="0 260 36 1000" />
 				<ellipse cx={-118} cy={70} rx={50} ry={74} fill={DAD_SKIN} />
 				<ellipse cx={118} cy={70} rx={50} ry={74} fill={DAD_SKIN} />
 				<ellipse cx={-118} cy={70} rx={50} ry={74} fill="#05070f" opacity={0.5 - 0.25 * light} />

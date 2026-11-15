@@ -209,13 +209,20 @@ const Lines: React.FC<{x: number; y: number; o: number; dir?: 1 | -1; s?: number
 	) : null;
 
 // ============================================================== SHOTS =======
-// 1. Voice messages from tomorrow — from your own number.
-export const S01: React.FC = G2.S01;
+// 1. Recap of series 1: voice messages from tomorrow — from your own number.
+export const S01: React.FC = () => {
+	const f = useCurrentFrame();
+	return (
+		<Recap f={f}>
+			<G2.S01 />
+		</Recap>
+	);
+};
 
 // 2. Recap: «Не садись в лифт» → the lift got stuck ✓.
 export const S02: React.FC = G2.S02;
 
-// 3. Recap: «На физре не трогай мяч» ? → you decide to obey (the viewers' choice).
+// 3. Recap: «На физре не трогай мяч» ? → title card: series 2, what the viewers chose (as in «Папа»).
 export const S03: React.FC = () => {
 	const f = useCurrentFrame();
 	const {i, t} = seg(f, [76]);
@@ -229,27 +236,27 @@ export const S03: React.FC = () => {
 			</Recap>
 		);
 	}
-	const nod = Math.sin(Math.min(1, Math.max(0, (t - 14) / 12)) * Math.PI);
-	const chip = pop(t, 4, 12);
+	const a = pop(t, 2, 10);
+	const b = pop(t, 10, 10);
+	const c = pop(t, 20, 11);
+	const d = pop(t, 34, 10);
 	return (
-		<AbsoluteFill>
-			<Stage cam={{s: lerp(t, 0, 41, 1.0, 1.08) * kick(t), cx: 540, cy: 960}} light={{glow: 0, vignette: 0.85}} bg="#05070f">
-				<rect x={-500} y={-500} width={2200} height={3000} fill="#1c2747" />
-				<Bust kind="teen" id="g2bs3" x={540} y={1010 + 24 * nod} scale={6.6} tilt={4 * nod} face={{eyes: t > 15 && t < 25 ? 'closed' : 'open', brows: 'worried', mouth: 'tight', look: [0, 0.15], blush: false}} />
-				<rect x={-500} y={-500} width={2200} height={3000} fill={NIGHT} opacity={0.35} />
-				<PhoneLight id="g2bs3pl" x={640} y={1900} r={1300} />
-			</Stage>
-			{chip > 0.01 && (
-				<div style={{position: 'absolute', top: 290, width: '100%', display: 'flex', justifyContent: 'center', transform: `scale(${chip})`}}>
-					<div style={{background: 'rgba(14,14,16,0.92)', border: '6px solid #3b82f6', borderRadius: 24, padding: '12px 32px 16px', fontFamily: HEAVY, fontWeight: 900, textAlign: 'center', boxShadow: '0 12px 30px rgba(0,0,0,0.5)'}}>
-						<div style={{fontSize: 30, color: '#9cc2ff', letterSpacing: 4}}>ВЫ ВЫБРАЛИ</div>
-						<div style={{display: 'flex', alignItems: 'center', gap: 16, marginTop: 6}}>
-							<div style={{width: 66, height: 66, borderRadius: 33, background: '#3b82f6', color: '#fff', fontSize: 46, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>1</div>
-							<div style={{fontSize: 54, color: '#fff'}}>ПОСЛУШАТЬСЯ</div>
-						</div>
+		<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 40%, #1d2a55 0%, #0a1024 58%, #04060d 100%)'}}>
+			<div style={{position: 'absolute', top: 420, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900}}>
+				<div style={{fontSize: 36, letterSpacing: 10, color: YELLOW}}>ГОЛОСОВЫЕ ИЗ ЗАВТРА</div>
+				<div style={{fontSize: 200, lineHeight: 1, color: '#fff', marginTop: 14, transform: `scale(${a})`}}>СЕРИЯ 2</div>
+				<div style={{fontSize: 76, color: RED, marginTop: 10, transform: `scale(${b})`, textShadow: '0 5px 0 rgba(0,0,0,0.5)'}}>НЕ ТРОГАЙ МЯЧ</div>
+				<div style={{display: 'inline-flex', flexDirection: 'column', alignItems: 'center', marginTop: 44, background: 'rgba(14,14,16,0.92)', border: '6px solid #3b82f6', borderRadius: 24, padding: '12px 34px 16px', transform: `scale(${c})`, boxShadow: '0 12px 30px rgba(0,0,0,0.5)'}}>
+					<div style={{fontSize: 30, color: '#9cc2ff', letterSpacing: 4}}>ВЫ ВЫБРАЛИ</div>
+					<div style={{display: 'flex', alignItems: 'center', gap: 16, marginTop: 6}}>
+						<div style={{width: 66, height: 66, borderRadius: 33, background: '#3b82f6', color: '#fff', fontSize: 46, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>1</div>
+						<div style={{fontSize: 54, color: '#fff'}}>ПОСЛУШАТЬСЯ</div>
 					</div>
 				</div>
-			)}
+				<div>
+					<div style={{display: 'inline-block', marginTop: 34, background: YELLOW, color: '#111', borderRadius: 18, padding: '10px 32px', fontSize: 36, transform: `scale(${d})`}}>СЕРИЯ 1 — В ПРОФИЛЕ</div>
+				</div>
+			</div>
 		</AbsoluteFill>
 	);
 };
@@ -816,7 +823,7 @@ export const S17: React.FC = () => {
 		<Vision f={t} label="СЕГОДНЯ · 19:00">
 			<Stage cam={c} light={{glow: 0.2, vignette: 0.6}} bg="#000">
 				<Hall id="g2bs17" bag={t >= 75 ? 0.5 + 0.5 * Math.sin((t - 75) / 4) : 0} />
-				{t >= 40 && <Person kind="mom" id="g2bs17m" x={880} y={1500} scale={0.95} silhouette="#2a1414" />}
+				<Person kind="mom" id="g2bs17m" x={880} y={1500} scale={0.95} breathe={t} silhouette="#2a1414" />
 			</Stage>
 			<NoSign p={pop(t, 93, 9)} x={sp.x} y={sp.y} r={300} />
 		</Vision>

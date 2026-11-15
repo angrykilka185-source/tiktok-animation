@@ -2,7 +2,7 @@
 // Authoring timeline ≈ the final edit (scripts/fit-voiceover.py --part g2b retimes it to the voice).
 import {FPS, makeShots, Sign} from '../timeline';
 
-export const SHOT_SECONDS = [3.3, 3, 3.9, 3.5, 3.9, 4.3, 3.9, 3.6, 2.3, 3.3, 3.7, 6.9, 3.2, 3.2, 3.1, 4.7, 6.9, 5.4, 2, 3.7, 10];
+export const SHOT_SECONDS = [3.3, 3, 4.9, 3.5, 3.9, 4.3, 3.9, 3.6, 2.3, 3.3, 3.7, 6.9, 3.2, 3.2, 3.1, 4.7, 6.9, 5.4, 2, 3.7, 10];
 const built = makeShots(SHOT_SECONDS);
 export const SHOTS = built.shots;
 export const TOTAL = built.total;

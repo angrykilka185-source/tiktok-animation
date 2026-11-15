@@ -213,22 +213,31 @@ const Lines: React.FC<{x: number; y: number; o: number; dir?: 1 | -1; s?: number
 export const S01: React.FC = () => {
 	const f = useCurrentFrame();
 	return (
-		<Recap f={f}>
+		<Recap f={f} label="◀◀ ЧАСТЬ 1">
 			<G2.S01 />
 		</Recap>
 	);
 };
 
 // 2. Recap: «Не садись в лифт» → the lift got stuck ✓.
-export const S02: React.FC = G2.S02;
+export const S02: React.FC = () => {
+	const f = useCurrentFrame();
+	const {i, t} = seg(f, [58]);
+	return (
+		<Recap f={t} label="◀◀ ЧАСТЬ 1">
+			<Freeze frame={i === 0 ? 118 : 95}>{i === 0 ? <G1.S03 /> : <G1.S08 />}</Freeze>
+			{i === 1 && <Stamp p={pop(t, 15, 10)} mark="check" label="ЛИФТ ЗАСТРЯЛ" />}
+		</Recap>
+	);
+};
 
-// 3. Recap: «На физре не трогай мяч» ? → title card: series 2, what the viewers chose (as in «Папа»).
+// 3. Recap: «На физре не трогай мяч» ? → title card: part 2, what the viewers chose (as in «Папа»).
 export const S03: React.FC = () => {
 	const f = useCurrentFrame();
 	const {i, t} = seg(f, [76]);
 	if (i === 0) {
 		return (
-			<Recap f={t}>
+			<Recap f={t} label="◀◀ ЧАСТЬ 1">
 				<Freeze frame={72}>
 					<G1.S12 />
 				</Freeze>
@@ -244,7 +253,7 @@ export const S03: React.FC = () => {
 		<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 40%, #1d2a55 0%, #0a1024 58%, #04060d 100%)'}}>
 			<div style={{position: 'absolute', top: 420, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900}}>
 				<div style={{fontSize: 36, letterSpacing: 10, color: YELLOW}}>ГОЛОСОВЫЕ ИЗ ЗАВТРА</div>
-				<div style={{fontSize: 200, lineHeight: 1, color: '#fff', marginTop: 14, transform: `scale(${a})`}}>СЕРИЯ 2</div>
+				<div style={{fontSize: 200, lineHeight: 1, color: '#fff', marginTop: 14, transform: `scale(${a})`}}>ЧАСТЬ 2</div>
 				<div style={{fontSize: 76, color: RED, marginTop: 10, transform: `scale(${b})`, textShadow: '0 5px 0 rgba(0,0,0,0.5)'}}>НЕ ТРОГАЙ МЯЧ</div>
 				<div style={{display: 'inline-flex', flexDirection: 'column', alignItems: 'center', marginTop: 44, background: 'rgba(14,14,16,0.92)', border: '6px solid #3b82f6', borderRadius: 24, padding: '12px 34px 16px', transform: `scale(${c})`, boxShadow: '0 12px 30px rgba(0,0,0,0.5)'}}>
 					<div style={{fontSize: 30, color: '#9cc2ff', letterSpacing: 4}}>ВЫ ВЫБРАЛИ</div>
@@ -254,7 +263,7 @@ export const S03: React.FC = () => {
 					</div>
 				</div>
 				<div>
-					<div style={{display: 'inline-block', marginTop: 34, background: YELLOW, color: '#111', borderRadius: 18, padding: '10px 32px', fontSize: 36, transform: `scale(${d})`}}>СЕРИЯ 1 — В ПРОФИЛЕ</div>
+					<div style={{display: 'inline-block', marginTop: 34, background: YELLOW, color: '#111', borderRadius: 18, padding: '10px 32px', fontSize: 36, transform: `scale(${d})`}}>ЧАСТЬ 1 — В ПРОФИЛЕ</div>
 				</div>
 			</div>
 		</AbsoluteFill>
@@ -920,4 +929,4 @@ export const S19: React.FC = () => {
 export const S20: React.FC = G2.S13;
 
 // 21. Finale: stay home, or go out and check who is lying? Countdown, end card.
-export const S21: React.FC = G2.S14;
+export const S21: React.FC = () => <G2.Finale next="ЧАСТЬ 3" />;

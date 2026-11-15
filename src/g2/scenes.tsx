@@ -275,7 +275,7 @@ export const Headphones: React.FC<{x: number; y: number; s: number}> = ({x, y, s
 );
 
 // recap frames from series 1: frozen, VHS look, «◀◀ СЕРИЯ 1»
-export const Recap: React.FC<{f: number; children: React.ReactNode}> = ({f, children}) => {
+export const Recap: React.FC<{f: number; label?: string; children: React.ReactNode}> = ({f, label = '◀◀ СЕРИЯ 1', children}) => {
 	const flash = interpolate(f, [0, 4], [0.55, 0], clamp);
 	const jitter = f < 3 ? (f % 2 ? 8 : -8) : 0;
 	return (
@@ -284,7 +284,7 @@ export const Recap: React.FC<{f: number; children: React.ReactNode}> = ({f, chil
 			<AbsoluteFill style={{background: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.16) 0px, rgba(0,0,0,0.16) 2px, transparent 2px, transparent 7px)'}} />
 			<AbsoluteFill style={{background: 'rgba(40,20,10,0.18)'}} />
 			<AbsoluteFill style={{background: '#fff', opacity: flash}} />
-			<div style={{position: 'absolute', left: 40, top: 304, background: '#111', border: `5px solid ${YELLOW}`, borderRadius: 14, padding: '8px 22px', fontFamily: HEAVY, fontWeight: 900, fontSize: 40, color: '#fff', letterSpacing: 2}}>◀◀ СЕРИЯ 1</div>
+			<div style={{position: 'absolute', left: 40, top: 304, background: '#111', border: `5px solid ${YELLOW}`, borderRadius: 14, padding: '8px 22px', fontFamily: HEAVY, fontWeight: 900, fontSize: 40, color: '#fff', letterSpacing: 2}}>{label}</div>
 		</AbsoluteFill>
 	);
 };
@@ -731,7 +731,10 @@ export const S13: React.FC = () => {
 };
 
 // 14. Finale: stay home, or go out and check who is lying? Countdown, end card.
-export const S14: React.FC = () => {
+export const S14: React.FC = () => <Finale />;
+
+// the finale card; `next` = what the end card announces
+export const Finale: React.FC<{next?: string}> = ({next = 'СЕРИЯ 3'}) => {
 	const f = useCurrentFrame();
 	const flash = lerp(f, 0, 10, 0.9, 0);
 	const title = pop(f, 6, 10);
@@ -857,7 +860,7 @@ export const S14: React.FC = () => {
 				<AbsoluteFill style={{opacity: endCard, background: 'radial-gradient(circle at 50% 42%, #1d2a55 0%, #0a1024 55%, #04060d 100%)'}}>
 					<div style={{position: 'absolute', top: 500, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900}}>
 						<div style={{fontSize: 40, letterSpacing: 8, color: YELLOW}}>ГОЛОСОВЫЕ ИЗ ЗАВТРА</div>
-						<div style={{fontSize: 190, lineHeight: 1, color: '#fff', marginTop: 18, transform: `scale(${pop(f, 254, 10)})`}}>СЕРИЯ 3</div>
+						<div style={{fontSize: 190, lineHeight: 1, color: '#fff', marginTop: 18, transform: `scale(${pop(f, 254, 10)})`}}>{next}</div>
 						<div style={{fontSize: 56, color: RED, marginTop: 8}}>СКОРО</div>
 						<div style={{display: 'inline-block', marginTop: 50, background: YELLOW, color: '#111', borderRadius: 18, padding: '10px 30px', fontSize: 38}}>ПИШИ 1 ИЛИ 2 В КОММЕНТАРИЯХ</div>
 						<div style={{fontSize: 30, color: '#9fb0d6', marginTop: 30, letterSpacing: 1}}>

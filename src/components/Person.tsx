@@ -56,6 +56,7 @@ export type PersonProps = {
 	shade?: boolean;
 	hideLegs?: boolean;
 	towel?: boolean;
+	armsBehind?: boolean; // arms drawn behind the body (hands hidden behind the back)
 };
 
 export const PALETTE = {
@@ -635,13 +636,14 @@ export const Person: React.FC<PersonProps> = (p) => {
 	const body = (
 		<g transform={`translate(0,${bob}) scale(${1 - breathe * 0.4},${1 + breathe})`}>
 			{p.back ? null : backpack}
+			{p.armsBehind ? arms : null}
 			{legs}
 			<rect x={-sp.neckW / 2} y={neckTop} width={sp.neckW} height={sp.neck + 20} fill={skin} />
 			{torso}
 			{p.back ? backpack : null}
 			{backpackStraps}
 			{head}
-			{arms}
+			{p.armsBehind ? null : arms}
 		</g>
 	);
 

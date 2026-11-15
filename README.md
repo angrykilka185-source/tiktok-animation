@@ -108,6 +108,22 @@ npx remotion render Golosovye2 out/golosovye-2.mp4
 ffmpeg -i out/golosovye-2.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k deliverables/golosovye-2-s-ozvuchkoy.mp4
 ```
 
+## «Голосовые из завтра», серия 2 «Не трогай мяч» (≈1,5 минуты, вариант «послушаться»)
+
+Зрители серии 1 выбрали «послушаться и не трогать мяч», поэтому вышедшая серия 2 — это `src/g2b/`
+(композиция `Golosovye2b`). Вариант «взять мяч» (`src/g2/`, `Golosovye2`) не публикуется, из него взяты спортзал,
+физрук, лампа, прихожая, дверь комнаты и финальная карточка. Новое: руки за спину (`armsBehind` у `Person`),
+скамейка и сидящий герой, одноклассник Макс (зелёное худи), телефон Макса с чатом «твоего» номера,
+плашка «ВЫ ВЫБРАЛИ: 1». Громкость голосовых для пузыря и волны: `python3 scripts/voice-env.py g2b g13 g17 g19`
+(пишет `src/g2b/env.json`).
+
+```bash
+python3 scripts/fit-voiceover.py assets/golosovye-2b.mp3 --part g2b
+python3 scripts/voice-env.py g2b g13 g17 g19
+npx remotion render Golosovye2b out/golosovye-2b.mp4
+ffmpeg -i out/golosovye-2b.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k deliverables/golosovye-2-ne-trogat-s-ozvuchkoy.mp4
+```
+
 ## «Папа вернулся с вахты», часть 4 «Спальня»
 
 Код: `src/p4/`. Начало — как в частях 1–3 (тот же голос из части 1), затем пересказ части 3 (кадры части 3 в стиле VHS).

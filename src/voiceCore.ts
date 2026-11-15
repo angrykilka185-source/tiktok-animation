@@ -115,6 +115,11 @@ export const makeVoice = (
 				cur = [];
 			};
 			l.words.forEach((w) => {
+				// a lone dash is a pause, not a word: break the caption there, show nothing
+				if (/^[—–-]+$/.test(w.w)) {
+					flush();
+					return;
+				}
 				const len = cur.reduce((a, x) => a + x.w.length + 1, 0);
 				if (cur.length >= 3 || (cur.length > 0 && len + w.w.length > 20)) flush();
 				cur.push(w);

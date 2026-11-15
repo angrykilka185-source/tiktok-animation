@@ -19,8 +19,8 @@ const level = (k: string, i: number) => {
 	return a[Math.floor(i)];
 };
 
-const TEACHER = {top: '#2a5ca8', topDark: '#214a8a', pants: '#2a5ca8', shoes: '#eceae4', hair: '#4a3a2c'};
-const MOM = {hair: '#3a2a22', top: '#3f7d6e', topDark: '#33685b', pants: '#e8b48e', shoes: '#5a3a3a', skin: '#e8b48e'};
+export const TEACHER = {top: '#2a5ca8', topDark: '#214a8a', pants: '#2a5ca8', shoes: '#eceae4', hair: '#4a3a2c'};
+export const MOM = {hair: '#3a2a22', top: '#3f7d6e', topDark: '#33685b', pants: '#e8b48e', shoes: '#5a3a3a', skin: '#e8b48e'};
 const KIDS = [
 	{kind: 'son' as const, scale: 0.8, colors: {top: '#3d8b5a', topDark: '#2f6e47', hair: '#2a1a12', pants: '#3a3f4a'}},
 	{kind: 'mom' as const, scale: 0.7, colors: {top: '#e07aa0', topDark: '#c4628a', hair: '#c27b3a', pants: '#f2c3a0', shoes: '#f4f4f4'}},
@@ -28,7 +28,7 @@ const KIDS = [
 ];
 
 // ======================================================= scene pieces =====
-const Ball: React.FC<{x: number; y: number; s: number; rot?: number}> = ({x, y, s, rot = 0}) => (
+export const Ball: React.FC<{x: number; y: number; s: number; rot?: number}> = ({x, y, s, rot = 0}) => (
 	<g transform={`translate(${x},${y}) scale(${s}) rotate(${rot})`}>
 		<circle r={86} fill="#e8742a" />
 		<path d="M -86,0 L 86,0 M 0,-86 L 0,86" stroke="#4a220c" strokeWidth={6} />
@@ -39,7 +39,7 @@ const Ball: React.FC<{x: number; y: number; s: number; rot?: number}> = ({x, y, 
 );
 
 // PE teacher in a tracksuit, a whistle on a red cord (in his mouth while he blows it)
-const Teacher: React.FC<{id: string; x: number; y: number; scale: number; f: number; blow?: boolean; face: Face; armL?: [number, number]; armR?: [number, number]; fore?: number; overhead?: boolean}> = ({
+export const Teacher: React.FC<{id: string; x: number; y: number; scale: number; f: number; blow?: boolean; face: Face; armL?: [number, number]; armR?: [number, number]; fore?: number; overhead?: boolean}> = ({
 	id,
 	x,
 	y,
@@ -91,7 +91,7 @@ const Classmates: React.FC<{f: number; xs: number[]; y: number; face: Face; idp:
 );
 
 // the old caged lamp; (0,0) = the point where its wire holds it, hangs downwards
-const Lamp: React.FC<{on?: boolean}> = ({on = true}) => (
+export const Lamp: React.FC<{on?: boolean}> = ({on = true}) => (
 	<g>
 		<rect x={-8} y={-10} width={16} height={26} fill="#5d646e" />
 		<path d="M -120,90 Q -110,10 0,10 Q 110,10 120,90 Z" fill="#7d8590" />
@@ -107,7 +107,7 @@ const Lamp: React.FC<{on?: boolean}> = ({on = true}) => (
 );
 
 // the lamp smashed on the floor: (x, y) = floor point
-const BrokenLamp: React.FC<{x: number; y: number; t: number}> = ({x, y, t}) => (
+export const BrokenLamp: React.FC<{x: number; y: number; t: number}> = ({x, y, t}) => (
 	<g>
 		<ellipse cx={x} cy={y + 6} rx={190} ry={26} fill="#000" opacity={0.25} />
 		<g transform={`translate(${x},${y - 40}) rotate(24)`}>
@@ -125,7 +125,7 @@ const BrokenLamp: React.FC<{x: number; y: number; t: number}> = ({x, y, t}) => (
 );
 
 // the gym ceiling seen from below, the lamp swinging on its last wire; the top of the wall with windows far below
-const Ceiling: React.FC<{f: number; spark: number}> = ({f, spark}) => {
+export const Ceiling: React.FC<{f: number; spark: number}> = ({f, spark}) => {
 	const th = 0.18 * Math.sin(f / 8);
 	const L = 330;
 	return (
@@ -201,7 +201,7 @@ export const Hall: React.FC<{id: string; bag?: number; dark?: number; noBag?: bo
 );
 
 // the door of your room seen from inside; behind it the lit hall with mom
-const RoomDoor: React.FC<{id: string; open: number; shake: number; talk: boolean}> = ({id, open, shake: sh, talk}) => {
+export const RoomDoor: React.FC<{id: string; open: number; shake: number; talk: boolean}> = ({id, open, shake: sh, talk}) => {
 	const o = Math.max(0, Math.min(1, open));
 	return (
 		<g>
@@ -245,7 +245,7 @@ const RoomDoor: React.FC<{id: string; open: number; shake: number; talk: boolean
 };
 
 // big bedside clock
-const BigClock: React.FC<{text: string; f: number; p: number}> = ({text, f, p}) => {
+export const BigClock: React.FC<{text: string; f: number; p: number}> = ({text, f, p}) => {
 	const colon = Math.floor(f / 15) % 2 === 0;
 	return (
 		<g>
@@ -264,7 +264,7 @@ const BigClock: React.FC<{text: string; f: number; p: number}> = ({text, f, p}) 
 };
 
 // big headphones over a bust at (x, y) with the given scale (son/teen head size)
-const Headphones: React.FC<{x: number; y: number; s: number}> = ({x, y, s}) => (
+export const Headphones: React.FC<{x: number; y: number; s: number}> = ({x, y, s}) => (
 	<g transform={`translate(${x},${y}) scale(${s})`}>
 		<path d="M -92,10 C -100,-150 100,-150 92,10" stroke="#2b2d33" strokeWidth={16} fill="none" strokeLinecap="round" />
 		<rect x={-112} y={-24} width={38} height={78} rx={16} fill="#2b2d33" />
@@ -275,7 +275,7 @@ const Headphones: React.FC<{x: number; y: number; s: number}> = ({x, y, s}) => (
 );
 
 // recap frames from series 1: frozen, VHS look, «◀◀ СЕРИЯ 1»
-const Recap: React.FC<{f: number; children: React.ReactNode}> = ({f, children}) => {
+export const Recap: React.FC<{f: number; children: React.ReactNode}> = ({f, children}) => {
 	const flash = interpolate(f, [0, 4], [0.55, 0], clamp);
 	const jitter = f < 3 ? (f % 2 ? 8 : -8) : 0;
 	return (
@@ -290,7 +290,7 @@ const Recap: React.FC<{f: number; children: React.ReactNode}> = ({f, children}) 
 };
 
 // a big stamp in the middle of the screen: ✓ (came true) or ? (not checked yet)
-const Stamp: React.FC<{p: number; mark: 'check' | 'q'; label: string}> = ({p, mark, label}) =>
+export const Stamp: React.FC<{p: number; mark: 'check' | 'q'; label: string}> = ({p, mark, label}) =>
 	p > 0.01 ? (
 		<div style={{position: 'absolute', left: 0, right: 0, top: 560, display: 'flex', justifyContent: 'center', transform: `scale(${0.5 + 0.5 * p}) rotate(${(1 - p) * -12 - 6}deg)`, opacity: Math.min(1, p * 2)}}>
 			<div style={{display: 'flex', alignItems: 'center', gap: 22, background: 'rgba(14,14,16,0.92)', border: `8px solid ${YELLOW}`, borderRadius: 26, padding: '18px 36px', boxShadow: '0 16px 40px rgba(0,0,0,0.5)'}}>

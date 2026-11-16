@@ -169,6 +169,9 @@ const UnderCar: React.FC<{f: number; id: string; lift: number; zoom?: number; le
 				<stop offset="0%" stopColor="#ffe08a" stopOpacity={0.3 * lift} />
 				<stop offset="100%" stopColor="#ffe08a" stopOpacity={0} />
 			</linearGradient>
+			<filter id={`${id}dim`} x="-20%" y="-20%" width="140%" height="140%" colorInterpolationFilters="sRGB">
+				<feColorMatrix type="matrix" values="0.5 0 0 0 0.01  0 0.5 0 0 0.01  0 0 0.55 0 0.03  0 0 0 1 0" />
+			</filter>
 		</defs>
 		<g clipPath={`url(#${id}gap)`}>
 			<g transform="translate(205,222) scale(0.62)">
@@ -181,7 +184,24 @@ const UnderCar: React.FC<{f: number; id: string; lift: number; zoom?: number; le
 		{Array.from({length: 22}).map((_, k) => (
 			<circle key={k} cx={rnd(k + 3) * 1080} cy={1200 + rnd(k + 40) * 700} r={3 + rnd(k + 9) * 5} fill="#2a2c33" />
 		))}
-		{legs && <Legs x={legs.x} y={legs.y} s={legs.s} ph={legs.ph} />}
+		{/* him: the whole man (dad's work jacket), dark against the garage light; the car's underside hides what is above it */}
+		{legs && (
+			<g filter={`url(#${id}dim)`}>
+				<Person
+					kind="dad"
+					id={`${id}him`}
+					colors={{top: '#2c4158', topDark: '#1f3045'}}
+					x={legs.x}
+					y={legs.y}
+					scale={(legs.s * 460) / 470}
+					hideLegs
+					face={{eyes: 'narrow', brows: 'flat', mouth: 'flat', stubble: true}}
+					armL={{target: [-150 - 30 * (legs.ph !== undefined ? Math.sin(legs.ph) : 0), -470], bend: 1}}
+					armR={{target: [150 - 30 * (legs.ph !== undefined ? Math.sin(legs.ph) : 0), -470], bend: -1}}
+				/>
+				<Legs x={legs.x} y={legs.y} s={legs.s} ph={legs.ph} />
+			</g>
+		)}
 		{/* the car's underside: sills, an exhaust pipe, an axle */}
 		<path d="M -300,-300 L 1380,-300 L 1380,770 Q 540,736 -300,770 Z" fill="#0f1013" />
 		<path d="M -300,742 Q 540,708 1380,742 L 1380,780 Q 540,746 -300,780 Z" fill="#1c1e24" />
@@ -325,6 +345,63 @@ const GarageView: React.FC<{f: number; id: string; son?: 'back' | 'front'; dadFa
 	);
 };
 
+// the side view by garages 17–19 (garage 17's door half up, light pouring out); the car stands in front of №18
+const GROUND = 1529;
+const SideCarBack: React.FC<{id: string}> = ({id}) => (
+	<g>
+		<defs>
+			<linearGradient id={`${id}spill`} x1="0" y1="0" x2="1" y2="0">
+				<stop offset="0%" stopColor="#ffe08a" stopOpacity={0.55} />
+				<stop offset="65%" stopColor="#ffe08a" stopOpacity={0} />
+			</linearGradient>
+		</defs>
+		<rect x={-500} y={-500} width={2200} height={1300} fill="url(#skyNight)" />
+		<rect x={-500} y={700} width={2200} height={50} fill="#3a3f48" />
+		<rect x={-500} y={750} width={2200} height={780} fill="#4a4f5a" />
+		{[
+			[-150, 17],
+			[290, 18],
+			[730, 19],
+		].map(([gx, n]) => (
+			<g key={n}>
+				<rect x={gx} y={820} width={380} height={710} fill={n === 17 ? '#ffe9a8' : '#5d5248'} />
+				{n === 17 && <rect x={gx} y={820} width={380} height={300} fill="#6b5a4a" />}
+				{Array.from({length: n === 17 ? 3 : 7}).map((_, j) => (
+					<rect key={j} x={gx} y={860 + j * 100} width={380} height={7} fill="#4e443c" />
+				))}
+				<text x={gx + 190} y={930} fontSize={56} fontFamily={HEAVY} fontWeight={900} fill="#d9d4c6" textAnchor="middle" opacity={0.85}>
+					{n}
+				</text>
+			</g>
+		))}
+		<rect x={-500} y={GROUND} width={2200} height={700} fill="#24262f" />
+		<rect x={-500} y={GROUND} width={2200} height={700} fill={`url(#${id}spill)`} />
+	</g>
+);
+// the car (and the shadow under it, `dark`), the night tint
+const SideCarFront: React.FC<{dark: number}> = ({dark}) => (
+	<g>
+		<Car x={640} y={GROUND - 12 * 2.4} s={2.4} color="#5a6a7a" />
+		<path d={`M 100,1404 L 1160,1404 L 1160,${GROUND} L 100,${GROUND} Z`} fill="#05070f" opacity={dark} />
+		<rect x={-500} y={-500} width={2200} height={3000} fill={NIGHT} opacity={0.22} />
+	</g>
+);
+// you, lying under the car (head to the left)
+const YouUnder: React.FC<{id: string; x?: number; roll?: number}> = ({id, x = 560, roll = 3 * Math.PI}) => (
+	<Roller id={id} x={x + 470} y={GROUND - 60} s={0.54} roll={roll} face={{eyes: 'wide', pupil: 0.5, brows: 'raised', mouth: 'tight', look: [-0.2, -0.6], blush: false}} />
+);
+// him, standing (or walking) on the far side of the car: head and shoulders above the roof, boots under the car
+const HimBehind: React.FC<{id: string; x: number; ph?: number; eyes?: number; flip?: boolean}> = ({id, x, ph, eyes = 0, flip = false}) => {
+	const sc = 0.62;
+	const y = GROUND - 26;
+	return (
+		<g transform={flip ? `translate(${2 * x},0) scale(-1,1)` : undefined}>
+			<Person kind="dad" id={id} x={x} y={y} scale={sc} silhouette="#07080c" walk={ph} />
+			<Glint x={x} y={y} scale={sc} o={eyes} />
+		</g>
+	);
+};
+
 // ============================================================== SHOTS =======
 // 1. the same opening as parts 1–6
 export const S01: React.FC = () => <P1.S01 />;
@@ -435,38 +512,9 @@ export const S06: React.FC = () => {
 	const dark = interpolate(t, [28, 44], [0, 0.55], clamp);
 	return (
 		<Stage cam={{s: lerp(t, 0, 59, 1.0, 1.05), cx: 540, cy: 1420}} light={{glow: 0, vignette: 0.85}} bg="#05070f">
-			<defs>
-				<linearGradient id="p7s6spill" x1="0" y1="0" x2="1" y2="0">
-					<stop offset="0%" stopColor="#ffe08a" stopOpacity={0.55} />
-					<stop offset="65%" stopColor="#ffe08a" stopOpacity={0} />
-				</linearGradient>
-			</defs>
-			<rect x={-500} y={-500} width={2200} height={1300} fill="url(#skyNight)" />
-			<rect x={-500} y={700} width={2200} height={50} fill="#3a3f48" />
-			<rect x={-500} y={750} width={2200} height={780} fill="#4a4f5a" />
-			{[
-				[-150, 17],
-				[290, 18],
-				[730, 19],
-			].map(([gx, n]) => (
-				<g key={n}>
-					<rect x={gx} y={820} width={380} height={710} fill={n === 17 ? '#ffe9a8' : '#5d5248'} />
-					{n === 17 && <rect x={gx} y={820} width={380} height={300} fill="#6b5a4a" />}
-					{Array.from({length: n === 17 ? 3 : 7}).map((_, j) => (
-						<rect key={j} x={gx} y={860 + j * 100} width={380} height={7} fill="#4e443c" />
-					))}
-					<text x={gx + 190} y={930} fontSize={56} fontFamily={HEAVY} fontWeight={900} fill="#d9d4c6" textAnchor="middle" opacity={0.85}>
-						{n}
-					</text>
-				</g>
-			))}
-			<rect x={-500} y={1529} width={2200} height={700} fill="#24262f" />
-			<rect x={-500} y={1529} width={2200} height={700} fill="url(#p7s6spill)" />
-			<Roller id="p7s6roll" x={x + 470} y={1529 - 60} s={0.54} roll={roll} face={{eyes: 'wide', pupil: 0.6, brows: 'raised', mouth: 'tight', blush: false}} />
-			<Car x={640} y={1529 - 12 * 2.4} s={2.4} color="#5a6a7a" />
-			{/* the shadow under the car swallows you */}
-			<path d="M 100,1404 L 1160,1404 L 1160,1529 L 100,1529 Z" fill="#05070f" opacity={dark} />
-			<rect x={-500} y={-500} width={2200} height={3000} fill={NIGHT} opacity={0.22} />
+			<SideCarBack id="p7s6side" />
+			<YouUnder id="p7s6roll" x={x} roll={roll} />
+			<SideCarFront dark={dark} />
 		</Stage>
 	);
 };
@@ -511,14 +559,24 @@ export const S07: React.FC = () => {
 };
 
 // 8. The door opens. His boots come out and stop a step from your face.
+//    a) from under the car (far away you see him to the waist; close up only his legs); b) from the side: he stands right by the car
 export const S08: React.FC = () => {
 	const f = useCurrentFrame();
-	const lift = lerp(f, 0, 36, 0.45, 1, Easing.inOut(Easing.sin));
-	const come = interpolate(f, [30, 100], [0, 1], {...clamp, easing: Easing.in(Easing.quad)});
-	const walking = f >= 30 && f < 100;
-	const [sx, sy] = f >= 100 ? shake(f, 100, 10, 6) : [0, 0];
+	if (f < 104) {
+		const lift = lerp(f, 0, 36, 0.45, 1, Easing.inOut(Easing.sin));
+		const come = interpolate(f, [30, 100], [0, 1], {...clamp, easing: Easing.in(Easing.quad)});
+		const walking = f >= 30 && f < 100;
+		const [sx, sy] = f >= 100 ? shake(f, 100, 10, 6) : [0, 0];
+		return <UnderCar f={f} id="p7s8" lift={lift} zoom={lerp(f, 0, 129, 1.0, 1.06)} dy={sy} legs={f >= 26 ? {x: 540 + 70 * come + sx, y: 1140 + 470 * come, s: 0.5 + 1.75 * come, ph: walking ? f * 0.3 : undefined} : undefined} />;
+	}
+	const t = f - 104;
 	return (
-		<UnderCar f={f} id="p7s8" lift={lift} zoom={lerp(f, 0, 129, 1.0, 1.06)} dy={sy} legs={f >= 26 ? {x: 540 + 70 * come + sx, y: 1140 + 470 * come, s: 0.5 + 1.75 * come, ph: walking ? f * 0.3 : undefined} : undefined} />
+		<Stage cam={{s: lerp(t, 0, 28, 1.08, 1.12) * kick(t), cx: 600, cy: 1300}} light={{glow: 0, vignette: 0.85}} bg="#05070f">
+			<SideCarBack id="p7s8side" />
+			<HimBehind id="p7s8him" x={600} eyes={interpolate(t, [6, 14], [0, 1], clamp)} />
+			<YouUnder id="p7s8you" />
+			<SideCarFront dark={0.4} />
+		</Stage>
 	);
 };
 
@@ -576,8 +634,15 @@ export const S10: React.FC = () => {
 	const f = useCurrentFrame();
 	const {i, t} = seg(f, [56]);
 	if (i === 0) {
-		const go = interpolate(t, [42, 56], [0, 1], {...clamp, easing: Easing.in(Easing.quad)});
-		return <UnderCar f={f} id="p7s10" lift={1} zoom={1.06} legs={{x: 610 - 900 * go, y: 1610, s: 2.25, ph: t >= 42 ? t * 0.35 : undefined}} />;
+		const go = interpolate(t, [40, 56], [0, 1], {...clamp, easing: Easing.in(Easing.quad)});
+		return (
+			<Stage cam={{s: lerp(t, 0, 56, 1.08, 1.14), cx: 600, cy: 1300}} light={{glow: 0, vignette: 0.85}} bg="#05070f">
+				<SideCarBack id="p7s10side" />
+				<HimBehind id="p7s10him" x={600 - 1000 * go} ph={t >= 40 ? t * 0.45 : undefined} eyes={t < 40 ? 1 : 0} flip={t >= 40} />
+				<YouUnder id="p7s10you" />
+				<SideCarFront dark={0.4} />
+			</Stage>
+		);
 	}
 	// your block's entrance: he walks in fast; up there — your window, mom is asleep
 	const x = lerp(t, 0, 44, 1180, 560, Easing.inOut(Easing.sin));

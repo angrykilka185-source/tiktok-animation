@@ -174,10 +174,10 @@ export const TypingDots: React.FC<{f: number; top: number}> = ({f, top}) => (
 	</div>
 );
 
-export const LockScreen: React.FC<{notif: number; ring?: number; time?: string}> = ({notif, ring = 0, time = '23:41'}) => (
+export const LockScreen: React.FC<{notif: number; ring?: number; time?: string; date?: string}> = ({notif, ring = 0, time = '23:41', date = 'четверг, 12 ноября'}) => (
 	<div style={{position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 30%, #2a3c6e 0%, #121a33 55%, #070a14 100%)', fontFamily: SANS, color: '#fff'}}>
 		<div style={{position: 'absolute', top: 110, width: '100%', textAlign: 'center'}}>
-			<div style={{fontSize: 32, fontWeight: 700, opacity: 0.85}}>четверг, 12 ноября</div>
+			<div style={{fontSize: 32, fontWeight: 700, opacity: 0.85}}>{date}</div>
 			<div style={{fontSize: 170, fontWeight: 800, lineHeight: 1.05}}>{time}</div>
 		</div>
 		<div

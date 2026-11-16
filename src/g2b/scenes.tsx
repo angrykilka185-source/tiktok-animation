@@ -23,7 +23,7 @@ const level = (k: string, i: number) => {
 };
 
 // Max: the classmate who picks up the ball (green hoodie, sandy hair)
-const MAX: Colors = {top: '#3d8b5a', topDark: '#2f6e47', hair: '#d9a441', pants: '#2b2d33', shoes: '#eceae4'};
+export const MAX: Colors = {top: '#3d8b5a', topDark: '#2f6e47', hair: '#d9a441', pants: '#2b2d33', shoes: '#eceae4'};
 const MS = 0.99; // Max next to the hero (teen at 0.95)
 const MAX_ARMS = {armL: {target: [-60, -440] as [number, number], bend: 1 as const, ku: 0.55, kf: 0.55}, armR: {target: [60, -440] as [number, number], bend: -1 as const, ku: 0.55, kf: 0.55}};
 const KIDS = [
@@ -37,7 +37,7 @@ const HERO_NUMBER = '+7 9•• •••-47-12'; // «Мой номер» from 
 
 // ======================================================= scene pieces =====
 // classmates; laugh = bouncing, a hand on the belly, pointing at you
-const Kids: React.FC<{f: number; xs: (number | undefined)[]; y: number; face: Face; idp: string; laugh?: boolean}> = ({f, xs, y, face, idp, laugh = false}) => (
+export const Kids: React.FC<{f: number; xs: (number | undefined)[]; y: number; face: Face; idp: string; laugh?: boolean}> = ({f, xs, y, face, idp, laugh = false}) => (
 	<g>
 		{KIDS.map((k, i) => {
 			const x = xs[i];
@@ -64,7 +64,7 @@ const Kids: React.FC<{f: number; xs: (number | undefined)[]; y: number; face: Fa
 	</g>
 );
 
-const Max: React.FC<{id: string; x: number; y: number; s?: number; f: number; face: Face; ball?: boolean; walk?: number; back?: boolean; silhouette?: string; arms?: {armL: {target: [number, number]; bend: 1 | -1; ku?: number; kf?: number}; armR: {target: [number, number]; bend: 1 | -1; ku?: number; kf?: number}}}> = ({
+export const Max: React.FC<{id: string; x: number; y: number; s?: number; f: number; face: Face; ball?: boolean; walk?: number; back?: boolean; silhouette?: string; arms?: {armL: {target: [number, number]; bend: 1 | -1; ku?: number; kf?: number}; armR: {target: [number, number]; bend: 1 | -1; ku?: number; kf?: number}}}> = ({
 	id,
 	x,
 	y,

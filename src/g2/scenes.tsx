@@ -733,8 +733,17 @@ export const S13: React.FC = () => {
 // 14. Finale: stay home, or go out and check who is lying? Countdown, end card.
 export const S14: React.FC = () => <Finale />;
 
-// the finale card; `next` = what the end card announces
-export const Finale: React.FC<{next?: string}> = ({next = 'СЕРИЯ 3'}) => {
+// the finale card; `next` = what the end card announces, `boxes` = predictions (the last one «?»),
+// opt1/opt2 = the two choices, tally = «2 ИЗ 3» / «ТРЕТЬЕ», bg = the picture behind the cards
+type Opt = {text: string; sub: string};
+export const Finale: React.FC<{next?: string; boxes?: number; opt1?: Opt; opt2?: Opt; tally?: {done: string; rest: string}; bg?: React.ReactNode}> = ({
+	next = 'СЕРИЯ 3',
+	boxes = 3,
+	opt1 = {text: 'НЕ ВЫХОДИТЬ', sub: 'послушаться голосового'},
+	opt2 = {text: 'ВЫЙТИ', sub: 'и проверить, кто врёт'},
+	tally = {done: '2 ИЗ 3', rest: 'ТРЕТЬЕ'},
+	bg,
+}) => {
 	const f = useCurrentFrame();
 	const flash = lerp(f, 0, 10, 0.9, 0);
 	const title = pop(f, 6, 10);
@@ -779,7 +788,7 @@ export const Finale: React.FC<{next?: string}> = ({next = 'СЕРИЯ 3'}) => {
 		</div>
 	);
 	const box = (k: number) => {
-		const q = k === 2;
+		const q = k === boxes - 1;
 		return (
 			<div
 				key={k}
@@ -811,20 +820,22 @@ export const Finale: React.FC<{next?: string}> = ({next = 'СЕРИЯ 3'}) => {
 	};
 	return (
 		<AbsoluteFill>
-			<Stage cam={{s: lerp(f, 0, 300, 1.0, 1.1), cx: 560, cy: 1000}} light={{glow: 0, vignette: 0.9}} bg="#05070f">
-				<Hall id="g2fin" dark={0.55} bag={0.4 + 0.4 * Math.sin(f / 6)} />
-				<rect x={-400} y={-400} width={1880} height={2800} fill="#000" opacity={0.35} />
-			</Stage>
+			{bg ?? (
+				<Stage cam={{s: lerp(f, 0, 300, 1.0, 1.1), cx: 560, cy: 1000}} light={{glow: 0, vignette: 0.9}} bg="#05070f">
+					<Hall id="g2fin" dark={0.55} bag={0.4 + 0.4 * Math.sin(f / 6)} />
+					<rect x={-400} y={-400} width={1880} height={2800} fill="#000" opacity={0.35} />
+				</Stage>
+			)}
 			<div style={{position: 'absolute', top: 300, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, fontSize: 86, color: '#fff', transform: `scale(${title})`, textShadow: '0 8px 0 #6b4a00, 0 0 30px rgba(255,211,74,0.45)'}}>
 				ЧТО <span style={{color: YELLOW}}>ВЫБЕРЕШЬ?</span>
 				<div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10, marginTop: 18}}>
 					<span style={{fontSize: 34, color: YELLOW, marginRight: 8}}>СБЫЛОСЬ</span>
-					{[0, 1, 2].map(box)}
+					{Array.from({length: boxes}, (_, k) => box(k))}
 				</div>
 			</div>
-			{card(c1, 680, '1', 'НЕ ВЫХОДИТЬ', '#3b82f6', 'послушаться голосового', 1)}
+			{card(c1, 680, '1', opt1.text, '#3b82f6', opt1.sub, 1)}
 			<div style={{position: 'absolute', left: 60, width: 720, top: 905, textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, fontSize: 44, color: YELLOW, opacity: c2}}>ИЛИ</div>
-			{card(c2, 970, '2', 'ВЫЙТИ', '#e0342b', 'и проверить, кто врёт', 2)}
+			{card(c2, 970, '2', opt2.text, '#e0342b', opt2.sub, 2)}
 			{cur && !final && (
 				<div
 					style={{
@@ -864,7 +875,7 @@ export const Finale: React.FC<{next?: string}> = ({next = 'СЕРИЯ 3'}) => {
 						<div style={{fontSize: 56, color: RED, marginTop: 8}}>СКОРО</div>
 						<div style={{display: 'inline-block', marginTop: 50, background: YELLOW, color: '#111', borderRadius: 18, padding: '10px 30px', fontSize: 38}}>ПИШИ 1 ИЛИ 2 В КОММЕНТАРИЯХ</div>
 						<div style={{fontSize: 30, color: '#9fb0d6', marginTop: 30, letterSpacing: 1}}>
-							СБЫЛОСЬ <span style={{color: '#7ee08a'}}>2 ИЗ 3</span> · ТРЕТЬЕ — <span style={{color: YELLOW}}>ПОД ВОПРОСОМ</span>
+							СБЫЛОСЬ <span style={{color: '#7ee08a'}}>{tally.done}</span> · {tally.rest} — <span style={{color: YELLOW}}>ПОД ВОПРОСОМ</span>
 						</div>
 						<div style={{display: 'inline-block', marginTop: 46, background: '#ff2d3d', borderRadius: 60, padding: '22px 70px', fontSize: 52, color: '#fff', boxShadow: '0 0 40px rgba(255,45,61,0.6)', transform: `scale(${1 + Math.sin(f / 5) * 0.04})`}}>
 							ПОДПИШИСЬ

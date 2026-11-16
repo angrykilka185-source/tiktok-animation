@@ -125,6 +125,22 @@ npx remotion render Golosovye2b out/golosovye-2b.mp4
 ffmpeg -i out/golosovye-2b.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k deliverables/golosovye-2-ne-trogat-s-ozvuchkoy.mp4
 ```
 
+## «Голосовые из завтра», часть 3 «Глазок» (≈1,5 минуты, вариант «не выходить»)
+
+Код: `src/g3/` (композиция `Golosovye3`). Начало: пересказ частей 1–2 (замороженные кадры с «◀◀ ЧАСТЬ 1/2»),
+потом заставка «ЧАСТЬ 3 · ГЛАЗОК · ВЫ ВЫБРАЛИ: 1 — НЕ ВЫХОДИТЬ». Новое: открывающаяся входная дверь прихожей
+(`FrontDoor`), площадка с лифтом, мусоропроводом и мигающей лампой (`Landing`), вид через дверной глазок
+(`Peephole`), двойник героя, экран входящего звонка «Мой номер» (`CallScreen`), полоска «выключить» на телефоне.
+Счётчик на 4 предсказания. Финальную карточку даёт `Finale` из `src/g2/scenes.tsx` (варианты, число клеток и итог
+задаются пропсами).
+
+```bash
+python3 scripts/fit-voiceover.py assets/golosovye-3.mp3 --part g3
+python3 scripts/voice-env.py g3 g21
+npx remotion render Golosovye3 out/golosovye-3.mp4
+ffmpeg -i out/golosovye-3.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k deliverables/golosovye-3-s-ozvuchkoy.mp4
+```
+
 ## «Папа вернулся с вахты», часть 4 «Спальня»
 
 Код: `src/p4/`. Начало — как в частях 1–3 (тот же голос из части 1), затем пересказ части 3 (кадры части 3 в стиле VHS).

@@ -40,6 +40,7 @@ PATHS = {
     'g2b': {'lines': 'src/g2b/voice-lines.json', 'timeline': 'src/g2b/timeline.ts', 'out': 'public/voice-g2b', 'timings': 'src/g2b/voice-timings.json', 'edit': 'src/g2b/edit.json'},
     'g3': {'lines': 'src/g3/voice-lines.json', 'timeline': 'src/g3/timeline.ts', 'out': 'public/voice-g3', 'timings': 'src/g3/voice-timings.json', 'edit': 'src/g3/edit.json'},
     'k1': {'lines': 'src/k1/voice-lines.json', 'timeline': 'src/k1/timeline.ts', 'out': 'public/voice-k1', 'timings': 'src/k1/voice-timings.json', 'edit': 'src/k1/edit.json'},
+    'f1': {'lines': 'src/f1/voice-lines.json', 'timeline': 'src/f1/timeline.ts', 'out': 'public/voice-f1', 'timings': 'src/f1/voice-timings.json', 'edit': 'src/f1/edit.json'},
 }[PART]
 SHOT = [float(x) for x in re.search(r'SHOT_SECONDS = \[([^\]]+)\]', open(os.path.join(ROOT, PATHS['timeline']), encoding='utf-8').read()).group(1).split(',')]
 TOTAL = round(sum(SHOT) * FPS)

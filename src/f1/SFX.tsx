@@ -51,10 +51,12 @@ const CUES: Cue[] = [
 	{at: s(11) + 54, file: 'glitch', vol: 0.35},
 	{at: s(11) + 92, file: 'stamp', vol: 0.5},
 	// 12 a seat creaks behind you, somebody sits down
+	{at: s(12), file: 'steps_slow', vol: 0.35, len: 44},
 	{at: s(12) + 14, file: 'creak', vol: 0.9},
-	{at: s(12) + 46, file: 'floorcreak', vol: 0.4},
+	{at: s(12) + 40, file: 'floorcreak', vol: 0.35},
+	{at: s(12) + 52, file: 'cloth', vol: 0.3},
 	{at: s(12) + 56, file: 'gasp', vol: 0.4},
-	{at: s(12) + 62, file: 'creak', vol: 0.45},
+	{at: s(12) + 62, file: 'creak', vol: 0.5},
 	// 13-14 the figure leans to your ear: «Привет, тигрёнок»
 	{at: s(13), file: 'heart', vol: 0.5, len: 90},
 	{at: s(13) + 10, file: 'swell', vol: 0.45},

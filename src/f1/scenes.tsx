@@ -432,7 +432,7 @@ const FilmHall: React.FC<{t: number; idp: string; sonBack?: boolean; dad?: boole
 			dim={0.45}
 			row8={
 				shadow > 0 ? (
-					<g opacity={Math.min(1, shadow * 1.5)} transform={`translate(${-36 * Math.min(1, shadow)},${123 * Math.min(1, shadow)})`}>
+					<g transform={`translate(${-36 * Math.min(1, shadow)},${123 * Math.min(1, shadow)})`}>
 						<Sitter kind="dad" k={8} i={SON_SEAT} id={`${idp}x`} f={t} silhouette="#050406" lean={8 * Math.min(1, shadow)} />
 					</g>
 				) : null
@@ -756,22 +756,40 @@ export const S11: React.FC = () => {
 // 12. Behind you a seat creaks. Somebody sits down right behind you (in the only empty seat).
 export const S12: React.FC = () => {
 	const f = useCurrentFrame();
-	const sit = lerp(f, 46, 68, 0, 1, Easing.inOut(Easing.cubic));
+	// a dark figure comes along row 8 from the left, stops at the only empty seat (right behind you) and sits down
+	const k8 = rowS(8);
+	const sc = k8 * VSCALE.dad;
+	const seat = seatX(8, SON_SEAT);
+	const floor = rowY(8) + 120 * k8; // the floor between rows 7 and 8
+	const hipStand = floor - SPECS.dad.leg * sc;
+	const hipSeat = rowY(8) - 26 * k8;
+	const x = lerp(f, 0, 40, 170, seat, Easing.out(Easing.sin));
+	const walking = f < 40;
+	const ph = (Math.min(f, 40) / 40) * 4 * Math.PI; // two strides, ends with the feet together
+	const sit = lerp(f, 50, 70, 0, 1, Easing.inOut(Easing.cubic));
+	const sw = walking ? Math.sin(ph) * 22 : 0;
+	const armA = (side: 1 | -1) => ({
+		target: [side * (160 - 80 * sit) - sw * side, -440 - 90 * sit] as [number, number],
+		bend: (side === -1 ? 1 : -1) as 1 | -1,
+	});
 	return (
-		<Stage cam={{s: lerp(f, 0, 111, 2.6, 2.75) * kick(f), cx: 510, cy: 880}} light={{glow: 0, vignette: 0.85}} bg="#1d161b">
+		<Stage cam={{s: interpolate(f, [0, 60, 111], [2.3, 2.6, 2.7], clamp) * kick(f), cx: lerp(f, 0, 60, 470, 500), cy: lerp(f, 0, 60, 870, 885)}} light={{glow: 0, vignette: 0.85}} bg="#1d161b">
+			<defs>
+				<clipPath id="f1s12clip">
+					<rect x={-600} y={-600} width={2300} height={rowY(8) + 30 * k8 + 600} />
+				</clipPath>
+			</defs>
 			<HallFront
 				dim={0.55}
 				f={f}
 				idp="f1s12v"
 				row8={
-					f >= 42 ? (
-						<g transform={`translate(0,${-140 * (1 - sit)})`}>
-							<Sitter kind="dad" k={8} i={SON_SEAT} id="f1s12x" f={f} silhouette="#050406" />
-						</g>
-					) : null
+					<g clipPath="url(#f1s12clip)">
+						<Person kind="dad" id="f1s12x" silhouette="#050406" x={x} y={floor + (hipSeat - hipStand) * sit} scale={sc} walk={walking ? ph : undefined} breathe={f} armL={armA(-1)} armR={armA(1)} />
+					</g>
 				}
 			>
-				<Sitter kind="son" k={7} i={SON_SEAT} id="f1s12s" f={f} face={{eyes: 'wide', pupil: f >= 52 ? 0.5 : 1, mouth: f >= 52 ? 'o' : 'flat', brows: 'raised', look: [0, -0.3]}} />
+				<Sitter kind="son" k={7} i={SON_SEAT} id="f1s12s" f={f} face={{eyes: 'wide', pupil: f >= 56 ? 0.5 : 1, mouth: f >= 56 ? 'o' : 'flat', brows: 'raised', look: [f >= 16 && f < 56 ? -0.5 : 0, -0.3]}} />
 				<Sitter kind="dad" k={7} i={DAD_SEAT} id="f1s12d" f={f} popcorn face={{eyes: 'happy', mouth: 'grin', brows: 'raised', stubble: true}} armL={{target: [-40, -560], bend: 1, ku: 0.7, kf: 0.7}} />
 			</HallFront>
 		</Stage>
@@ -783,7 +801,7 @@ export const S13: React.FC = () => {
 	const f = useCurrentFrame();
 	return (
 		<ScreenView f={f} zoom={lerp(f, 0, 99, 1.2, 1.32)}>
-			<FilmHall t={f} idp="f1s13" zoom={2.3} shadow={lerp(f, 24, 80, 0.3, 1)} />
+			<FilmHall t={f} idp="f1s13" zoom={2.3} shadow={lerp(f, 24, 80, 0.01, 1, Easing.inOut(Easing.sin))} />
 		</ScreenView>
 	);
 };

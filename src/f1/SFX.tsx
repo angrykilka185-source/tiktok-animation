@@ -125,7 +125,7 @@ export const SFXF1: React.FC<{r: Remap}> = ({r}) => {
 	return (
 		<>
 			<Sequence from={toonFrom} durationInFrames={toonLen} name="sfx cartoon theme">
-				<Audio src={staticFile('sfx/toon.wav')} volume={(f) => 0.32 * SFX_GAIN * interpolate(f, [0, 4], [0, 1], clampX) * toonGate(r.inv(toonFrom + f))} />
+				<Audio src={staticFile('sfx/toon.wav')} volume={(f) => 0.5 * SFX_GAIN * interpolate(f, [0, 4], [0, 1], clampX) * toonGate(r.inv(toonFrom + f))} />
 			</Sequence>
 			<Sequence from={bedFrom} durationInFrames={bedLen} name="sfx drone bed">
 				<Audio src={staticFile('sfx/drone.wav')} volume={(f) => 0.3 * interpolate(f, [0, 60, bedLen - 40, bedLen - 10], [0, 1, 1, 0], clampX)} />

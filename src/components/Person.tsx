@@ -57,6 +57,7 @@ export type PersonProps = {
 	hideLegs?: boolean;
 	towel?: boolean;
 	armsBehind?: boolean; // arms drawn behind the body (hands hidden behind the back)
+	plain?: boolean; // extras: a plain jacket / dress (no work-jacket stripes, no dress dots or apron)
 };
 
 export const PALETTE = {
@@ -584,12 +585,12 @@ export const Person: React.FC<PersonProps> = (p) => {
 				<path d={`M ${-sw},${shY + 18} Q ${-sw},${shY} ${-sw + 20},${shY} L ${sw - 20},${shY} Q ${sw},${shY} ${sw},${shY + 18} L ${sw + 30},${hem} L ${-sw - 30},${hem} Z`} fill={top} />
 				{!sil && (
 					<>
-						{Array.from({length: 22}).map((_, i) => {
+						{!p.plain && Array.from({length: 22}).map((_, i) => {
 							const px = ((i * 73) % (sw * 2 + 40)) - sw - 20;
 							const py = shY + 60 + ((i * 137) % (hem - shY - 80));
 							return <circle key={i} cx={px} cy={py} r={7} fill="#cfdcec" opacity={0.85} />;
 						})}
-						{!p.back && (
+						{!p.back && !p.plain && (
 							<path d={`M ${-sw * 0.62},${shY + 120} L ${sw * 0.62},${shY + 120} L ${sw * 0.78},${hem - 6} L ${-sw * 0.78},${hem - 6} Z`} fill="#f3ead8" />
 						)}
 						{!p.back && <path d={`M ${-40},${shY} Q 0,${shY + 50} 40,${shY}`} fill={sp.skin} />}
@@ -602,7 +603,8 @@ export const Person: React.FC<PersonProps> = (p) => {
 		torso = (
 			<g>
 				<path d={`M ${-sw},${shY + 30} Q ${-sw},${shY} ${-sw + 34},${shY} L ${sw - 34},${shY} Q ${sw},${shY} ${sw},${shY + 30} L ${hwid + 6},${hipY + 18} L ${-hwid - 6},${hipY + 18} Z`} fill={top} />
-				{!sil && p.kind === 'dad' && (
+				{!sil && p.kind === 'dad' && p.plain && !p.back && <path d={`M -34,${shY} L 0,${shY + 58} L 34,${shY}`} fill={sp.skin} />}
+				{!sil && p.kind === 'dad' && !p.plain && (
 					<>
 						{/* reflective stripes of a work jacket */}
 						<rect x={-hwid - 2} y={shY + sp.torso * 0.55} width={hwid * 2 + 4} height={30} fill="#f39a2e" />
@@ -664,7 +666,7 @@ export const Person: React.FC<PersonProps> = (p) => {
 			</g>
 		) : null;
 
-	const stripe = p.kind === 'dad' && !sil ? '#f39a2e' : undefined;
+	const stripe = p.kind === 'dad' && !sil && !p.plain ? '#f39a2e' : undefined;
 	const armColor = topDark;
 
 	const arms = (
@@ -689,7 +691,7 @@ export const Person: React.FC<PersonProps> = (p) => {
 			{torso}
 			{p.back ? backpack : null}
 			{backpackStraps}
-			{p.kind === 'girl' && !sil && <GirlNeck y0={shY} front={!p.back} />}
+			{p.kind === 'girl' && !sil && !p.plain && <GirlNeck y0={shY} front={!p.back} />}
 			{head}
 			{p.armsBehind ? null : arms}
 		</g>

@@ -800,3 +800,59 @@ write('lift_ding', room(add(ping([1318.5, 2637], 1.2, 0.35), ping([1046.5, 2093]
 	}
 	write('howl', room(lowpass(x, 1800), 0.6, 2.0), 0.35);
 }
+
+// ---------- «Фильм про тебя», часть 1 ----------
+// a full cinema hall applauding
+{
+	const dur = 4.2;
+	const x = buf(dur);
+	for (let p = 0; p < 34; p++) {
+		const rate = 3.2 + rnd() * 2.2;
+		const fc = 900 + rnd() * 1800;
+		const g = 0.4 + rnd() * 0.6;
+		let t = rnd() * 0.35;
+		while (t < dur - 0.05) {
+			const c = buf(0.03);
+			for (let i = 0; i < c.length; i++) c[i] = noise() * Math.exp(-i / SR / (0.004 + rnd() * 0.002));
+			const e = Math.min(1, t / 0.4) * Math.min(1, (dur - t) / 1.2);
+			add(x, reso(c, fc, 1.6), t, g * e);
+			t += (1 / rate) * (0.85 + 0.3 * rnd());
+		}
+	}
+	write('applause', room(bandpass(x, 300, 7000), 0.35, 1.8), 0.6);
+}
+// crunching popcorn (three bites)
+{
+	const x = buf(0.9);
+	for (let b = 0; b < 3; b++) {
+		const n = buf(0.09);
+		for (let i = 0; i < n.length; i++) n[i] = (rnd() < 0.08 ? noise() * 2 : noise() * 0.25) * Math.exp(-i / SR / 0.03);
+		add(x, bandpass(n, 1500, 7000), b * 0.27 + rnd() * 0.02, 1 - 0.15 * b);
+	}
+	write('crunch', room(x, 0.15, 0.8), 0.7);
+}
+// the cartoon's cheerful theme: a square-wave tune over a bouncy bass (original, procedural)
+{
+	const bpm = 160;
+	const e8 = 60 / bpm / 2;
+	const tune = [72, 76, 79, 84, 83, 79, 76, 79, 77, 81, 84, 81, 79, 76, 74, 71, 72, 76, 79, 84, 86, 84, 83, 81, 79, 77, 76, 74, 72, 0, 72, 0];
+	const bass = [48, 55, 53, 55, 48, 55, 43, 50];
+	const dur = tune.length * e8 + 0.3;
+	const x = buf(dur);
+	const hz = (m) => 440 * Math.pow(2, (m - 69) / 12);
+	const note = (m, len, vol, square) => {
+		const y = buf(len);
+		let ph = 0;
+		for (let i = 0; i < y.length; i++) {
+			const t = i / SR;
+			ph += hz(m) / SR;
+			const w = square ? (ph % 1 < 0.5 ? 1 : -1) : 2 * Math.abs(2 * (ph % 1) - 1) - 1;
+			y[i] = w * vol * Math.min(1, t / 0.004) * Math.exp(-t / (len * 0.8));
+		}
+		return y;
+	};
+	tune.forEach((m, k) => m && add(x, note(m, e8 * 0.95, 0.35, true), k * e8));
+	bass.forEach((m, k) => add(x, note(m, e8 * 3.6, 0.6, false), k * e8 * 4));
+	for (let k = 0; k < tune.length; k += 2) add(x, click(0.02, 7000, 2), k * e8, 0.15);
+	write('toon', room(lowpass(x, 5000), 0.2, 1.2), 0.5);
+}

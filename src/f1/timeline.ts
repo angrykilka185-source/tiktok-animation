@@ -2,7 +2,7 @@
 // Authoring timeline ≈ the final edit (scripts/fit-voiceover.py --part f1).
 import {FPS, makeShots, Sign} from '../timeline';
 
-export const SHOT_SECONDS = [5, 4.3, 3.1, 4.2, 3.4, 3.6, 6.1, 5.8, 5, 4.9, 3.5, 3.3, 3, 1.9, 3.3, 2.2, 3.9, 5.1, 3.5, 10];
+export const SHOT_SECONDS = [5, 3.9, 3, 3.9, 5.4, 4.1, 6.1, 4.9, 3.9, 5.3, 3.9, 3.7, 3.3, 2, 4.9, 4, 4.9, 6.5, 10];
 const built = makeShots(SHOT_SECONDS);
 export const SHOTS = built.shots;
 export const TOTAL = built.total;
@@ -13,21 +13,23 @@ const s = shotStart;
 
 // what the film showed — and then happened for real
 export const SIGNS: Sign[] = [
-	{n: 1, title: 'ШЁПОТ\nЗА СПИНОЙ', at: s(15) + 58, hold: 30, y: 1540},
-	{n: 2, title: 'ПАПА\nИСЧЕЗ', at: s(17) + 46, hold: 22, y: 1540},
+	{n: 1, title: 'ШЁПОТ\nЗА СПИНОЙ', at: s(14) + 34, hold: 24, y: 1540},
+	{n: 2, title: 'ПАПА\nИСЧЕЗ', at: s(16) + 46, hold: 22, y: 1540},
 ];
 
-// the film's own clock runs fast (the whole film in a few seconds), until it reaches «now»
-const FILM_FROM = s(4) + 20;
-const NOW = s(9) + 124;
-const filmClock = Array.from({length: Math.ceil((NOW - FILM_FROM) / 15)}, (_, k) => {
-	const min = Math.min(86, Math.round((k * 15 * 86) / (NOW - FILM_FROM)));
-	return {from: FILM_FROM + k * 15, text: `ФИЛЬМ · ${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`};
-});
+// the cartoon runs in real time; after the glitch the film about you races to «now»
+const tick = (from: number, to: number, startMin: number, endMin: number, step = 15) =>
+	Array.from({length: Math.ceil((to - from) / step)}, (_, k) => {
+		const m = Math.round(startMin + ((endMin - startMin) * k * step) / (to - from));
+		return {from: from + k * step, text: `ФИЛЬМ · ${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`};
+	});
+const NOW = s(10) + 132;
 export const CLOCK: {from: number; text: string}[] = [
 	{from: 0, text: 'НЕДЕЛЮ СПУСТЯ'},
 	{from: s(1) + 100, text: 'СЕАНС · 19:00'},
-	...filmClock,
+	...tick(s(3), s(4) + 24, 31, 37, 30),
+	{from: s(4) + 24, text: 'ФИЛЬМ · ??:??'},
+	...tick(s(5) + 30, NOW, 0, 86),
 	{from: NOW, text: 'ФИЛЬМ · СЕЙЧАС'},
 ];
 
@@ -36,10 +38,10 @@ export const EPF1 = {
 	signs: SIGNS,
 	slots: 3, // the whisper ✓, dad gone ✓, what next «?»
 	prefilled: 0,
-	pending: [{n: 3, at: s(19) + 60}],
+	pending: [{n: 3, at: s(18) + 60}],
 	counterFrom: 10,
-	hideFrom: s(20) + 248,
-	night: [[s(3), s(20) + 300]] as [number, number][],
+	hideFrom: s(19) + 248,
+	night: [[s(3), s(19) + 300]] as [number, number][],
 	counterTitle: 'КАК В ФИЛЬМЕ',
 	mark: 'check' as const,
 	accent: '#ffd34a',

@@ -1,12 +1,12 @@
-// «Фильм про тебя» — часть 1 (продолжение «Папа вернулся с вахты»). 20 shots on the timeline of
-// src/f1/timeline.ts (≈ the final edit, see scripts/fit-voiceover.py --part f1).
-// The hero is the son from «Папа»; the film on the cinema screen shows real shots of «Папа».
+// «Фильм про тебя» — часть 1 (продолжение «Папа вернулся с вахты»), версия 2: в кино идёт обычный мультик
+// про космос, потом сбой — и на экране твоя жизнь. Этого не замечает никто, кроме тебя.
+// 19 shots on the timeline of src/f1/timeline.ts (≈ the final edit, see scripts/fit-voiceover.py --part f1).
 import React from 'react';
 import {AbsoluteFill, Easing, Freeze, interpolate, Sequence, useCurrentFrame} from 'remotion';
 import {clamp, kick, lerp, pop, seg, shake} from '../anim';
 import {HEAVY, MONO} from '../components/Overlays';
-import {Bust, Colors, Face, Head, Person} from '../components/Person';
-import {Cam, Stage} from '../components/Stage';
+import {Bust, Colors, Face, Head, Kind, Person, SPECS} from '../components/Person';
+import {Cam, Stage, toScreen} from '../components/Stage';
 import * as P1a from '../scenes/S01_S05';
 import * as P6 from '../p6/scenes';
 import * as G1 from '../g1/scenes';
@@ -32,7 +32,6 @@ const Seat: React.FC<{x: number; y: number; s: number; up?: number}> = ({x, y, s
 	<g>
 		<rect x={x - 64 * s} y={y - 200 * s} width={128 * s} height={196 * s} rx={30 * s} fill={SEAT_D} />
 		<rect x={x - 54 * s} y={y - 186 * s} width={108 * s} height={150 * s} rx={22 * s} fill={SEAT} />
-		{/* the cushion, folded up when `up` = 1 */}
 		<g transform={`translate(${x},${y - 30 * s}) scale(1,${1 - 0.8 * up})`}>
 			<rect x={-68 * s} y={0} width={136 * s} height={50 * s} rx={14 * s} fill={SEAT} stroke={SEAT_D} strokeWidth={4 * s} />
 		</g>
@@ -40,36 +39,156 @@ const Seat: React.FC<{x: number; y: number; s: number; up?: number}> = ({x, y, s
 		<rect x={x + 66 * s} y={y - 70 * s} width={16 * s} height={110 * s} rx={6 * s} fill="#2a2226" />
 	</g>
 );
-const ROWS = 9;
-const rowY = (k: number) => 1820 - (k - 1) * 118; // k = 1 is the row nearest to the screen
+const AISLE = 140; // a cross aisle in front of row 7: nobody in front hides you and dad
+const rowY = (k: number) => 1820 - (k - 1) * 118 + (k <= 6 ? AISLE : 0); // k = 1 is the row nearest to the screen
 const rowS = (k: number) => 1.05 - 0.06 * (k - 1);
-const seatX = (k: number, i: number) => 540 + (i - 0.5) * 205 * rowS(k); // i = …,-1,0,1,2,… ; 0 and 1 are the middle seats
+// seats i = -3..4; 0 and 1 are the middle ones. Even rows are staggered half a seat to the left
+// (so the seat «right behind you» in row 8 shows beside your head)
+const seatX = (k: number, i: number) => 540 + (i - 0.5 - (k % 2 === 0 ? 0.5 : 0)) * 205 * rowS(k);
+const SEATS = [-3, -2, -1, 0, 1, 2, 3, 4];
 const SON_SEAT = 0;
 const DAD_SEAT = 1;
+// people in the seats, relative to the row's perspective scale (heads and shoulders above the seat backs)
+const VSCALE: Record<Kind, number> = {son: 0.64, girl: 0.64, teen: 0.62, mom: 0.6, dad: 0.6};
 
-// somebody sitting in a seat of row k (hips on the cushion)
-const Sitter: React.FC<{kind: 'son' | 'dad'; k: number; i: number; id: string; f: number; face?: Face; back?: boolean; silhouette?: string; headTurn?: number; lean?: number}> = ({kind, k, i, id, f, face, back, silhouette, headTurn, lean = 0}) => {
-	const s = rowS(k) * (kind === 'son' ? 0.78 : 0.74);
-	const leg = kind === 'son' ? 330 : 470;
+// popcorn in a striped bucket; (x, y) = bottom centre
+const Popcorn: React.FC<{x: number; y: number; s: number}> = ({x, y, s}) => (
+	<g transform={`translate(${x},${y}) scale(${s})`}>
+		{[-30, -6, 18, 38, -18, 8, 30].map((px, k) => (
+			<circle key={k} cx={px * 0.9} cy={-112 - (k > 3 ? 18 : 0)} r={18} fill="#fff3c4" stroke="#e8c870" strokeWidth={3} />
+		))}
+		<path d="M -50,-110 L 50,-110 L 40,0 L -40,0 Z" fill="#fff" />
+		{[-34, -10, 14, 36].map((sx) => (
+			<path key={sx} d={`M ${sx},-110 L ${sx * 0.8 + 6},0 L ${sx * 0.8 - 4},0 L ${sx - 10},-110 Z`} fill="#d63b2f" />
+		))}
+	</g>
+);
+
+type Arm = {target: [number, number]; bend?: 1 | -1; ku?: number; kf?: number};
+// one of the two heroes sitting in a seat of row k (hips on the cushion)
+const Sitter: React.FC<{kind: 'son' | 'dad'; k: number; i: number; id: string; f: number; face?: Face; back?: boolean; silhouette?: string; headTurn?: number; lean?: number; armL?: Arm; armR?: Arm; popcorn?: boolean}> = ({
+	kind,
+	k,
+	i,
+	id,
+	f,
+	face,
+	back,
+	silhouette,
+	headTurn,
+	lean = 0,
+	armL,
+	armR,
+	popcorn = false,
+}) => {
+	const s = rowS(k) * VSCALE[kind];
+	const leg = SPECS[kind].leg;
 	const hip = rowY(k) - 26 * rowS(k);
+	const x = seatX(k, i);
 	return (
-		<g transform={lean ? `rotate(${lean} ${seatX(k, i)} ${hip})` : undefined}>
-			<Person kind={kind} id={id} x={seatX(k, i)} y={hip + leg * s} scale={s} hideLegs back={back} silhouette={silhouette} breathe={f} headTurn={headTurn} face={face} armL={{target: [-80, -(leg + 60)], bend: 1}} armR={{target: [80, -(leg + 60)], bend: -1}} />
+		<g transform={lean ? `rotate(${lean} ${x} ${hip})` : undefined}>
+			<Person kind={kind} id={id} x={x} y={hip + leg * s} scale={s} hideLegs back={back} silhouette={silhouette} breathe={f} headTurn={headTurn} face={face} armL={armL ?? {target: [-80, -(leg + 60)], bend: 1}} armR={armR ?? {target: [80, -(leg + 60)], bend: -1}} />
+			{popcorn && <Popcorn x={x - 40 * s} y={hip - 20 * s} s={s * 0.9} />}
+		</g>
+	);
+};
+// where a hero's face is in the scene (for spotlights and labels)
+const faceAt = (kind: 'son' | 'dad', k: number, i: number) => {
+	const sp = SPECS[kind];
+	const s = rowS(k) * VSCALE[kind];
+	const hip = rowY(k) - 26 * rowS(k);
+	return {x: seatX(k, i), y: hip - (sp.torso + sp.neck - 10 + sp.hh * 0.85) * s, r: sp.hh * s};
+};
+
+// somebody else in the audience (plain clothes; kids sit right in front of you and dad, so nobody hides your faces)
+const VCOL = ['#3b6fd6', '#d65a3b', '#3d8b5a', '#8a5ab8', '#e0a526', '#2a9a9a', '#c4628a', '#5a5f66', '#7a8a3a'];
+const VHAIR = ['#2a1a12', '#8a5a32', '#e8c060', '#c27b3a', '#1f1a1a', '#a6a6a6', '#5a3a2a'];
+const VKINDS = ['son', 'girl', 'mom', 'dad', 'teen', 'mom', 'dad'] as const;
+type Mood = 'laugh' | 'watch' | 'clap';
+const Viewer: React.FC<{k: number; i: number; f: number; mood: Mood; idp: string}> = ({k, i, f, mood, idp}) => {
+	const seed = k * 11 + (i + 3) * 7;
+	const front = k === 6 && (i === SON_SEAT || i === DAD_SEAT);
+	const kind: Kind = front ? (i === SON_SEAT ? 'girl' : 'son') : VKINDS[Math.floor(rnd(seed) * VKINDS.length)];
+	const sp = SPECS[kind];
+	const s = rowS(k) * VSCALE[kind];
+	const hip = rowY(k) - 26 * rowS(k);
+	const x = seatX(k, i);
+	const bob = mood !== 'watch' ? -Math.abs(Math.sin(f / 3 + seed)) * 6 : 0;
+	const c = Math.floor(rnd(seed + 1) * VCOL.length);
+	const colors: Colors = {top: VCOL[c], topDark: VCOL[(c + 4) % VCOL.length], hair: VHAIR[Math.floor(rnd(seed + 2) * VHAIR.length)]};
+	const clap = mood === 'clap' ? Math.abs(Math.sin(f / 2.2 + seed)) : 0;
+	const chest = -(sp.leg + sp.torso * 0.55);
+	const face: Face =
+		mood === 'watch'
+			? {eyes: 'open', mouth: 'flat', brows: 'neutral', look: [0, -0.15], blush: false}
+			: {eyes: 'happy', mouth: mood === 'clap' ? 'smile' : rnd(seed + 7) < 0.3 ? 'o' : 'grin', brows: 'raised', blush: false};
+	const arms =
+		mood === 'clap'
+			? {armL: {target: [-12 - 46 * clap, chest] as [number, number], bend: 1 as const, ku: 0.75, kf: 0.75}, armR: {target: [12 + 46 * clap, chest] as [number, number], bend: -1 as const, ku: 0.75, kf: 0.75}}
+			: mood === 'laugh'
+				? {armL: {target: [-30, -(sp.leg + sp.torso * 0.25)] as [number, number], bend: 1 as const, ku: 0.75, kf: 0.75}, armR: {target: [70, -(sp.leg + 40)] as [number, number], bend: -1 as const}}
+				: {armL: {target: [-70, -(sp.leg + 50)] as [number, number], bend: 1 as const}, armR: {target: [70, -(sp.leg + 50)] as [number, number], bend: -1 as const}};
+	return (
+		<g>
+			<Person kind={kind} id={`${idp}${k}_${i}`} colors={colors} x={x} y={hip + sp.leg * s + bob} scale={s} hideLegs plain shade={false} face={face} armL={arms.armL} armR={arms.armR} />
+			{rnd(seed + 5) > 0.72 && mood !== 'clap' && <Popcorn x={x + 46 * s} y={hip - 16 * s} s={s * 0.75} />}
 		</g>
 	);
 };
 
-// the hall seen from the screen: rows of red seats, the projector beam; who sits in row 7 is given as children
-const HallFront: React.FC<{f: number; light?: number; children?: React.ReactNode; row8?: React.ReactNode; dadSeatUp?: number}> = ({f, light = 1, children, row8, dadSeatUp = 0}) => {
-	const seatsOf = (k: number) => (
+// the hall seen from the screen: rows of red seats (full of people if `full`), the projector beam.
+// children = the heroes in row 7; row8 = whoever is in the seat right behind you
+// dim = 0..1 darkens everybody but the heroes (they are what the shot is about)
+const HallFront: React.FC<{f: number; idp: string; full?: boolean; mood?: Mood; light?: number; dim?: number; children?: React.ReactNode; row8?: React.ReactNode; emptyBehind?: boolean; behindUp?: number; behindRing?: number; hideRow7?: boolean}> = ({
+	f,
+	idp,
+	full = true,
+	mood = 'laugh',
+	light = 1,
+	dim = 0,
+	children,
+	row8,
+	emptyBehind = true,
+	behindUp = 0,
+	behindRing = 0,
+	hideRow7 = false,
+}) => {
+	const fid = `${idp}dim`;
+	const m = 1 - 0.7 * dim;
+	const row = (k: number) => (
 		<g key={k}>
-			{[-3, -2, -1, 0, 1, 2, 3, 4].map((i) => (
-				<Seat key={i} x={seatX(k, i)} y={rowY(k)} s={rowS(k)} up={k === 7 && i === DAD_SEAT ? dadSeatUp : 0} />
-			))}
+			<g filter={dim > 0 ? `url(#${fid})` : undefined}>
+				{SEATS.map((i) => (
+					<Seat key={i} x={seatX(k, i)} y={rowY(k)} s={rowS(k)} up={k === 8 && i === SON_SEAT ? behindUp : 0} />
+				))}
+				{full &&
+					SEATS.map((i) => {
+						if (k === 7 && (i === SON_SEAT || i === DAD_SEAT)) return null;
+						if (k === 8 && i === SON_SEAT && emptyBehind) return null;
+						return <Viewer key={`v${i}`} k={k} i={i} f={f} mood={mood} idp={idp} />;
+					})}
+			</g>
+			{k === 8 && row8}
+			{k === 7 && children}
+			{k === 7 && (
+				<g>
+					<rect x={seatX(7, -3) - 140} y={rowY(7) - 90} width={70} height={56} rx={8} fill="#c9b37a" />
+					<text x={seatX(7, -3) - 105} y={rowY(7) - 47} fontSize={40} fontFamily={HEAVY} fontWeight={900} fill="#3a2a1a" textAnchor="middle">
+						7
+					</text>
+				</g>
+			)}
 		</g>
 	);
 	return (
 		<g>
+			{dim > 0 && (
+				<defs>
+					<filter id={fid} x="-5%" y="-5%" width="110%" height="110%" colorInterpolationFilters="sRGB">
+						<feColorMatrix type="matrix" values={`${m} 0 0 0 ${0.02 * dim}  0 ${m} 0 0 ${0.03 * dim}  0 0 ${m + 0.06 * dim} 0 ${0.07 * dim}  0 0 0 1 0`} />
+					</filter>
+				</defs>
+			)}
 			<rect x={-600} y={-600} width={2300} height={3200} fill="#1d161b" />
 			{Array.from({length: 16}).map((_, k) => (
 				<rect key={k} x={-600 + k * 150} y={-600} width={70} height={1600} fill="#241b21" />
@@ -79,39 +198,38 @@ const HallFront: React.FC<{f: number; light?: number; children?: React.ReactNode
 			{Array.from({length: 18}).map((_, k) => (
 				<circle key={k} cx={540 + (rnd(k) - 0.5) * 700 * rnd(k + 9)} cy={300 + ((f * (2 + rnd(k)) + rnd(k + 3) * 1400) % 1500)} r={2 + rnd(k + 5) * 3} fill="#fff6d8" opacity={0.35} />
 			))}
-			{[9, 8].map(seatsOf)}
-			{row8}
-			{seatsOf(7)}
-			{children}
-			<g>
-				<rect x={seatX(7, -3) - 140} y={rowY(7) - 90} width={70} height={56} rx={8} fill="#c9b37a" />
-				<text x={seatX(7, -3) - 105} y={rowY(7) - 47} fontSize={40} fontFamily={HEAVY} fontWeight={900} fill="#3a2a1a" textAnchor="middle">
-					7
-				</text>
-			</g>
-			{[6, 5, 4, 3, 2, 1].map(seatsOf)}
-			{/* the screen light on the audience */}
+			{[9, 8].map(row)}
+			{!hideRow7 && row(7)}
+			{[6, 5, 4, 3, 2, 1].map(row)}
+			{behindRing > 0 && <ellipse cx={seatX(8, SON_SEAT)} cy={rowY(8) - 100 * rowS(8)} rx={80 * (0.6 + 0.4 * behindRing)} ry={105 * (0.6 + 0.4 * behindRing)} fill="none" stroke={RED} strokeWidth={10} opacity={Math.min(1, behindRing)} />}
 			<rect x={-600} y={-600} width={2300} height={3200} fill="#6f8cff" opacity={0.07 + 0.03 * Math.sin(f / 3)} />
-			<rect x={-600} y={-600} width={2300} height={3200} fill="#000" opacity={0.25 + 0.5 * (1 - light)} />
+			<rect x={-600} y={-600} width={2300} height={3200} fill="#000" opacity={0.22 + 0.5 * (1 - light)} />
 		</g>
 	);
 };
 
-// the cinema screen seen from behind the audience; `children` is the film (a 1080×1920 scene, middle band shown)
-const ScreenView: React.FC<{f: number; children?: React.ReactNode; zoom?: number; dark?: number; heads?: 'both' | 'son' | 'none'}> = ({f, children, zoom = 1, dark = 0, heads = 'both'}) => {
+// a head-and-shoulders silhouette of somebody in the audience, seen from behind
+const HeadSil: React.FC<{x: number; y: number; s: number}> = ({x, y, s}) => (
+	<g transform={`translate(${x},${y}) scale(${s})`}>
+		<path d="M -110,140 Q -110,60 -40,50 L 40,50 Q 110,60 110,140 L 110,240 L -110,240 Z" fill="#0d0a0c" />
+		<ellipse cx={0} cy={0} rx={62} ry={74} fill="#0d0a0c" />
+	</g>
+);
+
+// the cinema screen seen over the audience; `children` is the film (a 1080×1920 scene, its middle band shown)
+const ScreenView: React.FC<{f: number; children?: React.ReactNode; zoom?: number; dark?: number; heads?: 'both' | 'son'}> = ({f, children, zoom = 1, dark = 0, heads = 'both'}) => {
 	const flick = 0.94 + 0.06 * rnd(Math.floor(f / 2));
 	return (
 		<AbsoluteFill style={{background: '#050507', overflow: 'hidden'}}>
 			<AbsoluteFill style={{transform: `scale(${zoom})`, transformOrigin: '540px 700px'}}>
 				<div style={{position: 'absolute', left: -40, top: 140, width: 1160, height: 1120, background: '#0b0b0e', boxShadow: '0 0 160px rgba(160,180,255,0.25)'}} />
-				<div style={{position: 'absolute', left: 0, top: 170, width: 1080, height: 1060, overflow: 'hidden', filter: `saturate(0.85) contrast(1.05) brightness(${flick})`}}>
+				<div style={{position: 'absolute', left: 0, top: 170, width: 1080, height: 1060, overflow: 'hidden', filter: `saturate(0.9) contrast(1.05) brightness(${flick})`}}>
 					<div style={{position: 'absolute', left: 0, top: -430, width: 1080, height: 1920}}>{children}</div>
 					<AbsoluteFill style={{background: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.08) 0px, rgba(0,0,0,0.08) 2px, transparent 2px, transparent 5px)'}} />
 					<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 50%, transparent 55%, rgba(0,0,0,0.55) 100%)'}} />
 					{dark > 0 && <AbsoluteFill style={{background: '#000', opacity: dark}} />}
 				</div>
 				<svg width={1080} height={1920} style={{position: 'absolute', inset: 0}}>
-					{/* the light spilling from the screen onto the seats */}
 					<defs>
 						<linearGradient id="f1spill" x1="0" y1="0" x2="0" y2="1">
 							<stop offset="0%" stopColor="#9fb4ff" stopOpacity={0.25 * (1 - dark)} />
@@ -119,55 +237,26 @@ const ScreenView: React.FC<{f: number; children?: React.ReactNode; zoom?: number
 						</linearGradient>
 					</defs>
 					<rect x={0} y={1230} width={1080} height={690} fill="url(#f1spill)" />
-					{/* backs of the seats: row 6 far, row 7 ours, row 8 near the camera */}
+					{/* a full hall: heads of the rows in front of the camera */}
 					{[-3, -2, -1, 0, 1, 2, 3, 4].map((i) => (
-						<rect key={`r6${i}`} x={540 + (i - 0.5) * 175 - 75} y={1300} width={150} height={150} rx={30} fill="#2a0e10" />
+						<HeadSil key={`a${i}`} x={540 + (i - 0.5) * 175} y={1290 + (i % 2) * 6} s={0.42} />
 					))}
-					{heads !== 'none' && (
-						<g>
-							<Person kind="son" id="f1sv1" x={470} y={1295 + 735.6 * 0.62} scale={0.62} hideLegs back silhouette="#0d0a0c" />
-							{heads === 'both' && <Person kind="dad" id="f1sv2" x={650} y={1265 + 1024.4 * 0.6} scale={0.6} hideLegs back silhouette="#0d0a0c" />}
-						</g>
-					)}
-					{[-2, -1, 0, 1, 2, 3].map((i) => (
-						<rect key={`r7${i}`} x={540 + (i - 0.5) * 230 - 100} y={1400} width={200} height={260} rx={40} fill="#1f0a0c" />
+					{[-2, -1, 2, 3].map((i) => (
+						<HeadSil key={`b${i}`} x={540 + (i - 0.5) * 210} y={1345} s={0.6} />
+					))}
+					<HeadSil x={470} y={1340} s={0.52} />
+					{heads === 'both' && <HeadSil x={660} y={1318} s={0.66} />}
+					{[-1, 0, 1, 2].map((i) => (
+						<rect key={`r7${i}`} x={540 + (i - 0.5) * 230 - 100} y={1430} width={200} height={240} rx={40} fill="#1f0a0c" />
 					))}
 					{[-1, 0, 1, 2].map((i) => (
-						<rect key={`r8${i}`} x={540 + (i - 0.5) * 330 - 150} y={1680} width={300} height={320} rx={56} fill="#140607" />
+						<HeadSil key={`c${i}`} x={540 + (i - 0.5) * 330} y={1690} s={1.0} />
 					))}
 				</svg>
 			</AbsoluteFill>
 		</AbsoluteFill>
 	);
 };
-
-// the entrance of your block at dusk (as the film shows it)
-const Entrance: React.FC = () => (
-	<g>
-		<rect x={-400} y={-400} width={1880} height={2800} fill="#2b2f5a" />
-		<rect x={-200} y={-200} width={1480} height={1700} fill="#bdb6a6" />
-		{Array.from({length: 4}).flatMap((_, r) =>
-			Array.from({length: 4}).map((__, c) => (
-				<rect key={`${r}-${c}`} x={-120 + c * 360} y={-100 + r * 260} width={150} height={150} fill={rnd(r * 5 + c) > 0.5 ? '#ffd98a' : '#4a5270'} />
-			)),
-		)}
-		<rect x={360} y={1020} width={360} height={480} fill="#3a4a3a" />
-		<rect x={380} y={1040} width={150} height={460} fill="#4a5e4a" />
-		<rect x={550} y={1040} width={150} height={460} fill="#4a5e4a" />
-		<rect x={320} y={980} width={440} height={40} fill="#8a8478" />
-		<circle cx={540} cy={950} r={20} fill="#fff6c8" />
-		<circle cx={540} cy={950} r={90} fill="#fff6c8" opacity={0.2} />
-		<rect x={730} y={1180} width={60} height={90} rx={8} fill="#2a2d33" />
-		<rect x={500} y={900} width={80} height={40} rx={6} fill="#2a5a8a" />
-		<text x={540} y={930} fontSize={30} fontFamily={HEAVY} fontWeight={900} fill="#fff" textAnchor="middle">
-			3
-		</text>
-		<rect x={-400} y={1500} width={1880} height={900} fill="#4a4a50" />
-		<rect x={820} y={1400} width={260} height={30} fill="#7a5a3a" />
-		<rect x={840} y={1430} width={16} height={70} fill="#5a3a2a" />
-		<rect x={1040} y={1430} width={16} height={70} fill="#5a3a2a" />
-	</g>
-);
 
 // a film title card on the screen, «Папа» style
 const FilmTitle: React.FC<{t: number; big: string; small?: string; color?: string; size?: number}> = ({t, big, small, color = '#fff', size = 120}) => (
@@ -179,29 +268,97 @@ const FilmTitle: React.FC<{t: number; big: string; small?: string; color?: strin
 	</AbsoluteFill>
 );
 
-// the ticket: front (title, hall, row, seat, price) or back (dad's handwriting); write = 0..1 how much is written
+// the cartoon everybody came for: a rocket with a little green alien over a ringed planet
+const SpaceToon: React.FC<{t: number; end?: boolean}> = ({t, end = false}) => {
+	const loop = (t % 150) / 150;
+	const rx = -260 + 1600 * loop;
+	const ry = 1080 - 300 * loop + Math.sin(t / 6) * 30;
+	return (
+		<AbsoluteFill style={{background: 'radial-gradient(circle at 30% 35%, #2f45a8 0%, #101a52 55%, #070a24 100%)'}}>
+			<svg width={1080} height={1920} style={{position: 'absolute', inset: 0}}>
+				{Array.from({length: 70}).map((_, k) => (
+					<circle key={k} cx={rnd(k + 2) * 1080} cy={400 + rnd(k + 40) * 1150} r={2 + rnd(k) * 4} fill="#fff" opacity={0.4 + 0.6 * Math.abs(Math.sin(t / 7 + k))} />
+				))}
+				<g transform="translate(800,760)">
+					<circle r={170} fill="#f2a65a" />
+					<path d="M -165,-40 Q 0,-10 165,-40 M -150,50 Q 0,80 150,50" stroke="#d8823a" strokeWidth={22} fill="none" />
+					<ellipse rx={270} ry={52} fill="none" stroke="#ffd98a" strokeWidth={16} transform="rotate(-14)" />
+				</g>
+				{!end && (
+					<g transform={`translate(${rx},${ry}) rotate(-18)`}>
+						{[0, 1, 2].map((k) => (
+							<path key={k} d={`M -150,${-28 + k * 28} L ${-230 - 40 * rnd(t + k)},${-14 + k * 14} L -150,${4 + k * 28} Z`} fill={k === 1 ? '#ffd34a' : '#ff7a2a'} />
+						))}
+						<path d="M -150,-60 L 90,-60 Q 200,0 90,60 L -150,60 Z" fill="#f4f4f6" />
+						<path d="M 90,-60 Q 200,0 90,60 Z" fill="#e0342b" />
+						<path d="M -150,-60 L -190,-110 L -100,-60 Z M -150,60 L -190,110 L -100,60 Z" fill="#e0342b" />
+						<circle cx={10} cy={0} r={38} fill="#7fc8ff" stroke="#9aa0a8" strokeWidth={8} />
+						<circle cx={10} cy={8} r={22} fill="#5fd06a" />
+						<circle cx={2} cy={4} r={5} fill="#111" />
+						<circle cx={18} cy={4} r={5} fill="#111" />
+						<path d="M 4,14 Q 10,20 16,14" stroke="#111" strokeWidth={3} fill="none" />
+						<path d="M 4,-12 L 0,-28 M 16,-12 L 22,-28" stroke="#5fd06a" strokeWidth={4} />
+					</g>
+				)}
+			</svg>
+			<div style={{position: 'absolute', top: 470, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, fontSize: end ? 150 : 64, color: end ? '#fff' : YELLOW, letterSpacing: 4, textShadow: '0 6px 0 #1a1a5a'}}>{end ? 'КОНЕЦ' : 'ЗВЁЗДНЫЙ ПАТРУЛЬ'}</div>
+		</AbsoluteFill>
+	);
+};
+
+// the picture tears: shifted slices, colour fringes, colour bars and noise, then black
+const BrokenFeed: React.FC<{t: number; jerk: number; bars: number; black: number; children: React.ReactNode}> = ({t, jerk, bars, black, children}) => (
+	<AbsoluteFill style={{background: '#000', overflow: 'hidden'}}>
+		{jerk <= 0 && children}
+		{jerk > 0 && Array.from({length: 12}).map((_, k) => {
+			const y0 = 430 + k * 90;
+			const dx = (rnd(t * 7 + k) - 0.5) * 220 * jerk * (rnd(t + k * 3) > 0.35 ? 1 : 0.1);
+			return (
+				<div key={k} style={{position: 'absolute', inset: 0, clipPath: `inset(${y0}px 0 calc(100% - ${y0 + 90}px) 0)`, transform: `translateX(${dx}px)`}}>
+					{children}
+				</div>
+			);
+		})}
+		{jerk > 0 && <AbsoluteFill style={{background: '#ff004c', mixBlendMode: 'screen', opacity: 0.25 * jerk, transform: `translateX(${14 * jerk}px)`}} />}
+		{bars > 0 && (
+			<AbsoluteFill style={{opacity: bars, display: 'flex'}}>
+				{['#c0c0c0', '#c0c000', '#00c0c0', '#00c000', '#c000c0', '#c00000', '#0000c0'].map((c) => (
+					<div key={c} style={{flex: 1, background: c}} />
+				))}
+			</AbsoluteFill>
+		)}
+		{bars > 0 &&
+			Array.from({length: 40}).map((_, k) => (
+				<div key={k} style={{position: 'absolute', left: rnd(t * 13 + k) * 1080, top: 430 + rnd(t * 17 + k) * 1060, width: 40 + rnd(k + t) * 260, height: 6 + rnd(t + k * 5) * 18, background: rnd(k * t) > 0.5 ? '#fff' : '#000', opacity: 0.7 * bars}} />
+			))}
+		{black > 0 && <AbsoluteFill style={{background: '#000', opacity: black}} />}
+	</AbsoluteFill>
+);
+
+// the ticket: front (the cartoon, hall, row, seat, price) or back (dad's handwriting); write = 0..1
 const Ticket: React.FC<{side: 'front' | 'back'; write?: number}> = ({side, write = 1}) => (
 	<div style={{position: 'absolute', left: 140, top: 520, width: 800, height: 420, borderRadius: 18, background: side === 'front' ? '#f4e6c4' : '#efe2c0', boxShadow: '0 30px 60px rgba(0,0,0,0.5)', fontFamily: HEAVY, fontWeight: 900, color: '#3a2a1a', overflow: 'hidden', boxSizing: 'border-box', padding: '34px 50px'}}>
 		<div style={{position: 'absolute', left: 600, top: 0, bottom: 0, borderLeft: '6px dashed #c9b48a'}} />
 		{side === 'front' ? (
 			<>
 				<div style={{fontSize: 28, letterSpacing: 6, color: '#a8322a'}}>КИНОТЕАТР «ОКТЯБРЬ»</div>
-				<div style={{fontSize: 50, lineHeight: 1.05, marginTop: 14, width: 520}}>ПАПА ВЕРНУЛСЯ С ВАХТЫ</div>
-				<div style={{fontSize: 32, marginTop: 24, fontFamily: MONO}}>ЗАЛ 1 · РЯД 7 · МЕСТА 13–14</div>
+				<div style={{fontSize: 52, lineHeight: 1.05, marginTop: 14, width: 520}}>ЗВЁЗДНЫЙ ПАТРУЛЬ</div>
+				<div style={{fontSize: 30, marginTop: 6, color: '#7a6a4a'}}>мультфильм · 6+</div>
+				<div style={{fontSize: 32, marginTop: 20, fontFamily: MONO}}>ЗАЛ 1 · РЯД 7 · МЕСТА 13–14</div>
 				<div style={{position: 'absolute', left: 618, top: 120, width: 160, textAlign: 'center', fontSize: 40, lineHeight: 1.1}}>
 					ЦЕНА
-					<div style={{fontSize: 90, color: '#a8322a'}}>0 ₽</div>
+					<div style={{fontSize: 60, color: '#a8322a', whiteSpace: 'nowrap', marginLeft: -10, marginRight: -10}}>250 ₽</div>
 				</div>
 			</>
 		) : (
-			<div style={{position: 'absolute', left: 60, top: 120, fontFamily: "'Segoe Print', 'Comic Sans MS', cursive", fontWeight: 700, fontStyle: 'italic', fontSize: 92, color: '#1f2a6a', transform: 'rotate(-6deg)', clipPath: `inset(0 ${100 - 100 * write}% 0 0)`, whiteSpace: 'nowrap'}}>
+			<div style={{position: 'absolute', left: 60, top: 120, fontFamily: "'Segoe Print', 'Comic Sans MS', cursive", fontWeight: 700, fontStyle: 'italic', fontSize: 80, color: '#1f2a6a', transform: 'rotate(-6deg)', clipPath: `inset(0 ${100 - 100 * write}% 0 0)`, whiteSpace: 'nowrap'}}>
 				Не досматривай
 			</div>
 		)}
 	</div>
 );
 
-// the cinema at dusk: neon «КИНО», the poster of the film
+// the cinema at dusk: neon «КИНО», the poster of the cartoon
 const CinemaFront: React.FC<{f: number}> = ({f}) => {
 	const neon = Math.floor(f / 5) % 13 === 7 ? 0.4 : 1;
 	return (
@@ -221,17 +378,15 @@ const CinemaFront: React.FC<{f: number}> = ({f}) => {
 			<text x={540} y={560} fontSize={150} fontFamily={HEAVY} fontWeight={900} fill="#ff4a5a" textAnchor="middle" opacity={neon} style={{filter: `drop-shadow(0 0 ${18 * neon}px #ff2a4a)`}}>
 				КИНО
 			</text>
-			{/* the poster */}
-			<rect x={600} y={700} width={300} height={430} fill="#1a1208" stroke="#d9c27a" strokeWidth={12} />
-			<text x={750} y={770} fontSize={30} fontFamily={HEAVY} fontWeight={900} fill="#ff4a3d" textAnchor="middle">
-				ПАПА
+			<rect x={600} y={700} width={300} height={430} fill="#101a52" stroke="#d9c27a" strokeWidth={12} />
+			<circle cx={800} cy={800} r={50} fill="#f2a65a" />
+			<path d="M 650,1010 L 760,960 L 770,990 Z" fill="#f4f4f6" />
+			<text x={750} y={1080} fontSize={28} fontFamily={HEAVY} fontWeight={900} fill={YELLOW} textAnchor="middle">
+				ЗВЁЗДНЫЙ
 			</text>
-			<text x={750} y={806} fontSize={22} fontFamily={HEAVY} fontWeight={900} fill="#ffc25a" textAnchor="middle">
-				ВЕРНУЛСЯ С ВАХТЫ
+			<text x={750} y={1112} fontSize={28} fontFamily={HEAVY} fontWeight={900} fill={YELLOW} textAnchor="middle">
+				ПАТРУЛЬ
 			</text>
-			<rect x={700} y={860} width={100} height={220} fill="#3a2a20" />
-			<Person kind="dad" id="f1post" x={750} y={1080} scale={0.2} silhouette="#0a0806" />
-			{/* doors */}
 			<rect x={330} y={1080} width={340} height={400} fill="#3a4a5a" />
 			<rect x={340} y={1090} width={155} height={390} fill="#8fb0c8" opacity={0.6} />
 			<rect x={505} y={1090} width={155} height={390} fill="#8fb0c8" opacity={0.6} />
@@ -241,13 +396,64 @@ const CinemaFront: React.FC<{f: number}> = ({f}) => {
 	);
 };
 
+// the entrance of your block at dusk (as the film shows it)
+const Entrance: React.FC = () => (
+	<g>
+		<rect x={-400} y={-400} width={1880} height={2800} fill="#2b2f5a" />
+		<rect x={-200} y={-200} width={1480} height={1700} fill="#bdb6a6" />
+		{Array.from({length: 4}).flatMap((_, r) =>
+			Array.from({length: 4}).map((__, c) => <rect key={`${r}-${c}`} x={-120 + c * 360} y={-100 + r * 260} width={150} height={150} fill={rnd(r * 5 + c) > 0.5 ? '#ffd98a' : '#4a5270'} />),
+		)}
+		<rect x={360} y={1020} width={360} height={480} fill="#3a4a3a" />
+		<rect x={380} y={1040} width={150} height={460} fill="#4a5e4a" />
+		<rect x={550} y={1040} width={150} height={460} fill="#4a5e4a" />
+		<rect x={320} y={980} width={440} height={40} fill="#8a8478" />
+		<circle cx={540} cy={950} r={20} fill="#fff6c8" />
+		<circle cx={540} cy={950} r={90} fill="#fff6c8" opacity={0.2} />
+		<rect x={730} y={1180} width={60} height={90} rx={8} fill="#2a2d33" />
+		<rect x={500} y={900} width={80} height={40} rx={6} fill="#2a5a8a" />
+		<text x={540} y={930} fontSize={30} fontFamily={HEAVY} fontWeight={900} fill="#fff" textAnchor="middle">
+			3
+		</text>
+		<rect x={-400} y={1500} width={1880} height={900} fill="#4a4a50" />
+		<rect x={820} y={1400} width={260} height={30} fill="#7a5a3a" />
+		<rect x={840} y={1430} width={16} height={70} fill="#5a3a2a" />
+		<rect x={1040} y={1430} width={16} height={70} fill="#5a3a2a" />
+	</g>
+);
+
+// the hall as the film shows it (full, like the real one)
+const FilmHall: React.FC<{t: number; idp: string; sonBack?: boolean; dad?: boolean; ring?: number; shadow?: number; zoom?: number}> = ({t, idp, sonBack = false, dad = true, ring = 0, shadow = 0, zoom = 1.7}) => (
+	<Stage cam={{s: zoom, cx: 540, cy: 900}} light={{glow: 0, vignette: 0.8}} bg="#1d161b">
+		<HallFront
+			f={t}
+			idp={`${idp}v`}
+			mood="laugh"
+			dim={0.45}
+			row8={
+				shadow > 0 ? (
+					<g opacity={Math.min(1, shadow * 1.5)} transform={`translate(${-36 * Math.min(1, shadow)},${123 * Math.min(1, shadow)})`}>
+						<Sitter kind="dad" k={8} i={SON_SEAT} id={`${idp}x`} f={t} silhouette="#050406" lean={8 * Math.min(1, shadow)} />
+					</g>
+				) : null
+			}
+		>
+			<Sitter kind="son" k={7} i={SON_SEAT} id={`${idp}s`} f={t} back={sonBack} face={{eyes: 'open', mouth: 'flat', brows: 'worried', look: [0, 0]}} />
+			{dad && <Sitter kind="dad" k={7} i={DAD_SEAT} id={`${idp}d`} f={t} face={{eyes: 'happy', mouth: 'grin', brows: 'raised', stubble: true}} />}
+			{ring > 0 && <ellipse cx={seatX(7, DAD_SEAT)} cy={rowY(7) - 75} rx={78 * (0.6 + 0.4 * ring)} ry={104 * (0.6 + 0.4 * ring)} fill="none" stroke={RED} strokeWidth={8} opacity={Math.min(1, ring)} />}
+		</HallFront>
+	</Stage>
+);
+
+const Label: React.FC<{p: number; x: number; y: number; text: string; color: string}> = ({p, x, y, text, color}) =>
+	p > 0.01 ? <div style={{position: 'absolute', left: x, top: y, transform: `scale(${p})`, transformOrigin: '0 0', background: 'rgba(14,14,16,0.9)', border: `5px solid ${color}`, borderRadius: 14, padding: '4px 20px', fontFamily: HEAVY, fontWeight: 900, fontSize: 42, color}}>{text}</div> : null;
+
 // ============================================================== SHOTS =======
 // 1. A week since the real dad came back → he takes you to the cinema.
 export const S01: React.FC = () => {
 	const f = useCurrentFrame();
 	const {i, t} = seg(f, [100]);
 	if (i === 0) {
-		// a photo from that week: dad is home
 		const p = pop(t, 2, 12);
 		return (
 			<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 45%, #3a2a1a 0%, #120c08 70%)'}}>
@@ -274,31 +480,26 @@ export const S01: React.FC = () => {
 	);
 };
 
-// 2. Free tickets → the cashier: «Этот фильм — про вас».
+// 2. The cashier yawns and sells you two tickets for a cartoon about space.
 export const S02: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [48]);
-	if (i === 0) {
-		const stamp = pop(t, 24, 9);
+	const {i, t} = seg(f, [52]);
+	if (i === 1) {
 		return (
 			<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 45%, #5a3a2a 0%, #1a100a 75%)'}}>
-				<div style={{transform: `rotate(-3deg) scale(${lerp(t, 0, 48, 1.0, 1.06) * kick(t)})`, position: 'absolute', inset: 0}}>
+				<div style={{transform: `rotate(-3deg) scale(${lerp(t, 0, 65, 1.0, 1.06) * kick(t)})`, position: 'absolute', inset: 0}}>
 					<Ticket side="front" />
 				</div>
-				{stamp > 0.01 && (
-					<div style={{position: 'absolute', left: 560, top: 940, transform: `translate(-50%,-50%) scale(${0.5 + 0.5 * stamp}) rotate(${(1 - stamp) * -20 - 8}deg)`, opacity: Math.min(1, stamp * 2), border: `8px solid ${RED}`, color: RED, borderRadius: 16, padding: '4px 26px', fontFamily: HEAVY, fontWeight: 900, fontSize: 70, background: 'rgba(255,240,230,0.85)'}}>
-						БЕСПЛАТНО
-					</div>
-				)}
 			</AbsoluteFill>
 		);
 	}
-	const talk = t >= 34 && t < 72 && Math.floor(t / 4) % 2 === 0;
+	const yawn = Math.sin(Math.min(1, Math.max(0, (t - 4) / 34)) * Math.PI);
 	return (
-		<Stage cam={{s: lerp(t, 0, 81, 1.0, 1.12) * kick(t), cx: 540, cy: 900}} light={{glow: 0.2, vignette: 0.7}} bg="#2a1a14">
+		<Stage cam={{s: lerp(t, 0, 52, 1.0, 1.08) * kick(t), cx: 540, cy: 900}} light={{glow: 0.2, vignette: 0.7}} bg="#2a1a14">
 			<rect x={-400} y={-400} width={1880} height={2800} fill="#3a2418" />
 			<rect x={140} y={360} width={800} height={900} rx={20} fill="#1a1a20" />
-			<Bust kind="mom" id="f1s2c" colors={CASHIER} x={540} y={820} scale={3.6} face={{eyes: 'stare', pupil: 0.6, brows: 'raised', mouth: talk ? 'o' : 'grin', look: [0, 0], blush: false}} />
+			<Bust kind="mom" id="f1s2c" colors={CASHIER} x={540} y={800} scale={3.0} face={{eyes: yawn > 0.3 ? 'closed' : 'narrow', brows: 'flat', mouth: 'flat', blush: false}} />
+			{yawn > 0.05 && <ellipse cx={540} cy={800 + 0.6 * 98 * 3.0} rx={47 * yawn} ry={67 * yawn} fill="#5a1a14" />}
 			<rect x={140} y={360} width={800} height={900} rx={20} fill="#bfe0ff" opacity={0.12} />
 			<path d="M 200,420 L 420,420 L 260,700 Z" fill="#fff" opacity={0.12} />
 			<rect x={100} y={1200} width={880} height={120} fill="#7a4a2c" />
@@ -310,51 +511,73 @@ export const S02: React.FC = () => {
 	);
 };
 
-// 3. The hall is empty. Only the two of you. Row seven.
+// 3. A full hall. Popcorn. Everybody laughs (the cartoon on the screen).
 export const S03: React.FC = () => {
 	const f = useCurrentFrame();
-	const z = lerp(f, 20, 80, 0, 1, Easing.inOut(Easing.cubic));
+	const {i, t} = seg(f, [34]);
+	if (i === 0) {
+		return (
+			<ScreenView f={f} zoom={lerp(t, 0, 34, 1.0, 1.04)}>
+				<SpaceToon t={f + 20} />
+			</ScreenView>
+		);
+	}
 	return (
-		<Stage cam={{s: 0.8 + 0.5 * z, cx: 540, cy: 1180 + (1000 - 1180) * z}} light={{glow: 0, vignette: 0.8}} bg="#1d161b">
-			<HallFront f={f}>
-				<Sitter kind="son" k={7} i={SON_SEAT} id="f1s3s" f={f} face={{eyes: 'open', mouth: 'smile', brows: 'neutral', look: [0.5, -0.2]}} />
-				<Sitter kind="dad" k={7} i={DAD_SEAT} id="f1s3d" f={f} face={{eyes: 'open', mouth: 'smile', brows: 'neutral', stubble: true, look: [-0.4, -0.2]}} />
+		<Stage cam={{s: lerp(t, 0, 56, 1.0, 1.55, Easing.inOut(Easing.cubic)), cx: 540, cy: lerp(t, 0, 56, 1080, 960, Easing.inOut(Easing.cubic))}} light={{glow: 0, vignette: 0.75}} bg="#1d161b">
+			<HallFront f={t} idp="f1s3v" dim={0.2}>
+				<Sitter kind="son" k={7} i={SON_SEAT} id="f1s3s" f={t} face={{eyes: 'happy', mouth: 'grin', brows: 'raised'}} />
+				<Sitter kind="dad" k={7} i={DAD_SEAT} id="f1s3d" f={t} popcorn face={{eyes: 'happy', mouth: 'grin', brows: 'raised', stubble: true}} armL={{target: [-40, -560], bend: 1, ku: 0.7, kf: 0.7}} />
 			</HallFront>
 		</Stage>
 	);
 };
 
-// 4. The lights go down. On the screen: «Папа вернулся с вахты».
+// 4. Suddenly the picture jerks. Stripes. The sound is gone.
 export const S04: React.FC = () => {
 	const f = useCurrentFrame();
-	const on = interpolate(f, [24, 40], [1, 0], clamp);
+	const jerk = f >= 22 && f < 44 ? 0.6 + 0.4 * rnd(f) : f >= 44 && f < 60 ? 0.3 : 0;
+	const bars = interpolate(f, [58, 64, 80, 86], [0, 1, 1, 0], clamp);
+	const black = interpolate(f, [84, 90], [0, 1], clamp);
 	return (
-		<ScreenView f={f} dark={on} zoom={lerp(f, 0, 126, 1.0, 1.08)}>
-			{f >= 60 ? <FilmTitle t={f - 60} small="ПАПА" big={'ВЕРНУЛСЯ\nС ВАХТЫ'} /> : <AbsoluteFill style={{background: '#0b0b0e'}} />}
+		<ScreenView f={f} zoom={1.06} dark={0}>
+			<BrokenFeed t={f} jerk={jerk} bars={bars} black={black}>
+				<Freeze frame={f < 22 ? f + 54 : 76}>
+					<SpaceToon t={f < 22 ? f + 54 : 76} />
+				</Freeze>
+			</BrokenFeed>
 		</ScreenView>
 	);
 };
 
-// 5. You see your entrance. Your flat. Yourself.
+// 5. When the picture comes back — your entrance. Your flat. You.
 export const S05: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [44, 76]);
+	const {i, t} = seg(f, [34, 112, 146]);
+	const flick = i === 1 && t < 10 ? (Math.floor(t / 2) % 2 === 0 ? 0.8 : 0) : 0;
+	let film: React.ReactNode;
+	if (i === 0) film = <AbsoluteFill style={{background: '#000'}} />;
+	else if (i === 1)
+		film = (
+			<Stage cam={{s: lerp(t, 0, 78, 1.0, 1.08), cx: 540, cy: 1100}} light={{glow: 0.2, vignette: 0.6}} bg="#2b2f5a">
+				<Entrance />
+			</Stage>
+		);
+	else if (i === 2)
+		film = (
+			<Freeze frame={20}>
+				<P1a.S01 />
+			</Freeze>
+		);
+	else
+		film = (
+			<Stage cam={{s: kick(t), cx: 540, cy: 960}} light={{glow: 0.2, vignette: 0.6}} bg="#d9c7a0">
+				<rect x={-400} y={-400} width={1880} height={2800} fill="#e8d6b0" />
+				<Bust kind="son" id="f1s5b" x={540} y={1000} scale={5.2} face={{eyes: 'open', mouth: 'flat', brows: 'neutral', look: [0, 0]}} />
+			</Stage>
+		);
 	return (
-		<ScreenView f={f} zoom={1.12}>
-			{i === 0 ? (
-				<Stage cam={{s: lerp(t, 0, 44, 1.0, 1.08), cx: 540, cy: 1100}} light={{glow: 0.2, vignette: 0.6}} bg="#2b2f5a">
-					<Entrance />
-				</Stage>
-			) : i === 1 ? (
-				<Freeze frame={20}>
-					<P1a.S01 />
-				</Freeze>
-			) : (
-				<Stage cam={{s: kick(t), cx: 540, cy: 960}} light={{glow: 0.2, vignette: 0.6}} bg="#d9c7a0">
-					<rect x={-400} y={-400} width={1880} height={2800} fill="#e8d6b0" />
-					<Bust kind="son" id="f1s5b" x={540} y={1000} scale={5.2} face={{eyes: 'open', mouth: 'flat', brows: 'neutral', look: [0, 0]}} />
-				</Stage>
-			)}
+		<ScreenView f={f} zoom={1.12} dark={flick}>
+			{film}
 		</ScreenView>
 	);
 };
@@ -362,11 +585,11 @@ export const S05: React.FC = () => {
 // 6. There you open the door — and there's dad. Only not the real one.
 export const S06: React.FC = () => {
 	const f = useCurrentFrame();
-	const stamp = pop(f, 76, 9);
+	const stamp = pop(f, 90, 9);
 	return (
 		<AbsoluteFill>
 			<ScreenView f={f} zoom={1.14}>
-				<Play at={110 + f}>
+				<Play at={100 + f}>
 					<P1a.S01 />
 				</Play>
 			</ScreenView>
@@ -382,38 +605,36 @@ export const S06: React.FC = () => {
 // 7. Everything that happened: borscht, «тигрёнок», garage 17 — even your word «карась».
 export const S07: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [33, 47, 66, 125]);
+	const {i, t} = seg(f, [34, 48, 66, 126]);
 	const tag = (text: string) => (
 		<div style={{position: 'absolute', left: 540, top: 330, transform: `translate(-50%,0) scale(${pop(t, 1, 9)})`, background: 'rgba(14,14,16,0.92)', border: `5px solid ${YELLOW}`, borderRadius: 14, padding: '4px 22px', fontFamily: HEAVY, fontWeight: 900, fontSize: 40, color: YELLOW, whiteSpace: 'nowrap'}}>{text}</div>
 	);
 	let film: React.ReactNode;
-	if (i === 0) {
+	if (i === 0)
 		film = (
 			<Play at={160 + t}>
 				<P1a.S01 />
 			</Play>
 		);
-	} else if (i === 1) {
+	else if (i === 1)
 		film = (
 			<Freeze frame={60}>
 				<P1a.S04 />
 			</Freeze>
 		);
-	} else if (i === 2) {
+	else if (i === 2)
 		film = (
 			<Freeze frame={60}>
 				<P1a.S03 />
 			</Freeze>
 		);
-	} else if (i === 3) {
+	else if (i === 3)
 		film = (
 			<Play at={20 + t}>
 				<P6.S10 />
 			</Play>
 		);
-	} else {
-		film = <FilmTitle t={t} small="СЕКРЕТНОЕ СЛОВО" big="«КАРАСЬ»" color={YELLOW} />;
-	}
+	else film = <FilmTitle t={t} small="СЕКРЕТНОЕ СЛОВО" big="«КАРАСЬ»" color={YELLOW} />;
 	return (
 		<AbsoluteFill>
 			<ScreenView f={f} zoom={1.14}>
@@ -426,111 +647,132 @@ export const S07: React.FC = () => {
 	);
 };
 
-// 8. Nobody knew that but the two of you → «Пап, кто это снял?» Dad says nothing.
+// 8. You look round: the hall laughs as if the cartoon were still on. Nobody notices anything.
 export const S08: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [64]);
+	const {i, t} = seg(f, [36]);
 	if (i === 0) {
+		const turn = Math.sin(t / 5) * 0.8;
 		return (
-			<Stage cam={{s: lerp(t, 0, 64, 1.0, 1.08) * kick(t), cx: 540, cy: 960}} light={{glow: 0, vignette: 0.85}} bg="#05060a">
+			<Stage cam={{s: lerp(t, 0, 36, 1.0, 1.06) * kick(t), cx: 540, cy: 960}} light={{glow: 0, vignette: 0.85}} bg="#05060a">
 				<rect x={-500} y={-500} width={2200} height={3000} fill="#141220" />
-				<Bust kind="son" id="f1s8b" x={540} y={1000} scale={6.0} face={{eyes: 'wide', pupil: 0.6, brows: 'raised', mouth: 'o', look: [0, -0.3], blush: false}} />
+				<Bust kind="son" id="f1s8b" x={540} y={1000} scale={6.0} turn={turn} face={{eyes: 'wide', pupil: 0.6, brows: 'raised', mouth: 'o', look: [turn, 0], blush: false}} />
 				<rect x={-500} y={-500} width={2200} height={3000} fill="#7f9bff" opacity={0.12 + 0.05 * Math.sin(t / 2)} />
 			</Stage>
 		);
 	}
-	const whisper = t >= 26 && t < 64 && Math.floor(t / 4) % 2 === 0;
-	return (
-		<Stage cam={{s: lerp(t, 0, 110, 2.15, 2.3) * kick(t), cx: 600, cy: 860}} light={{glow: 0, vignette: 0.8}} bg="#1d161b">
-			<HallFront f={t}>
-				<Sitter kind="son" k={7} i={SON_SEAT} id="f1s8s" f={t} headTurn={0.5} face={{eyes: 'wide', mouth: whisper ? 'o' : 'flat', brows: 'worried', look: [0.9, 0]}} />
-				<Sitter kind="dad" k={7} i={DAD_SEAT} id="f1s8d" f={t} face={{eyes: 'stare', pupil: 0.7, mouth: 'flat', brows: 'flat', stubble: true, look: [0, -0.2]}} />
-			</HallFront>
-		</Stage>
-	);
-};
-
-// the hall as the film shows it: you two in row 7 (or what the film says will happen)
-const FilmHall: React.FC<{t: number; sonBack?: boolean; dad?: boolean; ring?: number; shadow?: number; zoom?: number; idp?: string}> = ({t, sonBack = false, dad = true, ring = 0, shadow = 0, zoom = 1.25, idp = 'f1fh'}) => {
-	const c: Cam = {s: zoom, cx: 600, cy: 900};
-	return (
-		<Stage cam={c} light={{glow: 0, vignette: 0.8}} bg="#1d161b">
-			<HallFront
-				f={t}
-				row8={
-					shadow > 0 ? (
-						<g opacity={Math.min(1, shadow * 1.5)} transform={`translate(${-46 * Math.min(1, shadow)},${110 * Math.min(1, shadow)})`}>
-							<Sitter kind="dad" k={8} i={SON_SEAT} id={`${idp}x`} f={t} silhouette="#050406" lean={10 * Math.min(1, shadow)} />
-						</g>
-					) : null
-				}
-			>
-				<Sitter kind="son" k={7} i={SON_SEAT} id={`${idp}s`} f={t} back={sonBack} face={{eyes: 'open', mouth: 'flat', brows: 'worried', look: [0, 0]}} />
-				{dad && <Sitter kind="dad" k={7} i={DAD_SEAT} id={`${idp}d`} f={t} face={{eyes: 'open', mouth: 'flat', brows: 'neutral', stubble: true, look: [0, 0]}} />}
-				{ring > 0 && <ellipse cx={seatX(7, DAD_SEAT)} cy={rowY(7) - 170} rx={110 * (0.6 + 0.4 * ring)} ry={170 * (0.6 + 0.4 * ring)} fill="none" stroke={RED} strokeWidth={12} opacity={Math.min(1, ring)} />}
-			</HallFront>
-		</Stage>
-	);
-};
-
-// 9. Suddenly the screen shows this very hall. Row seven. You and dad. It's now.
-export const S09: React.FC = () => {
-	const f = useCurrentFrame();
-	const now = f >= 124;
+	const spot = interpolate(t, [50, 62], [0, 1], clamp);
+	const cam = {s: lerp(t, 0, 111, 1.7, 2.0), cx: 520, cy: 940};
+	const fc = faceAt('son', 7, SON_SEAT);
+	const sp = toScreen(cam, fc.x, fc.y);
 	return (
 		<AbsoluteFill>
-			<ScreenView f={f} zoom={lerp(f, 0, 150, 1.12, 1.22)}>
-				<FilmHall t={f} />
-				{now && (
-					<div style={{position: 'absolute', left: 70, top: 720, fontFamily: MONO, fontWeight: 700, fontSize: 52, color: '#ff4a3d', textShadow: '0 0 12px rgba(255,60,50,0.9)', opacity: Math.floor(f / 8) % 2 === 0 ? 1 : 0.5}}>● СЕЙЧАС</div>
-				)}
-			</ScreenView>
-			{now && f < 132 && <AbsoluteFill style={{background: '#fff', opacity: 0.25}} />}
+			<Stage cam={cam} light={{glow: 0, vignette: 0.8}} bg="#1d161b">
+				<HallFront f={t} idp="f1s8v" dim={0.15 + 0.5 * spot}>
+					<Sitter kind="son" k={7} i={SON_SEAT} id="f1s8s" f={t} face={{eyes: 'wide', pupil: 0.6, mouth: 'flat', brows: 'worried', look: [-0.4, 0]}} />
+					<Sitter kind="dad" k={7} i={DAD_SEAT} id="f1s8d" f={t} popcorn face={{eyes: 'happy', mouth: 'grin', brows: 'raised', stubble: true}} armL={{target: [-40, -560], bend: 1, ku: 0.7, kf: 0.7}} />
+				</HallFront>
+			</Stage>
+			{spot > 0 && <AbsoluteFill style={{background: `radial-gradient(circle at ${sp.x}px ${sp.y + 60}px, transparent ${170 * cam.s * 0.6}px, rgba(0,0,0,${0.5 * spot}) ${330 * cam.s * 0.6}px)`}} />}
 		</AbsoluteFill>
 	);
 };
 
-// 10. On the screen you slowly turn round. And dad's seat beside you is empty.
+// 9. «Пап, ты это видишь?» Dad crunches his popcorn: «Смешной, да?»
+export const S09: React.FC = () => {
+	const f = useCurrentFrame();
+	const ask = f < 36;
+	const eat = f >= 36 && f < 82;
+	const munch = f >= 50 && f < 80 && Math.floor(f / 4) % 2 === 0;
+	const talk = f >= 84 && f < 110 && Math.floor(f / 4) % 2 === 0;
+	// the hand: into the bucket, to the mouth, back
+	const hx = interpolate(f, [36, 42, 50, 74, 82], [80, -25, 10, 10, 80], clamp);
+	const hy = interpolate(f, [36, 42, 50, 74, 82], [-530, -610, -975, -975, -530], clamp);
+	const cam = {s: lerp(f, 0, 117, 3.1, 3.25) * kick(f), cx: 540, cy: 900};
+	const dadFace = toScreen(cam, faceAt('dad', 7, DAD_SEAT).x, faceAt('dad', 7, DAD_SEAT).y);
+	return (
+		<AbsoluteFill>
+			<Stage cam={cam} light={{glow: 0, vignette: 0.8}} bg="#1d161b">
+				<HallFront f={f} idp="f1s9v" dim={0.55}>
+					<Sitter kind="son" k={7} i={SON_SEAT} id="f1s9s" f={f} headTurn={0.5} face={{eyes: 'wide', mouth: ask && Math.floor(f / 4) % 2 === 0 ? 'o' : 'flat', brows: 'worried', look: [0.9, 0]}} />
+					<Sitter
+						kind="dad"
+						k={7}
+						i={DAD_SEAT}
+						id="f1s9d"
+						f={f}
+						popcorn
+						face={{eyes: 'happy', mouth: talk ? 'o' : munch ? 'tight' : 'grin', brows: 'raised', stubble: true, look: [0, -0.2]}}
+						armL={{target: [-40, -560], bend: 1, ku: 0.7, kf: 0.7}}
+						armR={eat ? {target: [hx, hy], bend: -1} : undefined}
+					/>
+				</HallFront>
+			</Stage>
+			{munch && (
+				<div style={{position: 'absolute', left: dadFace.x - 40, top: dadFace.y - 300, transform: `rotate(10deg) scale(${pop(f, 50, 8)})`, fontFamily: HEAVY, fontWeight: 900, fontSize: 64, color: '#fff3c4', textShadow: '0 5px 0 #000'}}>ХРУСТЬ</div>
+			)}
+		</AbsoluteFill>
+	);
+};
+
+// 10. Suddenly the screen shows this very hall. Row seven. You and dad. It's now.
 export const S10: React.FC = () => {
+	const f = useCurrentFrame();
+	const now = f >= 132;
+	const jerk = f >= 34 && f < 46 ? 0.5 + 0.5 * rnd(f) : 0;
+	return (
+		<AbsoluteFill>
+			<ScreenView f={f} zoom={lerp(f, 0, 159, 1.12, 1.22)}>
+				<BrokenFeed t={f} jerk={jerk} bars={0} black={0}>
+					{f >= 40 ? (
+						<FilmHall t={f} idp="f1s10" />
+					) : (
+						<Play at={60 + f}>
+							<P6.S10 />
+						</Play>
+					)}
+				</BrokenFeed>
+				{now && (
+					<div style={{position: 'absolute', left: 170, top: 560, padding: '6px 22px', borderRadius: 12, background: 'rgba(0,0,0,0.7)', border: '4px solid #ff4a3d', fontFamily: MONO, fontWeight: 700, fontSize: 64, color: '#ff4a3d', textShadow: '0 0 12px rgba(255,60,50,0.9)', transform: `scale(${pop(f, 132, 8)})`, transformOrigin: '0 50%'}}>
+						<span style={{opacity: Math.floor(f / 8) % 2 === 0 ? 1 : 0.35}}>●</span> СЕЙЧАС
+					</div>
+				)}
+			</ScreenView>
+			{now && f < 140 && <AbsoluteFill style={{background: '#fff', opacity: 0.25}} />}
+		</AbsoluteFill>
+	);
+};
+
+// 11. On the screen you turn round. And dad's seat beside you is empty.
+export const S11: React.FC = () => {
 	const f = useCurrentFrame();
 	return (
 		<ScreenView f={f} zoom={1.2}>
-			<FilmHall t={f} sonBack={f >= 40} dad={false} ring={pop(f, 112, 10)} />
+			<FilmHall t={f} idp="f1s11" sonBack={f >= 20} dad={f < 54 || (f < 62 && f % 4 < 2)} ring={pop(f, 92, 10)} />
 		</ScreenView>
 	);
 };
 
-// 11. You look to the side. Dad is here. He sits and doesn't blink.
-export const S11: React.FC = () => {
-	const f = useCurrentFrame();
-	return (
-		<Stage cam={{s: lerp(f, 0, 105, 3.0, 3.3) * kick(f), cx: 660, cy: 820}} light={{glow: 0, vignette: 0.85}} bg="#1d161b">
-			<HallFront f={f}>
-				<Sitter kind="son" k={7} i={SON_SEAT} id="f1s11s" f={f} headTurn={0.5} face={{eyes: 'open', mouth: 'flat', brows: 'worried', look: [0.9, 0]}} />
-				<Sitter kind="dad" k={7} i={DAD_SEAT} id="f1s11d" f={f} face={{eyes: 'stare', pupil: 0.6, mouth: 'flat', brows: 'flat', stubble: true, look: [0, -0.2]}} />
-			</HallFront>
-		</Stage>
-	);
-};
-
-// 12. Behind you a seat creaks. Somebody sits down right behind you.
+// 12. Behind you a seat creaks. Somebody sits down right behind you (in the only empty seat).
 export const S12: React.FC = () => {
 	const f = useCurrentFrame();
-	const sit = lerp(f, 40, 62, 0, 1, Easing.inOut(Easing.cubic));
+	const sit = lerp(f, 46, 68, 0, 1, Easing.inOut(Easing.cubic));
 	return (
-		<Stage cam={{s: lerp(f, 0, 99, 1.9, 2.05) * kick(f), cx: 560, cy: 860}} light={{glow: 0, vignette: 0.85}} bg="#1d161b">
+		<Stage cam={{s: lerp(f, 0, 111, 2.6, 2.75) * kick(f), cx: 510, cy: 880}} light={{glow: 0, vignette: 0.85}} bg="#1d161b">
 			<HallFront
+				dim={0.55}
 				f={f}
+				idp="f1s12v"
 				row8={
-					f >= 36 ? (
+					f >= 42 ? (
 						<g transform={`translate(0,${-140 * (1 - sit)})`}>
 							<Sitter kind="dad" k={8} i={SON_SEAT} id="f1s12x" f={f} silhouette="#050406" />
 						</g>
 					) : null
 				}
 			>
-				<Sitter kind="son" k={7} i={SON_SEAT} id="f1s12s" f={f} face={{eyes: 'wide', pupil: f >= 48 ? 0.5 : 1, mouth: f >= 48 ? 'o' : 'flat', brows: 'raised', look: [0, -0.3]}} />
-				<Sitter kind="dad" k={7} i={DAD_SEAT} id="f1s12d" f={f} face={{eyes: 'stare', pupil: 0.6, mouth: 'flat', brows: 'flat', stubble: true, look: [0, -0.2]}} />
+				<Sitter kind="son" k={7} i={SON_SEAT} id="f1s12s" f={f} face={{eyes: 'wide', pupil: f >= 52 ? 0.5 : 1, mouth: f >= 52 ? 'o' : 'flat', brows: 'raised', look: [0, -0.3]}} />
+				<Sitter kind="dad" k={7} i={DAD_SEAT} id="f1s12d" f={f} popcorn face={{eyes: 'happy', mouth: 'grin', brows: 'raised', stubble: true}} armL={{target: [-40, -560], bend: 1, ku: 0.7, kf: 0.7}} />
 			</HallFront>
 		</Stage>
 	);
@@ -540,8 +782,8 @@ export const S12: React.FC = () => {
 export const S13: React.FC = () => {
 	const f = useCurrentFrame();
 	return (
-		<ScreenView f={f} zoom={lerp(f, 0, 90, 1.2, 1.32)}>
-			<FilmHall t={f} zoom={1.7} shadow={lerp(f, 20, 70, 0.3, 1)} />
+		<ScreenView f={f} zoom={lerp(f, 0, 99, 1.2, 1.32)}>
+			<FilmHall t={f} idp="f1s13" zoom={2.3} shadow={lerp(f, 24, 80, 0.3, 1)} />
 		</ScreenView>
 	);
 };
@@ -550,16 +792,16 @@ export const S13: React.FC = () => {
 export const S14: React.FC = () => {
 	const f = useCurrentFrame();
 	const words = [
-		{w: 'ПРИВЕТ,', at: 8},
-		{w: 'ТИГРЁНОК', at: 24},
+		{w: 'ПРИВЕТ,', at: 6},
+		{w: 'ТИГРЁНОК', at: 23},
 	];
 	const jit = (k: number) => (rnd(f * 3 + k) - 0.5) * 10;
 	return (
 		<AbsoluteFill>
-			<Stage cam={{s: lerp(f, 0, 57, 1.0, 1.08) * kick(f), cx: 540, cy: 960}} light={{glow: 0, vignette: 0.9}} bg="#030304">
+			<Stage cam={{s: lerp(f, 0, 60, 1.0, 1.08) * kick(f), cx: 540, cy: 960}} light={{glow: 0, vignette: 0.9}} bg="#030304">
 				<rect x={-500} y={-500} width={2200} height={3000} fill="#0d0c14" />
-				<Bust kind="son" id="f1s14b" x={460} y={1080} scale={5.4} turn={-0.3} face={{eyes: 'wide', pupil: 0.45, brows: 'raised', mouth: 'flat', look: [0.8, 0], blush: false}} />
-				<g transform="translate(1030,1010) scale(4.2)">
+				<Bust kind="son" id="f1s14b" x={620} y={1080} scale={5.4} turn={0.3} face={{eyes: 'wide', pupil: 0.45, brows: 'raised', mouth: 'flat', look: [-0.8, 0], blush: false}} />
+				<g transform="translate(50,1010) scale(4.2)">
 					<Head kind="dad" silhouette="#020203" uid="f1s14x" />
 				</g>
 				<rect x={-500} y={-500} width={2200} height={3000} fill="#7f9bff" opacity={0.08} />
@@ -580,106 +822,67 @@ export const S14: React.FC = () => {
 	);
 };
 
-// 15. Not from the speakers → right behind your back.
+// 15. You turn round — nobody behind you. The only empty seat in the whole full hall (it folds up).
 export const S15: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [44]);
-	if (i === 0) {
-		const x = pop(t, 22, 9);
-		return (
-			<AbsoluteFill>
-				<Stage cam={{s: kick(t), cx: 540, cy: 960}} light={{glow: 0, vignette: 0.85}} bg="#1d161b">
-					<rect x={-400} y={-400} width={1880} height={2800} fill="#1d161b" />
-					{[200, 880].map((cx) => (
-						<g key={cx}>
-							<rect x={cx - 150} y={560} width={300} height={560} rx={20} fill="#2a2a30" />
-							<circle cx={cx} cy={720} r={90} fill="#121216" stroke="#3a3a42" strokeWidth={10} />
-							<circle cx={cx} cy={980} r={60} fill="#121216" stroke="#3a3a42" strokeWidth={10} />
-						</g>
-					))}
-				</Stage>
-				{x > 0.01 &&
-					[200, 880].map((cx) => (
-						<svg key={cx} width={1080} height={1920} style={{position: 'absolute', inset: 0}}>
-							<g transform={`translate(${cx},840) scale(${x})`} stroke={RED} strokeWidth={26} strokeLinecap="round">
-								<line x1={-150} y1={-150} x2={150} y2={150} />
-								<line x1={150} y1={-150} x2={-150} y2={150} />
-							</g>
-						</svg>
-					))}
-			</AbsoluteFill>
-		);
-	}
-	return (
-		<Stage cam={{s: lerp(t, 0, 55, 1.0, 1.1) * kick(t), cx: 540, cy: 960}} light={{glow: 0, vignette: 0.9}} bg="#030304">
-			<rect x={-500} y={-500} width={2200} height={3000} fill="#0d0c14" />
-			<Bust kind="son" id="f1s15b" x={540} y={1060} scale={6.0} face={{eyes: 'wide', pupil: 0.4, brows: 'raised', mouth: 'o', look: [-0.95, 0.1], blush: false}} />
-			{[0, 1, 2].map((k) => {
-				const p = ((t + k * 9) % 27) / 27;
-				return <path key={k} d={`M ${100 - 40 * p},${900 - 60 * p} q -40,40 0,80 q 40,40 0,80`} stroke="#cfd8ff" strokeWidth={10} fill="none" opacity={0.6 * (1 - p)} />;
-			})}
-			<rect x={-500} y={-500} width={2200} height={3000} fill="#7f9bff" opacity={0.1} />
-		</Stage>
-	);
-};
-
-// 16. You turn round — nobody behind. The seat folds up as if someone just got up.
-export const S16: React.FC = () => {
-	const f = useCurrentFrame();
-	const up = lerp(f, 30, 60, 0, 1, Easing.out(Easing.cubic));
 	const [sx, sy] = shake(f, 0, 14, 8);
+	const out = lerp(f, 70, 130, 0, 1, Easing.inOut(Easing.cubic));
+	const cx0 = seatX(8, SON_SEAT) + 30;
 	return (
-		<Stage cam={{s: 1.7 * kick(f), cx: 540 + sx, cy: 1000 + sy}} light={{glow: 0, vignette: 0.85}} bg="#1d161b">
-			<rect x={-400} y={-400} width={1880} height={2800} fill="#1d161b" />
-			{[-2, -1, 0, 1, 2].map((i) => (
-				<Seat key={i} x={540 + i * 200} y={1300} s={1.3} up={i === 0 ? up : 0} />
-			))}
-			<rect x={-400} y={-400} width={1880} height={2800} fill="#000" opacity={0.25} />
+		<Stage cam={{s: (2.6 - 1.4 * out) * kick(f), cx: cx0 + (520 - cx0) * out + sx, cy: 900 + 60 * out + sy}} light={{glow: 0, vignette: 0.85}} bg="#1d161b">
+			<HallFront f={f} idp="f1s15v" dim={0.3} behindUp={lerp(f, 30, 60, 0, 1, Easing.out(Easing.cubic))} behindRing={pop(f, 112, 10)}>
+				<Sitter kind="son" k={7} i={SON_SEAT} id="f1s15s" f={f} back />
+				<Sitter kind="dad" k={7} i={DAD_SEAT} id="f1s15d" f={f} popcorn face={{eyes: 'happy', mouth: 'grin', brows: 'raised', stubble: true}} armL={{target: [-40, -560], bend: 1, ku: 0.7, kf: 0.7}} />
+			</HallFront>
 		</Stage>
 	);
 };
 
-// 17. You turn back — dad's seat is empty. Just like on the screen.
-export const S17: React.FC = () => {
+// 16. You turn back — dad's seat is empty. Just like on the screen.
+export const S16: React.FC = () => {
 	const f = useCurrentFrame();
 	const {i, t} = seg(f, [80]);
 	if (i === 0) {
 		return (
-			<Stage cam={{s: lerp(t, 0, 80, 2.2, 2.4) * kick(t), cx: 600, cy: 870}} light={{glow: 0, vignette: 0.85}} bg="#1d161b">
-				<HallFront f={t} dadSeatUp={0}>
-					<Sitter kind="son" k={7} i={SON_SEAT} id="f1s17s" f={t} headTurn={0.5} face={{eyes: 'wide', pupil: 0.5, mouth: 'o', brows: 'raised', look: [0.9, 0]}} />
+			<Stage cam={{s: lerp(t, 0, 80, 3.0, 3.2) * kick(t), cx: 540, cy: 920}} light={{glow: 0, vignette: 0.85}} bg="#1d161b">
+				<HallFront f={t} idp="f1s16v" dim={0.55}>
+					<Sitter kind="son" k={7} i={SON_SEAT} id="f1s16s" f={t} headTurn={0.5} face={{eyes: 'wide', pupil: 0.5, mouth: 'o', brows: 'raised', look: [0.9, 0]}} />
+					<g transform={`translate(${seatX(7, DAD_SEAT)},${rowY(7) - 18}) rotate(-8) scale(${rowS(7)})`}>
+						<rect x={-34} y={-12} width={68} height={26} rx={3} fill="#f4e6c4" />
+						<rect x={18} y={-12} width={2} height={26} fill="#c9b48a" />
+					</g>
+					{t >= 58 && <ellipse cx={seatX(7, DAD_SEAT)} cy={rowY(7) - 75} rx={78 * (0.6 + 0.4 * pop(t, 58, 10))} ry={104 * (0.6 + 0.4 * pop(t, 58, 10))} fill="none" stroke={RED} strokeWidth={6} opacity={Math.min(1, pop(t, 58, 10))} />}
 				</HallFront>
 			</Stage>
 		);
 	}
-	// the film | for real
 	return (
 		<AbsoluteFill>
 			<AbsoluteFill style={{clipPath: 'inset(0 0 50% 0)'}}>
 				<div style={{position: 'absolute', inset: 0, transform: 'translateY(-470px)'}}>
-					<FilmHall t={t} sonBack dad={false} zoom={1.6} idp="f1s17top" />
+					<FilmHall t={t} idp="f1s16top" sonBack dad={false} zoom={2.0} />
 				</div>
 				<AbsoluteFill style={{background: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 2px, transparent 2px, transparent 6px)'}} />
 			</AbsoluteFill>
 			<AbsoluteFill style={{clipPath: 'inset(50% 0 0 0)'}}>
 				<div style={{position: 'absolute', inset: 0, transform: 'translateY(490px)'}}>
-					<FilmHall t={t} dad={false} zoom={1.6} idp="f1s17bot" />
+					<FilmHall t={t} idp="f1s16bot" dad={false} zoom={2.0} />
 				</div>
 			</AbsoluteFill>
 			<div style={{position: 'absolute', left: 0, top: 954, width: 1080, height: 12, background: '#fff'}} />
-			<div style={{position: 'absolute', left: 40, top: 300, background: 'rgba(14,14,16,0.9)', border: `5px solid ${YELLOW}`, borderRadius: 14, padding: '4px 20px', fontFamily: HEAVY, fontWeight: 900, fontSize: 42, color: YELLOW, transform: `scale(${pop(t, 2, 10)})`}}>НА ЭКРАНЕ</div>
-			<div style={{position: 'absolute', left: 40, top: 1000, background: 'rgba(14,14,16,0.9)', border: `5px solid ${RED}`, borderRadius: 14, padding: '4px 20px', fontFamily: HEAVY, fontWeight: 900, fontSize: 42, color: RED, transform: `scale(${pop(t, 10, 10)})`}}>НА САМОМ ДЕЛЕ</div>
+			<Label p={pop(t, 2, 10)} x={40} y={300} text="НА ЭКРАНЕ" color={YELLOW} />
+			<Label p={pop(t, 10, 10)} x={40} y={1000} text="НА САМОМ ДЕЛЕ" color={RED} />
 		</AbsoluteFill>
 	);
 };
 
-// 18. On the seat lies only his ticket. On the back, in dad's handwriting: «Не досматривай».
-export const S18: React.FC = () => {
+// 17. On the seat — his ticket. On the back, in dad's handwriting: «Не досматривай».
+export const S17: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [56]);
+	const {i, t} = seg(f, [50]);
 	if (i === 0) {
 		return (
-			<Stage cam={{s: lerp(t, 0, 56, 2.6, 2.9) * kick(t), cx: 540, cy: 1330}} light={{glow: 0, vignette: 0.85}} bg="#1d161b">
+			<Stage cam={{s: lerp(t, 0, 50, 2.6, 2.9) * kick(t), cx: 540, cy: 1330}} light={{glow: 0, vignette: 0.85}} bg="#1d161b">
 				<rect x={-400} y={-400} width={1880} height={2800} fill="#1d161b" />
 				<Seat x={540} y={1300} s={1.3} />
 				<g transform="translate(540,1262) rotate(-8)">
@@ -694,24 +897,54 @@ export const S18: React.FC = () => {
 	return (
 		<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 45%, #2a2030 0%, #08060a 75%)'}}>
 			<div style={{position: 'absolute', inset: 0, transform: `scaleX(${Math.max(0.03, Math.abs(flip))}) rotate(-3deg) scale(${lerp(t, 0, 97, 1.0, 1.08)})`}}>
-				<Ticket side={flip > 0 ? 'front' : 'back'} write={lerp(t, 44, 76, 0, 1, Easing.linear)} />
+				<Ticket side={flip > 0 ? 'front' : 'back'} write={lerp(t, 40, 72, 0, 1, Easing.linear)} />
 			</div>
 		</AbsoluteFill>
 	);
 };
 
-// 19. The screen lights up: «Продолжение следует». You are alone in the hall.
-export const S19: React.FC = () => {
+// 18. «Продолжение следует» → the hall applauds → for them it was a cartoon about space.
+export const S18: React.FC = () => {
 	const f = useCurrentFrame();
+	const {i, t} = seg(f, [88, 130]);
+	if (i === 0) {
+		return (
+			<ScreenView f={f} zoom={lerp(t, 0, 88, 1.0, 1.06)} heads="son">
+				{t >= 20 ? <FilmTitle t={t - 20} big={'ПРОДОЛЖЕНИЕ\nСЛЕДУЕТ…'} size={84} /> : <AbsoluteFill style={{background: '#0b0b0e'}} />}
+			</ScreenView>
+		);
+	}
+	if (i === 1) {
+		return (
+			<Stage cam={{s: lerp(t, 0, 42, 1.5, 1.65), cx: 540, cy: 960}} light={{glow: 0, vignette: 0.8}} bg="#1d161b">
+				<HallFront f={t} idp="f1s18v" mood="clap" dim={0.3}>
+					<Sitter kind="son" k={7} i={SON_SEAT} id="f1s18s" f={t} face={{eyes: 'wide', pupil: 0.5, mouth: 'flat', brows: 'worried', look: [0, 0]}} />
+				</HallFront>
+			</Stage>
+		);
+	}
+	// what they saw | what you saw
 	return (
-		<ScreenView f={f} zoom={lerp(f, 0, 105, 1.0, 1.06)} heads="son">
-			{f >= 18 ? <FilmTitle t={f - 18} big={'ПРОДОЛЖЕНИЕ\nСЛЕДУЕТ…'} size={84} /> : <AbsoluteFill style={{background: '#0b0b0e'}} />}
-		</ScreenView>
+		<AbsoluteFill>
+			<AbsoluteFill style={{clipPath: 'inset(0 0 50% 0)'}}>
+				<div style={{position: 'absolute', inset: 0, transform: 'translateY(-110px)'}}>
+					<SpaceToon t={t} end />
+				</div>
+			</AbsoluteFill>
+			<AbsoluteFill style={{clipPath: 'inset(50% 0 0 0)'}}>
+				<div style={{position: 'absolute', inset: 0, transform: 'translateY(640px)'}}>
+					<FilmTitle t={30} big={'ПРОДОЛЖЕНИЕ\nСЛЕДУЕТ…'} size={84} />
+				</div>
+			</AbsoluteFill>
+			<div style={{position: 'absolute', left: 0, top: 954, width: 1080, height: 12, background: '#fff'}} />
+			<Label p={pop(t, 2, 10)} x={40} y={230} text="ОНИ ВИДЕЛИ" color={YELLOW} />
+			<Label p={pop(t, 10, 10)} x={40} y={1000} text="ТЫ ВИДЕЛ" color={RED} />
+		</AbsoluteFill>
 	);
 };
 
-// 20. Finale: run out and look for dad, or stay and watch the film to the end?
-export const S20: React.FC = () => {
+// 19. Finale: run out and look for dad, or stay and watch the film to the end?
+export const S19: React.FC = () => {
 	const f = useCurrentFrame();
 	return (
 		<Finale
@@ -737,3 +970,6 @@ export const S20: React.FC = () => {
 		/>
 	);
 };
+
+// (the Cam type is used by the stage helpers above)
+export type _Cam = Cam;

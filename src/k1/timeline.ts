@@ -11,7 +11,7 @@ export {FPS};
 const s = shotStart;
 
 // what changed at home after the ride to the 13th floor
-export const SIGNS: Sign[] = [{n: 1, title: 'КРОВАТЬ У\nДРУГОЙ СТЕНЫ', at: s(17) + 112, hold: 34, y: 1540}];
+export const SIGNS: Sign[] = [{n: 1, title: 'КРОВАТЬ У\nДРУГОЙ СТЕНЫ', at: s(17) + 98, hold: 22, y: 1540}];
 
 export const CLOCK: {from: number; text: string}[] = [
 	{from: 0, text: 'ДЕНЬ 1 · 16:40'},

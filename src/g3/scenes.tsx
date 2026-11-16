@@ -128,7 +128,7 @@ const Peephole: React.FC<{children: React.ReactNode; dark?: number}> = ({childre
 
 // the hall's front door swung open by `open` (Hall itself draws it shut); the landing behind it.
 // children are drawn inside the doorway (people stepping out / in), under the landing's darkness
-const FrontDoor: React.FC<{id: string; open: number; light?: number; children?: React.ReactNode}> = ({id, open, light = 1, children}) => {
+export const FrontDoor: React.FC<{id: string; open: number; light?: number; children?: React.ReactNode}> = ({id, open, light = 1, children}) => {
 	const o = Math.max(0, Math.min(1, open));
 	if (o <= 0.001) return null;
 	const xe = 380 + 356 * (1 - o) + 24;

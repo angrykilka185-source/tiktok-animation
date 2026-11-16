@@ -96,7 +96,7 @@ export const HUD: React.FC<{ep: Episode}> = ({ep}) => {
 						position: 'absolute',
 						right: 1080 - COUNTER_X,
 						top: COUNTER_Y - 10,
-						width: g.boxW,
+						width: Math.max(g.boxW, 130 + (ep.counterTitle ?? 'ОН ИЛИ НЕ ОН?').length * 22),
 						transform: `translateX(${(1 - cIn) * 460}px)`,
 						background: 'rgba(14,14,16,0.9)',
 						border: `4px solid ${ep.accent ?? '#e0342b'}`,
@@ -106,7 +106,7 @@ export const HUD: React.FC<{ep: Episode}> = ({ep}) => {
 						boxSizing: 'border-box',
 					}}
 				>
-					<div style={{display: 'flex', justifyContent: 'space-between', fontFamily: HEAVY, fontWeight: 900, fontSize: 30, letterSpacing: 1}}>
+					<div style={{display: 'flex', justifyContent: 'space-between', gap: 14, fontFamily: HEAVY, fontWeight: 900, fontSize: 30, letterSpacing: 1}}>
 						<span style={{color: ep.accent ?? '#ff4a3d'}}>{ep.counterTitle ?? 'ОН ИЛИ НЕ ОН?'}</span>
 						<span style={{color: '#f4efe6'}}>
 							{done}/{ep.slots}

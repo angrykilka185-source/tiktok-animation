@@ -9,6 +9,7 @@ import {Wallpaper} from '../components/Set';
 import {Cam, Stage, toScreen} from '../components/Stage';
 import * as G1 from '../g1/scenes';
 import * as G2 from '../g2/scenes';
+import {FrontDoor} from '../g3/scenes';
 
 const {YELLOW, RED, NIGHT, rnd} = G1;
 const {Hall, Finale} = G2;
@@ -22,7 +23,7 @@ const GIRL_SLEEVE = '#1a827c';
 // the neighbour, uncle Vitya: grey hair, a grey moustache, a flat cap
 const Cap: React.FC<{x: number; hy: number; hw: number; hh: number}> = ({x, hy, hw, hh}) => (
 	<g>
-		<path d={`M ${x - 1.08 * hw},${hy - 0.42 * hh} C ${x - 1.12 * hw},${hy - 1.28 * hh} ${x + 1.12 * hw},${hy - 1.28 * hh} ${x + 1.08 * hw},${hy - 0.42 * hh} Z`} fill="#4a4f57" />
+		<path d={`M ${x - 1.08 * hw},${hy - 0.42 * hh} C ${x - 1.08 * hw},${hy - 1.12 * hh} ${x + 1.08 * hw},${hy - 1.12 * hh} ${x + 1.08 * hw},${hy - 0.42 * hh} Z`} fill="#4a4f57" />
 		<path d={`M ${x - 1.12 * hw},${hy - 0.42 * hh} Q ${x},${hy - 0.18 * hh} ${x + 1.12 * hw},${hy - 0.42 * hh} L ${x + 1.02 * hw},${hy - 0.52 * hh} Q ${x},${hy - 0.34 * hh} ${x - 1.02 * hw},${hy - 0.52 * hh} Z`} fill="#33373e" />
 	</g>
 );
@@ -33,12 +34,12 @@ const Moustache: React.FC<{x: number; hy: number; hw: number; hh: number}> = ({x
 	/>
 );
 type Arm = {target: [number, number]; bend?: 1 | -1; ku?: number; kf?: number};
-const Vitya: React.FC<{id: string; x: number; y: number; s: number; f: number; face: Face; armL?: Arm; armR?: Arm; walk?: number}> = (p) => {
+const Vitya: React.FC<{id: string; x: number; y: number; s: number; f: number; face: Face; armL?: Arm; armR?: Arm; walk?: number; back?: boolean}> = (p) => {
 	const hy = p.y - 1024.4 * p.s;
 	return (
 		<g>
-			<Person kind="dad" id={p.id} colors={VITYA} x={p.x} y={p.y} scale={p.s} breathe={p.f} walk={p.walk} face={{stubble: false, blush: false, ...p.face}} armL={p.armL} armR={p.armR} />
-			<Moustache x={p.x} hy={hy} hw={82 * p.s} hh={104 * p.s} />
+			<Person kind="dad" id={p.id} colors={VITYA} x={p.x} y={p.y} scale={p.s} breathe={p.f} walk={p.walk} back={p.back} face={{stubble: false, blush: false, ...p.face}} armL={p.armL} armR={p.armR} />
+			{!p.back && <Moustache x={p.x} hy={hy} hw={82 * p.s} hh={104 * p.s} />}
 			<Cap x={p.x} hy={hy} hw={82 * p.s} hh={104 * p.s} />
 		</g>
 	);
@@ -322,14 +323,14 @@ const DoorClose: React.FC<{num: string; handle?: number; sneaker?: boolean; flip
 			</text>
 		</g>
 		<circle cx={540} cy={560} r={20} fill="#2a1d14" stroke="#c9b37a" strokeWidth={6} />
-		<g transform={`translate(800,980) rotate(${32 * handle})`}>
+		<g transform={`translate(800,980) rotate(${-34 * handle})`}>
 			<circle r={34} fill="#c9b37a" />
 			<rect x={-150} y={-16} width={160} height={32} rx={16} fill="#d9c27a" stroke="#8a6a2a" strokeWidth={4} />
 		</g>
 		<rect x={784} y={1060} width={32} height={60} rx={8} fill="#c9b37a" />
 		<rect x={80} y={1500} width={920} height={110} rx={14} fill="#5a3a3a" />
 		<rect x={100} y={1520} width={880} height={70} rx={10} fill="none" stroke="#6e4a4a" strokeWidth={6} strokeDasharray="20 14" />
-		{sneaker && <Sneaker x={330} y={1540} s={1.0} />}
+		{sneaker && <Sneaker x={390} y={1546} s={0.62} />}
 	</g>
 );
 
@@ -387,7 +388,7 @@ const CrossSection: React.FC<{t: number}> = ({t}) => (
 		<text x={700} y={500} fontSize={44} fontFamily={HEAVY} fontWeight={900} fill="#d9c27a" textAnchor="middle">
 			84
 		</text>
-		<Person kind="girl" id="k1cs1" x={420} y={860} scale={0.5} breathe={t} face={{eyes: 'wide', brows: 'raised', mouth: 'o', look: [0.8, 0]}} />
+		<Person kind="girl" id="k1cs1" x={440} y={860} scale={0.38} breathe={t} face={{eyes: 'wide', brows: 'raised', mouth: 'o', look: [0.8, 0]}} />
 		{/* slab */}
 		<rect x={60} y={860} width={960} height={50} fill="#8a8478" />
 		{/* floor 12: the kitchen */}
@@ -395,7 +396,7 @@ const CrossSection: React.FC<{t: number}> = ({t}) => (
 		<rect x={600} y={1240} width={300} height={230} fill="#d9d4cc" />
 		<rect x={610} y={1220} width={280} height={24} fill="#3a3f47" />
 		<ellipse cx={700} cy={1210} rx={60} ry={14} fill="#5a5f66" />
-		<Person kind="mom" id="k1cs2" colors={MOM13} x={520} y={1470} scale={0.5} breathe={t} face={{eyes: 'happy', mouth: 'smile', look: [0.8, 0]}} armR={{target: [200, -420], bend: -1}} />
+		<Person kind="mom" id="k1cs2" colors={MOM13} x={520} y={1470} scale={0.4} breathe={t} face={{eyes: 'happy', mouth: 'smile', look: [0.8, 0]}} armR={{target: [200, -420], bend: -1}} />
 		<rect x={60} y={1470} width={960} height={50} fill="#8a8478" />
 		{/* labels */}
 		{[
@@ -495,18 +496,21 @@ export const S03: React.FC = () => {
 // 4. Uncle Vitya, the neighbour, comes into the lift and presses «1».
 export const S04: React.FC = () => {
 	const f = useCurrentFrame();
-	const walk = lerp(f, 4, 36, 0, 1, Easing.out(Easing.quad));
-	const vx = 1250 + (760 - 1250) * walk;
+	const walk = lerp(f, 2, 32, 0, 1, Easing.out(Easing.quad));
+	const turned = f >= 34;
+	const vx = 690 + (770 - 690) * walk;
+	const vy = 2200 + (1600 - 2200) * walk;
+	const vs = 1.5 + (0.88 - 1.5) * walk;
 	const press = lerp(f, 74, 84, 0, 1, Easing.out(Easing.cubic)) * (1 - lerp(f, 96, 108, 0, 1));
 	const c: Cam = {s: lerp(f, 0, 117, 1.0, 1.04) * kick(f), cx: 540, cy: 960};
 	const tag = pop(f, 46, 11);
-	const head = toScreen(c, vx, 1600 - 1024 * 0.95);
+	const head = toScreen(c, vx, vy - 1024 * vs);
 	return (
 		<AbsoluteFill>
 			<Stage cam={c} light={{glow: 0.3, vignette: 0.55}} bg="#2a2420">
 				<Cabin lit={f >= 84 ? [1] : []} glow13={0.4} />
 				<Person kind="girl" id="k1s4g" x={360} y={1580} scale={1.0} breathe={f} face={{eyes: 'open', mouth: 'flat', brows: 'neutral', look: [0.7, 0]}} />
-				<Vitya id="k1s4v" x={vx} y={1600} s={0.95} f={f} walk={walk < 1 ? f * 0.4 : undefined} face={{eyes: 'narrow', mouth: 'flat', brows: 'flat', look: [0.6, 0.1]}} armR={press > 0 ? {target: [200 + 120 * press, -800 - 60 * press], bend: -1} : undefined} />
+				<Vitya id="k1s4v" x={vx} y={vy} s={vs} f={f} back={!turned} walk={walk < 1 ? f * 0.4 : undefined} face={{eyes: 'narrow', mouth: 'flat', brows: 'flat', look: [0.6, 0.2]}} armR={press > 0 ? {target: [120 + 136 * press, -560 + 128 * press], bend: -1} : undefined} />
 			</Stage>
 			{tag > 0.01 && (
 				<div style={{position: 'absolute', left: head.x, top: head.y - 150, transform: `translate(-50%,-100%) scale(${tag})`, transformOrigin: '50% 100%', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
@@ -531,7 +535,7 @@ export const S05: React.FC = () => {
 				<Stage cam={c} light={{glow: 0.2, vignette: 0.7}} bg="#8d939b">
 					<Panel lit={[1]} glow13={0.6 + 0.3 * Math.sin(t / 3)} />
 				</Stage>
-				<Finger x={b.x + 110 + 300 * (1 - point)} y={b.y + 120 + 420 * (1 - point)} s={1.1} />
+				<Finger x={b.x + 80 + 300 * (1 - point)} y={b.y + 92 + 420 * (1 - point)} s={1.1} />
 			</AbsoluteFill>
 		);
 	}
@@ -565,14 +569,14 @@ export const S06: React.FC = () => {
 		return (
 			<Stage cam={{s: lerp(t, 0, 66, 1.0, 1.05) * kick(t), cx: 570, cy: 1000}} light={{glow: 0.3, vignette: 0.55}} bg="#cdb88f">
 				<Hall id="k1s6h" noBag />
-				<Person kind="mom" id="k1s6m" colors={MOM13} x={780} y={1560} scale={1.0} breathe={t} face={{eyes: 'happy', mouth: talk ? 'o' : 'smile', brows: 'neutral', look: [-0.8, 0.1]}} armL={{target: [-300, -560], bend: 1}} />
-				<g transform={`translate(${780 - 300},${1560 - 560})`}>
+				<Person kind="mom" id="k1s6m" colors={MOM13} x={780} y={1560} scale={0.88} breathe={t} face={{eyes: 'happy', mouth: talk ? 'o' : 'smile', brows: 'neutral', look: [-0.8, 0.1]}} armL={{target: [-300, -560], bend: 1}} />
+				<g transform={`translate(${780 - 300 * 0.88},${1560 - 560 * 0.88})`}>
 					<rect x={-40} y={-30} width={80} height={46} rx={6} fill="#9ac27a" stroke="#6a8a4a" strokeWidth={4} />
 					<text y={6} fontSize={22} fontFamily={HEAVY} fontWeight={900} fill="#3a5a2a" textAnchor="middle">
 						100
 					</text>
 				</g>
-				<Person kind="girl" id="k1s6g" x={380} y={1560} scale={1.0} breathe={t} face={{eyes: 'open', mouth: 'flat', brows: 'neutral', look: [0.8, 0]}} />
+				<Person kind="girl" id="k1s6g" x={400} y={1560} scale={0.9} breathe={t} face={{eyes: 'open', mouth: 'flat', brows: 'neutral', look: [0.8, 0]}} />
 			</Stage>
 		);
 	}
@@ -707,17 +711,20 @@ export const S11: React.FC = () => {
 // 12. Mom's voice from behind the door: «Это ты? Заходи, ужин стынет».
 export const S12: React.FC = () => {
 	const f = useCurrentFrame();
+	const c: Cam = {s: lerp(f, 0, 129, 1.22, 1.32) * kick(f), cx: 400, cy: 1060};
+	const d = toScreen(c, 320, 900);
 	return (
 		<AbsoluteFill>
-			<Stage cam={{s: lerp(f, 0, 129, 0.9, 0.98) * kick(f), cx: 540, cy: 1040}} light={{glow: 0.2, vignette: 0.7}} bg="#e8e2d0">
-				<DoorClose num="84" sneaker />
-				<Person kind="girl" id="k1s12g" x={300} y={1780} scale={1.1} breathe={f} face={{eyes: 'wide', pupil: 0.55, mouth: 'o', brows: 'raised', look: [0.8, -0.2]}} />
+			<Stage cam={c} light={{glow: 0.2, vignette: 0.7}} bg="#e8e2d0">
+				<Floor mirror num="84" sneaker />
+				<Person kind="girl" id="k1s12g" x={600} y={1610} scale={0.86} breathe={f} face={{eyes: 'wide', pupil: 0.55, mouth: 'o', brows: 'raised', look: [-0.8, -0.2]}} />
 			</Stage>
 			<svg width={1080} height={1920} style={{position: 'absolute', inset: 0}}>
 				{f >= 50 &&
 					[0, 1, 2].map((k) => {
 						const p = ((f - 50 + k * 10) % 30) / 30;
-						return <path key={k} d={`M ${720 + 40 * p},${500 - 120 - 80 * p} a ${80 + 120 * p},${80 + 120 * p} 0 0 1 0,${2 * (80 + 120 * p)}`} stroke="#fff" strokeWidth={10} fill="none" opacity={0.8 * (1 - p)} />;
+						const r = 70 + 110 * p;
+						return <path key={k} d={`M ${d.x + 120 + 30 * p},${d.y - r} a ${r},${r} 0 0 1 0,${2 * r}`} stroke="#fff" strokeWidth={10} fill="none" opacity={0.85 * (1 - p)} />;
 					})}
 			</svg>
 		</AbsoluteFill>
@@ -790,16 +797,25 @@ export const S16: React.FC = () => {
 	const f = useCurrentFrame();
 	const {i, t} = seg(f, [30]);
 	if (i === 0) return <Display text="12" f={t} />;
-	const run = lerp(t, 0, 30, 0, 1, Easing.out(Easing.quad));
+	const open = lerp(t, 0, 8, 0, 1, Easing.out(Easing.cubic)) * (1 - lerp(t, 30, 40, 0, 1, Easing.in(Easing.cubic)));
+	const run = lerp(t, 3, 28, 0, 1, Easing.out(Easing.quad));
+	const gx = 575 - 190 * run;
+	const gy = 1430 + 160 * run;
+	const gs = 0.66 + 0.26 * run;
+	const inside = gy >= 1470;
 	const ask = t >= 46;
 	const talk = ask && t < 84 && Math.floor(t / 4) % 2 === 0;
+	const girl = <Person kind="girl" id="k1s16g" x={gx} y={gy} scale={gs} walk={run < 1 ? t * 0.6 : undefined} breathe={t} face={{eyes: 'wide', mouth: 'o', brows: 'raised', look: [0.6, 0]}} />;
 	return (
 		<Stage cam={{s: lerp(t, 0, 93, 1.0, 1.06) * kick(t), cx: 570, cy: 1000}} light={{glow: 0.3, vignette: 0.55}} bg="#cdb88f">
 			<Hall id="k1s16h" noBag />
-			<Person kind="girl" id="k1s16g" x={570 - 200 * run} y={1460 + 120 * run} scale={0.9 + 0.12 * run} walk={run < 1 ? t * 0.6 : undefined} breathe={t} face={{eyes: 'wide', mouth: 'o', brows: 'raised', look: [0.6, 0]}} />
-			<Person kind="mom" id="k1s16m" colors={MOM13} x={800} y={1590} scale={1.02} breathe={t} face={{eyes: ask ? 'narrow' : 'open', mouth: talk ? 'o' : 'flat', brows: ask ? 'raised' : 'neutral', look: [-0.8, 0.1]}} armL={{target: [-150, -430], bend: 1}} armR={{target: [150, -430], bend: -1}} />
+			<FrontDoor id="k1s16d" open={open} light={1}>
+				{!inside ? girl : null}
+			</FrontDoor>
+			{inside && girl}
+			<Person kind="mom" id="k1s16m" colors={MOM13} x={800} y={1590} scale={0.88} breathe={t} face={{eyes: ask ? 'narrow' : 'open', mouth: talk ? 'o' : 'flat', brows: ask ? 'raised' : 'neutral', look: [-0.8, 0.1]}} armL={{target: [-150, -430], bend: 1}} armR={{target: [150, -430], bend: -1}} />
 			{ask && (
-				<g transform={`translate(${800 + 140},${1590 - 1150}) scale(${pop(t, 50, 9)})`}>
+				<g transform={`translate(${800 + 130},${1590 - 1020}) scale(${pop(t, 50, 9)})`}>
 					<circle r={60} fill="#fff" />
 					<text y={30} fontSize={90} fontFamily={HEAVY} fontWeight={900} fill="#d63b2f" textAnchor="middle">
 						?

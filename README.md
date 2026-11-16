@@ -141,6 +141,23 @@ npx remotion render Golosovye3 out/golosovye-3.mp4
 ffmpeg -i out/golosovye-3.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k deliverables/golosovye-3-s-ozvuchkoy.mp4
 ```
 
+## Новый сериал «Кнопка 13», часть 1
+
+Код: `src/k1/` (композиция `Knopka1`). Новая героиня — `Person kind="girl"`: рыжий высокий хвост с резинкой,
+чёлка, бирюзовое худи, белые наушники на шее и ключ на красном шнурке (`GirlNeck` в `src/components/Person.tsx`).
+Сосед дядя Витя — `kind="dad"` с кепкой и усами (`Vitya`, `VityaBust`). Наборы: многоэтажка на закате (`Building`),
+панель кнопок лифта с красной «13» (`Panel`, палец — `Finger`), кабина изнутри (`Cabin`) и вид из кабины на площадку
+(`CabinPOV`), табло этажа (`Display`), площадка этажа (`Floor`, `mirror` — зеркальный 13-й этаж с дверью «84»),
+дверь крупно (`DoorClose`), разрез дома (`CrossSection`), комната героини с кроватью у левой/правой стены (`GirlRoom`).
+Сверху счётчик «ИЗМЕНИЛОСЬ» с красными крестиками и табличками «ИЗМЕНЕНИЕ №n». Финальная карточка —
+`Finale` из `src/g2/scenes.tsx` (название сериала, подпись к клеткам и итоговая строка задаются пропсами).
+
+```bash
+python3 scripts/fit-voiceover.py assets/knopka-13-1.mp3 --part k1
+npx remotion render Knopka1 out/knopka-13-1.mp4
+ffmpeg -i out/knopka-13-1.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k deliverables/knopka-13-1-s-ozvuchkoy.mp4
+```
+
 ## «Папа вернулся с вахты», часть 4 «Спальня»
 
 Код: `src/p4/`. Начало — как в частях 1–3 (тот же голос из части 1), затем пересказ части 3 (кадры части 3 в стиле VHS).

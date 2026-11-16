@@ -30,7 +30,7 @@ export type ArmPose =
 	| {shoulder: number; elbow: number; ku?: number; kf?: number}
 	| {target: [number, number]; bend?: 1 | -1; ku?: number; kf?: number};
 
-export type Kind = 'dad' | 'mom' | 'son' | 'teen'; // teen = hero of «Голосовые из завтра»
+export type Kind = 'dad' | 'mom' | 'son' | 'teen' | 'girl'; // teen = hero of «Голосовые из завтра», girl = hero of «Кнопка 13»
 
 export type Colors = Partial<Pick<Spec, 'top' | 'topDark' | 'pants' | 'shoes' | 'hair' | 'skin'>>;
 
@@ -114,8 +114,46 @@ export const SPECS: Record<Kind, Spec> = {
 		upper: 170, fore: 160, armW: 50, hand: 24,
 		top: '#cf4a3c', topDark: '#b13c30', pants: '#2b2d33', shoes: '#e8e6e0', hair: '#1f1a1a', skin: '#e8b48e',
 	},
+	girl: {
+		leg: 350, legW: 54, legGap: 16,
+		torso: 300, shoulderW: 200, hipW: 186,
+		neck: 36, neckW: 40,
+		hw: 74, hh: 94,
+		upper: 160, fore: 150, armW: 46, hand: 22,
+		top: '#21a19a', topDark: '#1a827c', pants: '#3b4f7a', shoes: '#f2f0ea', hair: '#c4632f', skin: '#f2c3a0',
+	},
 };
-export const isHoodie = (k: Kind) => k === 'son' || k === 'teen';
+export const isHoodie = (k: Kind) => k === 'son' || k === 'teen' || k === 'girl';
+
+// the girl's ponytail (high, falls behind the head to the viewer's right) and her scrunchie
+const girlTail = (hw: number, hh: number, hair: string, sil: boolean) => (
+	<g>
+		<path d={`M ${hw * 0.05},${-hh * 1.02} C ${hw * 1.25},${-hh * 1.32} ${hw * 1.75},${-hh * 0.2} ${hw * 1.28},${hh * 0.95} C ${hw * 1.2},${hh * 0.45} ${hw * 1.0},${-hh * 0.35} ${hw * 0.2},${-hh * 0.62} Z`} fill={hair} />
+		{!sil && <ellipse cx={hw * 0.42} cy={-hh * 1.06} rx={hw * 0.2} ry={hh * 0.11} fill="#e04a6a" />}
+	</g>
+);
+// headphones around the neck and the flat key on a red lanyard (y0 = shoulder line)
+export const GirlNeck: React.FC<{y0: number; front?: boolean}> = ({y0, front = true}) => (
+	<g>
+		{front && (
+			<g>
+				<path d={`M -30,${y0 + 4} L 0,${y0 + 150} L 30,${y0 + 4}`} stroke="#d63b2f" strokeWidth={6} fill="none" strokeLinejoin="round" />
+				<g transform={`translate(0,${y0 + 152})`}>
+					<circle r={12} fill="none" stroke="#d9c27a" strokeWidth={6} />
+					<rect x={-4} y={10} width={8} height={32} fill="#d9c27a" />
+					<rect x={4} y={28} width={10} height={6} fill="#d9c27a" />
+				</g>
+			</g>
+		)}
+		<path d={`M -38,${y0 - 8} Q 0,${y0 + 30} 38,${y0 - 8}`} stroke="#f4f4f4" strokeWidth={9} fill="none" strokeLinecap="round" />
+		{[-1, 1].map((d) => (
+			<g key={d} transform={`translate(${d * 46},${y0 - 14}) rotate(${d * -14})`}>
+				<rect x={-13} y={-19} width={26} height={38} rx={13} fill="#f4f4f4" stroke="#cfcfcf" strokeWidth={3} />
+				<ellipse cx={0} cy={0} rx={6} ry={11} fill="#bfc3c9" />
+			</g>
+		))}
+	</g>
+);
 
 const deg = (r: number) => (r * 180) / Math.PI;
 
@@ -198,6 +236,14 @@ export const Head: React.FC<{
 				strokeLinejoin="round"
 			/>
 		);
+	} else if (kind === 'girl') {
+		hairBack = girlTail(hw, hh, hair, !!silhouette);
+		hairFront = (
+			<path
+				d={`M ${-hw * 1.07},${hh * 0.32} C ${-hw * 1.22},${-hh * 1.28} ${hw * 1.22},${-hh * 1.28} ${hw * 1.07},${hh * 0.32} L ${hw * 0.95},${hh * 0.14} C ${hw * 0.93},${-hh * 0.18} ${hw * 0.8},${-hh * 0.36} ${hw * 0.55},${-hh * 0.4} L ${-hw * 0.55},${-hh * 0.4} C ${-hw * 0.8},${-hh * 0.36} ${-hw * 0.93},${-hh * 0.18} ${-hw * 0.95},${hh * 0.14} Z`}
+				fill={hair}
+			/>
+		);
 	} else {
 		hairFront = (
 			<path
@@ -217,6 +263,7 @@ export const Head: React.FC<{
 					d={`M ${-hw * 1.04},${hh * (kind === 'mom' ? 0.55 : 0.35)} C ${-hw * 1.15},${-hh * 1.2} ${hw * 1.15},${-hh * 1.2} ${hw * 1.04},${hh * (kind === 'mom' ? 0.55 : 0.35)} C ${hw * 0.6},${hh * 0.6} ${-hw * 0.6},${hh * 0.6} ${-hw * 1.04},${hh * (kind === 'mom' ? 0.55 : 0.35)} Z`}
 					fill={hair}
 				/>
+				{kind === 'girl' && <g transform="scale(-1,1)">{girlTail(hw, hh, hair, false)}</g>}
 			</g>
 		);
 	}
@@ -642,6 +689,7 @@ export const Person: React.FC<PersonProps> = (p) => {
 			{torso}
 			{p.back ? backpack : null}
 			{backpackStraps}
+			{p.kind === 'girl' && !sil && <GirlNeck y0={shY} front={!p.back} />}
 			{head}
 			{p.armsBehind ? null : arms}
 		</g>
@@ -692,6 +740,7 @@ export const Bust: React.FC<{kind: Kind; id: string; face?: Face; x?: number; y?
 						</>
 					)}
 					{kind === 'mom' && <path d={`M -48,${shY} Q 0,${shY + 60} 48,${shY}`} fill={sp.skin} />}
+					{kind === 'girl' && <GirlNeck y0={shY} />}
 					<g transform={`rotate(${tilt})`}>
 						<Head kind={kind} face={face} turn={turn} uid={id} colors={colors} />
 					</g>

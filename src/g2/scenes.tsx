@@ -736,8 +736,12 @@ export const S14: React.FC = () => <Finale />;
 // the finale card; `next` = what the end card announces, `boxes` = predictions (the last one «?»),
 // opt1/opt2 = the two choices, tally = «2 ИЗ 3» / «ТРЕТЬЕ», bg = the picture behind the cards
 type Opt = {text: string; sub: string};
-export const Finale: React.FC<{next?: string; boxes?: number; opt1?: Opt; opt2?: Opt; tally?: {done: string; rest: string}; bg?: React.ReactNode}> = ({
+export const Finale: React.FC<{next?: string; boxes?: number; opt1?: Opt; opt2?: Opt; tally?: {done: string; rest: string}; bg?: React.ReactNode; series?: string; boxLabel?: string; tallyLine?: React.ReactNode; boxMark?: 'check' | 'cross'}> = ({
 	next = 'СЕРИЯ 3',
+	series = 'ГОЛОСОВЫЕ ИЗ ЗАВТРА',
+	boxLabel = 'СБЫЛОСЬ',
+	tallyLine,
+	boxMark = 'check',
 	boxes = 3,
 	opt1 = {text: 'НЕ ВЫХОДИТЬ', sub: 'послушаться голосового'},
 	opt2 = {text: 'ВЫЙТИ', sub: 'и проверить, кто врёт'},
@@ -796,8 +800,8 @@ export const Finale: React.FC<{next?: string; boxes?: number; opt1?: Opt; opt2?:
 					width: 80,
 					height: 56,
 					borderRadius: 12,
-					background: q ? `rgba(255,211,74,${0.18 + 0.12 * Math.sin(f / 5)})` : YELLOW,
-					border: `3px solid ${q ? YELLOW : '#fff3c4'}`,
+					background: q ? `rgba(255,211,74,${0.18 + 0.12 * Math.sin(f / 5)})` : boxMark === 'cross' ? '#e0342b' : YELLOW,
+					border: `3px solid ${q ? YELLOW : boxMark === 'cross' ? '#ff8a80' : '#fff3c4'}`,
 					display: 'flex',
 					alignItems: 'center',
 					justifyContent: 'center',
@@ -810,6 +814,10 @@ export const Finale: React.FC<{next?: string; boxes?: number; opt1?: Opt; opt2?:
 			>
 				{q ? (
 					'?'
+				) : boxMark === 'cross' ? (
+					<svg width={30} height={30} viewBox="0 0 24 24">
+						<path d="M 5,5 L 19,19 M 19,5 L 5,19" stroke="#fff" strokeWidth={4.5} fill="none" strokeLinecap="round" />
+					</svg>
 				) : (
 					<svg width={34} height={34} viewBox="0 0 24 24">
 						<path d="M 4,13 L 10,19 L 20,5" stroke="#111" strokeWidth={4.5} fill="none" strokeLinecap="round" strokeLinejoin="round" />
@@ -829,7 +837,7 @@ export const Finale: React.FC<{next?: string; boxes?: number; opt1?: Opt; opt2?:
 			<div style={{position: 'absolute', top: 300, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, fontSize: 86, color: '#fff', transform: `scale(${title})`, textShadow: '0 8px 0 #6b4a00, 0 0 30px rgba(255,211,74,0.45)'}}>
 				ЧТО <span style={{color: YELLOW}}>ВЫБЕРЕШЬ?</span>
 				<div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10, marginTop: 18}}>
-					<span style={{fontSize: 34, color: YELLOW, marginRight: 8}}>СБЫЛОСЬ</span>
+					<span style={{fontSize: 34, color: YELLOW, marginRight: 8}}>{boxLabel}</span>
 					{Array.from({length: boxes}, (_, k) => box(k))}
 				</div>
 			</div>
@@ -870,12 +878,16 @@ export const Finale: React.FC<{next?: string; boxes?: number; opt1?: Opt; opt2?:
 			{endCard > 0 && (
 				<AbsoluteFill style={{opacity: endCard, background: 'radial-gradient(circle at 50% 42%, #1d2a55 0%, #0a1024 55%, #04060d 100%)'}}>
 					<div style={{position: 'absolute', top: 500, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900}}>
-						<div style={{fontSize: 40, letterSpacing: 8, color: YELLOW}}>ГОЛОСОВЫЕ ИЗ ЗАВТРА</div>
+						<div style={{fontSize: 40, letterSpacing: 8, color: YELLOW}}>{series}</div>
 						<div style={{fontSize: 190, lineHeight: 1, color: '#fff', marginTop: 18, transform: `scale(${pop(f, 254, 10)})`}}>{next}</div>
 						<div style={{fontSize: 56, color: RED, marginTop: 8}}>СКОРО</div>
 						<div style={{display: 'inline-block', marginTop: 50, background: YELLOW, color: '#111', borderRadius: 18, padding: '10px 30px', fontSize: 38}}>ПИШИ 1 ИЛИ 2 В КОММЕНТАРИЯХ</div>
 						<div style={{fontSize: 30, color: '#9fb0d6', marginTop: 30, letterSpacing: 1}}>
-							СБЫЛОСЬ <span style={{color: '#7ee08a'}}>{tally.done}</span> · {tally.rest} — <span style={{color: YELLOW}}>ПОД ВОПРОСОМ</span>
+							{tallyLine ?? (
+								<>
+									СБЫЛОСЬ <span style={{color: '#7ee08a'}}>{tally.done}</span> · {tally.rest} — <span style={{color: YELLOW}}>ПОД ВОПРОСОМ</span>
+								</>
+							)}
 						</div>
 						<div style={{display: 'inline-block', marginTop: 46, background: '#ff2d3d', borderRadius: 60, padding: '22px 70px', fontSize: 52, color: '#fff', boxShadow: '0 0 40px rgba(255,45,61,0.6)', transform: `scale(${1 + Math.sin(f / 5) * 0.04})`}}>
 							ПОДПИШИСЬ

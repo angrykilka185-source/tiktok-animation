@@ -216,3 +216,19 @@ python3 scripts/fit-voiceover.py assets/voiceover-6.mp3 --part 6
 npx remotion render PapaVakhta6 out/papa-vakhta-6.mp4
 ffmpeg -i out/papa-vakhta-6.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k deliverables/papa-vakhta-6-s-ozvuchkoy.mp4
 ```
+
+## «Папа вернулся с вахты», часть 7 «Финал» (≈1,5 минуты, зрители выбрали «позвонить в полицию»)
+
+Код: `src/p7/` (машины, гараж №17, ботинки и гараж изнутри — из `src/p6/`, двор, пересказ и плашка «правило
+нарушено» — из `src/p5/`, силуэт и фонарик — из `src/p4/`, кухня с борщом — из `src/components/Set.tsx`).
+Новое: вид из-под машины (`UnderCar`), набор 102 (`Dialer`), полицейская машина с мигалками (`PoliceCar`,
+`Flashers`), полицейский с фонарём (`Officer`), скотч на папе (`Tape`), экран блокировки (`LockNote`),
+заставка «КОНЕЦ». Счётчик «НАСТОЯЩИЙ ПАПА»: 4 зелёные галочки (знает слово, пахнет соляркой, ест левой,
+зовёт «тигрёнком») и «?» в конце — двойник запомнил слово. Звук сирены — `siren` в `scripts/make-sfx.mjs`.
+У последней реплики `holdAfter`, чтобы заставка «КОНЕЦ» держалась несколько секунд.
+
+```bash
+python3 scripts/fit-voiceover.py assets/voiceover-7.mp3 --part 7
+npx remotion render PapaVakhta7 out/papa-vakhta-7.mp4
+ffmpeg -i out/papa-vakhta-7.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k deliverables/papa-vakhta-7-s-ozvuchkoy.mp4
+```

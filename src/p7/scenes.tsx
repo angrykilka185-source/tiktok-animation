@@ -445,12 +445,12 @@ export const S08: React.FC = () => {
 // 9. The phone buzzes: «Сынок, ты где?» You press it into the asphalt.
 export const S09: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [52]);
+	const {i, t} = seg(f, [66]);
 	if (i === 0) {
 		const buzz = t >= 4 && Math.floor((t - 4) / 7) % 2 === 0;
 		return (
 			<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 55%, #1c2a4a 0%, #05070f 65%)'}}>
-				<Phone x={540 + (buzz ? Math.sin(t * 2.9) * 10 : 0)} y={1000} w={680} scale={lerp(t, 0, 52, 1.0, 1.08) * kick(t)} sleeve="#3a4a6a">
+				<Phone x={540 + (buzz ? Math.sin(t * 2.9) * 10 : 0)} y={1000} w={680} scale={lerp(t, 0, 66, 1.0, 1.08) * kick(t)} sleeve="#3a4a6a">
 					<LockNote time="03:19" day="четверг" from="Папа (вахта)" avatar="П" avatarBg="#33506e" text="Сынок, ты где?" note={pop(t, 4, 12)} />
 				</Phone>
 			</AbsoluteFill>
@@ -460,7 +460,7 @@ export const S09: React.FC = () => {
 	const press = interpolate(t, [0, 12], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
 	const leak = 0.6 * (1 - interpolate(t, [10, 40], [0, 1], clamp)) * (Math.floor(t / 7) % 2 === 0 ? 1 : 0.5);
 	return (
-		<Stage cam={{s: lerp(t, 0, 53, 1.0, 1.06) * kick(t), cx: 540, cy: 1000}} light={{glow: 0, vignette: 0.85}} bg="#121317">
+		<Stage cam={{s: lerp(t, 0, 78, 1.0, 1.06) * kick(t), cx: 540, cy: 1000}} light={{glow: 0, vignette: 0.85}} bg="#121317">
 			<rect x={-500} y={-500} width={2200} height={3000} fill="#1c1d22" />
 			{Array.from({length: 60}).map((_, k) => (
 				<circle key={k} cx={rnd(k + 5) * 1080} cy={300 + rnd(k + 70) * 1400} r={3 + rnd(k + 11) * 7} fill={k % 3 ? '#26272d' : '#141519'} />
@@ -491,7 +491,7 @@ export const S10: React.FC = () => {
 		return <UnderCar f={f} id="p7s10" lift={1} zoom={1.06} legs={{x: 610 - 900 * go, y: 1610, s: 2.25, ph: t >= 42 ? t * 0.35 : undefined}} />;
 	}
 	const x = lerp(t, 0, 50, 560, 175, Easing.inOut(Easing.sin));
-	const ring = pop(t, 34, 10);
+	const ring = pop(t, 38, 10);
 	return (
 		<Stage cam={{s: lerp(t, 0, 55, 1.0, 1.08), cx: 380, cy: 980}} light={{glow: 0, vignette: 0.8}} bg="#05070f">
 			<Yard f={f} id="p7s10y" light={1} walker={{x, y: 1250, s: 0.24}} />
@@ -536,9 +536,9 @@ export const S11: React.FC = () => {
 export const S12: React.FC = () => {
 	const f = useCurrentFrame();
 	const rip = interpolate(f, [8, 16], [0, 1], {...clamp, easing: Easing.in(Easing.quad)});
-	const say = f >= 44 && f < 66 && Math.floor(f / 4) % 2 === 0;
-	const word = pop(f, 48, 10);
-	const real = pop(f, 86, 10);
+	const say = f >= 62 && f < 82 && Math.floor(f / 4) % 2 === 0;
+	const word = pop(f, 68, 10);
+	const real = pop(f, 91, 10);
 	return (
 		<AbsoluteFill>
 			<Stage cam={{s: lerp(f, 0, 117, 1.0, 1.1) * kick(f), cx: 540, cy: 960}} light={{glow: 0.25, vignette: 0.85}} bg="#2a2218">
@@ -551,7 +551,7 @@ export const S12: React.FC = () => {
 					y={860}
 					scale={3.5}
 					tilt={4}
-					face={{eyes: f < 40 ? 'narrow' : 'open', brows: 'sad', mouth: f < 16 ? 'flat' : f < 40 ? 'o' : say ? 'o' : 'smile', stubble: true, sweat: 0.4, tears: f >= 70 ? 0.5 : 0, look: [-0.2, 0.3], blush: false}}
+					face={{eyes: f < 40 ? 'narrow' : 'open', brows: 'sad', mouth: f < 16 ? 'flat' : f < 40 ? 'o' : f < 62 ? 'flat' : say ? 'o' : 'smile', stubble: true, sweat: 0.4, tears: f >= 84 ? 0.5 : 0, look: [-0.2, 0.3], blush: false}}
 				/>
 				{rip < 1 && (
 					<g transform={`translate(${700 * rip},${-260 * rip}) rotate(${50 * rip} 540 1071)`}>
@@ -580,11 +580,11 @@ export const S13: React.FC = () => {
 	const f = useCurrentFrame();
 	return (
 		<AbsoluteFill>
-			<Stage cam={{s: lerp(f, 0, 117, 1.45, 1.55), cx: 560, cy: 1120}} light={{glow: 0, vignette: 0.85}} bg="#05070f">
+			<Stage cam={{s: lerp(f, 0, 168, 1.45, 1.58), cx: 560, cy: 1120}} light={{glow: 0, vignette: 0.85}} bg="#05070f">
 				<GarageFront f={f} id="p7s13g" lift={1} inside={<GarageView f={f} id="p7s13in" son="back" dadFace={{eyes: 'open', brows: 'worried', mouth: 'flat', look: [0.6, -0.4]}} />} />
 				<rect x={-500} y={-500} width={2200} height={3000} fill={NIGHT} opacity={0.2} />
 			</Stage>
-			<RuleBroken f={f} from={60} stampAt={92} />
+			<RuleBroken f={f} from={118} stampAt={146} />
 		</AbsoluteFill>
 	);
 };
@@ -592,23 +592,23 @@ export const S13: React.FC = () => {
 // 14. Steps behind you. A torch in your face… «Полиция! Где он?»
 export const S14: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [36]);
+	const {i, t} = seg(f, [42]);
 	if (i === 0) {
-		const come = interpolate(t, [0, 30], [0, 1], {...clamp, easing: Easing.out(Easing.quad)});
+		const come = interpolate(t, [0, 36], [0, 1], {...clamp, easing: Easing.out(Easing.quad)});
 		return (
 			<Stage cam={{s: 1.5, cx: 560, cy: 1120}} light={{glow: 0, vignette: 0.85}} bg="#05070f">
-				<GarageFront f={f} id="p7s14g" lift={1} inside={<GarageView f={f} id="p7s14in" son={t >= 22 ? 'front' : 'back'} dadFace={{eyes: 'wide', brows: 'raised', mouth: 'o', look: [-0.6, 0.2]}} />} />
+				<GarageFront f={f} id="p7s14g" lift={1} inside={<GarageView f={f} id="p7s14in" son={t >= 26 ? 'front' : 'back'} dadFace={{eyes: 'wide', brows: 'raised', mouth: 'o', look: [-0.6, 0.2]}} />} />
 				<Shadow id="p7s14sh" x={-120 + 440 * come} y={2350} scale={1.35} />
 				<rect x={-500} y={-500} width={2200} height={3000} fill={NIGHT} opacity={0.2} />
 			</Stage>
 		);
 	}
-	const cam = {s: lerp(t, 0, 54, 1.0, 1.06), cx: 540, cy: 1000};
+	const cam = {s: lerp(t, 0, 66, 1.0, 1.06), cx: 540, cy: 1000};
 	const hand: [number, number] = [150, -740];
 	const s = 1.1;
 	const hp = toScreen(cam, 540 + hand[0] * s, 1980 + hand[1] * s);
 	const glare = interpolate(t, [0, 4, 14], [0, 1, 0.55], clamp);
-	const shout = t >= 12 && t < 40 && Math.floor(t / 4) % 2 === 0;
+	const shout = t >= 30 && t < 60 && Math.floor(t / 4) % 2 === 0;
 	return (
 		<AbsoluteFill>
 			<Stage cam={cam} light={{glow: 0, vignette: 0.85}} bg="#05070f">
@@ -627,12 +627,12 @@ export const S14: React.FC = () => {
 // 15. The police run into your block. Mom opens the door, half asleep. He isn't in the flat.
 export const S15: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [48, 100]);
+	const {i, t} = seg(f, [56, 110]);
 	if (i === 0) {
-		const run = lerp(t, 0, 48, 0, 1, Easing.linear);
+		const run = lerp(t, 0, 56, 0, 1, Easing.linear);
 		return (
 			<AbsoluteFill>
-				<Stage cam={{s: lerp(t, 0, 48, 1.0, 1.06), cx: 420, cy: 1050}} light={{glow: 0, vignette: 0.8}} bg="#05070f">
+				<Stage cam={{s: lerp(t, 0, 56, 1.0, 1.06), cx: 420, cy: 1050}} light={{glow: 0, vignette: 0.8}} bg="#05070f">
 					<Yard f={f} id="p7s15y" light={1} />
 					<rect x={70} y={1110} width={120} height={180} fill="#3a3326" />
 					<rect x={80} y={1120} width={100} height={170} fill="#ffd27a" opacity={0.8} />
@@ -649,7 +649,7 @@ export const S15: React.FC = () => {
 		const open = interpolate(t, [2, 18], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
 		return (
 			<AbsoluteFill>
-				<Stage cam={{s: lerp(t, 0, 52, 1.0, 1.06), cx: 540, cy: 1000}} light={{glow: 0, vignette: 0.85}} bg="#05070f">
+				<Stage cam={{s: lerp(t, 0, 54, 1.0, 1.06), cx: 540, cy: 1000}} light={{glow: 0, vignette: 0.85}} bg="#05070f">
 					<rect x={-500} y={-500} width={2200} height={1500} fill="#cfd3c6" />
 					<rect x={-500} y={1000} width={2200} height={1600} fill="#4f8571" />
 					<rect x={-500} y={994} width={2200} height={10} fill="#3d6a58" />
@@ -665,13 +665,13 @@ export const S15: React.FC = () => {
 		);
 	}
 	// the dark flat: a torch beam goes over the hall — nobody
-	const bx = lerp(t, 0, 41, 280, 820, Easing.inOut(Easing.sin));
+	const bx = lerp(t, 0, 40, 280, 820, Easing.inOut(Easing.sin));
 	return (
 		<Stage cam={{s: 1.05, cx: 540, cy: 1000}} light={{glow: 0, vignette: 0.85}} bg="#05070f">
 			<Hall id="p7s15h" dark={0.5} noBag />
 			<Flashlight id="p7s15fl" x={bx} y={1000} r={420} dark={0.92} />
-			{t >= 22 && (
-				<text x={540} y={760} textAnchor="middle" fontFamily={HEAVY} fontWeight={900} fontSize={110} fill="#fff" stroke="#111" strokeWidth={12} paintOrder="stroke" opacity={pop(t, 22, 10)}>
+			{t >= 26 && (
+				<text x={540} y={760} textAnchor="middle" fontFamily={HEAVY} fontWeight={900} fontSize={110} fill="#fff" stroke="#111" strokeWidth={12} paintOrder="stroke" opacity={pop(t, 26, 10)}>
 					ПУСТО
 				</text>
 			)}
@@ -682,10 +682,10 @@ export const S15: React.FC = () => {
 // 16. Only — on your pillow lies dad's phone.
 export const S16: React.FC = () => {
 	const f = useCurrentFrame();
-	const ring = pop(f, 40, 10);
+	const ring = pop(f, 54, 10);
 	return (
 		<AbsoluteFill>
-			<Stage cam={{s: lerp(f, 0, 87, 1.0, 1.12), cx: 540, cy: 1000}} light={{glow: 0, vignette: 0.9}} bg="#05070f">
+			<Stage cam={{s: lerp(f, 0, 81, 1.0, 1.12), cx: 540, cy: 1000}} light={{glow: 0, vignette: 0.9}} bg="#05070f">
 				<rect x={-500} y={-500} width={2200} height={3000} fill="#232c52" />
 				<path d="M -300,1240 C 100,1160 900,1160 1380,1240 L 1380,2400 L -300,2400 Z" fill="#4b69a6" />
 				<path d="M 140,640 C 140,520 300,500 540,500 C 780,500 940,520 940,640 L 960,1120 C 960,1230 800,1250 540,1250 C 280,1250 120,1230 120,1120 Z" fill="#e6e2f0" />
@@ -712,7 +712,7 @@ export const S16: React.FC = () => {
 // 17. They search for him all night. And don't find him.
 export const S17: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [34]);
+	const {i, t} = seg(f, [40]);
 	if (i === 0) {
 		return (
 			<AbsoluteFill>
@@ -729,7 +729,7 @@ export const S17: React.FC = () => {
 		);
 	}
 	return (
-		<Stage cam={{s: lerp(t, 0, 29, 1.15, 1.22), cx: 640, cy: 1150}} light={{glow: 0.15, vignette: 0.85}} bg="#2a2218">
+		<Stage cam={{s: lerp(t, 0, 32, 1.15, 1.22), cx: 640, cy: 1150}} light={{glow: 0.15, vignette: 0.85}} bg="#2a2218">
 			<rect x={-500} y={-500} width={2200} height={3000} fill="#5d6066" />
 			{Array.from({length: 9}).map((_, k) => (
 				<rect key={k} x={-500} y={-400 + k * 220} width={2200} height={6} fill="#53565c" />
@@ -752,14 +752,14 @@ export const S17: React.FC = () => {
 // 18. Morning. Dad is in the kitchen. Smells of diesel. Eats borscht — with his LEFT hand.
 export const S18: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [64]);
+	const {i, t} = seg(f, [84]);
 	if (i === 0) {
 		// his LEFT hand (viewer-right): spoon from the bowl to the mouth and back
 		const cyc = (t % 40) / 40;
 		const up = cyc < 0.35 ? 0 : cyc < 0.6 ? (cyc - 0.35) / 0.25 : cyc < 0.8 ? 1 : 1 - (cyc - 0.8) / 0.2;
-		const smell = interpolate(t, [10, 22], [0, 1], clamp);
+		const smell = interpolate(t, [40, 52], [0, 1], clamp);
 		return (
-			<Stage cam={{s: lerp(t, 0, 64, 1.0, 1.08), cx: 520, cy: 1000}} light={{glow: 0.35, vignette: 0.5}}>
+			<Stage cam={{s: lerp(t, 0, 84, 1.0, 1.08), cx: 520, cy: 1000}} light={{glow: 0.35, vignette: 0.5}}>
 				<Kitchen id="p7s18k" floorY={1300} clock={[8, 15]} tick={f / 30} sky="#9fd3ff" />
 				<Person
 					kind="dad"
@@ -791,9 +791,9 @@ export const S18: React.FC = () => {
 			</Stage>
 		);
 	}
-	const ring = pop(t, 8, 10);
+	const ring = pop(t, 22, 10);
 	return (
-		<Stage cam={{s: lerp(t, 0, 41, 1.0, 1.06) * kick(t), cx: 540, cy: 1000}} light={{glow: 0.3, vignette: 0.55}}>
+		<Stage cam={{s: lerp(t, 0, 48, 1.0, 1.06) * kick(t), cx: 540, cy: 1000}} light={{glow: 0.3, vignette: 0.55}}>
 			<rect x={-200} y={-200} width={1500} height={1000} fill="#f0dcb0" />
 			<rect x={-200} y={720} width={1500} height={1500} fill="#e7553f" />
 			{Array.from({length: 24}).map((_, k) => (
@@ -819,7 +819,7 @@ export const S18: React.FC = () => {
 export const S19: React.FC = () => {
 	const f = useCurrentFrame();
 	const hug = interpolate(f, [4, 24], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
-	const say = f >= 10 && f < 34 && Math.floor(f / 4) % 2 === 0;
+	const say = f >= 18 && f < 40 && Math.floor(f / 4) % 2 === 0;
 	return (
 		<AbsoluteFill>
 			<Stage cam={{s: lerp(f, 0, 123, 1.0, 1.08), cx: 540, cy: 1000}} light={{glow: 0.4, vignette: 0.45}}>
@@ -838,8 +838,8 @@ export const S19: React.FC = () => {
 				<Person kind="son" id="p7s19son" x={500 - 20 * hug} y={1730} scale={0.9} breathe={f} face={{eyes: 'happy', mouth: 'grin', brows: 'raised', tears: 0.4}} armL={{target: [-150, -420], bend: 1}} armR={{target: [150, -420], bend: -1}} />
 				<Person kind="mom" id="p7s19mom" x={840} y={1720} scale={0.95} breathe={f} face={{eyes: 'happy', mouth: 'smile', brows: 'raised', tears: interpolate(f, [50, 80], [0.2, 1], clamp)}} armL={{target: [-70, -880], bend: 1, ku: 0.8, kf: 0.8}} armR={{target: [70, -880], bend: -1, ku: 0.8, kf: 0.8}} />
 			</Stage>
-			{f >= 8 && (
-				<div style={{position: 'absolute', left: 120, top: 330, transform: `scale(${pop(f, 8, 10)})`, transformOrigin: '20% 100%', background: '#fff', borderRadius: 40, padding: '18px 34px', fontFamily: HEAVY, fontWeight: 900, fontSize: 64, color: '#111', boxShadow: '0 10px 0 rgba(0,0,0,0.25)'}}>
+			{f >= 22 && (
+				<div style={{position: 'absolute', left: 120, top: 330, transform: `scale(${pop(f, 22, 10)})`, transformOrigin: '20% 100%', background: '#fff', borderRadius: 40, padding: '18px 34px', fontFamily: HEAVY, fontWeight: 900, fontSize: 64, color: '#111', boxShadow: '0 10px 0 rgba(0,0,0,0.25)'}}>
 					ТИГРЁНОК!
 					<div style={{position: 'absolute', left: 120, bottom: -30, width: 0, height: 0, borderLeft: '22px solid transparent', borderRight: '22px solid transparent', borderTop: '34px solid #fff'}} />
 				</div>
@@ -859,11 +859,11 @@ export const S20: React.FC = () => {
 			</Stage>
 		);
 	}
-	const glitch = t >= 60 ? (rnd(Math.floor(t / 2)) - 0.5) * 16 : 0;
-	const face = interpolate(t, [62, 92], [0, 0.35], clamp);
+	const glitch = t >= 70 ? (rnd(Math.floor(t / 2)) - 0.5) * 16 : 0;
+	const face = interpolate(t, [72, 100], [0, 0.35], clamp);
 	return (
 		<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 55%, #2a0d12 0%, #05070f 65%)'}}>
-			<Phone x={540 + glitch} y={1000} w={680} scale={lerp(t, 0, 98, 1.05, 1.18) * kick(t)} sleeve="#3a4a6a">
+			<Phone x={540 + glitch} y={1000} w={680} scale={lerp(t, 0, 119, 1.05, 1.18) * kick(t)} sleeve="#3a4a6a">
 				<LockNote time="23:47" day="пятница" from="Неизвестный номер" avatar="?" avatarBg="#5a5f66" text="Карась. Я запомнил, тигрёнок." note={pop(t, 4, 12)} />
 				{face > 0 && (
 					<svg width={648} height={1362} viewBox="0 0 1080 1920" style={{position: 'absolute', inset: 0, opacity: face}}>
@@ -871,7 +871,7 @@ export const S20: React.FC = () => {
 					</svg>
 				)}
 			</Phone>
-			{t >= 60 && <AbsoluteFill style={{background: '#ff0030', mixBlendMode: 'screen', opacity: 0.12 + 0.08 * Math.sin(t)}} />}
+			{t >= 70 && <AbsoluteFill style={{background: '#ff0030', mixBlendMode: 'screen', opacity: 0.12 + 0.08 * Math.sin(t)}} />}
 		</AbsoluteFill>
 	);
 };
@@ -880,12 +880,12 @@ export const S20: React.FC = () => {
 export const S21: React.FC = () => {
 	const f = useCurrentFrame();
 	const a = pop(f, 2, 12);
-	const q = pop(f, 30, 10);
-	const c = pop(f, 70, 10);
+	const q = pop(f, 44, 10);
+	const c = pop(f, 92, 10);
 	return (
 		<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 42%, #4a0d10 0%, #1a0607 55%, #0a0304 100%)'}}>
 			<svg width={1080} height={1920} style={{position: 'absolute', inset: 0, opacity: 0.55}}>
-				<ShadowFace x={540} headY={1450} s={2.6} eyes={interpolate(f, [90, 110], [0, 1], clamp)} smile={interpolate(f, [120, 140], [0, 1], clamp)} />
+				<ShadowFace x={540} headY={1450} s={2.6} eyes={interpolate(f, [110, 130], [0, 1], clamp)} smile={interpolate(f, [140, 160], [0, 1], clamp)} />
 			</svg>
 			<div style={{position: 'absolute', top: 300, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900}}>
 				<div style={{fontSize: 36, letterSpacing: 12, color: '#ff4a3d'}}>ПАПА ВЕРНУЛСЯ С ВАХТЫ</div>
@@ -893,7 +893,7 @@ export const S21: React.FC = () => {
 				<div style={{fontSize: 92, color: RED, marginTop: 30, transform: `scale(${q})`, textShadow: '0 6px 0 #000'}}>КТО ОН ТАКОЙ?</div>
 				<div style={{display: 'inline-block', marginTop: 44, background: YELLOW, color: '#111', borderRadius: 18, padding: '12px 34px', fontSize: 44, transform: `scale(${c})`}}>ПИШИ В КОММЕНТАРИЯХ</div>
 				<div style={{fontSize: 34, color: '#b9a9aa', marginTop: 26, letterSpacing: 2, opacity: c}}>ЧАСТИ 1–7 — В ПРОФИЛЕ</div>
-				<div style={{display: 'inline-block', marginTop: 40, background: '#ff2d3d', borderRadius: 60, padding: '22px 70px', fontSize: 52, color: '#fff', boxShadow: '0 0 40px rgba(255,45,61,0.6)', transform: `scale(${pop(f, 100, 10) * (1 + Math.sin(f / 5) * 0.04)})`}}>
+				<div style={{display: 'inline-block', marginTop: 40, background: '#ff2d3d', borderRadius: 60, padding: '22px 70px', fontSize: 52, color: '#fff', boxShadow: '0 0 40px rgba(255,45,61,0.6)', transform: `scale(${pop(f, 122, 10) * (1 + Math.sin(f / 5) * 0.04)})`}}>
 					ПОДПИШИСЬ
 				</div>
 			</div>

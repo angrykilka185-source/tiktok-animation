@@ -50,7 +50,7 @@ export const Recap: React.FC<{f: number; label: string; children: React.ReactNod
 };
 
 // your head on the pillow, big (lying on your side). Children are drawn between the head and the night tint.
-const PillowFace: React.FC<{t: number; id: string; face: Face; zoom?: [number, number]; children?: React.ReactNode; after?: React.ReactNode; red?: number}> = ({t, id, face, zoom = [1, 1.08], children, after, red = 0}) => (
+export const PillowFace: React.FC<{t: number; id: string; face: Face; zoom?: [number, number]; children?: React.ReactNode; after?: React.ReactNode; red?: number}> = ({t, id, face, zoom = [1, 1.08], children, after, red = 0}) => (
 	<Stage cam={{s: lerp(t, 0, 90, zoom[0], zoom[1]), cx: 540, cy: 960}} light={{glow: 0, vignette: 0.85}} bg="#05070f">
 		<rect x={-500} y={-500} width={2200} height={3000} fill="#232c52" />
 		<ellipse cx={400} cy={1180} rx={760} ry={330} fill="#dcd8e8" />
@@ -156,7 +156,7 @@ export const Yard: React.FC<{f: number; id: string; light?: number; walker?: {x:
 );
 
 // window frame seen from inside (the yard is drawn behind it)
-const WindowFrame: React.FC = () => (
+export const WindowFrame: React.FC = () => (
 	<g>
 		<path d="M -500,-500 L 1700,-500 L 1700,2600 L -500,2600 Z M 140,260 L 140,1560 L 940,1560 L 940,260 Z" fill="#2c3454" fillRule="evenodd" />
 		<rect x={130} y={250} width={820} height={1320} fill="none" stroke="#e9e2d4" strokeWidth={22} />
@@ -186,7 +186,7 @@ const SnapHand: React.FC<{x: number; y: number; snap: number}> = ({x, y, snap}) 
 );
 
 // the rule card with a red «НАРУШЕНО» stamp
-const RuleBroken: React.FC<{f: number; from: number; stampAt: number}> = ({f, from, stampAt}) => {
+export const RuleBroken: React.FC<{f: number; from: number; stampAt: number}> = ({f, from, stampAt}) => {
 	if (f < from) return null;
 	const p = pop(f, from, 12);
 	const st = pop(f, stampAt, 9);

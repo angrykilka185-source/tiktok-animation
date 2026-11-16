@@ -26,7 +26,7 @@ const DAD_SKIN = '#e9b892';
 
 // ======================================================= scene pieces =====
 // a parked car seen from the side (local origin = ground under the middle)
-const Car: React.FC<{x: number; y: number; s: number; color: string}> = ({x, y, s, color}) => (
+export const Car: React.FC<{x: number; y: number; s: number; color: string}> = ({x, y, s, color}) => (
 	<g transform={`translate(${x},${y}) scale(${s})`}>
 		<path d="M -270,-40 L -262,-112 Q -252,-132 -210,-136 L -130,-142 L -66,-212 Q -46,-232 -6,-232 L 130,-232 Q 172,-232 192,-206 L 244,-142 L 256,-136 Q 288,-130 288,-100 L 292,-40 Z" fill={color} />
 		<path d="M -44,-204 L -4,-220 L 120,-220 L 162,-152 L -94,-152 Z" fill="#1d2433" />
@@ -42,7 +42,7 @@ const Car: React.FC<{x: number; y: number; s: number; color: string}> = ({x, y, 
 );
 
 // garage №17 from the outside; lift 0..1 = the door rolled up; inside = what the open part shows
-const GarageFront: React.FC<{f: number; lift?: number; light?: number; inside?: React.ReactNode; id: string}> = ({f, lift = 0, light = 1, inside, id}) => {
+export const GarageFront: React.FC<{f: number; lift?: number; light?: number; inside?: React.ReactNode; id: string}> = ({f, lift = 0, light = 1, inside, id}) => {
 	const bottom = 1480 - 960 * lift;
 	const flick = 0.9 + 0.1 * Math.sin(f / 3);
 	return (
@@ -93,7 +93,7 @@ const GarageFront: React.FC<{f: number; lift?: number; light?: number; inside?: 
 };
 
 // legs + boots of a man standing / walking (the view through the gap shows only this much)
-const Legs: React.FC<{x: number; y: number; s: number; ph?: number; pants?: string; boots?: string}> = ({x, y, s, ph, pants = '#2b2d33', boots = '#111216'}) => {
+export const Legs: React.FC<{x: number; y: number; s: number; ph?: number; pants?: string; boots?: string}> = ({x, y, s, ph, pants = '#2b2d33', boots = '#111216'}) => {
 	const a = ph !== undefined ? Math.sin(ph) * 26 : 0;
 	return (
 		<g transform={`translate(${x},${y}) scale(${s})`}>
@@ -111,7 +111,7 @@ const Legs: React.FC<{x: number; y: number; s: number; ph?: number; pants?: stri
 };
 
 // dad's legs when he sits: thighs towards us (a lap as wide as the hips), shins down to the floor, work boots, ropes
-const SitLegs: React.FC<{x: number; hipY: number; floorY: number; s: number}> = ({x, hipY, floorY, s}) => {
+export const SitLegs: React.FC<{x: number; hipY: number; floorY: number; s: number}> = ({x, hipY, floorY, s}) => {
 	const legW = 78 * s;
 	const kneeY = hipY + 70 * s;
 	const off = legW / 2 + 12 * s;
@@ -133,7 +133,7 @@ const SitLegs: React.FC<{x: number; hipY: number; floorY: number; s: number}> = 
 };
 
 // the chair with dad's tied feet (view through the gap)
-const TiedFeet: React.FC<{x: number; y: number; s: number; ring?: number}> = ({x, y, s, ring = 0}) => (
+export const TiedFeet: React.FC<{x: number; y: number; s: number; ring?: number}> = ({x, y, s, ring = 0}) => (
 	<g transform={`translate(${x},${y}) scale(${s})`}>
 		{[-150, 150].map((cx) => (
 			<rect key={cx} x={cx - 12} y={-420} width={24} height={420} fill="#6a4a34" />
@@ -154,7 +154,7 @@ const TiedFeet: React.FC<{x: number; y: number; s: number; ring?: number}> = ({x
 );
 
 // what you see lying on the asphalt: a narrow bright slit under the garage door
-const Slit: React.FC<{f: number; id: string; pan?: number; children: React.ReactNode}> = ({f, id, pan = 0, children}) => (
+export const Slit: React.FC<{f: number; id: string; pan?: number; children: React.ReactNode}> = ({f, id, pan = 0, children}) => (
 	<AbsoluteFill style={{background: '#020203'}}>
 		<svg width={1080} height={1920} viewBox="0 0 1080 1920" style={{position: 'absolute', inset: 0}}>
 			<defs>
@@ -185,7 +185,7 @@ const Slit: React.FC<{f: number; id: string; pan?: number; children: React.React
 );
 
 // inside the garage: walls, tool board, a bare bulb; dad tied to a chair
-const GarageInside: React.FC<{f: number; id: string; lean?: number; dadFace: Face; dadTilt?: number; shadowX?: number}> = ({f, id, lean = 0, dadFace, dadTilt = 0, shadowX = 330 + 140 * lean}) => {
+export const GarageInside: React.FC<{f: number; id: string; lean?: number; dadFace: Face; dadTilt?: number; shadowX?: number}> = ({f, id, lean = 0, dadFace, dadTilt = 0, shadowX = 330 + 140 * lean}) => {
 	const sway = Math.sin(f / 14) * 3;
 	return (
 		<g>
@@ -227,7 +227,7 @@ const GarageInside: React.FC<{f: number; id: string; lean?: number; dadFace: Fac
 
 // chat on dad's phone (the impostor's hands): everything «папа» wrote to you was sent from here
 const DAD_MSGS = ['Сынок, рейс задержали. Прилечу завтра.', 'Маме не говори. Сюрприз.', 'Сынок, ты один?', 'Не звони. Тут плохо ловит.'];
-const DadChat: React.FC<{f: number; typed: string; sent: number; hl: number}> = ({f, typed, sent, hl}) => (
+export const DadChat: React.FC<{f: number; typed: string; sent: number; hl: number}> = ({f, typed, sent, hl}) => (
 	<div style={{position: 'absolute', inset: 0, background: '#0f1115', fontFamily: SANS}}>
 		<div style={{position: 'absolute', left: 0, right: 0, top: 0, height: 190, background: '#1b1d22', display: 'flex', alignItems: 'flex-end', padding: '0 30px 22px', gap: 20, boxSizing: 'border-box'}}>
 			<div style={{width: 84, height: 84, borderRadius: 42, background: '#f0a032', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 40}}>С</div>

@@ -856,3 +856,20 @@ write('lift_ding', room(add(ping([1318.5, 2637], 1.2, 0.35), ping([1046.5, 2093]
 	for (let k = 0; k < tune.length; k += 2) add(x, click(0.02, 7000, 2), k * e8, 0.15);
 	write('toon', room(lowpass(x, 5000), 0.2, 1.2), 0.5);
 }
+
+// ---------- «Папа вернулся с вахты», часть 7 ----------
+// a police siren coming closer (yelp: a fast up-down sweep), a little echo off the blocks of flats
+{
+	const dur = 6.5;
+	const x = buf(dur);
+	let ph = 0;
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		const sweep = 0.5 - 0.5 * Math.cos(2 * Math.PI * t * 3.2);
+		const f0 = 720 + 640 * sweep;
+		ph += (2 * Math.PI * f0) / SR;
+		const e = Math.min(1, t / 2.5) * Math.min(1, (dur - t) / 0.8);
+		x[i] = (Math.sin(ph) + 0.45 * Math.sin(2 * ph) + 0.2 * Math.sin(3 * ph)) * e;
+	}
+	write('siren', room(lowpass(x, 3200), 0.45, 2.2), 0.5);
+}

@@ -198,12 +198,13 @@ const UnderCar: React.FC<{f: number; id: string; lift: number; zoom?: number; le
 	</Stage>
 );
 
-// a person lying on the ground and rolling (feet at (x, y), head to the left); roll = angle in radians
+// a person lying on the ground, rolling sideways (feet at (x, y), head to the left): the body bobs and wobbles
 const Roller: React.FC<{id: string; x: number; y: number; s: number; roll: number; face: Face}> = ({id, x, y, s, roll, face}) => {
-	const c = Math.cos(roll);
+	const bob = -Math.abs(Math.sin(roll)) * 16;
+	const wob = Math.sin(roll) * 7;
 	return (
-		<g transform={`translate(${x},${y}) rotate(-90) scale(${Math.max(0.12, Math.abs(c))},1)`}>
-			<Person kind="son" id={id} colors={JACKET} x={0} y={0} scale={s} back={c < 0} face={face} armL={{target: [-120, -300], bend: 1}} armR={{target: [120, -300], bend: -1}} />
+		<g transform={`translate(${x},${y + bob}) rotate(${-90 + wob})`}>
+			<Person kind="son" id={id} colors={JACKET} x={0} y={0} scale={s} face={face} armL={{target: [-50, -560], bend: 1}} armR={{target: [50, -560], bend: -1}} />
 		</g>
 	);
 };
@@ -217,12 +218,59 @@ const Tape: React.FC<{x: number; y: number; s: number; rot?: number}> = ({x, y, 
 	</g>
 );
 
-// inside the garage, seen from the open door: dad on the chair; `son` = you at his knees with the ropes
+// your block's entrance at night (the same entrance the film showed later); open = the right door leaf swung out
+const NightEntrance: React.FC<{open?: number; ring?: number}> = ({open = 0, ring = 0}) => (
+	<g>
+		<rect x={-500} y={-500} width={2100} height={2900} fill="#0b1230" />
+		<rect x={-200} y={-200} width={1480} height={1700} fill="#4f4c55" />
+		{Array.from({length: 4}).flatMap((_, r) =>
+			Array.from({length: 4}).map((__, c) => {
+				const mom = r === 3 && c === 2;
+				const lit = mom || rnd(r * 7 + c + 3) > 0.8;
+				return <rect key={`${r}-${c}`} x={-120 + c * 360} y={-100 + r * 260} width={150} height={150} fill={lit ? '#ffd27a' : '#232842'} />;
+			}),
+		)}
+		{/* the lit stairwell behind the door */}
+		<rect x={360} y={1020} width={360} height={480} fill="#2a332a" />
+		<rect x={380} y={1040} width={320} height={460} fill="#ffd98a" opacity={0.85} />
+		<rect x={380} y={1040} width={150} height={460} fill="#34433a" />
+		<rect x={700 - 150 * (1 - 0.8 * open)} y={1040} width={150 * (1 - 0.8 * open)} height={460} fill="#34433a" />
+		<rect x={320} y={980} width={440} height={40} fill="#5a5850" />
+		<circle cx={540} cy={950} r={20} fill="#fff6c8" />
+		<circle cx={540} cy={950} r={110} fill="#fff6c8" opacity={0.22} />
+		<path d="M 520,960 L 560,960 L 780,1500 L 300,1500 Z" fill="#fff6c8" opacity={0.08} />
+		<rect x={730} y={1180} width={60} height={90} rx={8} fill="#1d2026" />
+		<rect x={500} y={900} width={80} height={40} rx={6} fill="#2a5a8a" />
+		<text x={540} y={930} fontSize={30} fontFamily={HEAVY} fontWeight={900} fill="#fff" textAnchor="middle">
+			3
+		</text>
+		<rect x={-500} y={1500} width={2100} height={900} fill="#25262c" />
+		<rect x={-500} y={1500} width={2100} height={10} fill="#33343c" />
+		<rect x={820} y={1400} width={260} height={30} fill="#4a3a2a" />
+		<rect x={840} y={1430} width={16} height={70} fill="#3a2a1e" />
+		<rect x={1040} y={1430} width={16} height={70} fill="#3a2a1e" />
+		<rect x={-500} y={-500} width={2100} height={2900} fill={NIGHT} opacity={0.2} />
+		{ring > 0.01 && (
+			<g opacity={Math.min(1, ring)}>
+				<circle cx={675} cy={755} r={125 * (0.6 + 0.4 * ring)} fill="none" stroke={RED} strokeWidth={10} />
+				<text x={675} y={600} textAnchor="middle" fontFamily={HEAVY} fontWeight={900} fontSize={64} fill="#fff" stroke="#111" strokeWidth={9} paintOrder="stroke">
+					МАМА
+				</text>
+			</g>
+		)}
+	</g>
+);
+
+// inside the garage, seen from the open door: dad tied to a chair; `son` = you kneeling at his knees with the ropes
 const GarageView: React.FC<{f: number; id: string; son?: 'back' | 'front'; dadFace: Face; tape?: boolean}> = ({f, id, son, dadFace, tape = false}) => {
 	const sway = Math.sin(f / 14) * 3;
 	const dS = 0.55;
-	const dHip = 1250;
-	const work = Math.sin(f / 3) * 14;
+	const floorY = 1450;
+	const dHip = 1322;
+	const work = Math.sin(f / 3) * 16;
+	const sS = 0.62;
+	const sHip = 1352;
+	const sx = 455;
 	return (
 		<g>
 			<rect x={160} y={520} width={760} height={960} fill="#5d6066" />
@@ -230,31 +278,48 @@ const GarageView: React.FC<{f: number; id: string; son?: 'back' | 'front'; dadFa
 				<rect key={k} x={160} y={560 + k * 180} width={760} height={5} fill="#53565c" />
 			))}
 			<rect x={680} y={640} width={200} height={150} fill="#7a6a52" />
-			<rect x={160} y={1380} width={760} height={100} fill="#8a8678" />
+			<rect x={160} y={floorY - 20} width={760} height={100} fill="#8a8678" />
 			<line x1={540 + sway} y1={520} x2={540 + sway} y2={640} stroke="#222" strokeWidth={3} />
 			<circle cx={540 + sway} cy={652} r={14} fill="#fff6d0" />
 			<circle cx={540 + sway} cy={652} r={90} fill="#fff6d0" opacity={0.18} />
-			{/* the chair and dad */}
-			<rect x={600 - 130 * dS} y={dHip} width={260 * dS} height={16} fill="#7a5638" />
-			<Person kind="dad" id={`${id}dad`} x={600} y={dHip + 470 * dS} scale={dS} hideLegs face={{stubble: true, ...dadFace}} armL={{target: [-120, -420], bend: 1}} armR={{target: [120, -420], bend: -1}} />
-			<rect x={600 - 66} y={dHip - 150} width={132} height={10} rx={5} fill="#d8c690" />
-			<rect x={600 - 66} y={dHip - 120} width={132} height={10} rx={5} fill="#d8c690" />
+			{/* the chair: back posts and the top rail behind dad, the seat */}
+			<rect x={600 - 108} y={dHip - 205} width={14} height={floorY - dHip + 205} fill="#6a4a34" />
+			<rect x={600 + 94} y={dHip - 205} width={14} height={floorY - dHip + 205} fill="#6a4a34" />
+			<rect x={600 - 114} y={dHip - 212} width={228} height={20} rx={7} fill="#7a5638" />
+			<rect x={600 - 116} y={dHip - 8} width={232} height={22} rx={6} fill="#7a5638" />
+			<Person kind="dad" id={`${id}dad`} x={600} y={dHip + 470 * dS} scale={dS} hideLegs face={{stubble: true, ...dadFace}} armL={{target: [-100, -480], bend: 1}} armR={{target: [100, -480], bend: -1}} />
+			{/* ropes round his chest and belly */}
+			<rect x={600 - 92} y={dHip - 176} width={184} height={11} rx={5} fill="#d8c690" />
+			<rect x={600 - 92} y={dHip - 130} width={184} height={11} rx={5} fill="#d8c690" />
 			{tape && <Tape x={600} y={dHip + 470 * dS - (1024 - 0.58 * 104) * dS} s={dS * 0.9} />}
-			<SitLegs x={600} hipY={dHip + 4} floorY={1440} s={dS} />
+			<SitLegs x={600} hipY={dHip + 4} floorY={floorY} s={dS} />
+			{/* the chair's front legs */}
+			<rect x={600 - 116} y={dHip + 12} width={12} height={floorY - dHip - 12} fill="#5a3e2c" />
+			<rect x={600 + 104} y={dHip + 12} width={12} height={floorY - dHip - 12} fill="#5a3e2c" />
 			{son && (
-				<Person
-					kind="son"
-					id={`${id}son`}
-					colors={JACKET}
-					x={500}
-					y={1560}
-					scale={0.6}
-					hideLegs
-					back={son === 'back'}
-					face={{eyes: 'wide', pupil: 0.6, brows: 'raised', mouth: 'o', blush: false}}
-					armL={son === 'back' ? {target: [60 + work, -380], bend: 1} : {target: [-120, -420], bend: 1}}
-					armR={son === 'back' ? {target: [200 - work, -360], bend: -1} : {target: [120, -420], bend: -1}}
-				/>
+				<g>
+					{/* kneeling: shins on the floor, soles towards us */}
+					{son === 'back' &&
+						[-1, 1].map((d) => (
+							<g key={d}>
+								<rect x={sx + d * 26 - 22} y={sHip - 10} width={44} height={floorY - sHip + 4} rx={18} fill="#9fb8e0" />
+								<ellipse cx={sx + d * 30} cy={floorY + 2} rx={30} ry={18} fill="#22252b" />
+							</g>
+						))}
+					<Person
+						kind="son"
+						id={`${id}son`}
+						colors={JACKET}
+						x={sx}
+						y={sHip + 330 * sS}
+						scale={sS}
+						hideLegs
+						back={son === 'back'}
+						face={{eyes: 'wide', pupil: 0.6, brows: 'raised', mouth: 'o', blush: false}}
+						armL={son === 'back' ? {target: [170 + work, -300], bend: 1} : {target: [-120, -380], bend: 1}}
+						armR={son === 'back' ? {target: [250 - work, -280], bend: -1} : {target: [120, -380], bend: -1}}
+					/>
+				</g>
 			)}
 		</g>
 	);
@@ -332,14 +397,14 @@ export const S05: React.FC = () => {
 };
 
 // 6. At the last second you roll under the neighbour's car.
-//    a) from inside: the door rises — your face in the gap — you roll away; b) you roll into the dark under the car
+//    a) from inside: the door rises — your face in the gap — you jerk away; b) you roll into the dark under the car
 export const S06: React.FC = () => {
 	const f = useCurrentFrame();
 	const {i, t} = seg(f, [40]);
 	if (i === 0) {
 		const rise = interpolate(t, [0, 30], [0, 1], {...clamp, easing: Easing.inOut(Easing.sin)});
 		const edge = 880 - 380 * rise;
-		const away = interpolate(t, [18, 38], [0, 1], {...clamp, easing: Easing.in(Easing.quad)});
+		const away = interpolate(t, [18, 34], [0, 1], {...clamp, easing: Easing.in(Easing.quad)});
 		return (
 			<Stage cam={{s: 1.0 + 0.06 * rise, cx: 540, cy: 960}} light={{glow: 0, vignette: 0.85}} bg="#020203">
 				<defs>
@@ -353,8 +418,8 @@ export const S06: React.FC = () => {
 				))}
 				<g clipPath="url(#p7s6gap)">
 					<rect x={-500} y={300} width={2200} height={800} fill="#0d0f16" />
-					<g transform={`translate(${900 * away},0) rotate(${90 * away} 540 1010)`}>
-						<Bust kind="son" id="p7s6eyes" x={540} y={1010} scale={4.4} face={{eyes: 'wide', pupil: 0.5, look: [0.4, -0.3], brows: 'raised', mouth: t > 10 ? 'o' : 'flat', blush: false}} />
+					<g transform={`translate(${1150 * away},${20 * away})`}>
+						<Bust kind="son" id="p7s6eyes" colors={JACKET} x={540} y={1010} scale={4.4} face={{eyes: 'wide', pupil: 0.5, look: [0.4, -0.3], brows: 'raised', mouth: t > 10 ? 'o' : 'flat', blush: false}} />
 					</g>
 					<rect x={-500} y={300} width={2200} height={800} fill="#ffe08a" opacity={0.25 * rise} />
 				</g>
@@ -364,23 +429,36 @@ export const S06: React.FC = () => {
 			</Stage>
 		);
 	}
-	// side view: the car, the gap under it, you rolling in
+	// side view: garage 17 (its door half up, light pouring out), the car in front of №18, you rolling under it
 	const x = lerp(t, 0, 36, -260, 560, Easing.out(Easing.cubic));
-	const roll = lerp(t, 0, 36, 0, 2 * Math.PI, Easing.out(Easing.cubic));
-	const spill = interpolate(t, [0, 60], [0.25, 0.7], clamp);
-	const dark = interpolate(t, [28, 44], [0, 0.6], clamp);
+	const roll = lerp(t, 0, 36, 0, 3 * Math.PI, Easing.out(Easing.cubic));
+	const dark = interpolate(t, [28, 44], [0, 0.55], clamp);
 	return (
-		<Stage cam={{s: lerp(t, 0, 68, 1.0, 1.06), cx: 540, cy: 1560}} light={{glow: 0, vignette: 0.85}} bg="#05070f">
+		<Stage cam={{s: lerp(t, 0, 59, 1.0, 1.05), cx: 540, cy: 1420}} light={{glow: 0, vignette: 0.85}} bg="#05070f">
 			<defs>
 				<linearGradient id="p7s6spill" x1="0" y1="0" x2="1" y2="0">
-					<stop offset="0%" stopColor="#ffe08a" stopOpacity={spill} />
-					<stop offset="70%" stopColor="#ffe08a" stopOpacity={0} />
+					<stop offset="0%" stopColor="#ffe08a" stopOpacity={0.55} />
+					<stop offset="65%" stopColor="#ffe08a" stopOpacity={0} />
 				</linearGradient>
 			</defs>
-			<rect x={-500} y={-500} width={2200} height={2030} fill="url(#skyNight)" />
-			<rect x={-500} y={700} width={2200} height={830} fill="#2a2d38" />
-			{[-300, 100, 500, 900].map((x0) => (
-				<rect key={x0} x={x0} y={760} width={320} height={770} fill="#353a46" />
+			<rect x={-500} y={-500} width={2200} height={1300} fill="url(#skyNight)" />
+			<rect x={-500} y={700} width={2200} height={50} fill="#3a3f48" />
+			<rect x={-500} y={750} width={2200} height={780} fill="#4a4f5a" />
+			{[
+				[-150, 17],
+				[290, 18],
+				[730, 19],
+			].map(([gx, n]) => (
+				<g key={n}>
+					<rect x={gx} y={820} width={380} height={710} fill={n === 17 ? '#ffe9a8' : '#5d5248'} />
+					{n === 17 && <rect x={gx} y={820} width={380} height={300} fill="#6b5a4a" />}
+					{Array.from({length: n === 17 ? 3 : 7}).map((_, j) => (
+						<rect key={j} x={gx} y={860 + j * 100} width={380} height={7} fill="#4e443c" />
+					))}
+					<text x={gx + 190} y={930} fontSize={56} fontFamily={HEAVY} fontWeight={900} fill="#d9d4c6" textAnchor="middle" opacity={0.85}>
+						{n}
+					</text>
+				</g>
 			))}
 			<rect x={-500} y={1529} width={2200} height={700} fill="#24262f" />
 			<rect x={-500} y={1529} width={2200} height={700} fill="url(#p7s6spill)" />
@@ -408,23 +486,25 @@ export const S07: React.FC = () => {
 	}
 	const talk = t >= 6 && Math.floor(t / 4) % 2 === 0;
 	return (
-		<Stage cam={{s: lerp(t, 0, 66, 1.0, 1.08), cx: 540, cy: 960}} light={{glow: 0, vignette: 0.9}} bg="#020203">
+		<Stage cam={{s: lerp(t, 0, 87, 1.0, 1.08), cx: 540, cy: 960}} light={{glow: 0, vignette: 0.9}} bg="#020203">
 			<rect x={-500} y={-500} width={2200} height={3000} fill="#07080c" />
-			<Bust kind="son" id="p7s7face" x={540} y={880} scale={4.0} face={{eyes: 'wide', pupil: 0.6, brows: 'worried', mouth: talk ? 'o' : 'flat', look: [0, 0.5], blush: false}} />
-			{/* the phone's light from below */}
-			<ellipse cx={540} cy={1380} rx={520} ry={380} fill="#9fc0ff" opacity={0.16} />
-			<rect x={-500} y={-500} width={2200} height={3000} fill="#05070f" opacity={0.25} />
+			<Bust kind="son" id="p7s7face" colors={JACKET} x={500} y={880} scale={4.0} face={{eyes: 'wide', pupil: 0.6, brows: 'worried', mouth: talk ? 'o' : 'flat', look: [0.5, 0.1], blush: false}} />
+			{/* the phone at your ear; its screen lights your cheek */}
+			<ellipse cx={820} cy={900} rx={300} ry={380} fill="#9fc0ff" opacity={0.14} />
+			<rect x={860} y={1040} width={150} height={620} rx={70} fill="#3a4a6a" transform="rotate(-14 935 1040)" />
+			<g transform="rotate(10 845 880)">
+				<rect x={780} y={740} width={130} height={270} rx={22} fill="#15161a" />
+				<rect x={790} y={752} width={110} height={246} rx={16} fill="#cfe2ff" opacity={0.85} />
+			</g>
+			<ellipse cx={880} cy={1010} rx={66} ry={92} fill="#f2c3a0" transform="rotate(-14 880 1010)" />
+			<rect x={-500} y={-500} width={2200} height={3000} fill="#05070f" opacity={0.2} />
 			{/* the car's underside right above your head */}
 			<path d="M -300,-300 L 1380,-300 L 1380,380 Q 540,330 -300,380 Z" fill="#0f1013" />
 			<path d="M -300,360 Q 540,312 1380,360 L 1380,390 Q 540,342 -300,390 Z" fill="#1c1e24" />
-			<g transform="translate(540,1440)">
-				<rect x={-140} y={-60} width={280} height={150} rx={26} fill="#15161a" />
-				<rect x={-126} y={-48} width={252} height={130} rx={18} fill="#cfe2ff" opacity={0.9} />
-			</g>
 			{t >= 6 &&
 				[0, 1, 2].map((k) => {
-					const r = 30 + ((t * 3 + k * 24) % 70);
-					return <path key={k} d={`M ${700 + r},${990 - r * 0.5} q ${r * 0.4},${r * 0.5} 0,${r}`} stroke="#fff" strokeWidth={6} fill="none" opacity={0.6 * (1 - r / 100)} />;
+					const r = 26 + ((t * 3 + k * 22) % 60);
+					return <path key={k} d={`M ${620 + r * 0.6},${1080 - r * 0.4} q ${r * 0.35},${r * 0.35} 0,${r * 0.8}`} stroke="#fff" strokeWidth={6} fill="none" opacity={0.55 * (1 - r / 86)} />;
 				})}
 		</Stage>
 	);
@@ -456,25 +536,34 @@ export const S09: React.FC = () => {
 			</AbsoluteFill>
 		);
 	}
-	// top-down: your hand presses the phone face down into the asphalt; its light leaks out at the edges
+	// top-down: your hand presses the phone face down into the asphalt; its light leaks out round the edges
 	const press = interpolate(t, [0, 12], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
-	const leak = 0.6 * (1 - interpolate(t, [10, 40], [0, 1], clamp)) * (Math.floor(t / 7) % 2 === 0 ? 1 : 0.5);
+	const leak = (1 - interpolate(t, [12, 50], [0, 1], clamp)) * (Math.floor(t / 7) % 2 === 0 ? 1 : 0.6);
+	const jx = t < 40 && Math.floor(t / 7) % 2 === 0 ? Math.sin(t * 3) * 4 : 0;
 	return (
-		<Stage cam={{s: lerp(t, 0, 78, 1.0, 1.06) * kick(t), cx: 540, cy: 1000}} light={{glow: 0, vignette: 0.85}} bg="#121317">
+		<Stage cam={{s: lerp(t, 0, 78, 1.0, 1.06) * kick(t), cx: 540, cy: 960}} light={{glow: 0, vignette: 0.85}} bg="#121317">
 			<rect x={-500} y={-500} width={2200} height={3000} fill="#1c1d22" />
 			{Array.from({length: 60}).map((_, k) => (
-				<circle key={k} cx={rnd(k + 5) * 1080} cy={300 + rnd(k + 70) * 1400} r={3 + rnd(k + 11) * 7} fill={k % 3 ? '#26272d' : '#141519'} />
+				<circle key={k} cx={rnd(k + 5) * 1080} cy={200 + rnd(k + 70) * 1500} r={3 + rnd(k + 11) * 7} fill={k % 3 ? '#26272d' : '#141519'} />
 			))}
-			<rect x={330} y={830} width={420} height={260} rx={40} fill="#cfe2ff" opacity={leak} />
-			<rect x={350} y={850} width={380} height={220} rx={34} fill="#15161a" />
-			{/* your hand (jacket sleeve) pressing the phone down */}
-			<g transform={`translate(0,${-40 * (1 - press)})`}>
-				<rect x={430} y={1080} width={220} height={900} rx={90} fill="#3a4a6a" />
-				<rect x={430} y={1080} width={220} height={60} rx={26} fill="#2e3c58" />
-				<ellipse cx={540} cy={980} rx={175} ry={150} fill="#f2c3a0" />
-				<ellipse cx={385} cy={1010} rx={44} ry={92} fill="#f2c3a0" transform="rotate(28 385 1010)" />
-				{[-110, -40, 30, 100].map((dx) => (
-					<ellipse key={dx} cx={540 + dx} cy={850} rx={36} ry={70} fill="#f2c3a0" />
+			<g transform={`translate(${jx},0)`}>
+				{[64, 42, 22].map((g, k) => (
+					<rect key={g} x={410 - g} y={640 - g} width={260 + 2 * g} height={480 + 2 * g} rx={40 + g} fill="#cfe2ff" opacity={leak * (0.12 + 0.1 * k)} />
+				))}
+				<rect x={410} y={640} width={260} height={480} rx={36} fill="#15161a" />
+				<rect x={430} y={660} width={220} height={440} rx={28} fill="#1d1f25" />
+			</g>
+			{/* your hand pressing it down */}
+			<g transform={`translate(0,${-30 * (1 - press)})`}>
+				<rect x={445} y={1000} width={190} height={1000} rx={90} fill="#3a4a6a" />
+				<rect x={445} y={1000} width={190} height={60} rx={26} fill="#2e3c58" />
+				<ellipse cx={540} cy={900} rx={150} ry={135} fill="#f2c3a0" />
+				<ellipse cx={398} cy={940} rx={38} ry={84} fill="#f2c3a0" transform="rotate(30 398 940)" />
+				{[-100, -35, 30, 95].map((dx, k) => (
+					<ellipse key={dx} cx={540 + dx} cy={752 - (k === 1 || k === 2 ? 14 : 0)} rx={32} ry={76} fill="#f2c3a0" />
+				))}
+				{[-68, 0, 64].map((dx) => (
+					<path key={dx} d={`M ${540 + dx - 12},${840} q 12,-8 24,0`} stroke="#d9a284" strokeWidth={5} fill="none" strokeLinecap="round" />
 				))}
 			</g>
 			<rect x={-500} y={-500} width={2200} height={3000} fill={NIGHT} opacity={0.25} />
@@ -490,21 +579,15 @@ export const S10: React.FC = () => {
 		const go = interpolate(t, [42, 56], [0, 1], {...clamp, easing: Easing.in(Easing.quad)});
 		return <UnderCar f={f} id="p7s10" lift={1} zoom={1.06} legs={{x: 610 - 900 * go, y: 1610, s: 2.25, ph: t >= 42 ? t * 0.35 : undefined}} />;
 	}
-	const x = lerp(t, 0, 50, 560, 175, Easing.inOut(Easing.sin));
-	const ring = pop(t, 38, 10);
+	// your block's entrance: he walks in fast; up there — your window, mom is asleep
+	const x = lerp(t, 0, 44, 1180, 560, Easing.inOut(Easing.sin));
+	const gone = interpolate(t, [42, 50], [1, 0], clamp);
 	return (
-		<Stage cam={{s: lerp(t, 0, 55, 1.0, 1.08), cx: 380, cy: 980}} light={{glow: 0, vignette: 0.8}} bg="#05070f">
-			<Yard f={f} id="p7s10y" light={1} walker={{x, y: 1250, s: 0.24}} />
-			{/* your block's entrance and your lit window (mom is there) */}
-			<rect x={70} y={1110} width={120} height={180} fill="#3a3326" />
-			<rect x={80} y={1120} width={100} height={170} fill="#ffd27a" opacity={0.7} />
-			<rect x={150} y={760} width={46} height={64} fill="#ffd27a" />
-			{ring > 0.01 && <circle cx={173} cy={792} r={70 * (0.6 + 0.4 * ring)} fill="none" stroke={RED} strokeWidth={8} opacity={Math.min(1, ring)} />}
-			{ring > 0.01 && (
-				<text x={173} y={690} textAnchor="middle" fontFamily={HEAVY} fontWeight={900} fontSize={54} fill="#fff" stroke="#111" strokeWidth={8} paintOrder="stroke" opacity={ring}>
-					МАМА
-				</text>
-			)}
+		<Stage cam={{s: lerp(t, 0, 55, 0.9, 0.95), cx: 560, cy: 1250}} light={{glow: 0, vignette: 0.8}} bg="#05070f">
+			<NightEntrance open={interpolate(t, [32, 44], [0, 1], clamp) * gone} ring={pop(t, 38, 10)} />
+			<g opacity={gone}>
+				<Shadow id="p7s10sh" x={x} y={1500} scale={0.36} />
+			</g>
 		</Stage>
 	);
 };
@@ -629,24 +712,26 @@ export const S15: React.FC = () => {
 	const f = useCurrentFrame();
 	const {i, t} = seg(f, [56, 110]);
 	if (i === 0) {
-		const run = lerp(t, 0, 56, 0, 1, Easing.linear);
 		return (
 			<AbsoluteFill>
-				<Stage cam={{s: lerp(t, 0, 56, 1.0, 1.06), cx: 420, cy: 1050}} light={{glow: 0, vignette: 0.8}} bg="#05070f">
-					<Yard f={f} id="p7s15y" light={1} />
-					<rect x={70} y={1110} width={120} height={180} fill="#3a3326" />
-					<rect x={80} y={1120} width={100} height={170} fill="#ffd27a" opacity={0.8} />
-					{[0, 1].map((k) => (
-						<Officer key={k} id={`p7s15c${k}`} x={560 - 380 * run - k * 90} y={1300 + k * 20} s={0.2} back walk={t * 0.5 + k} />
-					))}
-					<PoliceCar f={f} x={700} y={1640} s={1.1} />
+				<Stage cam={{s: lerp(t, 0, 56, 0.9, 0.94), cx: 560, cy: 1250}} light={{glow: 0, vignette: 0.8}} bg="#05070f">
+					<NightEntrance open={1} />
+					{[0, 1].map((k) => {
+						const run = interpolate(t, [k * 8, 50 + k * 6], [0, 1], clamp);
+						return (
+							<g key={k} opacity={interpolate(run, [0.92, 1], [1, 0], clamp)}>
+								<Officer id={`p7s15c${k}`} x={1150 + k * 120 - (590 + k * 120) * run} y={1500} s={0.34} back walk={t * 0.6 + k * 2} />
+							</g>
+						);
+					})}
+					<PoliceCar f={f} x={820} y={1780} s={1.05} />
 				</Stage>
 				<Flashers f={f} />
 			</AbsoluteFill>
 		);
 	}
 	if (i === 1) {
-		const open = interpolate(t, [2, 18], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
+		const open = interpolate(t, [2, 18], [0, 0.75], {...clamp, easing: Easing.out(Easing.cubic)});
 		return (
 			<AbsoluteFill>
 				<Stage cam={{s: lerp(t, 0, 54, 1.0, 1.06), cx: 540, cy: 1000}} light={{glow: 0, vignette: 0.85}} bg="#05070f">
@@ -654,10 +739,12 @@ export const S15: React.FC = () => {
 					<rect x={-500} y={1000} width={2200} height={1600} fill="#4f8571" />
 					<rect x={-500} y={994} width={2200} height={10} fill="#3d6a58" />
 					<rect x={330} y={560} width={420} height={900} fill="#3a2a22" />
-					{/* behind the door: the lit hallway and mom in her nightie */}
+					{/* behind the door: the lit hallway and mom in her nightie, in the doorway */}
 					<rect x={350} y={580} width={380} height={880} fill="#e8d4a8" />
-					<Person kind="mom" id="p7s15mom" plain colors={NIGHTIE} x={560} y={1640} scale={0.82} face={{eyes: 'narrow', brows: 'raised', mouth: t > 20 ? 'o' : 'flat', look: [0, 0.2], blush: false}} armL={{target: [-90, -470], bend: 1}} armR={{target: [235, -640], bend: -1}} />
-					<path d={`M 350,580 L ${350 + 380 * (1 - open)},${580} L ${350 + 380 * (1 - open)},1460 L 350,1460 Z`} fill="#4a3628" />
+					<rect x={350} y={1380} width={380} height={80} fill="#b38a5a" />
+					<Person kind="mom" id="p7s15mom" plain colors={NIGHTIE} x={575} y={1458} scale={0.78} face={{eyes: 'narrow', brows: 'raised', mouth: t > 20 ? 'o' : 'flat', look: [0, 0.2], blush: false}} armL={{target: [-165, -560], bend: 1}} armR={{target: [90, -470], bend: -1}} />
+					<path d={`M 350,580 L ${350 + 380 * (1 - open)},${580 - 16 * open} L ${350 + 380 * (1 - open)},${1460 + 16 * open} L 350,1460 Z`} fill="#4a3628" />
+					<rect x={330} y={1460} width={420} height={14} fill="#2a1e18" />
 					<rect x={-500} y={-500} width={2200} height={3000} fill={NIGHT} opacity={0.3} />
 				</Stage>
 				<Flashers f={f} o={0.7} />
@@ -679,18 +766,24 @@ export const S15: React.FC = () => {
 	);
 };
 
-// 16. Only — on your pillow lies dad's phone.
+// 16. Only — on your pillow lies dad's phone (where your head was).
 export const S16: React.FC = () => {
 	const f = useCurrentFrame();
 	const ring = pop(f, 54, 10);
 	return (
 		<AbsoluteFill>
-			<Stage cam={{s: lerp(f, 0, 81, 1.0, 1.12), cx: 540, cy: 1000}} light={{glow: 0, vignette: 0.9}} bg="#05070f">
+			<Stage cam={{s: lerp(f, 0, 81, 1.0, 1.1), cx: 540, cy: 960}} light={{glow: 0, vignette: 0.9}} bg="#05070f">
 				<rect x={-500} y={-500} width={2200} height={3000} fill="#232c52" />
-				<path d="M -300,1240 C 100,1160 900,1160 1380,1240 L 1380,2400 L -300,2400 Z" fill="#4b69a6" />
-				<path d="M 140,640 C 140,520 300,500 540,500 C 780,500 940,520 940,640 L 960,1120 C 960,1230 800,1250 540,1250 C 280,1250 120,1230 120,1120 Z" fill="#e6e2f0" />
-				<path d="M 200,700 C 400,760 680,760 880,700" stroke="#cfc9dd" strokeWidth={10} fill="none" />
-				<g transform="translate(540,900) rotate(-14)">
+				<rect x={-500} y={360} width={2200} height={2200} fill="#cfcbdc" />
+				{/* the pillow, a dent where your head was */}
+				<path d="M 180,540 Q 160,450 270,452 L 810,452 Q 920,450 900,540 L 922,1150 Q 940,1250 830,1250 L 250,1250 Q 140,1250 158,1150 Z" fill="#eeebf6" />
+				<path d="M 170,1180 Q 540,1240 910,1180 L 900,1250 L 180,1250 Z" fill="#d8d3e6" />
+				<path d="M 230,500 Q 540,476 850,500" stroke="#dcd8e8" strokeWidth={8} fill="none" />
+				<ellipse cx={540} cy={860} rx={250} ry={190} fill="#e0dcec" />
+				{/* the blanket thrown back */}
+				<path d="M -300,1300 C 100,1240 900,1240 1380,1300 L 1380,2400 L -300,2400 Z" fill="#4b69a6" />
+				<path d="M -300,1300 C 100,1240 900,1240 1380,1300" stroke="#6f8cc8" strokeWidth={36} fill="none" />
+				<g transform="translate(540,860) rotate(-14)">
 					<rect x={-130} y={-240} width={260} height={480} rx={36} fill="#15161a" />
 					<rect x={-116} y={-226} width={232} height={452} rx={26} fill="#2d6cdf" opacity={0.95} />
 					<rect x={-96} y={-150} width={192} height={60} rx={20} fill="#fff" opacity={0.9} />
@@ -700,8 +793,8 @@ export const S16: React.FC = () => {
 						Сынок, ты где?
 					</text>
 				</g>
-				<ellipse cx={540} cy={900} rx={420} ry={420} fill="#cfe2ff" opacity={0.08 + 0.04 * Math.sin(f / 4)} />
-				{ring > 0.01 && <ellipse cx={540} cy={900} rx={240 * (0.6 + 0.4 * ring)} ry={330 * (0.6 + 0.4 * ring)} fill="none" stroke={RED} strokeWidth={10} opacity={Math.min(1, ring)} />}
+				<ellipse cx={540} cy={860} rx={420} ry={420} fill="#cfe2ff" opacity={0.08 + 0.04 * Math.sin(f / 4)} />
+				{ring > 0.01 && <ellipse cx={540} cy={860} rx={240 * (0.6 + 0.4 * ring)} ry={330 * (0.6 + 0.4 * ring)} fill="none" stroke={RED} strokeWidth={10} opacity={Math.min(1, ring)} />}
 				<rect x={-500} y={-500} width={2200} height={3000} fill={NIGHT} opacity={0.35} />
 			</Stage>
 			<Flashers f={f} o={0.5} />
@@ -754,7 +847,7 @@ export const S18: React.FC = () => {
 	const f = useCurrentFrame();
 	const {i, t} = seg(f, [84]);
 	if (i === 0) {
-		// his LEFT hand (viewer-right): spoon from the bowl to the mouth and back
+		// his LEFT hand (viewer-right): spoon from the bowl to the mouth and back; the right hand rests on the table
 		const cyc = (t % 40) / 40;
 		const up = cyc < 0.35 ? 0 : cyc < 0.6 ? (cyc - 0.35) / 0.25 : cyc < 0.8 ? 1 : 1 - (cyc - 0.8) / 0.2;
 		const smell = interpolate(t, [40, 52], [0, 1], clamp);
@@ -769,8 +862,8 @@ export const S18: React.FC = () => {
 					y={1400 + 470 * 1.05 - 30}
 					scale={1.05}
 					breathe={t}
-					face={{eyes: 'happy', mouth: 'smile', brows: 'raised', stubble: true, look: [0.4, 0.6]}}
-					armL={{target: [-110, -560], bend: 1}}
+					face={{eyes: 'happy', mouth: up > 0.8 ? 'o' : 'smile', brows: 'raised', stubble: true, look: [0.4, 0.6]}}
+					armL={{target: [-80, -450], bend: 1, ku: 0.8, kf: 0.7}}
 					armR={{target: [171 - 135 * up, -450 - 505 * up], bend: -1, ku: 0.85, kf: 0.75}}
 					itemR={
 						<g transform="rotate(200)">
@@ -783,10 +876,12 @@ export const S18: React.FC = () => {
 				<g transform="translate(600,1430)">
 					<BorschtBowl steam={f / 30} scale={0.95} />
 				</g>
+				{/* the smell of diesel from his work jacket (from the shoulders, not the mouth) */}
 				{smell > 0 &&
-					[0, 1, 2].map((k) => {
-						const ph = (t * 2 + k * 30) % 90;
-						return <path key={k} d={`M ${300 + k * 110},${1000 - ph * 2} c -30,-40 30,-70 0,-110 c -30,-40 30,-70 0,-110`} stroke="#6f7d4e" strokeWidth={13} fill="none" strokeLinecap="round" opacity={smell * 0.75 * (1 - ph / 90)} />;
+					[0, 1, 2, 3].map((k) => {
+						const ph = (t * 2 + k * 24) % 90;
+						const bx = [230, 290, 560, 620][k];
+						return <path key={k} d={`M ${bx},${1150 - ph * 2} c -26,-36 26,-62 0,-98 c -26,-36 26,-62 0,-98`} stroke="#6f7d4e" strokeWidth={13} fill="none" strokeLinecap="round" opacity={smell * 0.7 * (1 - ph / 90)} />;
 					})}
 			</Stage>
 		);
@@ -802,12 +897,8 @@ export const S18: React.FC = () => {
 			<g transform="translate(560,1300)">
 				<BorschtBowl steam={f / 30} scale={2.2} />
 			</g>
-			<BigHand x={780} y={930} rot={14} thumb={-1} scar />
-			<g transform="translate(700,1060) rotate(30)">
-				<rect x={-10} y={-10} width={20} height={200} rx={8} fill="#c9ced6" />
-				<ellipse cx={0} cy={214} rx={40} ry={52} fill="#c9ced6" />
-			</g>
-			{ring > 0.01 && <circle cx={780} cy={990} r={210 * (0.7 + 0.3 * ring)} fill="none" stroke={GREEN} strokeWidth={12} opacity={ring} />}
+			<BigHand x={760} y={960} rot={20} spoon thumb={-1} scar />
+			{ring > 0.01 && <circle cx={745} cy={960} r={200 * (0.7 + 0.3 * ring)} fill="none" stroke={GREEN} strokeWidth={12} opacity={ring} />}
 			<text x={760} y={680} textAnchor="middle" fontFamily={HEAVY} fontWeight={900} fontSize={84} fill="#fff" stroke="#111" strokeWidth={10} paintOrder="stroke" opacity={ring} transform="rotate(-4 760 680)">
 				ЛЕВАЯ
 			</text>
@@ -815,33 +906,33 @@ export const S18: React.FC = () => {
 	);
 };
 
-// 19. He calls you «тигрёнок». And mom cries — now really from happiness.
+// 19. He calls you «тигрёнок» (his hands on your shoulders). And mom cries — now really from happiness.
 export const S19: React.FC = () => {
 	const f = useCurrentFrame();
-	const hug = interpolate(f, [4, 24], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
+	const hug = interpolate(f, [2, 18], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
 	const say = f >= 18 && f < 40 && Math.floor(f / 4) % 2 === 0;
 	return (
 		<AbsoluteFill>
-			<Stage cam={{s: lerp(f, 0, 123, 1.0, 1.08), cx: 540, cy: 1000}} light={{glow: 0.4, vignette: 0.45}}>
+			<Stage cam={{s: lerp(f, 0, 153, 1.0, 1.08), cx: 560, cy: 1000}} light={{glow: 0.4, vignette: 0.45}}>
 				<Kitchen id="p7s19k" floorY={1300} clock={[8, 20]} tick={f / 30} sky="#9fd3ff" />
 				<Person
 					kind="dad"
 					id="p7s19dad"
-					x={430}
+					x={440}
 					y={1720}
 					scale={0.95}
 					breathe={f}
 					face={{eyes: 'happy', mouth: say ? 'o' : 'grin', brows: 'raised', stubble: true, tears: 0.3}}
-					armL={{target: [-40 + 120 * hug, -700 + 60 * hug], bend: 1}}
-					armR={{target: [200 + 60 * hug, -700 + 40 * hug], bend: -1}}
+					armL={{target: [-40 + 20 * hug, -640 + 40 * hug], bend: 1, ku: 0.95, kf: 0.9}}
+					armR={{target: [150 - 10 * hug, -640 + 40 * hug], bend: -1, ku: 0.95, kf: 0.9}}
 				/>
-				<Person kind="son" id="p7s19son" x={500 - 20 * hug} y={1730} scale={0.9} breathe={f} face={{eyes: 'happy', mouth: 'grin', brows: 'raised', tears: 0.4}} armL={{target: [-150, -420], bend: 1}} armR={{target: [150, -420], bend: -1}} />
-				<Person kind="mom" id="p7s19mom" x={840} y={1720} scale={0.95} breathe={f} face={{eyes: 'happy', mouth: 'smile', brows: 'raised', tears: interpolate(f, [50, 80], [0.2, 1], clamp)}} armL={{target: [-70, -880], bend: 1, ku: 0.8, kf: 0.8}} armR={{target: [70, -880], bend: -1, ku: 0.8, kf: 0.8}} />
+				<Person kind="son" id="p7s19son" x={500} y={1735} scale={0.9} breathe={f} face={{eyes: 'happy', mouth: 'grin', brows: 'raised', tears: 0.4}} armL={{target: [-90, -300], bend: 1}} armR={{target: [90, -300], bend: -1}} />
+				<Person kind="mom" id="p7s19mom" x={820} y={1720} scale={0.95} breathe={f} face={{eyes: 'happy', mouth: 'smile', brows: 'raised', tears: interpolate(f, [50, 80], [0.2, 1], clamp)}} armL={{target: [-30, -690], bend: 1, ku: 0.8, kf: 0.8}} armR={{target: [30, -690], bend: -1, ku: 0.8, kf: 0.8}} />
 			</Stage>
 			{f >= 22 && (
-				<div style={{position: 'absolute', left: 120, top: 330, transform: `scale(${pop(f, 22, 10)})`, transformOrigin: '20% 100%', background: '#fff', borderRadius: 40, padding: '18px 34px', fontFamily: HEAVY, fontWeight: 900, fontSize: 64, color: '#111', boxShadow: '0 10px 0 rgba(0,0,0,0.25)'}}>
+				<div style={{position: 'absolute', left: 140, top: 330, transform: `scale(${pop(f, 22, 10)})`, transformOrigin: '30% 100%', background: '#fff', borderRadius: 40, padding: '18px 34px', fontFamily: HEAVY, fontWeight: 900, fontSize: 64, color: '#111', boxShadow: '0 10px 0 rgba(0,0,0,0.25)'}}>
 					ТИГРЁНОК!
-					<div style={{position: 'absolute', left: 120, bottom: -30, width: 0, height: 0, borderLeft: '22px solid transparent', borderRight: '22px solid transparent', borderTop: '34px solid #fff'}} />
+					<div style={{position: 'absolute', left: 150, bottom: -30, width: 0, height: 0, borderLeft: '22px solid transparent', borderRight: '22px solid transparent', borderTop: '34px solid #fff'}} />
 				</div>
 			)}
 		</AbsoluteFill>
@@ -864,7 +955,7 @@ export const S20: React.FC = () => {
 	return (
 		<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 55%, #2a0d12 0%, #05070f 65%)'}}>
 			<Phone x={540 + glitch} y={1000} w={680} scale={lerp(t, 0, 119, 1.05, 1.18) * kick(t)} sleeve="#3a4a6a">
-				<LockNote time="23:47" day="пятница" from="Неизвестный номер" avatar="?" avatarBg="#5a5f66" text="Карась. Я запомнил, тигрёнок." note={pop(t, 4, 12)} />
+				<LockNote time="23:47" day="четверг" from="Неизвестный номер" avatar="?" avatarBg="#5a5f66" text="Карась. Я запомнил, тигрёнок." note={pop(t, 4, 12)} />
 				{face > 0 && (
 					<svg width={648} height={1362} viewBox="0 0 1080 1920" style={{position: 'absolute', inset: 0, opacity: face}}>
 						<ShadowFace x={540} headY={1300} s={3.2} eyes={1} smile={1} />

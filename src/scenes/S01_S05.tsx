@@ -20,11 +20,12 @@ export const BigHand: React.FC<{
 	rot?: number;
 	s?: number;
 	fork?: boolean;
+	spoon?: boolean;
 	scar?: boolean;
 	sleeve?: string;
 	skin?: string;
 	thumb?: -1 | 1;
-}> = ({x, y, rot = 0, s = 1, fork, scar, sleeve = '#33506e', skin = '#e9b892', thumb = 1}) => (
+}> = ({x, y, rot = 0, s = 1, fork, spoon, scar, sleeve = '#33506e', skin = '#e9b892', thumb = 1}) => (
 	<g transform={`translate(${x},${y}) rotate(${rot}) scale(${s})`}>
 		<rect x={-86} y={-760} width={172} height={640} rx={72} fill={sleeve} />
 		<rect x={-86} y={-330} width={172} height={40} fill="#f39a2e" />
@@ -36,7 +37,14 @@ export const BigHand: React.FC<{
 				<Fork scale={2.4} />
 			</g>
 		)}
-		{fork ? (
+		{spoon && (
+			<g transform="translate(0,40) rotate(180) scale(2.4)">
+				<rect x={-5} y={-92} width={10} height={86} rx={4} fill="#c9ced6" />
+				<ellipse cx={0} cy={-112} rx={17} ry={24} fill="#c9ced6" />
+				<ellipse cx={-4} cy={-116} rx={7} ry={11} fill="#e8ebf0" />
+			</g>
+		)}
+		{fork || spoon ? (
 			<g>
 				<rect x={-84} y={-86} width={168} height={168} rx={70} fill={skin} />
 				<ellipse cx={thumb * 40} cy={-10} rx={70} ry={32} fill={skin} />

@@ -24,9 +24,9 @@ export const CLOCK: {from: number; text: string}[] = [
 	{from: s(8), text: 'ДЕНЬ 3 · 03:19'},
 	{from: s(11), text: 'ДЕНЬ 3 · 03:21'},
 	{from: s(14), text: 'ДЕНЬ 3 · 03:26'},
-	{from: s(17), text: 'ДЕНЬ 4 · 05:40'},
-	{from: s(18), text: 'ДЕНЬ 4 · 08:15'},
-	{from: s(20), text: 'ДЕНЬ 4 · 23:47'},
+	{from: s(17), text: 'ДЕНЬ 3 · 05:40'},
+	{from: s(18), text: 'ДЕНЬ 3 · 08:15'},
+	{from: s(20), text: 'ДЕНЬ 3 · 23:47'},
 ];
 
 export const EP7 = {

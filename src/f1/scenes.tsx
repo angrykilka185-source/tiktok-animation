@@ -92,6 +92,14 @@ const Sitter: React.FC<{kind: 'son' | 'dad'; k: number; i: number; id: string; f
 		</g>
 	);
 };
+// dad's ticket, left on his seat when he is gone
+const SeatTicket: React.FC = () => (
+	<g transform={`translate(${seatX(7, DAD_SEAT)},${rowY(7) - 18}) rotate(-8) scale(${rowS(7)})`}>
+		<rect x={-34} y={-12} width={68} height={26} rx={3} fill="#f4e6c4" />
+		<rect x={18} y={-12} width={2} height={26} fill="#c9b48a" />
+	</g>
+);
+
 // where a hero's face is in the scene (for spotlights and labels)
 const faceAt = (kind: 'son' | 'dad', k: number, i: number) => {
 	const sp = SPECS[kind];
@@ -139,7 +147,7 @@ const Viewer: React.FC<{k: number; i: number; f: number; mood: Mood; idp: string
 // the hall seen from the screen: rows of red seats (full of people if `full`), the projector beam.
 // children = the heroes in row 7; row8 = whoever is in the seat right behind you
 // dim = 0..1 darkens everybody but the heroes (they are what the shot is about)
-const HallFront: React.FC<{f: number; idp: string; full?: boolean; mood?: Mood; light?: number; dim?: number; children?: React.ReactNode; row8?: React.ReactNode; emptyBehind?: boolean; behindUp?: number; behindRing?: number; hideRow7?: boolean}> = ({
+const HallFront: React.FC<{f: number; idp: string; full?: boolean; mood?: Mood; light?: number; dim?: number; children?: React.ReactNode; row8?: React.ReactNode; emptyBehind?: boolean; behindUp?: number; behindRing?: number; hideRow7?: boolean; behindOnly?: boolean}> = ({
 	f,
 	idp,
 	full = true,
@@ -152,6 +160,7 @@ const HallFront: React.FC<{f: number; idp: string; full?: boolean; mood?: Mood; 
 	behindUp = 0,
 	behindRing = 0,
 	hideRow7 = false,
+	behindOnly = false,
 }) => {
 	const fid = `${idp}dim`;
 	const m = 1 - 0.7 * dim;
@@ -198,9 +207,9 @@ const HallFront: React.FC<{f: number; idp: string; full?: boolean; mood?: Mood; 
 			{Array.from({length: 18}).map((_, k) => (
 				<circle key={k} cx={540 + (rnd(k) - 0.5) * 700 * rnd(k + 9)} cy={300 + ((f * (2 + rnd(k)) + rnd(k + 3) * 1400) % 1500)} r={2 + rnd(k + 5) * 3} fill="#fff6d8" opacity={0.35} />
 			))}
-			{[9, 8].map(row)}
-			{!hideRow7 && row(7)}
-			{[6, 5, 4, 3, 2, 1].map(row)}
+			{[11, 10, 9, 8].map(row)}
+			{!hideRow7 && !behindOnly && row(7)}
+			{!behindOnly && [6, 5, 4, 3, 2, 1].map(row)}
 			{behindRing > 0 && <ellipse cx={seatX(8, SON_SEAT)} cy={rowY(8) - 100 * rowS(8)} rx={80 * (0.6 + 0.4 * behindRing)} ry={105 * (0.6 + 0.4 * behindRing)} fill="none" stroke={RED} strokeWidth={10} opacity={Math.min(1, behindRing)} />}
 			<rect x={-600} y={-600} width={2300} height={3200} fill="#6f8cff" opacity={0.07 + 0.03 * Math.sin(f / 3)} />
 			<rect x={-600} y={-600} width={2300} height={3200} fill="#000" opacity={0.22 + 0.5 * (1 - light)} />
@@ -790,7 +799,7 @@ export const S12: React.FC = () => {
 				}
 			>
 				<Sitter kind="son" k={7} i={SON_SEAT} id="f1s12s" f={f} face={{eyes: 'wide', pupil: f >= 56 ? 0.5 : 1, mouth: f >= 56 ? 'o' : 'flat', brows: 'raised', look: [f >= 16 && f < 56 ? -0.5 : 0, -0.3]}} />
-				<Sitter kind="dad" k={7} i={DAD_SEAT} id="f1s12d" f={f} popcorn face={{eyes: 'happy', mouth: 'grin', brows: 'raised', stubble: true}} armL={{target: [-40, -560], bend: 1, ku: 0.7, kf: 0.7}} />
+				<SeatTicket />
 			</HallFront>
 		</Stage>
 	);
@@ -801,7 +810,7 @@ export const S13: React.FC = () => {
 	const f = useCurrentFrame();
 	return (
 		<ScreenView f={f} zoom={lerp(f, 0, 99, 1.2, 1.32)}>
-			<FilmHall t={f} idp="f1s13" zoom={2.3} shadow={lerp(f, 24, 80, 0.01, 1, Easing.inOut(Easing.sin))} />
+			<FilmHall t={f} idp="f1s13" zoom={2.3} dad={false} shadow={lerp(f, 24, 80, 0.01, 1, Easing.inOut(Easing.sin))} />
 		</ScreenView>
 	);
 };
@@ -845,13 +854,18 @@ export const S15: React.FC = () => {
 	const f = useCurrentFrame();
 	const [sx, sy] = shake(f, 0, 14, 8);
 	const out = lerp(f, 70, 130, 0, 1, Easing.inOut(Easing.cubic));
-	const cx0 = seatX(8, SON_SEAT) + 30;
+	const seat = seatX(8, SON_SEAT);
 	return (
-		<Stage cam={{s: (2.6 - 1.4 * out) * kick(f), cx: cx0 + (520 - cx0) * out + sx, cy: 900 + 60 * out + sy}} light={{glow: 0, vignette: 0.85}} bg="#1d161b">
-			<HallFront f={f} idp="f1s15v" dim={0.3} behindUp={lerp(f, 30, 60, 0, 1, Easing.out(Easing.cubic))} behindRing={pop(f, 112, 10)}>
-				<Sitter kind="son" k={7} i={SON_SEAT} id="f1s15s" f={f} back />
-				<Sitter kind="dad" k={7} i={DAD_SEAT} id="f1s15d" f={f} popcorn face={{eyes: 'happy', mouth: 'grin', brows: 'raised', stubble: true}} armL={{target: [-40, -560], bend: 1, ku: 0.7, kf: 0.7}} />
-			</HallFront>
+		<Stage cam={{s: (2.6 - 1.25 * out) * kick(f), cx: seat + (520 - seat) * out + sx, cy: 900 + 60 * out + sy}} light={{glow: 0, vignette: 0.85}} bg="#1d161b">
+			<HallFront f={f} idp="f1s15v" dim={0.2} behindOnly behindUp={lerp(f, 30, 60, 0, 1, Easing.out(Easing.cubic))} behindRing={pop(f, 112, 10)} />
+			{/* the backs of your own row: you look back over them */}
+			<rect x={-600} y={rowY(7) + 120} width={2300} height={1000} fill="#0e090b" />
+			{[-3, -2, -1, 0, 1, 2, 3, 4].map((i) => (
+				<g key={i}>
+					<rect x={seatX(7, i) - 68} y={rowY(7) + 20} width={136} height={420} rx={40} fill="#4a181d" stroke="#240b0f" strokeWidth={5} />
+					<rect x={seatX(7, i) - 52} y={rowY(7) + 30} width={104} height={16} rx={8} fill="#6a242a" />
+				</g>
+			))}
 		</Stage>
 	);
 };
@@ -865,10 +879,7 @@ export const S16: React.FC = () => {
 			<Stage cam={{s: lerp(t, 0, 80, 3.0, 3.2) * kick(t), cx: 540, cy: 920}} light={{glow: 0, vignette: 0.85}} bg="#1d161b">
 				<HallFront f={t} idp="f1s16v" dim={0.55}>
 					<Sitter kind="son" k={7} i={SON_SEAT} id="f1s16s" f={t} headTurn={0.5} face={{eyes: 'wide', pupil: 0.5, mouth: 'o', brows: 'raised', look: [0.9, 0]}} />
-					<g transform={`translate(${seatX(7, DAD_SEAT)},${rowY(7) - 18}) rotate(-8) scale(${rowS(7)})`}>
-						<rect x={-34} y={-12} width={68} height={26} rx={3} fill="#f4e6c4" />
-						<rect x={18} y={-12} width={2} height={26} fill="#c9b48a" />
-					</g>
+					<SeatTicket />
 					{t >= 58 && <ellipse cx={seatX(7, DAD_SEAT)} cy={rowY(7) - 75} rx={78 * (0.6 + 0.4 * pop(t, 58, 10))} ry={104 * (0.6 + 0.4 * pop(t, 58, 10))} fill="none" stroke={RED} strokeWidth={6} opacity={Math.min(1, pop(t, 58, 10))} />}
 				</HallFront>
 			</Stage>

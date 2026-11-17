@@ -312,14 +312,14 @@ const Offer: React.FC<{f: number; p: number; talk?: boolean}> = ({f, p, talk = f
 // 1. Recap: the voice messages from tomorrow saved you from the lift and from the lamp.
 export const S01: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [48]);
+	const {i, t} = seg(f, [80]);
 	if (i === 0) {
 		return (
 			<Recap f={t} label="◀◀ ЧАСТЬ 1">
 				<Freeze frame={95}>
 					<G1.S08 />
 				</Freeze>
-				<Stamp p={pop(t, 16, 10)} mark="check" label="ЛИФТ" />
+				<Stamp p={pop(t, 70, 10)} mark="check" label="ЛИФТ" />
 			</Recap>
 		);
 	}
@@ -328,7 +328,7 @@ export const S01: React.FC = () => {
 			<Freeze frame={50}>
 				<G2B.S10 />
 			</Freeze>
-			<Stamp p={pop(t, 14, 10)} mark="check" label="ЛАМПА" />
+			<Stamp p={pop(t, 10, 10)} mark="check" label="ЛАМПА" />
 		</Recap>
 	);
 };
@@ -336,7 +336,7 @@ export const S01: React.FC = () => {
 // 2. Recap: yesterday you saw the double through the door viewer. With your face.
 export const S02: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [46]);
+	const {i, t} = seg(f, [84]);
 	return (
 		<Recap f={t} label="◀◀ ЧАСТЬ 3">
 			{i === 0 ? (
@@ -355,7 +355,7 @@ export const S02: React.FC = () => {
 // 3. Recap: at night the voice said «Выключи телефон…» — and «Мой номер» called.
 export const S03: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [80]);
+	const {i, t} = seg(f, [118]);
 	return (
 		<Recap f={t} label="◀◀ ЧАСТЬ 3">
 			{i === 0 ? (
@@ -376,8 +376,8 @@ export const S04: React.FC = () => {
 	const f = useCurrentFrame();
 	const a = pop(f, 2, 10);
 	const b = pop(f, 10, 10);
-	const c = pop(f, 22, 11);
-	const d = pop(f, 36, 10);
+	const c = pop(f, 28, 11);
+	const d = pop(f, 44, 10);
 	return (
 		<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 40%, #1d2a55 0%, #0a1024 58%, #04060d 100%)'}}>
 			<div style={{position: 'absolute', top: 400, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900}}>
@@ -404,14 +404,14 @@ export const S05: React.FC = () => {
 	const f = useCurrentFrame();
 	const press = lerp(f, 0, 12, 0, 1, Easing.out(Easing.cubic));
 	const bar = pop(f, 12, 10);
-	const k = lerp(f, 26, 42, 0, 1, Easing.inOut(Easing.cubic));
-	const off = interpolate(f, [62, 74], [0, 1], clamp);
-	const ringing = f < 42;
+	const k = lerp(f, 32, 50, 0, 1, Easing.inOut(Easing.cubic));
+	const off = interpolate(f, [80, 90], [0, 1], clamp);
+	const ringing = f < 50;
 	const jx = ringing ? Math.sin(f * 3.1) * 8 : 0;
 	return (
 		<AbsoluteFill style={{background: PHONE_BG}}>
 			<Phone x={540 + jx} y={1000} w={680} scale={lerp(f, 0, 99, 1.0, 1.06) * kick(f)}>
-				{f < 46 ? <CallScreen f={f} /> : <div style={{position: 'absolute', inset: 0, background: 'linear-gradient(180deg, #23304f 0%, #0c1120 100%)', fontFamily: SANS, color: '#aeb6c8', textAlign: 'center', paddingTop: 260, fontSize: 40, fontWeight: 800}}>Вызов завершён</div>}
+				{f < 52 ? <CallScreen f={f} /> : <div style={{position: 'absolute', inset: 0, background: 'linear-gradient(180deg, #23304f 0%, #0c1120 100%)', fontFamily: SANS, color: '#aeb6c8', textAlign: 'center', paddingTop: 260, fontSize: 40, fontWeight: 800}}>Вызов завершён</div>}
 				<SlideOff p={bar * (1 - off)} k={k} />
 				<div style={{position: 'absolute', inset: 0, background: '#000', opacity: off}} />
 			</Phone>
@@ -423,14 +423,14 @@ export const S05: React.FC = () => {
 // 6. In the black screen — your reflection. It blinks a second later than you.
 export const S06: React.FC = () => {
 	const f = useCurrentFrame();
-	const lid = interpolate(f, [26, 30, 34], [0, 1, 0], clamp);
-	const late = f >= 58 && f < 66;
-	const s = lerp(f, 0, 120, 1.25, 1.42);
+	const lid = interpolate(f, [76, 80, 84], [0, 1, 0], clamp);
+	const late = f >= 106 && f < 114;
+	const s = lerp(f, 0, 147, 1.25, 1.45);
 	const p = focus(680, 324, 640, 540, 820, s);
 	return (
 		<AbsoluteFill style={{background: '#020203'}}>
 			<Phone x={p.x} y={p.y} w={680} scale={s}>
-				<Reflection blink={late} ring={pop(f, 58, 10)} />
+				<Reflection blink={late} ring={pop(f, 106, 10)} />
 			</Phone>
 			{/* your own blink: the world goes dark for a moment */}
 			<div style={{position: 'absolute', left: 0, right: 0, top: 0, height: 960 * lid, background: '#000'}} />
@@ -442,12 +442,12 @@ export const S06: React.FC = () => {
 // 7. Morning. The alarm was in the phone. You wake up — at 9:20.
 export const S07: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [46]);
+	const {i, t} = seg(f, [98]);
 	if (i === 0) {
 		return (
 			<AbsoluteFill>
-				<Stage cam={{s: lerp(t, 0, 46, 1.12, 1.2), cx: 575, cy: 1130}} light={{glow: 0.3, vignette: 0.5}} bg="#05070f">
-					<Bedroom f={t} id="g4s7" glow={0} buzz={false} eyes={t < 24 ? 'closed' : 'wide'} day clock="09:20" />
+				<Stage cam={{s: lerp(t, 0, 98, 1.12, 1.24), cx: 575, cy: 1130}} light={{glow: 0.3, vignette: 0.5}} bg="#05070f">
+					<Bedroom f={t} id="g4s7" glow={0} buzz={false} eyes={t < 76 ? 'closed' : 'wide'} day clock="09:20" />
 				</Stage>
 			</AbsoluteFill>
 		);
@@ -462,12 +462,12 @@ export const S07: React.FC = () => {
 // 8. Mom freezes in the kitchen with a cup: «Ты дома? Я же только что проводила тебя в школу».
 export const S08: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [44]);
+	const {i, t} = seg(f, [58]);
 	if (i === 0) {
-		const freeze = interpolate(t, [10, 18], [0, 1], clamp);
+		const freeze = interpolate(t, [22, 30], [0, 1], clamp);
 		const tilt = 28 * freeze;
 		return (
-			<Stage cam={{s: lerp(t, 0, 44, 1.0, 1.06) * kick(t), cx: 560, cy: 1000}} light={{glow: 0.35, vignette: 0.5}}>
+			<Stage cam={{s: lerp(t, 0, 58, 1.0, 1.06) * kick(t), cx: 560, cy: 1000}} light={{glow: 0.35, vignette: 0.5}}>
 				<Kitchen id="g4s8k" floorY={1300} clock={[9, 21]} tick={f / 30} sky="#9fd3ff" />
 				<Person kind="teen" id="g4s8h" x={170} y={1620} scale={0.95} breathe={t} face={{eyes: 'wide', pupil: 0.7, brows: 'worried', mouth: 'o', look: [0.8, 0], blush: false}} />
 				<Person
@@ -497,9 +497,9 @@ export const S08: React.FC = () => {
 			</Stage>
 		);
 	}
-	const talk = t >= 4 && t < 90 && Math.floor(t / 4) % 2 === 0;
+	const talk = t >= 2 && t < 72 && Math.floor(t / 4) % 2 === 0;
 	return (
-		<WarmClose id="g4s8c" t={t} len={94} zoom={[1, 1.08]}>
+		<WarmClose id="g4s8c" t={t} len={80} zoom={[1, 1.08]}>
 			<Bust kind="mom" id="g4s8b" colors={MOM} x={540} y={1000} scale={5.6} face={{eyes: 'wide', pupil: 0.6, brows: 'raised', mouth: talk ? 'o' : 'flat', look: [-0.3, 0.1], blush: false}} />
 		</WarmClose>
 	);
@@ -508,11 +508,11 @@ export const S08: React.FC = () => {
 // 9. You run to school and look in through the classroom window.
 export const S09: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [44]);
+	const {i, t} = seg(f, [34]);
 	if (i === 0) {
-		const run = lerp(t, 0, 44, 0, 1, Easing.linear);
+		const run = lerp(t, 0, 34, 0, 1, Easing.linear);
 		return (
-			<Stage cam={{s: lerp(t, 0, 44, 1.0, 1.08), cx: 540, cy: 1150}} light={{glow: 0.3, vignette: 0.5}} bg="#9fd3ff">
+			<Stage cam={{s: lerp(t, 0, 34, 1.0, 1.08), cx: 540, cy: 1150}} light={{glow: 0.3, vignette: 0.5}} bg="#9fd3ff">
 				<SchoolFront />
 				<Person kind="teen" id="g4s9run" back x={540 + 120 * Math.sin(run * 2)} y={2200 - 600 * run} scale={1.15 - 0.6 * run} walk={t * 0.55} />
 			</Stage>
@@ -537,11 +537,11 @@ export const S09: React.FC = () => {
 // 10. At your desk sits — you. In the red hoodie. Max laughs at his joke.
 export const S10: React.FC = () => {
 	const f = useCurrentFrame();
-	const joke = f >= 6 && f < 60 && Math.floor(f / 4) % 2 === 0;
+	const joke = f >= 78 && f < 120 && Math.floor(f / 4) % 2 === 0;
 	return (
-		<ClassWindow f={f} zoom={lerp(f, 0, 123, 1.0, 1.1)}>
+		<ClassWindow f={f} zoom={lerp(f, 0, 150, 1.0, 1.1)}>
 			<Stage cam={{s: 1.15, cx: 560, cy: 1050}} light={{glow: 0.2, vignette: 0.4}} bg="#efe6cc">
-				<Classroom f={f} id="g4s10c" dbl={{face: {...SMILE, mouth: joke ? 'o' : 'smile', look: [0.7, 0]}}} maxFace={{eyes: 'happy', mouth: f >= 40 ? 'grin' : 'smile', brows: 'raised', look: [-0.8, 0]}} />
+				<Classroom f={f} id="g4s10c" dbl={{face: {...SMILE, mouth: joke ? 'o' : 'smile', look: [0.7, 0]}}} maxFace={{eyes: 'happy', mouth: f >= 96 ? (Math.floor(f / 5) % 2 === 0 ? 'grin' : 'o') : 'smile', brows: 'raised', look: [-0.8, 0]}} />
 			</Stage>
 		</ClassWindow>
 	);
@@ -550,17 +550,17 @@ export const S10: React.FC = () => {
 // 11. The teacher calls «к доске» — by your surname. And HE stands up.
 export const S11: React.FC = () => {
 	const f = useCurrentFrame();
-	const stand = lerp(f, 62, 84, 0, 1, Easing.inOut(Easing.cubic));
-	const talk = f >= 4 && f < 50 && Math.floor(f / 4) % 2 === 0;
+	const stand = lerp(f, 92, 112, 0, 1, Easing.inOut(Easing.cubic));
+	const talk = f >= 26 && f < 76 && Math.floor(f / 4) % 2 === 0;
 	return (
 		<AbsoluteFill>
-			<ClassWindow f={f} zoom={lerp(f, 0, 108, 1.0, 1.06)}>
+			<ClassWindow f={f} zoom={lerp(f, 0, 120, 1.0, 1.06)}>
 				<Stage cam={{s: 1.0, cx: 540, cy: 1000}} light={{glow: 0.2, vignette: 0.4}} bg="#efe6cc">
-					<Classroom f={f} id="g4s11c" dbl={{face: {...SMILE, look: [-0.8, 0]}, stand}} maxFace={{eyes: 'open', mouth: 'smile', brows: 'neutral', look: [-0.6, 0]}} teacher={{point: pop(f, 6, 10), talk}} />
+					<Classroom f={f} id="g4s11c" dbl={{face: {...SMILE, look: [-0.8, 0]}, stand}} maxFace={{eyes: 'open', mouth: 'smile', brows: 'neutral', look: [-0.6, 0]}} teacher={{point: pop(f, 30, 10), talk}} />
 				</Stage>
 			</ClassWindow>
-			{f >= 8 && (
-				<div style={{position: 'absolute', left: 120, top: 300, transform: `scale(${pop(f, 8, 10)})`, transformOrigin: '10% 100%', background: '#fff', borderRadius: 34, padding: '14px 30px', fontFamily: HEAVY, fontWeight: 900, fontSize: 54, color: '#111', boxShadow: '0 8px 0 rgba(0,0,0,0.25)'}}>
+			{f >= 40 && (
+				<div style={{position: 'absolute', left: 120, top: 300, transform: `scale(${pop(f, 40, 10)})`, transformOrigin: '10% 100%', background: '#fff', borderRadius: 34, padding: '14px 30px', fontFamily: HEAVY, fontWeight: 900, fontSize: 54, color: '#111', boxShadow: '0 8px 0 rgba(0,0,0,0.25)'}}>
 					К ДОСКЕ!
 					<div style={{position: 'absolute', left: 60, bottom: -28, width: 0, height: 0, borderLeft: '20px solid transparent', borderRight: '20px solid transparent', borderTop: '30px solid #fff'}} />
 				</div>
@@ -573,8 +573,8 @@ export const S11: React.FC = () => {
 export const S12: React.FC = () => {
 	const f = useCurrentFrame();
 	const turn = lerp(f, 4, 40, 1, 0, Easing.inOut(Easing.cubic));
-	const wave = f >= 50 ? Math.sin((f - 50) / 3) : 0;
-	const up = interpolate(f, [44, 54], [0, 1], clamp);
+	const wave = f >= 62 ? Math.sin((f - 62) / 3) : 0;
+	const up = interpolate(f, [56, 64], [0, 1], clamp);
 	return (
 		<ClassWindow f={f} zoom={lerp(f, 0, 90, 1.0, 1.05)}>
 			<Stage cam={{s: 1.0, cx: 540, cy: 960}} light={{glow: 0.2, vignette: 0.5}} bg="#efe6cc">
@@ -591,7 +591,7 @@ export const S12: React.FC = () => {
 					scale={1.55}
 					breathe={f}
 					headTurn={0.9 * turn}
-					face={{...(f >= 44 ? GRIN : SMILE), look: [0.9 * turn, 0]}}
+					face={{...(f >= 56 ? GRIN : SMILE), look: [0.9 * turn, 0]}}
 					armL={{target: [-120, -420], bend: 1}}
 					armR={{target: [140 + 40 * up + 30 * wave, -440 - 470 * up], bend: -1}}
 				/>
@@ -640,11 +640,11 @@ export const S14: React.FC = () => {
 // 15. «Зачем ты выключил? Тот голос был не мой. Это он…» → yesterday night: HE records a message in your voice → «…не давай ему до себя дотронуться».
 export const S15: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [66, 128]);
+	const {i, t} = seg(f, [88, 160]);
 	if (i === 1) {
 		return (
 			<Vision f={t} label="ВЧЕРА · 23:41">
-				<Stage cam={{s: lerp(t, 0, 62, 1.0, 1.08), cx: 540, cy: 1000}} light={{glow: 0, vignette: 0.85}} bg="#05070f">
+				<Stage cam={{s: lerp(t, 0, 72, 1.0, 1.08), cx: 540, cy: 1000}} light={{glow: 0, vignette: 0.85}} bg="#05070f">
 					<rect x={-500} y={-500} width={2200} height={3000} fill="#0b0f1e" />
 					<Bust kind="teen" id="g4s15d" x={540} y={1000} scale={4.4} face={{...GRIN, look: [0.2, 0.5]}} />
 					<rect x={-500} y={-500} width={2200} height={3000} fill="#05070f" opacity={0.45} />
@@ -658,14 +658,14 @@ export const S15: React.FC = () => {
 			</Vision>
 		);
 	}
-	const s = lerp(f, 0, 186, 1.45, 1.6) * kick(t, 0.05);
+	const s = lerp(f, 0, 234, 1.45, 1.6) * kick(t, 0.05);
 	const p = focus(680, 304, 330, 540, 760, s);
-	const warn = pop(t, 22, 10);
+	const warn = pop(t, 46, 10);
 	return (
 		<AbsoluteFill style={{background: PHONE_BG}}>
 			<Phone x={p.x} y={p.y} w={680} scale={s}>
 				<ChatScreen time="09:36">
-					<VoiceBubble top={250} f={f} progress={interpolate(f, [6, 180], [0.03, 0.98], clamp)} lvl={level('g15', f - 6)} sent="23:59" />
+					<VoiceBubble top={250} f={f} progress={interpolate(f, [6, 228], [0.03, 0.98], clamp)} lvl={level('g15', f - 6)} sent="23:59" />
 				</ChatScreen>
 			</Phone>
 			{i === 2 && warn > 0.01 && (
@@ -684,17 +684,17 @@ export const S15: React.FC = () => {
 // 16. And at the very end — the whisper again: «Это не ты». (your reflection smiles)
 export const S16: React.FC = () => {
 	const f = useCurrentFrame();
-	const s = lerp(f, 0, 72, 1.3, 1.5);
+	const s = lerp(f, 0, 90, 1.3, 1.5);
 	const p = focus(680, 324, 640, 540, 820, s);
-	const word = f >= 30;
+	const word = f >= 64;
 	const jit = word ? (rnd(f * 3) - 0.5) * 12 : 0;
 	return (
 		<AbsoluteFill style={{background: '#020203'}}>
 			<Phone x={p.x + jit} y={p.y} w={680} scale={s}>
-				<Reflection grin={f >= 36} />
+				<Reflection grin={f >= 70} />
 			</Phone>
 			{word && (
-				<div style={{position: 'absolute', top: 280, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, fontSize: 120, transform: `scale(${pop(f, 30, 9)}) translateX(${jit}px)`}}>
+				<div style={{position: 'absolute', top: 280, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, fontSize: 120, transform: `scale(${pop(f, 64, 9)}) translateX(${jit}px)`}}>
 					<span style={{position: 'absolute', left: 0, right: 0, color: '#00e5ff', opacity: 0.5, transform: 'translateX(-8px)'}}>ЭТО НЕ ТЫ</span>
 					<span style={{position: 'relative', color: RED, textShadow: '6px 0 0 rgba(255,0,60,0.5)'}}>ЭТО НЕ ТЫ</span>
 				</div>
@@ -744,9 +744,9 @@ export const S17: React.FC = () => {
 export const S18: React.FC = () => {
 	const f = useCurrentFrame();
 	const reach = lerp(f, 6, 40, 0, 1, Easing.out(Easing.cubic));
-	const talk = f >= 50 && f < 110 && Math.floor(f / 4) % 2 === 0;
+	const talk = f >= 62 && f < 112 && Math.floor(f / 4) % 2 === 0;
 	return (
-		<Stage cam={{s: lerp(f, 0, 117, 1.0, 1.06), cx: 560, cy: 1000}} light={{glow: 0.2, vignette: 0.7}} bg="#e9e3d2">
+		<Stage cam={{s: lerp(f, 0, 123, 1.0, 1.06), cx: 560, cy: 1000}} light={{glow: 0.2, vignette: 0.7}} bg="#e9e3d2">
 			<Offer f={f} p={reach} talk={talk} />
 		</Stage>
 	);

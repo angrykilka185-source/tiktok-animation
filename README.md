@@ -141,6 +141,23 @@ npx remotion render Golosovye3 out/golosovye-3.mp4
 ffmpeg -i out/golosovye-3.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k deliverables/golosovye-3-s-ozvuchkoy.mp4
 ```
 
+## «Голосовые из завтра», часть 4 «Подмена» (≈1,5 минуты, вариант «выключить телефон»)
+
+Код: `src/g4/` (композиция `Golosovye4`). Пересказ частей 1–3, заставка «ЧАСТЬ 4 · ПОДМЕНА · ВЫ ВЫБРАЛИ:
+1 — ВЫКЛЮЧИТЬ». Новое: ползунок «выключить» (`SlideOff`), отражение в чёрном экране (`Reflection`, моргает
+на секунду позже и улыбается на «Это не ты»), утренняя спальня (`Bedroom` с `day` и `clock`), класс через окно
+(`Classroom`, `ClassWindow`: двойник за твоей партой, Макс, учительница «К доске!»), школа снаружи
+(`SchoolFront`), коридор (`Corridor`), 47 пропущенных (`Missed`), рука для рукопожатия (`ProfileHand`, `Offer`).
+Звонок/экран вызова, двойник и тёплые крупные планы — из `src/g3/`. Счётчик на 5 предсказаний (4 ✓ и «?»).
+У вопроса в финале `holdAfter`, чтобы отсчёт «Три. Два. Один» не прилипал к вопросу.
+
+```bash
+python3 scripts/fit-voiceover.py assets/golosovye-4.mp3 --part g4
+python3 scripts/voice-env.py g4 g15
+npx remotion render Golosovye4 out/golosovye-4.mp4
+ffmpeg -i out/golosovye-4.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k deliverables/golosovye-4-s-ozvuchkoy.mp4
+```
+
 ## Новый сериал «Кнопка 13», часть 1
 
 Код: `src/k1/` (композиция `Knopka1`). Новая героиня — `Person kind="girl"`: рыжий высокий хвост с резинкой,

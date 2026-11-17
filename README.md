@@ -249,3 +249,16 @@ python3 scripts/fit-voiceover.py assets/voiceover-7.mp3 --part 7
 npx remotion render PapaVakhta7 out/papa-vakhta-7.mp4
 ffmpeg -i out/papa-vakhta-7.mp4 -c:v copy -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k deliverables/papa-vakhta-7-s-ozvuchkoy.mp4
 ```
+
+## «Папа вернулся с вахты» — все 7 частей одним фильмом (длинное видео, ≈6:50)
+
+`scripts/make-film.py` склеивает уже выложенные серии из `deliverables/` в один фильм без интерактива:
+часть 1 идёт с начала, у частей 2–7 вырезаны повторное вступление, пересказ, титул «ЧАСТЬ N» и строка
+«Вы выбрали: …», у частей 1–6 — экран выбора с отсчётом «три, два, один». Часть 7 — до финальной
+карточки «КОНЕЦ». Между частями — короткое затемнение и «бум», как в конце каждой серии. Границы
+записаны в скрипте в кадрах исходных видео (начало новой части — первый кадр без субтитра от «Вы выбрали»,
+конец — кадр перед белой вспышкой экрана выбора). Звук — two-pass loudnorm до −14 LUFS.
+
+```bash
+python3 scripts/make-film.py   # → deliverables/papa-vakhta-film-vse-chasti.mp4
+```

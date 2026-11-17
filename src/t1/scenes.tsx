@@ -373,7 +373,7 @@ export const S05: React.FC = () => {
 
 // a small phone in "dad"'s hand (hand-local coordinates)
 const DadPhone: React.FC = () => (
-	<g transform="rotate(50)">
+	<g transform="rotate(-105)">
 		<rect x={-38} y={-150} width={76} height={150} rx={12} fill="#15161a" />
 		<rect x={-32} y={-144} width={64} height={138} rx={8} fill="#8fd8ff" />
 		<path d="M -14,-80 L -3,-68 L 16,-94" stroke="#0b3a55" strokeWidth={8} fill="none" strokeLinecap="round" strokeLinejoin="round" />
@@ -386,7 +386,7 @@ export const S06: React.FC = () => {
 	const sub = pop(f, 33, 10); // «подписался»
 	return (
 		<AbsoluteFill style={{background: '#05060b', overflow: 'hidden'}}>
-			<DoorScene id="t1s6" zoom={lerp(f, 0, 90, 1.06, 1.14)} son={false} arm={{target: [105, -770], bend: 1}} item={<DadPhone />} glow={0.8 + 0.2 * Math.sin(f / 4)} />
+			<DoorScene id="t1s6" zoom={lerp(f, 0, 90, 1.06, 1.14)} son={false} arm={{target: [58, -719], bend: -1, ku: 0.85, kf: 0.35}} item={<DadPhone />} glow={0.8 + 0.2 * Math.sin(f / 4)} />
 			{sub > 0.001 && (
 				<div style={{position: 'absolute', left: 540, top: 240, transform: `translate(-50%,-50%) scale(${sub})`}}>
 					<div style={{display: 'flex', alignItems: 'center', gap: 16, background: CH_BLUE, borderRadius: 60, padding: '18px 40px', fontFamily: HEAVY, fontWeight: 900, fontSize: 52, color: '#fff', boxShadow: '0 12px 30px rgba(0,0,0,0.5)', whiteSpace: 'nowrap'}}>

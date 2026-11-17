@@ -56,7 +56,7 @@ const CUES: Cue[] = [
 	{at: s(8) + 222, file: 'whoosh', vol: 0.6},
 ];
 
-const SFX_GAIN = HAS_VOICE ? 0.55 : 1;
+const SFX_GAIN = HAS_VOICE ? 0.42 : 1; // a promo: the voice comes first
 const clampX = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 // a low drone under the whole video, like in the series: no dead silence between the phrases
 const BEDS: [number, number][] = [[0, TOTAL]];
@@ -68,7 +68,7 @@ export const SFXT1: React.FC<{r: Remap}> = ({r}) => (
 			const len = Math.round(r.fwd(b)) - from;
 			return (
 				<Sequence key={k} from={from} durationInFrames={len} name={`sfx drone bed ${k + 1}`}>
-					<Audio src={staticFile('sfx/drone.wav')} loop volume={(f) => 0.32 * interpolate(f, [0, 12, len - 12, len - 1], [0, 1, 1, 0], clampX)} />
+					<Audio src={staticFile('sfx/drone.wav')} loop volume={(f) => 0.2 * interpolate(f, [0, 12, len - 12, len - 1], [0, 1, 1, 0], clampX)} />
 				</Sequence>
 			);
 		})}

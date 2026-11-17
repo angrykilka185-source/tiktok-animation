@@ -70,11 +70,10 @@ const Room: React.FC<{id: string}> = ({id}) => (
 	</>
 );
 
-type Hero = {kind: Kind; id: string; x: number; tag: string; sub?: string; color: string; at: number};
+type Hero = {kind: Kind; id: string; x: number; tag: string; sub?: string; color: string; at: number; tagY: number};
 const HEROES: Hero[] = [
-	{kind: 'girl', id: 'hg', x: 255, tag: 'КНОПКА 13', color: '#21a19a', at: 8},
-	{kind: 'son', id: 'hs', x: 540, tag: 'ВАХТА', color: '#f0a032', at: 30},
-	{kind: 'teen', id: 'ht', x: 825, tag: 'ГОЛОСОВЫЕ', sub: 'ИЗ ЗАВТРА', color: '#cf4a3c', at: 52},
+	{kind: 'son', id: 'hs', x: 385, tag: 'ВАХТА', color: '#f0a032', at: 8, tagY: 480},
+	{kind: 'teen', id: 'ht', x: 695, tag: 'ГОЛОСОВЫЕ', sub: 'ИЗ ЗАВТРА', color: '#cf4a3c', at: 34, tagY: 380},
 ];
 const FEET = 1720;
 const HS = 0.92;
@@ -132,12 +131,12 @@ const HOPE: Record<Kind, Face> = {
 	mom: {},
 };
 
-// the hand of the girl from «Кнопка 13» (teal sleeve), pointing up-left
-const Finger: React.FC<{x: number; y: number; s?: number}> = ({x, y, s = 1}) => (
+// the hand of the son from «Вахта» (orange sleeve), pointing up-left
+const Finger: React.FC<{x: number; y: number; s?: number; sleeve?: string}> = ({x, y, s = 1, sleeve = '#f0a032'}) => (
 	<div style={{position: 'absolute', left: x, top: y, transform: `scale(${s}) rotate(-28deg)`, transformOrigin: '0 0'}}>
 		<div style={{position: 'absolute', left: -38, top: -20, width: 76, height: 300, borderRadius: 38, background: '#f2c3a0', boxShadow: 'inset -10px 0 0 rgba(0,0,0,0.08)'}} />
 		<div style={{position: 'absolute', left: -96, top: 220, width: 200, height: 260, borderRadius: 70, background: '#f2c3a0'}} />
-		<div style={{position: 'absolute', left: -140, top: 400, width: 280, height: 700, borderRadius: 90, background: '#21a19a'}} />
+		<div style={{position: 'absolute', left: -140, top: 400, width: 280, height: 700, borderRadius: 90, background: sleeve}} />
 	</div>
 );
 
@@ -188,7 +187,7 @@ export const S01: React.FC = () => {
 // 2. The heroes of all our stories gather to ask you one thing.
 export const S02: React.FC = () => {
 	const f = useCurrentFrame();
-	const cam = {s: lerp(f, 0, 150, 1.28, 1.34), cx: 540, cy: 1180};
+	const cam = {s: lerp(f, 0, 150, 1.42, 1.48), cx: 540, cy: 1170};
 	return (
 		<AbsoluteFill>
 			<Stage cam={cam} light={{glow: 0.35, vignette: 0.75}} bg="#2a1d14">
@@ -197,13 +196,13 @@ export const S02: React.FC = () => {
 			</Stage>
 			{HEROES.map((h) => {
 				const p = toScreen(cam, h.x, 0);
-				return <Tag key={h.id} x={p.x} y={450} text={h.tag} sub={h.sub} color={h.color} p={pop(f, h.at + 6, 10)} />;
+				return <Tag key={h.id} x={p.x} y={h.tagY} text={h.tag} sub={h.sub} color={h.color} p={pop(f, h.at + 6, 10)} />;
 			})}
 		</AbsoluteFill>
 	);
 };
 
-// 3. "Should we open our Telegram channel or not?" — the girl from «Кнопка 13» and a big button.
+// 3. "Should we open our Telegram channel or not?" — the son from «Вахта» and a big button.
 export const S03: React.FC = () => {
 	const f = useCurrentFrame();
 	const reach = lerp(f, 14, 64, 0, 1, Easing.out(Easing.cubic));
@@ -213,7 +212,7 @@ export const S03: React.FC = () => {
 		<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 40%, #1f4a5a 0%, #0c1c2a 55%, #050a12 100%)', overflow: 'hidden'}}>
 			<svg width={1080} height={1920} viewBox="0 0 1080 1920" style={{position: 'absolute', inset: 0}}>
 				<GlobalDefs />
-				<Bust kind="girl" id="t1s3g" x={540} y={760 + lerp(f, 0, 100, 10, 0)} scale={2.3} tilt={lerp(f, 30, 70, 0, -6)} face={{eyes: 'open', mouth: f > 60 ? 'smile' : 'o', brows: 'raised', look: [0, f > 40 ? 0.15 : 0.6], pupil: 0.9}} />
+				<Bust kind="son" id="t1s3s" x={540} y={760 + lerp(f, 0, 100, 10, 0)} scale={2.3} tilt={lerp(f, 30, 70, 0, -6)} face={{eyes: 'open', mouth: f > 60 ? 'smile' : 'o', brows: 'raised', look: [0, f > 40 ? 0.15 : 0.6], pupil: 0.9, blush: false}} />
 			</svg>
 			<Bubble x={560} y={330} text="ОТКРЫВАЕМ ТГК?" from={6} to={104} />
 			{/* the button on a steel plate */}
@@ -331,6 +330,47 @@ export const S04: React.FC = () => {
 	);
 };
 
+// 5. "We'll open it when there are seven hundred of us." — the subscriber goal.
+const GOAL = 700;
+export const S05: React.FC = () => {
+	const f = useCurrentFrame();
+	const k = lerp(f, 4, 62, 0, 1, Easing.out(Easing.cubic));
+	const done = f >= 62;
+	const burst = pop(f, 62, 8);
+	const shine = done ? 0.5 + 0.5 * Math.sin((f - 62) / 4) : 0;
+	const W = 860;
+	return (
+		<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 40%, #1d2a55 0%, #0a1024 55%, #04060d 100%)', overflow: 'hidden'}}>
+			{/* the two heroes peek in from the bottom, cheering */}
+			<svg width={1080} height={1920} viewBox="0 0 1080 1920" style={{position: 'absolute', inset: 0}}>
+				<GlobalDefs />
+				<Bust kind="son" id="t1s5s" x={260} y={1700 - 40 * burst} scale={1.6} face={{eyes: done ? 'happy' : 'wide', mouth: done ? 'open' : 'o', brows: 'raised', look: [0.4, -0.6], blush: false}} />
+				<Bust kind="teen" id="t1s5t" x={830} y={1720 - 40 * burst} scale={1.6} face={{eyes: done ? 'happy' : 'wide', mouth: done ? 'open' : 'o', brows: 'raised', look: [-0.4, -0.6], blush: false}} />
+			</svg>
+			<div style={{position: 'absolute', top: 200, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900}}>
+				<div style={{fontSize: 50, color: '#9fb3d9', letterSpacing: 6}}>ОТКРОЕМ ТГК НА</div>
+				<div style={{fontSize: 290, lineHeight: 1, color: done ? YELLOW : '#fff', transform: `scale(${done ? 1 + 0.12 * (1 - burst) + 0.03 * shine : 1})`, textShadow: done ? '0 12px 0 #6b4a00, 0 0 60px rgba(255,211,74,0.55)' : '0 10px 0 #000'}}>
+					{Math.round(GOAL * k)}
+				</div>
+				<div style={{fontSize: 70, color: '#fff', marginTop: -6, textShadow: '0 6px 0 #000'}}>ПОДПИСЧИКОВ</div>
+			</div>
+			{/* the bar with the lock at the goal */}
+			<div style={{position: 'absolute', left: (1080 - W) / 2, top: 820, width: W, height: 56, borderRadius: 28, background: 'rgba(255,255,255,0.12)', border: '4px solid rgba(255,255,255,0.25)', boxSizing: 'border-box'}}>
+				<div style={{height: '100%', width: `${100 * k}%`, borderRadius: 28, background: done ? YELLOW : CH_BLUE, boxShadow: done ? '0 0 30px rgba(255,211,74,0.7)' : 'none'}} />
+			</div>
+			<div style={{position: 'absolute', left: (1080 + W) / 2, top: 848, transform: `translate(-50%,-50%) scale(${1 + 0.25 * burst * (done ? 1 : 0)})`}}>
+				<div style={{width: 130, height: 130, borderRadius: 65, background: done ? YELLOW : '#1b2550', border: '6px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+					<svg width={70} height={70} viewBox="0 0 24 24">
+						<rect x={4} y={10} width={16} height={12} rx={2.5} fill={done ? '#111' : '#fff'} />
+						<path d={done ? 'M 7.5,10 V 7 a 4.5,4.5 0 0 1 9,0' : 'M 7.5,10 V 7 a 4.5,4.5 0 0 1 9,0 V 10'} stroke={done ? '#111' : '#fff'} strokeWidth={2.6} fill="none" transform={done ? 'translate(5,-2) rotate(20 12 7)' : undefined} />
+					</svg>
+				</div>
+				<div style={{position: 'absolute', top: 140, left: '50%', transform: 'translateX(-50%)', fontFamily: HEAVY, fontWeight: 900, fontSize: 38, color: done ? YELLOW : '#fff', whiteSpace: 'nowrap'}}>ТГК</div>
+			</div>
+		</AbsoluteFill>
+	);
+};
+
 // a small phone in "dad"'s hand (hand-local coordinates)
 const DadPhone: React.FC = () => (
 	<g transform="rotate(50)">
@@ -340,13 +380,13 @@ const DadPhone: React.FC = () => (
 	</g>
 );
 
-// 5. "And he, it seems, has already subscribed."
-export const S05: React.FC = () => {
+// 6. "And he, it seems, has already subscribed." (+1 to the counter)
+export const S06: React.FC = () => {
 	const f = useCurrentFrame();
 	const sub = pop(f, 46, 10);
 	return (
 		<AbsoluteFill style={{background: '#05060b', overflow: 'hidden'}}>
-			<DoorScene id="t1s5" zoom={lerp(f, 0, 90, 1.06, 1.14)} son={false} arm={{target: [105, -770], bend: 1}} item={<DadPhone />} glow={0.8 + 0.2 * Math.sin(f / 4)} />
+			<DoorScene id="t1s6" zoom={lerp(f, 0, 90, 1.06, 1.14)} son={false} arm={{target: [105, -770], bend: 1}} item={<DadPhone />} glow={0.8 + 0.2 * Math.sin(f / 4)} />
 			{sub > 0.001 && (
 				<div style={{position: 'absolute', left: 540, top: 240, transform: `translate(-50%,-50%) scale(${sub})`}}>
 					<div style={{display: 'flex', alignItems: 'center', gap: 16, background: CH_BLUE, borderRadius: 60, padding: '18px 40px', fontFamily: HEAVY, fontWeight: 900, fontSize: 52, color: '#fff', boxShadow: '0 12px 30px rgba(0,0,0,0.5)', whiteSpace: 'nowrap'}}>
@@ -357,11 +397,14 @@ export const S05: React.FC = () => {
 					</div>
 				</div>
 			)}
+			{f >= 52 && (
+				<div style={{position: 'absolute', left: 800, top: 330 - lerp(f, 52, 84, 0, 90), opacity: interpolate(f, [52, 58, 76, 86], [0, 1, 1, 0], clamp), fontFamily: HEAVY, fontWeight: 900, fontSize: 80, color: YELLOW, textShadow: '0 5px 0 #000'}}>+1</div>
+			)}
 		</AbsoluteFill>
 	);
 };
 
-// 6. "So — are we opening it?" — the three heroes, close, hopeful.
+// 7. "So — are we opening it?" — the heroes, close, hopeful.
 const GroupClose: React.FC<{f: number; q?: number}> = ({f, q = 0}) => (
 	<AbsoluteFill>
 		<Stage cam={{s: 1.5 * kick(f, 0.05), cx: 540, cy: 990}} light={{glow: 0.35, vignette: 0.8}} bg="#2a1d14">
@@ -374,13 +417,13 @@ const GroupClose: React.FC<{f: number; q?: number}> = ({f, q = 0}) => (
 	</AbsoluteFill>
 );
 
-export const S06: React.FC = () => {
+export const S07: React.FC = () => {
 	const f = useCurrentFrame();
 	return <GroupClose f={f} q={pop(f, 8, 9)} />;
 };
 
-// 7. The choice: 1 — yes, 2 — no; three, two, one.
-export const S07: React.FC = () => {
+// 8. The choice: 1 — yes, 2 — no; three, two, one.
+export const S08: React.FC = () => {
 	const f = useCurrentFrame();
 	const title = pop(f, 6, 10);
 	const c1 = pop(f, 8, 11);
@@ -429,10 +472,11 @@ export const S07: React.FC = () => {
 			<AbsoluteFill style={{background: 'rgba(3,4,10,0.72)'}} />
 			<div style={{position: 'absolute', top: 280, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, fontSize: 96, color: '#fff', transform: `scale(${title})`, textShadow: '0 8px 0 #6b4a00, 0 0 30px rgba(255,211,74,0.45)', lineHeight: 1.05}}>
 				ОТКРЫВАТЬ <span style={{color: YELLOW}}>ТГК?</span>
+				<div style={{fontSize: 40, color: YELLOW, marginTop: 14, letterSpacing: 2, textShadow: '0 4px 0 #000'}}>ОТКРОЕМ НА 700 ПОДПИСЧИКОВ</div>
 			</div>
-			{card(c1, 560, '1', 'ДА, ОТКРЫВАЙ!', '#3b82f6', 'хочу серии раньше всех', 1)}
-			<div style={{position: 'absolute', left: 0, width: '100%', top: 790, textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, fontSize: 44, color: YELLOW, opacity: c2}}>ИЛИ</div>
-			{card(c2, 860, '2', 'НЕТ, НЕ НАДО', '#e0342b', 'мне и тут страшно', 2)}
+			{card(c1, 600, '1', 'ДА, ОТКРЫВАЙ!', '#3b82f6', 'хочу серии раньше всех', 1)}
+			<div style={{position: 'absolute', left: 0, width: '100%', top: 830, textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, fontSize: 44, color: YELLOW, opacity: c2}}>ИЛИ</div>
+			{card(c2, 900, '2', 'НЕТ, НЕ НАДО', '#e0342b', 'мне и тут страшно', 2)}
 			{cur && !final && (
 				<div
 					style={{

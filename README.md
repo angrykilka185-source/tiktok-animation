@@ -279,3 +279,12 @@ python3 scripts/make-film.py   # → deliverables/papa-vakhta-film-vse-chasti.mp
 4:31 Часть 6 — Гараж
 5:41 Часть 7 — Финал
 ```
+
+Обложка фильма — `src/covers/PapaFilm.tsx` (тот же «папа» крупным планом, что в части 1, но со стеклянным
+взглядом в красном свете, и напуганный сын; «ЭТО НЕ ПАПА», плашка «ВСЕ 7 ЧАСТЕЙ»):
+
+```bash
+npx remotion still CoverPapaFilm out/cover/h.png    # 1280×720 — обложка YouTube
+npx remotion still CoverPapaFilmV out/cover/v.png   # 1080×1920 — вертикальная (TikTok)
+ffmpeg -i out/cover/h.png -q:v 2 deliverables/oblozhka-papa-film-youtube.jpg
+```

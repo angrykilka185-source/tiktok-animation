@@ -47,8 +47,9 @@ const LAYOUT: Record<'h' | 'v', L> = {
 };
 
 // the night hallway with the front door wide open; cold-warm stairwell light pours in behind "dad"
-const NightDoor: React.FC<{id: string; L: L}> = ({id, L}) => {
-	const {cx, top, k} = L.door;
+// (door = where the scene door lands: x 330..710, top 560, floor 1260; w × h = the picture it fills)
+export const NightDoor: React.FC<{id: string; door: {cx: number; top: number; k: number}; w: number; h: number}> = ({id, door, w, h}) => {
+	const {cx, top, k} = door;
 	const T = `translate(${cx - 520 * k},${top - 560 * k}) scale(${k})`;
 	return (
 		<g>
@@ -74,7 +75,7 @@ const NightDoor: React.FC<{id: string; L: L}> = ({id, L}) => {
 				<DoorFrame x={330} y={560} w={380} h={700} open={1} />
 			</g>
 			{/* night */}
-			<rect x={0} y={0} width={L.w} height={L.h} fill="#121a42" opacity={0.92} style={{mixBlendMode: 'multiply'}} />
+			<rect x={0} y={0} width={w} height={h} fill="#121a42" opacity={0.92} style={{mixBlendMode: 'multiply'}} />
 			{/* the doorway stays lit: stairwell light, a spill on the floor and a halo around the frame */}
 			<g transform={T}>
 				<rect x={330} y={560} width={338} height={700} fill={`url(#${id}-stair)`} />
@@ -114,7 +115,7 @@ const Cover: React.FC<{v: 'h' | 'v'}> = ({v}) => {
 						<stop offset="1" stopColor="#000" stopOpacity={0.7} />
 					</radialGradient>
 				</defs>
-				<NightDoor id={`${id}-door`} L={L} />
+				<NightDoor id={`${id}-door`} door={L.door} w={L.w} h={L.h} />
 				{/* "dad" stands in the doorway: dead stare straight at you, a wide grin, head slightly tilted */}
 				<g filter={`url(#${id}-red)`}>
 					<Person

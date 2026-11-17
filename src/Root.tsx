@@ -15,6 +15,7 @@ import {Golosovye4, RG4} from './g4/Main';
 import {Knopka1, RK1} from './k1/Main';
 import {Film1, RF1} from './f1/Main';
 import {CoverPapaFilm, CoverPapaFilmV} from './covers/PapaFilm';
+import {TgkOpros, RT1} from './t1/Main';
 import {FPS, H, SHOTS, W} from './timeline';
 import * as Scenes from './scenes';
 
@@ -34,6 +35,7 @@ export const RemotionRoot: React.FC = () => (
 		<Composition id="Golosovye4" component={Golosovye4} durationInFrames={RG4.total} fps={FPS} width={W} height={H} />
 		<Composition id="Knopka1" component={Knopka1} durationInFrames={RK1.total} fps={FPS} width={W} height={H} />
 		<Composition id="Film1" component={Film1} durationInFrames={RF1.total} fps={FPS} width={W} height={H} />
+		<Composition id="TgkOpros" component={TgkOpros} durationInFrames={RT1.total} fps={FPS} width={W} height={H} />
 		{/* covers for the long video (all parts as one film) */}
 		<Composition id="CoverPapaFilm" component={CoverPapaFilm} durationInFrames={1} fps={FPS} width={1280} height={720} />
 		<Composition id="CoverPapaFilmV" component={CoverPapaFilmV} durationInFrames={1} fps={FPS} width={W} height={H} />

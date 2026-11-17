@@ -288,3 +288,17 @@ npx remotion still CoverPapaFilm out/cover/h.png    # 1280×720 — обложк
 npx remotion still CoverPapaFilmV out/cover/v.png   # 1080×1920 — вертикальная (TikTok)
 ffmpeg -i out/cover/h.png -q:v 2 deliverables/oblozhka-papa-film-youtube.jpg
 ```
+
+## Видео-опрос «Открывать ТГК?» (≈30 секунд, герои всех сериалов)
+
+Код: `src/t1/` (композиция `TgkOpros`). Начинается как новая серия «Вахты» — «папа» в дверях (фон с обложки
+фильма, `NightDoor` из `src/covers/PapaFilm.tsx`), — и тут «СТОП», пауза. Дальше герои сериалов: девочка из
+«Кнопки 13», сын из «Вахты» и парень из «Голосовых из завтра» с плашками; девочка тянется к большой кнопке
+«ОТКРЫТЬ ТГК»; в телефоне парня — лента канала (новая серия раньше всех, опрос «куда пойдёт сюжет»); «папа» в
+дверях показывает телефон «ВЫ ПОДПИСАНЫ»; финал — выбор «1 — да, открывай / 2 — нет, не надо» с отсчётом.
+Текст для озвучки — `deliverables/tgk-opros.txt`.
+
+```bash
+python3 scripts/fit-voiceover.py assets/tgk-opros.mp3 --part t1
+npx remotion render TgkOpros out/tgk-opros.mp4
+```

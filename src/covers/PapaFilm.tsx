@@ -6,7 +6,7 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
 import {HEAVY} from '../components/Overlays';
-import {Bust} from '../components/Person';
+import {Bust, Person} from '../components/Person';
 import {Baseboard, DoorFrame, GlobalDefs, PlankFloor, Wallpaper} from '../components/Set';
 
 const RED = '#ff3b30';
@@ -16,7 +16,7 @@ type L = {
 	w: number;
 	h: number;
 	door: {cx: number; top: number; k: number}; // where the front door lands (scene door: x 330..710, top 560, floor 1260)
-	dad: {x: number; y: number; s: number};
+	dad: {x: number; y: number; s: number}; // y = feet (the head centre is 1024·s above)
 	son: {x: number; y: number; s: number};
 	text: React.CSSProperties;
 	big: number;
@@ -28,7 +28,7 @@ const LAYOUT: Record<'h' | 'v', L> = {
 		w: 1280,
 		h: 720,
 		door: {cx: 990, top: 34, k: 1.15},
-		dad: {x: 990, y: 300, s: 1.75},
+		dad: {x: 990, y: 222 + 1024 * 0.85, s: 0.85},
 		son: {x: 330, y: 572, s: 1.42},
 		text: {top: 64, left: 40, width: 760},
 		big: 140,
@@ -38,7 +38,7 @@ const LAYOUT: Record<'h' | 'v', L> = {
 		w: 1080,
 		h: 1920,
 		door: {cx: 640, top: 520, k: 1.9},
-		dad: {x: 640, y: 1010, s: 3.0},
+		dad: {x: 640, y: 813 + 1024 * 1.45, s: 1.45},
 		son: {x: 270, y: 1640, s: 2.2},
 		text: {top: 120, left: 0, width: 1080, textAlign: 'center'},
 		big: 190,
@@ -115,14 +115,15 @@ const Cover: React.FC<{v: 'h' | 'v'}> = ({v}) => {
 					</radialGradient>
 				</defs>
 				<NightDoor id={`${id}-door`} L={L} />
-				{/* "dad": dead stare straight at you, a wide grin, head slightly tilted */}
-				<g transform={`rotate(-4 ${L.dad.x} ${L.dad.y})`} filter={`url(#${id}-red)`}>
-					<Bust
+				{/* "dad" stands in the doorway: dead stare straight at you, a wide grin, head slightly tilted */}
+				<g filter={`url(#${id}-red)`}>
+					<Person
 						kind="dad"
 						id={`${id}dad`}
 						x={L.dad.x}
 						y={L.dad.y}
 						scale={L.dad.s}
+						headTilt={-6}
 						face={{eyes: 'stare', mouth: 'grin', look: [0, 0.15], pupil: 0.4, brows: 'flat', stubble: true, blush: false}}
 					/>
 				</g>

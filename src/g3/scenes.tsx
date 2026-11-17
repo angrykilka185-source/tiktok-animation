@@ -25,20 +25,20 @@ const level = (k: string, i: number) => {
 };
 
 // the bulb on the landing: mostly on, now and then it blinks
-const flick = (t: number, seed = 0) => {
+export const flick = (t: number, seed = 0) => {
 	const r = rnd(Math.floor(t / 2) * 7 + seed * 131);
 	return r < 0.1 ? 0.12 : r < 0.18 ? 0.55 : 1;
 };
 
-const DOUBLE_FACE: Face = {eyes: 'stare', pupil: 0.6, brows: 'flat', mouth: 'flat', blush: false};
-const PEEP = {x: 540, y: 820, r: 470};
+export const DOUBLE_FACE: Face = {eyes: 'stare', pupil: 0.6, brows: 'flat', mouth: 'flat', blush: false};
+export const PEEP = {x: 540, y: 820, r: 470};
 // camera for scenes seen through the door viewer (the round window is centred at PEEP)
-const pcam = (s: number, cx: number, cy: number): Cam => ({s, cx, cy, dy: PEEP.y - 960});
+export const pcam = (s: number, cx: number, cy: number): Cam => ({s, cx, cy, dy: PEEP.y - 960});
 const BAG_D = 'M -70,170 Q -95,60 -30,10 L -14,-12 Q 0,-26 14,-12 L 30,10 Q 95,60 70,170 Z';
 
 // ======================================================= scene pieces =====
 // the trash bag hanging from a hand at (x, y)
-const Bag: React.FC<{x: number; y: number; s?: number; rot?: number}> = ({x, y, s = 1, rot = 0}) => (
+export const Bag: React.FC<{x: number; y: number; s?: number; rot?: number}> = ({x, y, s = 1, rot = 0}) => (
 	<g transform={`translate(${x},${y}) rotate(${rot}) scale(${s})`}>
 		<path d={BAG_D} fill="#1d1f24" />
 		<path d="M -40,120 Q -30,60 -6,40" stroke="#3a3d45" strokeWidth={7} fill="none" />
@@ -46,7 +46,7 @@ const Bag: React.FC<{x: number; y: number; s?: number; rot?: number}> = ({x, y, 
 );
 
 // the landing outside your flat: the lift, the neighbours' door, the trash chute, one bare bulb
-const Landing: React.FC<{light: number; hatch?: number}> = ({light, hatch = 0}) => (
+export const Landing: React.FC<{light: number; hatch?: number}> = ({light, hatch = 0}) => (
 	<g>
 		<rect x={-400} y={-400} width={1880} height={1500} fill="#d9d6c6" />
 		<rect x={-400} y={1100} width={1880} height={380} fill="#5f8f74" />
@@ -97,12 +97,12 @@ const Landing: React.FC<{light: number; hatch?: number}> = ({light, hatch = 0}) 
 );
 
 // darkness of the landing (drawn over the people too)
-const Dark: React.FC<{light: number; base?: number}> = ({light, base = 0.1}) => (
+export const Dark: React.FC<{light: number; base?: number}> = ({light, base = 0.1}) => (
 	<rect x={-800} y={-800} width={2800} height={3800} fill="#04060c" opacity={Math.min(0.94, base + 0.85 * (1 - light))} />
 );
 
 // looking through the door viewer: a round fisheye window, the door around it
-const Peephole: React.FC<{children: React.ReactNode; dark?: number}> = ({children, dark = 0}) => (
+export const Peephole: React.FC<{children: React.ReactNode; dark?: number}> = ({children, dark = 0}) => (
 	<AbsoluteFill style={{background: '#0d0907'}}>
 		<AbsoluteFill style={{clipPath: `circle(${PEEP.r}px at ${PEEP.x}px ${PEEP.y}px)`}}>
 			<AbsoluteFill style={{transform: 'scale(1.06)', transformOrigin: `${PEEP.x}px ${PEEP.y}px`}}>{children}</AbsoluteFill>
@@ -155,7 +155,7 @@ export const FrontDoor: React.FC<{id: string; open: number; light?: number; chil
 };
 
 // warm close-up in the flat (wallpaper behind)
-const WarmClose: React.FC<{id: string; t: number; len: number; zoom?: [number, number]; dim?: number; children: React.ReactNode}> = ({id, t, len, zoom = [1, 1.08], dim = 0, children}) => (
+export const WarmClose: React.FC<{id: string; t: number; len: number; zoom?: [number, number]; dim?: number; children: React.ReactNode}> = ({id, t, len, zoom = [1, 1.08], dim = 0, children}) => (
 	<Stage cam={{s: lerp(t, 0, len, zoom[0], zoom[1]) * kick(t), cx: 540, cy: 960}} light={{glow: 0.25, vignette: 0.7}} bg="#cdb88f">
 		<Wallpaper id={`${id}wp`} x={-600} y={-600} w={2300} h={3200} base="#d9c7a0" line="#c8b48a" />
 		{children}
@@ -164,7 +164,7 @@ const WarmClose: React.FC<{id: string; t: number; len: number; zoom?: [number, n
 );
 
 // your door lock in close-up: the thumb-turn snaps shut
-const LockClose: React.FC<{t: number}> = ({t}) => {
+export const LockClose: React.FC<{t: number}> = ({t}) => {
 	const turn = lerp(t, 7, 12, 0, 90, Easing.out(Easing.cubic));
 	const [sx, sy] = shake(t, 11, 12, 9);
 	return (
@@ -187,7 +187,7 @@ const LockClose: React.FC<{t: number}> = ({t}) => {
 };
 
 // incoming call screen (phone screen content)
-const Handset: React.FC<{size: number; rot?: number}> = ({size, rot = 0}) => (
+export const Handset: React.FC<{size: number; rot?: number}> = ({size, rot = 0}) => (
 	<svg width={size} height={size} viewBox="0 0 24 24" style={{transform: `rotate(${rot}deg)`}}>
 		<path
 			d="M 6.6,10.8 C 8,13.6 10.4,16 13.2,17.4 L 15.4,15.2 C 15.7,14.9 16.1,14.8 16.4,14.9 C 17.5,15.3 18.7,15.5 20,15.5 C 20.6,15.5 21,15.9 21,16.5 L 21,20 C 21,20.6 20.6,21 20,21 C 10.6,21 3,13.4 3,4 C 3,3.4 3.4,3 4,3 L 7.5,3 C 8.1,3 8.5,3.4 8.5,4 C 8.5,5.3 8.7,6.5 9.1,7.6 C 9.2,7.9 9.1,8.3 8.9,8.6 Z"
@@ -195,7 +195,7 @@ const Handset: React.FC<{size: number; rot?: number}> = ({size, rot = 0}) => (
 		/>
 	</svg>
 );
-const CallScreen: React.FC<{f: number; ring?: number}> = ({f, ring = 0}) => (
+export const CallScreen: React.FC<{f: number; ring?: number}> = ({f, ring = 0}) => (
 	<div style={{position: 'absolute', inset: 0, background: 'linear-gradient(180deg, #23304f 0%, #0c1120 100%)', fontFamily: SANS, color: '#fff', overflow: 'hidden'}}>
 		<StatusBar time="23:42" />
 		<div style={{position: 'absolute', top: 150, width: '100%', textAlign: 'center'}}>
@@ -231,7 +231,7 @@ const CallScreen: React.FC<{f: number; ring?: number}> = ({f, ring = 0}) => (
 );
 
 // «slide to power off» bar on top of the phone screen
-const PowerSlider: React.FC<{p: number; f: number}> = ({p, f}) =>
+export const PowerSlider: React.FC<{p: number; f: number}> = ({p, f}) =>
 	p > 0.01 ? (
 		<div style={{position: 'absolute', left: 36, right: 36, top: 90, height: 110, borderRadius: 55, background: 'rgba(240,240,245,0.94)', display: 'flex', alignItems: 'center', padding: '0 12px', gap: 26, transform: `scale(${p})`, zIndex: 5, boxSizing: 'border-box', boxShadow: '0 10px 30px rgba(0,0,0,0.5)'}}>
 			<div style={{width: 86, height: 86, borderRadius: 43, background: '#ff3b30', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: `translateX(${Math.max(0, Math.sin(f / 5)) * 18}px)`}}>
@@ -245,7 +245,7 @@ const PowerSlider: React.FC<{p: number; f: number}> = ({p, f}) =>
 	) : null;
 
 // the dark phone in your hand at night (lock screen, no notification)
-const NightLock: React.FC = () => (
+export const NightLock: React.FC = () => (
 	<div style={{position: 'absolute', inset: 0, opacity: 0.55}}>
 		<LockScreen notif={0} time="23:42" date="суббота, 14 ноября" />
 	</div>

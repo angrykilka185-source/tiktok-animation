@@ -40,6 +40,7 @@ PATHS = {
     'g2': {'lines': 'src/g2/voice-lines.json', 'timeline': 'src/g2/timeline.ts', 'out': 'public/voice-g2', 'timings': 'src/g2/voice-timings.json', 'edit': 'src/g2/edit.json'},
     'g2b': {'lines': 'src/g2b/voice-lines.json', 'timeline': 'src/g2b/timeline.ts', 'out': 'public/voice-g2b', 'timings': 'src/g2b/voice-timings.json', 'edit': 'src/g2b/edit.json'},
     'g3': {'lines': 'src/g3/voice-lines.json', 'timeline': 'src/g3/timeline.ts', 'out': 'public/voice-g3', 'timings': 'src/g3/voice-timings.json', 'edit': 'src/g3/edit.json'},
+    'g4': {'lines': 'src/g4/voice-lines.json', 'timeline': 'src/g4/timeline.ts', 'out': 'public/voice-g4', 'timings': 'src/g4/voice-timings.json', 'edit': 'src/g4/edit.json'},
     'k1': {'lines': 'src/k1/voice-lines.json', 'timeline': 'src/k1/timeline.ts', 'out': 'public/voice-k1', 'timings': 'src/k1/voice-timings.json', 'edit': 'src/k1/edit.json'},
     'f1': {'lines': 'src/f1/voice-lines.json', 'timeline': 'src/f1/timeline.ts', 'out': 'public/voice-f1', 'timings': 'src/f1/voice-timings.json', 'edit': 'src/f1/edit.json'},
 }[PART]

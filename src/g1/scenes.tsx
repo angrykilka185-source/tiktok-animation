@@ -259,7 +259,8 @@ export const PhoneLight: React.FC<{id: string; x: number; y: number; r: number; 
 );
 
 // Your room at night, the bed seen from the side, the phone on the bedside table.
-export const Bedroom: React.FC<{f: number; id: string; glow: number; buzz: boolean; eyes: 'closed' | 'open' | 'wide'; kind?: 'son' | 'teen'; look?: [number, number]}> = ({f, id, glow, buzz, eyes, kind = 'teen', look = [0, 0.85]}) => {
+// day = morning (blue sky in the window, no night tint); clock = the bedside clock's digits
+export const Bedroom: React.FC<{f: number; id: string; glow: number; buzz: boolean; eyes: 'closed' | 'open' | 'wide'; kind?: 'son' | 'teen'; look?: [number, number]; day?: boolean; clock?: string}> = ({f, id, glow, buzz, eyes, kind = 'teen', look = [0, 0.85], day = false, clock = '23:41'}) => {
 	const jx = buzz ? Math.sin(f * 2.9) * 5 : 0;
 	const face: Face =
 		eyes === 'closed'
@@ -277,10 +278,11 @@ export const Bedroom: React.FC<{f: number; id: string; glow: number; buzz: boole
 				ГОЛ!
 			</text>
 			{/* window with the moon */}
-			<WindowBox x={560} y={440} w={360} h={420} sky="url(#skyNight)" curtain={false} />
-			<circle cx={830} cy={528} r={68} fill="#f3eecb" opacity={0.12} />
-			<circle cx={830} cy={528} r={40} fill="#f3eecb" />
-			{[
+			<WindowBox x={560} y={440} w={360} h={420} sky={day ? '#9fd3ff' : 'url(#skyNight)'} curtain={false} />
+			{day && <ellipse cx={680} cy={560} rx={70} ry={26} fill="#fff" opacity={0.85} />}
+			{!day && <circle cx={830} cy={528} r={68} fill="#f3eecb" opacity={0.12} />}
+			{!day && <circle cx={830} cy={528} r={40} fill="#f3eecb" />}
+			{!day && [
 				[610, 480],
 				[690, 560],
 				[640, 700],
@@ -291,7 +293,7 @@ export const Bedroom: React.FC<{f: number; id: string; glow: number; buzz: boole
 			))}
 			<path d="M 520,410 L 600,410 Q 580,650 600,900 L 520,900 Z" fill="#3b3f6e" />
 			<path d="M 960,410 L 880,410 Q 900,650 880,900 L 960,900 Z" fill="#3b3f6e" />
-			<path d="M 560,860 L 920,860 L 1060,1450 L 420,1450 Z" fill="#9fb7ff" opacity={0.06} />
+			<path d="M 560,860 L 920,860 L 1060,1450 L 420,1450 Z" fill={day ? '#fff3c4' : '#9fb7ff'} opacity={day ? 0.22 : 0.06} />
 			<PlankFloor y={1450} color="#3a2c2a" seam="#2a1f1e" />
 			{/* bed */}
 			<rect x={36} y={960} width={74} height={500} rx={16} fill="#6b4a33" />
@@ -323,9 +325,9 @@ export const Bedroom: React.FC<{f: number; id: string; glow: number; buzz: boole
 				<rect x={-34} y={-128} width={68} height={128} rx={10} fill="#111" />
 			</g>
 			{/* night */}
-			<rect x={-400} y={-400} width={1880} height={2800} fill={NIGHT} opacity={0.42} />
+			<rect x={-400} y={-400} width={1880} height={2800} fill={NIGHT} opacity={day ? 0.06 : 0.42} />
 			<text x={865} y={1150} fontSize={40} fontFamily={MONO} fontWeight={700} fill={RED} textAnchor="middle" style={{filter: 'drop-shadow(0 0 6px rgba(255,59,48,0.9))'}}>
-				23:41
+				{clock}
 			</text>
 			<g transform={`translate(${960 + jx},1172) rotate(8)`}>
 				<rect x={-28} y={-122} width={56} height={116} rx={7} fill={glow > 0 ? '#cfe2ff' : '#0d0f14'} />

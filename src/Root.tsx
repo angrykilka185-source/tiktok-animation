@@ -11,6 +11,7 @@ import {Golosovye1, RG1} from './g1/Main';
 import {Golosovye2, RG2} from './g2/Main';
 import {Golosovye2b, RG2B} from './g2b/Main';
 import {Golosovye3, RG3} from './g3/Main';
+import {Golosovye4, RG4} from './g4/Main';
 import {Knopka1, RK1} from './k1/Main';
 import {Film1, RF1} from './f1/Main';
 import {FPS, H, SHOTS, W} from './timeline';
@@ -29,6 +30,7 @@ export const RemotionRoot: React.FC = () => (
 		<Composition id="Golosovye2" component={Golosovye2} durationInFrames={RG2.total} fps={FPS} width={W} height={H} />
 		<Composition id="Golosovye2b" component={Golosovye2b} durationInFrames={RG2B.total} fps={FPS} width={W} height={H} />
 		<Composition id="Golosovye3" component={Golosovye3} durationInFrames={RG3.total} fps={FPS} width={W} height={H} />
+		<Composition id="Golosovye4" component={Golosovye4} durationInFrames={RG4.total} fps={FPS} width={W} height={H} />
 		<Composition id="Knopka1" component={Knopka1} durationInFrames={RK1.total} fps={FPS} width={W} height={H} />
 		<Composition id="Film1" component={Film1} durationInFrames={RF1.total} fps={FPS} width={W} height={H} />
 		{/* every shot on its own for quick previews */}

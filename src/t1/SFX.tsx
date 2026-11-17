@@ -1,7 +1,7 @@
 import React from 'react';
 import {Audio, Sequence, interpolate, staticFile} from 'remotion';
 import type {Remap} from '../edit';
-import {shotStart as s} from './timeline';
+import {shotStart as s, TOTAL} from './timeline';
 import {HAS_VOICE, VOICE} from './voice';
 
 type Cue = {at: number; file: string; vol?: number; len?: number};
@@ -10,9 +10,9 @@ const CUES: Cue[] = [
 	// 1 an "episode" starts: dad in the doorway → STOP (pause)
 	{at: 0, file: 'creak', vol: 0.5},
 	{at: 4, file: 'heart', vol: 0.4, len: 20},
-	{at: 22, file: 'switch', vol: 0.8},
-	{at: 22, file: 'glitch', vol: 0.55},
-	{at: 24, file: 'stamp', vol: 0.9},
+	{at: 20, file: 'switch', vol: 0.8},
+	{at: 20, file: 'glitch', vol: 0.55},
+	{at: 22, file: 'stamp', vol: 0.9},
 	// 2 the heroes gather
 	{at: s(2), file: 'whoosh', vol: 0.4},
 	{at: s(2) + 8, file: 'pop', vol: 0.5},
@@ -26,29 +26,29 @@ const CUES: Cue[] = [
 	// 4 the channel feed
 	{at: s(4), file: 'whoosh', vol: 0.35},
 	{at: s(4) + 14, file: 'message', vol: 0.5},
-	{at: s(4) + 76, file: 'message', vol: 0.5},
+	{at: s(4) + 64, file: 'message', vol: 0.5},
+	{at: s(4) + 80, file: 'tick', vol: 0.4},
 	{at: s(4) + 90, file: 'tick', vol: 0.4},
-	{at: s(4) + 100, file: 'tick', vol: 0.4},
 	// 5 the goal: 700 subscribers
 	{at: s(5), file: 'whoosh', vol: 0.35},
-	...[8, 16, 24, 32, 40, 48, 56].map((o) => ({at: s(5) + o, file: 'tick', vol: 0.3})),
-	{at: s(5) + 20, file: 'swell', vol: 0.4},
-	{at: s(5) + 62, file: 'pop', vol: 0.6},
-	{at: s(5) + 62, file: 'switch', vol: 0.5},
-	{at: s(5) + 64, file: 'applause', vol: 0.3, len: 50},
+	...[7, 13, 19, 25, 31, 37, 43].map((o) => ({at: s(5) + o, file: 'tick', vol: 0.3})),
+	{at: s(5) + 12, file: 'swell', vol: 0.4},
+	{at: s(5) + 47, file: 'pop', vol: 0.6},
+	{at: s(5) + 47, file: 'switch', vol: 0.5},
+	{at: s(5) + 49, file: 'applause', vol: 0.3, len: 40},
 	// 6 "dad" is already subscribed
 	{at: s(6), file: 'creak', vol: 0.45},
 	{at: s(6) + 2, file: 'heart_big', vol: 0.6},
-	{at: s(6) + 46, file: 'pop', vol: 0.5},
-	{at: s(6) + 48, file: 'whisper', vol: 0.3},
-	{at: s(6) + 54, file: 'pop', vol: 0.3},
+	{at: s(6) + 33, file: 'pop', vol: 0.5},
+	{at: s(6) + 35, file: 'whisper', vol: 0.3},
+	{at: s(6) + 41, file: 'pop', vol: 0.3},
 	// 7 so — are we opening it?
 	{at: s(7), file: 'whoosh', vol: 0.4},
-	{at: s(7) + 10, file: 'pop', vol: 0.5},
+	{at: s(7) + 16, file: 'pop', vol: 0.5},
 	// 8 the choice
 	{at: s(8), file: 'boom', vol: 0.9},
 	{at: s(8) + 8, file: 'pop', vol: 0.5},
-	{at: s(8) + 50, file: 'pop', vol: 0.5},
+	{at: s(8) + 76, file: 'pop', vol: 0.5},
 	{at: s(8) + 120, file: 'beep', vol: 0.8},
 	{at: s(8) + 150, file: 'beep', vol: 0.8},
 	{at: s(8) + 180, file: 'beep', vol: 0.8},
@@ -58,11 +58,8 @@ const CUES: Cue[] = [
 
 const SFX_GAIN = HAS_VOICE ? 0.55 : 1;
 const clampX = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
-// a low drone under the creepy bits (the opening and «он уже подписался»)
-const BEDS: [number, number][] = [
-	[0, s(2) + 6],
-	[s(6), s(7) + 4],
-];
+// a low drone under the whole video, like in the series: no dead silence between the phrases
+const BEDS: [number, number][] = [[0, TOTAL]];
 
 export const SFXT1: React.FC<{r: Remap}> = ({r}) => (
 	<>

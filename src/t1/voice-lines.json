@@ -12,6 +12,6 @@
     {"id": "t08", "shot": 8, "offset": 6, "nocap": true, "holdAfter": 0.6, "text": "Пиши в комментариях: один — да. Два — нет."},
     {"id": "t09", "shot": 8, "offset": 120, "nocap": true, "minDur": 0.8, "text": "Три."},
     {"id": "t10", "shot": 8, "offset": 150, "nocap": true, "minDur": 0.8, "text": "Два."},
-    {"id": "t11", "shot": 8, "offset": 180, "nocap": true, "minDur": 0.8, "text": "Один."}
+    {"id": "t11", "shot": 8, "offset": 180, "nocap": true, "minDur": 0.8, "holdAfter": 1.4, "text": "Один."}
   ]
 }

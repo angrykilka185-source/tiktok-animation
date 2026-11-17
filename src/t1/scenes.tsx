@@ -142,7 +142,7 @@ const Finger: React.FC<{x: number; y: number; s?: number; sleeve?: string}> = ({
 
 // ------------------------------------------------------------------- SHOTS ---
 // 1. It looks like a new episode: "dad" in the doorway … STOP (pause).
-const STOP = 22;
+const STOP = 20; // «Стоп»
 export const S01: React.FC = () => {
 	const f = useCurrentFrame();
 	const frozen = f >= STOP;
@@ -259,8 +259,8 @@ const Lock: React.FC<{size: number}> = ({size}) => (
 
 const ChannelScreen: React.FC<{f: number}> = ({f}) => {
 	const p1 = pop(f, 14, 11);
-	const p2 = pop(f, 76, 11);
-	const bar = lerp(f, 92, 116, 0, 1, Easing.out(Easing.cubic));
+	const p2 = pop(f, 64, 11);
+	const bar = lerp(f, 76, 100, 0, 1, Easing.out(Easing.cubic));
 	const opts = [
 		{n: '1', t: 'открыть дверь', v: 64},
 		{n: '2', t: 'не открывать', v: 36},
@@ -334,10 +334,10 @@ export const S04: React.FC = () => {
 const GOAL = 700;
 export const S05: React.FC = () => {
 	const f = useCurrentFrame();
-	const k = lerp(f, 4, 62, 0, 1, Easing.out(Easing.cubic));
-	const done = f >= 62;
-	const burst = pop(f, 62, 8);
-	const shine = done ? 0.5 + 0.5 * Math.sin((f - 62) / 4) : 0;
+	const k = lerp(f, 4, 47, 0, 1, Easing.out(Easing.cubic)); // 700 on «семьсот»
+	const done = f >= 47;
+	const burst = pop(f, 47, 8);
+	const shine = done ? 0.5 + 0.5 * Math.sin((f - 47) / 4) : 0;
 	const W = 860;
 	return (
 		<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 40%, #1d2a55 0%, #0a1024 55%, #04060d 100%)', overflow: 'hidden'}}>
@@ -383,7 +383,7 @@ const DadPhone: React.FC = () => (
 // 6. "And he, it seems, has already subscribed." (+1 to the counter)
 export const S06: React.FC = () => {
 	const f = useCurrentFrame();
-	const sub = pop(f, 46, 10);
+	const sub = pop(f, 33, 10); // «подписался»
 	return (
 		<AbsoluteFill style={{background: '#05060b', overflow: 'hidden'}}>
 			<DoorScene id="t1s6" zoom={lerp(f, 0, 90, 1.06, 1.14)} son={false} arm={{target: [105, -770], bend: 1}} item={<DadPhone />} glow={0.8 + 0.2 * Math.sin(f / 4)} />
@@ -397,8 +397,8 @@ export const S06: React.FC = () => {
 					</div>
 				</div>
 			)}
-			{f >= 52 && (
-				<div style={{position: 'absolute', left: 800, top: 330 - lerp(f, 52, 84, 0, 90), opacity: interpolate(f, [52, 58, 76, 86], [0, 1, 1, 0], clamp), fontFamily: HEAVY, fontWeight: 900, fontSize: 80, color: YELLOW, textShadow: '0 5px 0 #000'}}>+1</div>
+			{f >= 40 && (
+				<div style={{position: 'absolute', left: 800, top: 330 - lerp(f, 40, 58, 0, 70), opacity: interpolate(f, [40, 45, 54, 58], [0, 1, 1, 0], clamp), fontFamily: HEAVY, fontWeight: 900, fontSize: 80, color: YELLOW, textShadow: '0 5px 0 #000'}}>+1</div>
 			)}
 		</AbsoluteFill>
 	);
@@ -419,7 +419,7 @@ const GroupClose: React.FC<{f: number; q?: number}> = ({f, q = 0}) => (
 
 export const S07: React.FC = () => {
 	const f = useCurrentFrame();
-	return <GroupClose f={f} q={pop(f, 8, 9)} />;
+	return <GroupClose f={f} q={pop(f, 16, 9)} />;
 };
 
 // 8. The choice: 1 — yes, 2 — no; three, two, one.
@@ -427,7 +427,7 @@ export const S08: React.FC = () => {
 	const f = useCurrentFrame();
 	const title = pop(f, 6, 10);
 	const c1 = pop(f, 8, 11);
-	const c2 = pop(f, 50, 11);
+	const c2 = pop(f, 76, 11); // «Два — нет»
 	const nums = [
 		{n: '3', at: 120},
 		{n: '2', at: 150},

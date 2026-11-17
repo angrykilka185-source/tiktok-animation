@@ -38,12 +38,9 @@ MIN_HOLD = 18     # пауза между частями, кадров (мини
 FADE_OUT = 0.45   # затемнение
 FADE_IN = 0.2     # новая часть проявляется из чёрного
 BOOM_GAIN = 0.4   # «бум» на стыке (в сериях был ~0.5 от файла)
-# лёгкий файл ≈32 МБ (как обычные серии — такие скачиваются из приложения): два прохода x264 под точный размер;
-# плоская анимация хорошо жмётся, YouTube/TikTok всё равно перекодируют
-TARGET_MB = 32
-AUDIO_KBPS = 128
-OUT_RAW = 'out/papa-vakhta-film.mkv'   # промежуточный файл почти без потерь
-PASSLOG = 'out/papa-vakhta-film-2pass'
+# лёгкий файл (≈50 МБ): плоская анимация хорошо жмётся, YouTube/TikTok всё равно перекодируют
+X264 = ['-c:v', 'libx264', '-preset', 'slow', '-tune', 'animation', '-crf', '25', '-pix_fmt', 'yuv420p']
+OUT_RAW = 'out/papa-vakhta-film.mkv'
 OUT = D + 'papa-vakhta-film-vse-chasti.mp4'
 OUT_CHAPTERS = D + 'papa-vakhta-film-glavy.txt'
 
@@ -95,8 +92,7 @@ def main():
     for p, *_ in parts:
         cmd += ['-i', p]
     cmd += ['-i', 'public/sfx/boom.wav', '-filter_complex', ';'.join(fl), '-map', '[v]', '-map', '[a]',
-            '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '12', '-pix_fmt', 'yuv420p', '-r', str(FPS),
-            '-c:a', 'pcm_s24le', OUT_RAW]
+            *X264, '-r', str(FPS), '-c:a', 'pcm_s24le', OUT_RAW]
     chapters = '\n'.join(f'{s // FPS // 60}:{s // FPS % 60:02d} Часть {i + 1} — {name}'
                          for i, (s, (*_, name)) in enumerate(zip(starts, parts)))
     print(f'склейка: {n} частей, {t / FPS:.2f} с; паузы ' + ', '.join(f'{h / FPS:.2f}' for _, h in seams))
@@ -110,14 +106,8 @@ def main():
     m = json.loads(r.stderr[r.stderr.rindex('{'):r.stderr.rindex('}') + 1])
     af = (f"loudnorm=I=-14:TP=-1.5:LRA=11:measured_I={m['input_i']}:measured_TP={m['input_tp']}:"
           f"measured_LRA={m['input_lra']}:measured_thresh={m['input_thresh']}:offset={m['target_offset']}:linear=true")
-    # video bitrate for the target size (−1.5 % for the container)
-    vk = int(TARGET_MB * 1e6 * 8 * 0.985 / (t / FPS) / 1000) - AUDIO_KBPS
-    x264 = ['-c:v', 'libx264', '-preset', 'slow', '-tune', 'animation', '-b:v', f'{vk}k', '-pix_fmt', 'yuv420p',
-            '-passlogfile', PASSLOG]
-    print(f'кодирование: видео {vk} кбит/с в два прохода')
-    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', OUT_RAW, '-an', *x264, '-pass', '1', '-f', 'null', '-'], check=True)
-    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', OUT_RAW, *x264, '-pass', '2', '-af', af, '-ar', '48000',
-                    '-c:a', 'aac', '-b:a', f'{AUDIO_KBPS}k', '-movflags', '+faststart', OUT], check=True)
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', OUT_RAW, '-c:v', 'copy', '-af', af, '-ar', '48000',
+                    '-c:a', 'aac', '-b:a', '160k', '-movflags', '+faststart', OUT], check=True)
     with open(OUT_CHAPTERS, 'w') as fh:
         fh.write(chapters + '\n')
     print('готово:', OUT, f'({os.path.getsize(OUT) / 1e6:.1f} МБ), главы — {OUT_CHAPTERS}')

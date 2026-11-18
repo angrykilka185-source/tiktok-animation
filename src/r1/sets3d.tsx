@@ -347,8 +347,7 @@ export const BedroomBack: React.FC<{f: number; doorLight?: number}> = ({f, doorL
 // ------------------------------------------------------------------ the gang's «качалка» (a basement gym) ----
 // the end wall of a building with the iron door of the basement gym (art w × h, the door centred at the bottom):
 // plaster with bare bricks, a drainpipe, «КАЧАЛКА» painted above the door with a barbell, light under the door.
-// `signs` writes the choice on the two door leaves.
-export const KachalkaArt: React.FC<{w: number; h: number; inside?: number; signs?: number}> = ({w, h, inside = 1, signs = 0}) => {
+export const KachalkaArt: React.FC<{w: number; h: number; inside?: number}> = ({w, h, inside = 1}) => {
 	const dx = w / 2;
 	const dw = 420;
 	const dh = 640;
@@ -403,11 +402,6 @@ export const KachalkaArt: React.FC<{w: number; h: number; inside?: number; signs
 							<circle key={r} cx={lx + 16} cy={top + 40 + r * 100} r={6} fill="#2c3a32" />
 						))}
 						<path d={`M ${lx + 60},${top + 120} q 10,120 -6,260`} stroke="#7a4a2a" strokeWidth={14} opacity={0.35} fill="none" />
-						{signs > 0 && (
-							<text x={lx + dw / 4} y={top + dh * 0.42} textAnchor="middle" fontFamily={HEAVY} fontWeight={900} fontSize={sd < 0 ? 40 : 30} fill={sd < 0 ? '#ffd34a' : '#ff6a5f'} opacity={signs} transform={`rotate(${sd * 2} ${lx + dw / 4} ${top + dh * 0.42})`}>
-								{sd < 0 ? 'ПРИШИТЬСЯ' : 'НЕ ПРИШИТЬСЯ'}
-							</text>
-						)}
 					</g>
 				);
 			})}
@@ -420,12 +414,12 @@ export const KachalkaArt: React.FC<{w: number; h: number; inside?: number; signs
 // the качалка: the end wall with the door (z −1300, door at x), the step, a caged bulb above the door, its light.
 // Drawn in its OWN pass (Scene3D `far`, farBlur 0) — in one 3D context with the ground (which crosses behind the camera)
 // Chrome drops half of this big wall. The ground goes to the near pass: <Ground3D id time="night" />.
-export const KachalkaFar: React.FC<{f: number; x?: number; signs?: number}> = ({f, x = 1700, signs = 0}) => {
+export const KachalkaFar: React.FC<{f: number; x?: number}> = ({f, x = 1700}) => {
 	const flick = 0.85 + 0.15 * Math.sin(f * 1.7) * Math.sin(f * 0.37);
 	return (
 		<>
 			<Card3D x={x} y={0} z={-1300} w={3200} h={2000} res={2}>
-				<KachalkaArt w={3200} h={2000} signs={signs} />
+				<KachalkaArt w={3200} h={2000} />
 			</Card3D>
 			<Card3D x={x} y={0} z={-1240} w={560} h={36}>
 				<rect width={560} height={36} fill="#a39d90" />

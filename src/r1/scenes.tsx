@@ -2,7 +2,7 @@
 // Ты — Игорь Лавров, 13 лет, слабый; мама зовёт тебя «Игоречек», а Сазон из 8 «Б» подхватил это прозвище и травит
 // тебя (шапка в луже, двадцать копеек, синяк — три «обиды» в счётчике «ТЕРПЕНИЕ»). В районе боятся только Тяп-ляп;
 // Гвоздь из твоего подъезда предлагает пришиться: «Зашёл — значит, навсегда. В семь — у нашей качалки». В конце ты
-// стоишь у двери их качалки, а на створках — «ПРИШИТЬСЯ» и «НЕ ПРИШИТЬСЯ»: выбирают зрители (1 или 2).
+// стоишь у двери их качалки — и выбор, как в других сериях: «1 ПРИШИТЬСЯ / 2 НЕ ПРИШИТЬСЯ» (пиши 1 или 2).
 // Всё в «3D-камере» (2.5D): плоские 2D-слои на настоящей глубине (components/Scene3D.tsx), задний план размыт.
 // 23 shots on the timeline of src/r1/timeline.ts (= the voice, see scripts/fit-voiceover.py --part r1).
 import React from 'react';
@@ -13,11 +13,13 @@ import {Bust, Colors, Face, PersonProps} from '../components/Person';
 import {Wallpaper, WallClock} from '../components/Set';
 import {Box3D, Cam3, Card3D, Floor3D, project, Scene3D} from '../components/Scene3D';
 import * as G1 from '../g1/scenes';
+import * as G2 from '../g2/scenes';
 import {BOY_S, Figure3D, Ground3D, MAN_S, skyBg, Time, YardFar, YardNear} from './world3d';
 import {Avoska, Bedroom3D, BedroomBack, Briefcase, Cloakroom3D, CloakroomBack, HatArt, KachalkaFar, Puddle, SchoolFar, SchoolFenceArt} from './sets3d';
 import {SHOTS} from './timeline';
 
 const {YELLOW, RED} = G1;
+const {Finale} = G2;
 
 // ============================================================ people ======
 const IGOR: Colors = {top: '#2c3a66', topDark: '#222e52', pants: '#2c3a66', shoes: '#1a1a1e'};
@@ -1060,77 +1062,32 @@ export const S22: React.FC = () => {
 	);
 };
 
-// 23. Finale: the choice is written on the door — «ПРИШИТЬСЯ» on the left leaf, «НЕ ПРИШИТЬСЯ» on the right.
-// «Пришиться — и больше никогда не бояться? Или не пришиться — и остаться Игоречком?» 3 — 2 — 1, comments, next episode.
+// 23. Finale (as in the other series): «Пришиться — и больше никогда не бояться? Или не пришиться — и остаться
+// Игоречком?» — the two choice cards over the darkened door of the качалка, 3-2-1, «пиши 1 или 2», next episode.
 export const S23: React.FC = () => {
 	const f = useCurrentFrame();
-	const cam: Cam3 = {x: 1700, y: -300, z: lerp(f, 0, 300, 1835, 1870)};
-	const L = project(cam, 1595, -330, -1300);
-	const R = project(cam, 1805, -330, -1300);
-	const nums = [
-		{n: '3', at: 150},
-		{n: '2', at: 180},
-		{n: '1', at: 210},
-	];
-	const cur = [...nums].reverse().find((x) => f >= x.at);
-	const final = f >= 236;
-	const counting = f >= 150 && f < 236;
-	const hot = counting ? (Math.floor((f - 150) / 15) % 2 === 0 ? 1 : 2) : 0;
-	const endCard = interpolate(f, [252, 260], [0, 1], clamp);
-	const word = (p: {x: number; y: number}, idx: 1 | 2, at: number, lines: string[], sub: string, color: string) => {
-		const pp = pop(f, at, 11);
-		return (
-			<div style={{position: 'absolute', left: p.x, top: p.y, transform: `translate(-50%,-50%) rotate(${idx === 1 ? -3 : 3}deg) scale(${pp * (hot === idx ? 1.07 : 1)})`, textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, width: 340}}>
-				<div style={{display: 'inline-flex', width: 104, height: 104, borderRadius: 52, background: color, border: '6px solid #fff', color: '#fff', fontSize: 64, alignItems: 'center', justifyContent: 'center', boxShadow: hot === idx ? `0 0 40px ${color}` : 'none'}}>{idx}</div>
-				{lines.map((l) => (
-					<div key={l} style={{fontSize: 52, lineHeight: 1.02, color: hot === idx ? '#fff' : idx === 1 ? '#ffd34a' : '#ff7a6f', marginTop: 10, textShadow: '0 5px 0 rgba(0,0,0,0.6), 0 0 18px rgba(0,0,0,0.6)'}}>
-						{l}
-					</div>
-				))}
-				<div style={{fontSize: 26, color: '#f2efe6', marginTop: 8, textShadow: '0 3px 0 rgba(0,0,0,0.7)'}}>{sub}</div>
-			</div>
-		);
-	};
 	return (
-		<AbsoluteFill>
-			<Scene3D cam={cam} bg={skyBg('night')} far={<KachalkaFar f={f} />} farBlur={0}>
-				<Ground3D id="r1s23g" time="night" />
-			</Scene3D>
-			<AbsoluteFill style={{background: '#000', opacity: 0.35}} />
-			{vignette(0.6)}
-			<div style={{position: 'absolute', top: 250, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, fontSize: 86, color: '#fff', transform: `scale(${pop(f, 6, 10)})`, textShadow: '0 8px 0 #6b4a00, 0 0 30px rgba(255,211,74,0.45)'}}>
-				ЧТО <span style={{color: YELLOW}}>ВЫБЕРЕШЬ?</span>
-			</div>
-			{word({x: L.x, y: L.y}, 1, 10, ['ПРИШИТЬСЯ'], 'и больше не бояться', '#3b82f6')}
-			{word({x: R.x, y: R.y}, 2, 80, ['НЕ', 'ПРИШИТЬСЯ'], 'и остаться Игоречком', '#e0342b')}
-			{cur && !final && (
-				<div style={{position: 'absolute', left: 540, top: 1500, width: 200, height: 200, marginLeft: -100, borderRadius: 100, background: YELLOW, border: '8px solid #111', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: HEAVY, fontWeight: 900, fontSize: 140, color: '#111', transform: `scale(${pop(f, cur.at, 8) * interpolate(f, [cur.at + 22, cur.at + 30], [1, 0.6], clamp)})`}}>
-					{cur.n}
-				</div>
-			)}
-			{final && (
-				<div style={{position: 'absolute', left: 40, width: 1000, top: 1470, textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, transform: `scale(${pop(f, 236, 9)})`}}>
-					<div style={{fontSize: 96, color: YELLOW, textShadow: '0 6px 0 #000'}}>ВЫБИРАЙ!</div>
-					<div style={{fontSize: 44, color: '#fff', textShadow: '0 4px 0 #000', marginTop: 6}}>ПИШИ 1 ИЛИ 2 В КОММЕНТАРИЯХ</div>
-				</div>
-			)}
-			{endCard > 0 && (
-				<AbsoluteFill style={{opacity: endCard, background: 'radial-gradient(circle at 50% 42%, #1d2a55 0%, #0a1024 55%, #04060d 100%)'}}>
-					<div style={{position: 'absolute', top: 500, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900}}>
-						<div style={{fontSize: 40, letterSpacing: 8, color: YELLOW}}>ТЫ С КАКОГО РАЙОНА?</div>
-						<div style={{fontSize: 190, lineHeight: 1, color: '#fff', marginTop: 18, transform: `scale(${pop(f, 254, 10)})`}}>СЕРИЯ 2</div>
-						<div style={{fontSize: 56, color: RED, marginTop: 8}}>СКОРО</div>
-						<div style={{display: 'inline-block', marginTop: 50, background: YELLOW, color: '#111', borderRadius: 18, padding: '10px 30px', fontSize: 38}}>ПИШИ 1 ИЛИ 2 В КОММЕНТАРИЯХ</div>
-						<div style={{fontSize: 30, color: '#9fb0d6', marginTop: 30, letterSpacing: 1}}>
-							ОБИД: <span style={{color: '#ff6a5f'}}>3</span> · ДАЛЬШЕ — <span style={{color: YELLOW}}>ВЫБИРАЕШЬ ТЫ</span>
-						</div>
-						<div style={{display: 'inline-block', marginTop: 46, background: '#ff2d3d', borderRadius: 60, padding: '22px 70px', fontSize: 52, color: '#fff', boxShadow: '0 0 40px rgba(255,45,61,0.6)', transform: `scale(${1 + Math.sin(f / 5) * 0.04})`}}>
-							ПОДПИШИСЬ
-						</div>
-					</div>
+		<Finale
+			next="СЕРИЯ 2"
+			series="ТЫ С КАКОГО РАЙОНА?"
+			boxes={4}
+			boxLabel="ТЕРПЕНИЕ"
+			boxMark="cross"
+			opt1={{text: 'ПРИШИТЬСЯ', sub: 'и больше не бояться'}}
+			opt2={{text: 'НЕ ПРИШИТЬСЯ', sub: 'и остаться Игоречком'}}
+			tallyLine={
+				<>
+					ОБИД: <span style={{color: '#ff6a5f'}}>3</span> · ДАЛЬШЕ — <span style={{color: YELLOW}}>ВЫБИРАЕШЬ ТЫ</span>
+				</>
+			}
+			bg={
+				<AbsoluteFill>
+					<Scene3D cam={{x: 1700, y: -420, z: lerp(f, 0, 300, 900, 980)}} bg={skyBg('night')} far={<KachalkaFar f={f} />} farBlur={0}>
+						<Ground3D id="r1s23g" time="night" />
+					</Scene3D>
+					<AbsoluteFill style={{background: '#000', opacity: 0.55}} />
 				</AbsoluteFill>
-			)}
-			<AbsoluteFill style={{background: '#fff', opacity: lerp(f, 0, 10, 0.9, 0)}} />
-		</AbsoluteFill>
+			}
+		/>
 	);
 };

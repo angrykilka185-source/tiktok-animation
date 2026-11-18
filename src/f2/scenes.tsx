@@ -275,6 +275,20 @@ const DadInFilm: React.FC<{t: number; idp: string; knocks?: number[]; shout?: bo
 				<GlobalDefs />
 				<g transform={`translate(0,${-20 * push}) scale(${1 + 0.03 * push})`} style={{transformOrigin: '540px 960px'}}>
 					<Bust kind="dad" id={`${idp}d`} x={540} y={980} scale={2.6} face={{eyes: 'wide', pupil: 0.5, mouth: shout ? (Math.floor(t / 5) % 2 ? 'open' : 'o') : 'o', brows: 'worried', stubble: true, blush: false}} />
+					{/* his arms: from the shoulders out to the elbows and up to the palms (jacket sleeves; the right one in the half-shadow) */}
+					{[-1, 1].map((sd) => {
+						const sh = [540 + sd * 395, 1390];
+						const el = [540 + sd * 440, 1195 - 6 * push];
+						const wr = [540 + sd * 322, 1012 - 10 * push];
+						const c = sd < 0 ? '#33506e' : '#263c55';
+						return (
+							<g key={`arm${sd}`}>
+								<path d={`M ${sh[0]},${sh[1]} L ${el[0]},${el[1]}`} stroke={c} strokeWidth={132} strokeLinecap="round" />
+								<path d={`M ${el[0]},${el[1]} L ${wr[0]},${wr[1]}`} stroke={c} strokeWidth={114} strokeLinecap="round" />
+								<path d={`M ${wr[0] + (el[0] - wr[0]) * 0.18},${wr[1] + (el[1] - wr[1]) * 0.18} L ${wr[0] + (el[0] - wr[0]) * 0.3},${wr[1] + (el[1] - wr[1]) * 0.3}`} stroke={sd < 0 ? '#d9dde2' : '#b9bdc2'} strokeWidth={114} />
+							</g>
+						);
+					})}
 					{/* his palms flat on the screen */}
 					{[-1, 1].map((sd) => (
 						<g key={sd} transform={`translate(${540 + sd * 310},${930 - 10 * push})`}>

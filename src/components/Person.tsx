@@ -23,6 +23,7 @@ export type Face = {
 	stubble?: boolean;
 	blush?: boolean;
 	glasses?: boolean; // the «Голосовые» teen wears glasses unless false
+	bruise?: number; // 0..1 a purple bruise under the viewer-right eye
 };
 
 // ku / kf: visible length of the upper arm / forearm (0..1). Values < 1 fake
@@ -60,6 +61,7 @@ export type PersonProps = {
 	armsBehind?: boolean; // arms drawn behind the body (hands hidden behind the back)
 	plain?: boolean; // extras: a plain jacket / dress (no work-jacket stripes, no dress dots or apron); hoodie kinds: a plain jacket (no hood)
 	cap?: string; // a flat cap of this colour (the 70s)
+	knit?: string; // a knitted «петушок» hat of this colour (white stripe, pompom)
 	quilt?: boolean; // a quilted jacket (телогрейка): stitched bands across the torso
 	pioneer?: boolean; // a white shirt collar and a red pioneer tie (school uniform)
 };
@@ -436,6 +438,12 @@ export const Head: React.FC<{
 						<ellipse cx={hw * 0.55} cy={hh * 0.3} rx={hw * 0.2} ry={hh * 0.09} fill={PALETTE.blush} opacity={0.55} />
 					</>
 				)}
+				{!!face.bruise && (
+					<g opacity={face.bruise}>
+						<ellipse cx={ex * 1.05} cy={ey + hh * 0.1} rx={hw * 0.34} ry={hh * 0.24} fill="#8a5a9a" opacity={0.55} />
+						<ellipse cx={ex * 1.05} cy={ey + hh * 0.16} rx={hw * 0.24} ry={hh * 0.12} fill="#6a3a7a" opacity={0.45} />
+					</g>
+				)}
 				{eye(-ex)}
 				{eye(ex)}
 				{kind === 'teen' && face.glasses !== false && (
@@ -495,6 +503,20 @@ export const Cap: React.FC<{hw: number; hh: number; color: string; back?: boolea
 		</g>
 	);
 };
+
+// a knitted «петушок» hat (the 70s): a pointed dome with a white stripe, a ribbed cuff and a pompom (head coords)
+export const KnitHat: React.FC<{hw: number; hh: number; color: string}> = ({hw, hh, color}) => (
+	<g>
+		<path d={`M ${-hw * 1.1},${-hh * 0.3} C ${-hw * 1.16},${-hh * 1.2} ${-hw * 0.4},${-hh * 1.5} ${hw * 0.3},${-hh * 1.66} C ${hw * 0.86},${-hh * 1.36} ${hw * 1.16},${-hh * 0.95} ${hw * 1.1},${-hh * 0.3} Z`} fill={color} />
+		<path d={`M ${-hw * 1.13},${-hh * 0.74} Q 0,${-hh * 0.94} ${hw * 1.13},${-hh * 0.74} L ${hw * 1.12},${-hh * 0.6} Q 0,${-hh * 0.8} ${-hw * 1.12},${-hh * 0.6} Z`} fill="#f4f0e8" />
+		<path d={`M ${-hw * 1.16},${-hh * 0.46} Q 0,${-hh * 0.62} ${hw * 1.16},${-hh * 0.46} L ${hw * 1.13},${-hh * 0.2} Q 0,${-hh * 0.36} ${-hw * 1.13},${-hh * 0.2} Z`} fill={color} />
+		<path d={`M ${-hw * 1.16},${-hh * 0.46} Q 0,${-hh * 0.62} ${hw * 1.16},${-hh * 0.46} L ${hw * 1.13},${-hh * 0.2} Q 0,${-hh * 0.36} ${-hw * 1.13},${-hh * 0.2} Z`} fill="#000" opacity={0.18} />
+		{Array.from({length: 9}).map((_, k) => (
+			<line key={k} x1={-hw + k * hw * 0.25} y1={-hh * 0.5} x2={-hw + k * hw * 0.25} y2={-hh * 0.26} stroke="#000" strokeOpacity={0.15} strokeWidth={hw * 0.05} />
+		))}
+		<circle cx={hw * 0.34} cy={-hh * 1.66} r={hw * 0.24} fill="#f4f0e8" />
+	</g>
+);
 
 // ---------------------------------------------------------------------------
 // The signature look: a darker copy of the silhouette on the right half.
@@ -722,6 +744,7 @@ export const Person: React.FC<PersonProps> = (p) => {
 		<g transform={`translate(0,${headCY}) rotate(${p.headTilt ?? 0})`}>
 			<Head kind={p.kind} face={p.face} back={p.back} turn={p.headTurn} silhouette={sil} uid={p.id} colors={p.colors} />
 			{p.cap && <Cap hw={sp.hw} hh={sp.hh} color={sil ?? p.cap} back={p.back} turn={p.headTurn ?? 0} />}
+			{p.knit && <KnitHat hw={sp.hw} hh={sp.hh} color={sil ?? p.knit} />}
 		</g>
 	);
 

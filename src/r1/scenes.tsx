@@ -1,27 +1,36 @@
-// «Ты с какого района?» — серия 1 «Двадцать копеек», версия 2: «3D-камера» (2.5D). Плоские 2D-слои — дома, гаражи,
-// деревья, люди — стоят на настоящей глубине (components/Scene3D.tsx): камера ездит между ними, задний план размыт
-// (глубина резкости), земля и пол уходят в перспективу. Новый герой — рыжий мальчик «под горшок» с веснушками
-// (Person kind 'boy'), не похожий на сына из «Вахты». 1976 год, школьная форма с пионерским галстуком.
-// 13 shots on the timeline of src/r1/timeline.ts (= the voice, see scripts/fit-voiceover.py --part r1).
+// «Ты с какого района?» — серия 1 «Игоречек» (1976), версия 3: новый сюжет, ~1,5 минуты.
+// Ты — Игорь Лавров, 13 лет, слабый; мама зовёт тебя «Игоречек», а Сазон из 8 «Б» подхватил это прозвище и травит
+// тебя (шапка в луже, двадцать копеек, синяк — три «обиды» в счётчике «ТЕРПЕНИЕ»). В районе боятся только Тяп-ляп;
+// Гвоздь из твоего подъезда предлагает пришиться: «Зашёл — значит, навсегда». Финал: пришиться или остаться Игоречком.
+// Всё в «3D-камере» (2.5D): плоские 2D-слои на настоящей глубине (components/Scene3D.tsx), задний план размыт.
+// 19 shots on the timeline of src/r1/timeline.ts (= the voice, see scripts/fit-voiceover.py --part r1).
 import React from 'react';
 import {AbsoluteFill, Easing, interpolate, useCurrentFrame} from 'remotion';
 import {clamp, lerp, pop, seg} from '../anim';
 import {Bubble, HEAVY, NameTag} from '../components/Overlays';
-import {Bust, Colors, Face, Person, PersonProps} from '../components/Person';
-import {GlobalDefs, Wallpaper, WallClock} from '../components/Set';
+import {Bust, Colors, Face, PersonProps} from '../components/Person';
+import {Wallpaper, WallClock} from '../components/Set';
 import {Box3D, Cam3, Card3D, Floor3D, project, Scene3D} from '../components/Scene3D';
 import * as G1 from '../g1/scenes';
 import * as G2 from '../g2/scenes';
-import {BOY_S, FactoryArt, Facade, Figure3D, MAN_S, skyBg, Time, TreeArt, YardFar, YardNear} from './world3d';
+import {BOY_S, Figure3D, Ground3D, MAN_S, skyBg, Time, YardFar, YardNear} from './world3d';
+import {Avoska, Bedroom3D, BedroomBack, Briefcase, Cloakroom3D, CloakroomBack, HatArt, Puddle, SchoolFar, SchoolFenceArt} from './sets3d';
 
 const {YELLOW, RED} = G1;
 const {Finale} = G2;
 
 // ============================================================ people ======
-const BOY: Colors = {top: '#2c3a66', topDark: '#222e52', pants: '#2c3a66', shoes: '#1a1a1e'};
-// Санька: spiky fair hair (no glasses), the same school uniform
-const SANKA: Colors = {top: '#2c3a66', topDark: '#222e52', pants: '#2c3a66', shoes: '#1a1a1e', hair: '#e2bd62', skin: '#f2c3a0'};
-const SANKA_NIGHT: Colors = {...SANKA, top: '#5a4632', topDark: '#3e3022'};
+const IGOR: Colors = {top: '#2c3a66', topDark: '#222e52', pants: '#2c3a66', shoes: '#1a1a1e'};
+const IGOR_PJ: Colors = {top: '#a9bcd8', topDark: '#94a8c6'};
+const HAT = '#c8352c';
+// Сазон, 8 «Б»: big, dark hair, a mean grin; his two friends
+const SAZON: Colors = {top: '#3b4660', topDark: '#2c3549', pants: '#3b4660', shoes: '#151515', hair: '#2a1d16', skin: '#e8b48e'};
+const SAZ_FR: Colors[] = [
+	{top: '#3b4660', topDark: '#2c3549', pants: '#3b4660', shoes: '#151515', hair: '#8a5a32', skin: '#f0c09a'},
+	{top: '#46506a', topDark: '#353d52', pants: '#46506a', shoes: '#151515', hair: '#d0a860', skin: '#f2c3a0'},
+];
+const SAZ_FACE: Face = {eyes: 'narrow', mouth: 'grin', brows: 'angry', look: [0, 0], blush: false, glasses: false};
+const MOM_COAT: Colors = {top: '#6a5866', topDark: '#55465a', shoes: '#3a2a2a'};
 const GVOZD: Colors = {top: '#24201d', topDark: '#151210', pants: '#2b2d33', shoes: '#111216', hair: '#1f1a1a', skin: '#e3b08a'};
 const GANG: Colors[] = [
 	{top: '#3d4436', topDark: '#2c3127', pants: '#2b2d33', shoes: '#111216', hair: '#3a2a20'},
@@ -30,24 +39,29 @@ const GANG: Colors[] = [
 	{top: '#4a3d33', topDark: '#362c24', pants: '#2b2d33', shoes: '#111216', hair: '#8a5a32'},
 ];
 const GANG_CAP = ['#3a3a3a', '#4a3a2a', '#2f3640', '#3b3226'];
-const STRANGERS: Colors[] = [
-	{top: '#5a2a2a', topDark: '#431f1f', pants: '#2b2d33', shoes: '#111216', hair: '#2a1a12'},
-	{top: '#2a3a5a', topDark: '#1f2b43', pants: '#33302c', shoes: '#111216', hair: '#3a2a20'},
-	{top: '#3a4a2a', topDark: '#2b371f', pants: '#2b2d33', shoes: '#111216', hair: '#1f1a1a'},
-];
-const STRANGER_CAP = ['#2a2a2a', '#3a2a2a', '#22262c'];
-const HARD: Face = {eyes: 'narrow', mouth: 'grin', brows: 'angry', look: [0, 0.2], blush: false};
+const KID_HAIR = ['#6a4a2a', '#d9b46a', '#2a1d16', '#8a5a32', '#4a3020', '#b8863a'];
+const WARY: Face = {eyes: 'open', mouth: 'flat', brows: 'worried', look: [0, 0.1], blush: false};
 const SCARED: Face = {eyes: 'wide', pupil: 0.5, mouth: 'o', brows: 'worried', look: [0, 0], blush: false};
 const GV_FACE: Face = {eyes: 'narrow', mouth: 'smile', brows: 'flat', look: [0, 0.1], blush: false};
+const LAUGH = (f: number, k = 0): Face => ({eyes: 'happy', mouth: Math.floor((f + k * 3) / 5) % 2 ? 'open' : 'grin', brows: 'raised', look: [0, 0], blush: false, glasses: false});
 
 type P = Omit<PersonProps, 'x' | 'y'>;
-const boy = (id: string, extra: Partial<P> = {}): P => ({kind: 'boy', id, scale: BOY_S, plain: true, pioneer: true, ...extra});
+const igor = (id: string, extra: Partial<P> = {}): P => ({kind: 'boy', id, scale: BOY_S, plain: true, pioneer: true, colors: IGOR, ...extra});
+const sazon = (id: string, extra: Partial<P> = {}): P => ({kind: 'teen', id, scale: 0.54, plain: true, colors: SAZON, face: SAZ_FACE, ...extra});
+const sazFriend = (id: string, k: number, extra: Partial<P> = {}): P => ({kind: 'teen', id, scale: 0.52, plain: true, colors: SAZ_FR[k % 2], face: {...SAZ_FACE, mouth: 'smile'}, ...extra});
 const man = (id: string, colors: Colors, extra: Partial<P> = {}): P => ({kind: 'dad', id, scale: MAN_S, plain: true, colors, ...extra});
 const gvozd = (id: string, extra: Partial<P> = {}): P => man(id, GVOZD, {cap: '#2a2a2a', face: GV_FACE, ...extra});
+const gang = (id: string, k: number, extra: Partial<P> = {}): P => man(id, GANG[k % 4], {quilt: true, cap: GANG_CAP[k % 4], face: {eyes: 'narrow', mouth: 'flat', brows: 'flat', look: [0, 0.1], blush: false}, ...extra});
+// schoolkids: boys in the uniform, girls in brown dresses with white aprons
+const kid = (id: string, k: number, extra: Partial<P> = {}): P =>
+	k % 3 === 2
+		? {kind: 'mom', id, scale: 0.43, colors: {top: '#6a4632', topDark: '#55382a', shoes: '#2a1a14', hair: KID_HAIR[k % 6]}, ...extra}
+		: {kind: 'boy', id, scale: 0.5, plain: true, pioneer: k % 2 === 0, colors: {...IGOR, hair: KID_HAIR[k % 6], skin: k % 4 === 1 ? '#f0c09a' : '#f6cba8'}, ...extra};
+const MOM_FACE = (talk: boolean, f: number, extra: Partial<Face> = {}): Face => ({eyes: 'open', mouth: talk ? (Math.floor(f / 5) % 2 ? 'open' : 'smile') : 'smile', brows: 'raised', look: [0.6, 0], ...extra});
 
 // ============================================================ close-up art (inside cards) ==========
-const Coin: React.FC<{x: number; y: number; s: number; rot?: number}> = ({x, y, s, rot = 0}) => (
-	<g transform={`translate(${x},${y}) scale(${s}) rotate(${rot})`}>
+const Coin: React.FC<{x: number; y: number; s: number; rot?: number; flip?: number}> = ({x, y, s, rot = 0, flip = 1}) => (
+	<g transform={`translate(${x},${y}) scale(${s * flip},${s}) rotate(${rot})`}>
 		<circle r={100} fill="#c9ccd2" />
 		<circle r={88} fill="#dfe2e6" stroke="#aeb2ba" strokeWidth={6} />
 		<text y={20} fontSize={86} fontFamily={HEAVY} fontWeight={900} fill="#8a8e96" textAnchor="middle">
@@ -64,7 +78,7 @@ const Coin: React.FC<{x: number; y: number; s: number; rot?: number}> = ({x, y, 
 // your open palm, seen from above (navy sleeve, white cuff)
 const Palm: React.FC<{s: number; children?: React.ReactNode}> = ({s, children}) => (
 	<g transform={`scale(${s})`}>
-		<rect x={-130} y={170} width={260} height={500} rx={40} fill={BOY.top} />
+		<rect x={-130} y={170} width={260} height={500} rx={40} fill={IGOR.top} />
 		<rect x={-120} y={150} width={240} height={40} rx={12} fill="#e9e4d8" />
 		<ellipse cx={0} cy={60} rx={150} ry={150} fill="#f6cba8" />
 		{[-90, -30, 30, 90].map((fx, k) => (
@@ -74,13 +88,14 @@ const Palm: React.FC<{s: number; children?: React.ReactNode}> = ({s, children}) 
 		{children}
 	</g>
 );
-// somebody's hand from above (sleeve colour), fingers pointing down
-const HandDown: React.FC<{sleeve: string; skin?: string}> = ({sleeve, skin = '#e3b08a'}) => (
+// a fist with a sleeve, the knuckles pointing right (art centred on the knuckles)
+const Fist: React.FC<{sleeve: string}> = ({sleeve}) => (
 	<g>
-		<rect x={-80} y={-560} width={160} height={540} rx={36} fill={sleeve} />
-		<ellipse cx={0} cy={30} rx={92} ry={100} fill={skin} />
-		{[-46, -16, 14, 44].map((fx, k) => (
-			<rect key={k} x={fx - 15} y={60} width={30} height={84 - Math.abs(fx) * 0.4} rx={15} fill={skin} />
+		<rect x={-640} y={-70} width={560} height={140} rx={50} fill={sleeve} />
+		<rect x={-110} y={-76} width={40} height={152} rx={12} fill="#e9e4d8" />
+		<rect x={-80} y={-80} width={150} height={160} rx={56} fill="#e8b48e" />
+		{[-46, -14, 18, 50].map((y) => (
+			<rect key={y} x={30} y={y - 14} width={50} height={28} rx={14} fill="#d9a07a" />
 		))}
 	</g>
 );
@@ -98,8 +113,10 @@ const GvozdHead: React.FC<{id: string; t: number; s: number; face?: Face; tilt?:
 		</g>
 	</g>
 );
-const Lamp3D: React.FC<{x: number; z: number; on?: number}> = ({x, z, on = 1}) => (
+// a yard street lamp (art 700 × 1900, the lamp head at (565, 204))
+const Lamp3D: React.FC<{x: number; z: number; on?: number; cone?: number}> = ({x, z, on = 1, cone = 0}) => (
 	<Card3D x={x} y={0} z={z} w={700} h={1900}>
+		{cone > 0 && <path d="M 545,210 L 585,210 L 900,1900 L 230,1900 Z" fill="#ffe7a0" opacity={0.14 * cone * on} />}
 		<rect x={330} y={260} width={40} height={1640} fill="#6d6a62" />
 		<path d="M 350,280 Q 370,150 560,160" stroke="#6d6a62" strokeWidth={30} fill="none" />
 		<path d="M 510,150 L 620,150 L 600,200 L 530,200 Z" fill="#4f4d46" />
@@ -111,317 +128,134 @@ const Lamp3D: React.FC<{x: number; z: number; on?: number}> = ({x, z, on = 1}) =
 		)}
 	</Card3D>
 );
-
-// ============================================================== SHOTS =======
-// 1. 1976. You are thirteen. Your yard — хрущёвки, garages and the brick factory. (close-up → the camera cranes up)
-export const S01: React.FC = () => {
-	const f = useCurrentFrame();
-	const out = lerp(f, 40, 150, 0, 1, Easing.inOut(Easing.cubic));
-	const cam: Cam3 = {x: lerp(out, 0, 1, 0, 300), y: lerp(out, 0, 1, -380, -1150), z: lerp(out, 0, 1, 950, -1500), rx: lerp(out, 0, 1, 0, 8)};
-	const p = (at: number) => pop(f, at, 10);
-	const tag = (x: number, y: number, z: number) => project(cam, x, y, z);
-	return (
-		<AbsoluteFill>
-			<Scene3D cam={cam} bg={skyBg('day')} far={<YardFar f={f} />} farBlur={lerp(out, 0, 1, 7, 2.5)}>
-				<YardNear id="r1s1" />
-				<Figure3D x={0} z={0} p={boy('r1s1you', {backpack: true, breathe: f, face: {eyes: 'open', mouth: 'flat', brows: 'neutral', look: [0.3, 0], blush: false}})} />
-			</Scene3D>
-			<div style={{position: 'absolute', top: 380, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, opacity: interpolate(f, [4, 10, 40, 48], [0, 1, 1, 0], clamp)}}>
-				<div style={{fontSize: 220, lineHeight: 1, color: '#fff', textShadow: '0 10px 0 rgba(0,0,0,0.45)', transform: `scale(${p(4)})`}}>1976</div>
-				<div style={{fontSize: 46, letterSpacing: 12, color: YELLOW, textShadow: '0 4px 0 rgba(0,0,0,0.5)'}}>ОКТЯБРЬ</div>
-			</div>
-			{f >= 49 && f < 88 && <NameTag x={tag(0, -470, 0).x} y={tag(0, -470, 0).y - 90} title="ТЫ" sub="13 ЛЕТ" at={49} pin={50} color={YELLOW} to={88} />}
-			{f >= 103 && <NameTag x={Math.max(250, tag(-2600, -3000, -6400).x)} y={Math.max(260, tag(-2600, -3000, -6400).y)} title="ХРУЩЁВКИ" at={103} color="#e9e4d8" />}
-			{f >= 120 && <NameTag x={Math.min(800, tag(2300, -1100, -1500).x)} y={tag(2300, -1100, -1500).y} title="ГАРАЖИ" at={120} color="#9fb4c8" />}
-			{f >= 140 && <NameTag x={Math.min(690, Math.max(340, tag(1300, -8200, -20000).x))} y={Math.max(260, tag(1300, -8200, -20000).y)} title="КИРПИЧНЫЙ ЗАВОД" at={140} color="#e08a5a" />}
-		</AbsoluteFill>
-	);
-};
-
-// 2. Every day on the way from school: «Ты с какого района?» (the camera tracks you along the concrete fence)
-export const S02: React.FC = () => {
-	const f = useCurrentFrame();
-	const {i, t} = seg(f, [38, 76]);
-	const bx = [-1100, -300, 300][i] + Math.min(t, 30) * 9;
-	const cam: Cam3 = {x: bx + 160, y: -440, z: 1020, ry: -2};
-	const groups = [
-		[{x: -500, k: 0}],
-		[
-			{x: -700, k: 1},
-			{x: -380, k: 2},
-		],
-		[
-			{x: 470, k: 0},
-			{x: 760, k: 2},
-			{x: 1040, k: 1},
-		],
-	][i];
-	const lead = groups[groups.length - 1];
-	const b = project(cam, lead.x, -560, -1150);
-	const text = ['С КАКОГО?', 'ТЫ ЧЕЙ?', 'ТЫ С КАКОГО РАЙОНА?'][i];
-	return (
-		<AbsoluteFill>
-			<Scene3D cam={cam} bg={skyBg('day')} far={<YardFar f={f} />} farBlur={5}>
-				<YardNear id={`r1s2${i}`} fence garages={false} />
-				{groups.map((g, j) => (
-					<Figure3D key={j} x={g.x} z={-1150} p={man(`r1s2g${i}${j}`, STRANGERS[g.k], {quilt: true, cap: STRANGER_CAP[g.k], face: HARD, breathe: f + j * 9})} />
-				))}
-				<Figure3D x={bx} z={-450} p={boy(`r1s2you${i}`, {backpack: true, walk: t < 30 ? t * 0.42 : undefined, headTurn: 0.5, face: {eyes: 'open', mouth: 'flat', brows: i === 2 ? 'worried' : 'neutral', look: [0.8, 0], blush: false}})} />
-			</Scene3D>
-			<Bubble x={Math.min(700, Math.max(380, b.x))} y={b.y - 40} text={text} from={[0, 38, 76][i] + 8} to={[36, 74, 114][i]} tail="right" dark={i === 2} />
-		</AbsoluteFill>
-	);
-};
-
-// at the garages: you (back to a garage door), the three strangers, Гвоздь coming in, the strangers leaving
-const GarageAction: React.FC<{id: string; f: number; pockets?: number; leaving?: number; gv?: number; time?: Time}> = ({id, f, pockets = 0, leaving = 0, gv = -1, time = 'day'}) => (
-	<>
-		<YardNear id={id} time={time} />
-		{[
-			[1420, -1250],
-			[2060, -1220],
-			[2380, -1380],
-		].map(([x, z], k) => (
-			<Figure3D
-				key={k}
-				x={x + leaving * (1900 + k * 300)}
-				z={z}
-				p={man(`${id}st${k}`, STRANGERS[k], {
-					quilt: k !== 1,
-					cap: STRANGER_CAP[k],
-					face: HARD,
-					back: leaving > 0.05,
-					walk: leaving > 0.05 && leaving < 1 ? f * 0.5 + k : undefined,
-					breathe: f + k * 11,
-					armR: k === 0 && pockets > 0 && leaving === 0 ? {target: [200, -560], bend: -1} : undefined,
-				})}
-			/>
-		))}
-		<Figure3D x={1720} z={-1300} p={boy(`${id}you`, {face: SCARED, armL: {target: [-110, -380], bend: 1}, armR: {target: [110, -380], bend: -1}, breathe: f})} />
-		{pockets > 0 && (
-			<Card3D x={1720} y={-160} z={-1290} w={130} h={80} anchor="center">
-				<path d={`M 8,10 L 30,10 L 27,${10 + 38 * pockets} L 5,${10 + 32 * pockets} Z`} fill="#e9e4d8" />
-				<path d={`M 122,10 L 100,10 L 103,${10 + 38 * pockets} L 125,${10 + 32 * pockets} Z`} fill="#e9e4d8" />
-			</Card3D>
-		)}
-		{gv >= 0 && <Figure3D x={lerp(gv, 0, 1, 300, 1180)} z={-1180} p={gvozd(`${id}gv`, {walk: gv < 1 ? f * 0.45 : undefined, breathe: f, face: {...GV_FACE, look: [0.6, 0]}})} />}
-	</>
+// a pool of lamp light on the ground
+const LightPool: React.FC<{x: number; z: number; on?: number}> = ({x, z, on = 1}) => (
+	<Floor3D y={-1} zNear={z + 500} depth={1000} w={1400} x={x} res={1}>
+		<defs>
+			<radialGradient id={`lp${x}${z}`} cx={0.5} cy={0.5} r={0.5}>
+				<stop offset="0" stopColor="#ffe7a0" stopOpacity={0.55 * on} />
+				<stop offset="1" stopColor="#ffe7a0" stopOpacity={0} />
+			</radialGradient>
+		</defs>
+		<rect width={1400} height={1000} fill={`url(#lp${x}${z})`} />
+	</Floor3D>
 );
 
-// a close-up card in front of the blurred yard (palm, coin, hands)
-const CloseUp: React.FC<{cam: Cam3; f: number; time?: Time; children: React.ReactNode; blur?: number}> = ({cam, f, time = 'day', children, blur = 9}) => (
+// a close-up card in front of the blurred yard (palm, fist, faces)
+const CloseUp: React.FC<{cam: Cam3; f: number; time?: Time; children: React.ReactNode; blur?: number; far?: React.ReactNode; bg?: string}> = ({cam, f, time = 'day', children, blur = 9, far, bg}) => (
 	<Scene3D
 		cam={cam}
-		bg={skyBg(time)}
+		bg={bg ?? skyBg(time)}
 		far={
-			<>
-				<YardFar f={f} time={time} />
-				<YardNear id={`cu${time}`} time={time} />
-			</>
+			far ?? (
+				<>
+					<YardFar f={f} time={time} />
+					<YardNear id={`cu${time}`} time={time} />
+				</>
+			)
 		}
 		farBlur={blur}
 	>
 		{children}
 	</Scene3D>
 );
-
-// 3. Three strangers corner you at the garages, turn out your pockets, take the twenty kopecks.
-export const S03: React.FC = () => {
-	const f = useCurrentFrame();
-	const {i, t} = seg(f, [112]);
-	if (i === 0) {
-		return (
-			<Scene3D cam={{x: lerp(t, 0, 112, 1860, 1720), y: lerp(t, 0, 112, -420, -220), z: lerp(t, 0, 112, 1400, 1780), ry: lerp(t, 0, 112, -4, 2)}} bg={skyBg('day')} far={<YardFar f={t} />} farBlur={6}>
-				<GarageAction id="r1s3" f={t} pockets={interpolate(t, [80, 92], [0, 1], clamp)} />
-			</Scene3D>
-		);
-	}
-	const take = lerp(t, 22, 36, 0, 1, Easing.in(Easing.cubic));
-	return (
-		<CloseUp cam={{x: lerp(t, 0, 60, 1760, 1680), y: -180, z: 800, rx: 6}} f={t}>
-			<Card3D x={1720} y={-300} z={-120} w={800} h={1200} anchor="center" view={[-400, -600, 800, 1200]}>
-				<Palm s={0.95}>
-					<Coin x={0} y={take * -900} s={0.9} rot={take * 40} />
-				</Palm>
-				<g transform={`translate(${lerp(t, 0, 22, 700, 120) - take * 40},${lerp(t, 0, 22, -700, -260) - take * 900}) rotate(150)`}>
-					<rect x={-70} y={-520} width={140} height={420} rx={30} fill={STRANGERS[0].top} />
-					<ellipse cx={0} cy={-60} rx={88} ry={110} fill="#e9b892" />
-				</g>
-			</Card3D>
-		</CloseUp>
-	);
-};
-
-// 4. Гвоздь comes — the oldest of your yard. The strangers leave without looking back.
-export const S04: React.FC = () => {
-	const f = useCurrentFrame();
-	const gv = lerp(f, 13, 45, 0, 1, Easing.out(Easing.quad));
-	const cam: Cam3 = {x: lerp(f, 0, 151, 1600, 1450), y: -460, z: lerp(f, 0, 151, 1350, 1450), ry: lerp(f, 0, 151, 3, -1)};
-	const gp = project(cam, lerp(gv, 0, 1, 300, 1180), -620, -1180);
-	return (
-		<AbsoluteFill>
-			<Scene3D cam={cam} bg={skyBg('day')} far={<YardFar f={f} />} farBlur={5}>
-				<GarageAction id="r1s4" f={f} pockets={1} gv={gv} leaving={lerp(f, 95, 151, 0, 1)} />
-			</Scene3D>
-			{f >= 39 && <NameTag x={Math.min(760, Math.max(330, gp.x))} y={gp.y - 140} title="ГВОЗДЬ" sub="СТАРШИЙ С ТВОЕГО ДВОРА" at={39} color={YELLOW} />}
-		</AbsoluteFill>
-	);
-};
-
-// 5. Гвоздь gives the coin back: «Пришьёшься к нам — больше никто не тронет».
-export const S05: React.FC = () => {
-	const f = useCurrentFrame();
-	const {i, t} = seg(f, [44]);
-	if (i === 0) {
-		const drop = lerp(t, 4, 18, 0, 1, Easing.in(Easing.quad));
-		return (
-			<CloseUp cam={{x: 1700, y: -180, z: 800, rx: 6}} f={t}>
-				<Card3D x={1720} y={-300} z={-120} w={800} h={1200} anchor="center" view={[-400, -600, 800, 1200]}>
-					<Palm s={0.95}>
-						<Coin x={0} y={lerp(drop, 0, 1, -340, 0)} s={0.9} rot={lerp(drop, 0, 1, -60, 0)} />
-					</Palm>
-					<g transform={`translate(20,${lerp(t, 0, 14, -500, -420)})`}>
-						<HandDown sleeve={GVOZD.top ?? "#24201d"} />
-					</g>
-				</Card3D>
-			</CloseUp>
-		);
-	}
-	return (
-		<CloseUp cam={{x: lerp(t, 0, 74, 1080, 1020), y: -560, z: lerp(t, 0, 74, 560, 680)}} f={t} blur={8}>
-			<Card3D x={1000} y={-560} z={-300} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
-				<GvozdHead id="r1s5gv" t={t} s={1.9} />
-			</Card3D>
-		</CloseUp>
-	);
-};
-
-// 6. Evening behind the garages: the guys in caps and quilted jackets. Everybody looks at you.
-const DuskCircle: React.FC<{id: string; f: number; look?: number}> = ({id, f, look = 0}) => (
+// the school yard: ground, the fence with the gate (z −1700), the school far behind
+const SchoolYardFar: React.FC<{f: number}> = ({f}) => (
 	<>
-		<YardNear id={id} time="dusk" />
-		<Lamp3D x={600} z={-1250} />
-		{[
-			[1180, -900],
-			[1520, -1060],
-			[2280, -1060],
-			[2620, -900],
-		].map(([x, z], k) => (
-			<Figure3D
-				key={k}
-				x={x}
-				z={z}
-				p={man(`${id}g${k}`, GANG[k], {
-					quilt: true,
-					cap: GANG_CAP[k],
-					breathe: f + k * 13,
-					headTurn: look ? (1900 - x) / 1600 : k % 2 ? 0.6 : -0.6,
-					face: {eyes: 'narrow', mouth: 'flat', brows: 'flat', look: [look ? (1900 - x) / 900 : 0, 0.3 * look], blush: false},
-				})}
-			/>
-		))}
-		<Figure3D x={1900} z={-1140} p={gvozd(`${id}gv`, {breathe: f, face: {...GV_FACE, look: [0, 0.3 * look]}})} />
-		<Figure3D x={1900} z={-420} p={boy(`${id}you`, {back: true, breathe: f})} />
+		<SchoolFar f={f} />
 	</>
 );
-export const S06: React.FC = () => {
-	const f = useCurrentFrame();
-	const look = interpolate(f, [108, 118], [0, 1], clamp);
-	return (
-		<Scene3D cam={{x: lerp(f, 0, 144, 1780, 1900), y: -540, z: lerp(f, 0, 144, 700, 980), ry: lerp(f, 0, 144, 3, 0)}} bg={skyBg('dusk')} far={<YardFar f={f} time="dusk" />} farBlur={6}>
-			<DuskCircle id="r1s6" f={f} look={look} />
-		</Scene3D>
-	);
-};
-
-// 7. «Теперь ты наш. Правило первое: своих не сдают». (8 starts the same) — Гвоздь's hand on your shoulder
-const TwoShot: React.FC<{t: number}> = ({t}) => (
-	<CloseUp cam={{x: lerp(t, 0, 200, 1880, 1960), y: -540, z: 560}} f={t} time="dusk" blur={8}>
-		<Card3D x={1700} y={-640} z={-420} w={760} h={900} anchor="center" view={[-380, -450, 760, 900]}>
-			<GvozdHead id="r1s7gv" t={t} s={1.6} tilt={-4} />
-		</Card3D>
-		<Card3D x={2150} y={-470} z={-260} w={760} h={900} anchor="center" view={[-380, -450, 760, 900]}>
-			<Bust kind="boy" id="r1s7you" x={0} y={0} scale={1.6} colors={BOY} face={{eyes: 'wide', pupil: 0.6, mouth: 'flat', brows: 'raised', look: [-0.6, -0.2], blush: false}} />
-			<g transform={`translate(${lerp(t, 0, 12, -420, -180)},${lerp(t, 0, 12, 600, 300)}) rotate(-50)`}>
-				<rect x={-50} y={0} width={100} height={420} rx={26} fill={GVOZD.top} />
-				<ellipse cx={0} cy={-8} rx={66} ry={54} fill="#e3b08a" />
-			</g>
-		</Card3D>
-	</CloseUp>
-);
-export const S07: React.FC = () => <TwoShot t={useCurrentFrame()} />;
-
-// 8. «Правило второе: слово дал — держи». And you give your word: a handshake.
-export const S08: React.FC = () => {
-	const f = useCurrentFrame();
-	const {i, t} = seg(f, [74]);
-	if (i === 0) return <TwoShot t={f + 122} />;
-	const sh = Math.sin(t / 3) * 14 * interpolate(t, [4, 10, 30, 40], [0, 1, 1, 0], clamp);
-	return (
-		<CloseUp cam={{x: lerp(t, 0, 43, 1880, 1940), y: -500, z: 700}} f={t} time="dusk" blur={9}>
-			<Card3D x={1900} y={-500} z={-150} w={1300} h={800} anchor="center" view={[-650, -400, 1300, 800]}>
-				<g transform={`translate(0,${sh})`}>
-					<g transform="translate(-640,60) rotate(-12)">
-						<rect x={0} y={-70} width={560} height={140} rx={50} fill={BOY.top} />
-						<rect x={520} y={-74} width={50} height={148} rx={14} fill="#e9e4d8" />
-					</g>
-					<g transform="translate(650,10) rotate(12)">
-						<rect x={-600} y={-80} width={600} height={160} rx={50} fill={GVOZD.top} />
-					</g>
-					<ellipse cx={20} cy={-10} rx={130} ry={96} fill="#e3b08a" />
-					<ellipse cx={-20} cy={30} rx={110} ry={84} fill="#f6cba8" />
-					<path d="M -70,-20 Q -20,-60 50,-30" stroke="#c99a76" strokeWidth={10} fill="none" />
-				</g>
+const SchoolYardNear: React.FC<{id: string; fence?: boolean}> = ({id, fence = true}) => (
+	<>
+		<Ground3D id={`${id}g`} time="day" />
+		{fence && (
+			<Card3D x={0} y={0} z={-1700} w={10000} h={560}>
+				<SchoolFenceArt w={10000} h={560} gx0={4700} gx1={5300} />
 			</Card3D>
-		</CloseUp>
+		)}
+	</>
+);
+// a comic «ХА!» popping over a laughing kid
+const Ha: React.FC<{x: number; y: number; at: number; rot?: number; size?: number}> = ({x, y, at, rot = 0, size = 64}) => {
+	const f = useCurrentFrame();
+	if (f < at || f > at + 30) return null;
+	const p = pop(f, at, 8) * interpolate(f, [at + 22, at + 30], [1, 0], clamp);
+	return (
+		<div style={{position: 'absolute', left: x, top: y, transform: `translate(-50%,-50%) rotate(${rot}deg) scale(${p})`, fontFamily: HEAVY, fontWeight: 900, fontSize: size, color: '#fff', WebkitTextStroke: '0px', textShadow: '0 0 0 #000, 4px 4px 0 #111, -4px -4px 0 #111, 4px -4px 0 #111, -4px 4px 0 #111'}}>
+			ХА!
+		</div>
 	);
 };
+// a static plaque in the style of the rule plaques (does not fly to the counter)
+const RulePlaque: React.FC<{title: string; label: string; from: number; to: number; y?: number}> = ({title, label, from, to, y = 430}) => {
+	const f = useCurrentFrame();
+	if (f < from || f > to) return null;
+	const p = pop(f, from, 10) * interpolate(f, [to - 8, to], [1, 0], clamp);
+	return (
+		<div style={{position: 'absolute', left: 540, top: y, width: 860, transform: `translate(-50%,-50%) scale(${0.5 + 0.5 * p}) rotate(${(1 - p) * -4}deg)`, opacity: p, background: '#121214', border: '7px solid #e0342b', borderRadius: 26, padding: '26px 40px 30px', boxShadow: '0 0 0 4px rgba(0,0,0,0.6), 0 18px 40px rgba(0,0,0,0.45)', boxSizing: 'border-box', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900}}>
+			<div style={{fontSize: 38, letterSpacing: 10, color: '#ff9a2e'}}>{label}</div>
+			{title.split('\n').map((l) => (
+				<div key={l} style={{fontSize: 66, lineHeight: 1.08, color: '#fff', marginTop: 8}}>
+					{l}
+				</div>
+			))}
+		</div>
+	);
+};
+const vignette = (a = 0.5) => <AbsoluteFill style={{background: `radial-gradient(circle at 50% 45%, transparent 48%, rgba(0,0,0,${a}) 100%)`}} />;
 
-// 9. Mom asks where you were. You say nothing. You are «пацан» now. A real 3D kitchen: a box of floor, ceiling and
-// three walls, the table with an oilcloth by the window, the gas stove, the ЗИЛ fridge, the lamp hanging close to the
-// camera (it slides past fastest when the camera pushes in).
+// ============================================================ the kitchen (S03 morning, S09 evening) ======
 const KW = 650; // half the width of the kitchen
 const KITCHEN_TILE = {background: '#d8e4dc', backgroundImage: 'linear-gradient(#b7cbc1 3px, transparent 3px), linear-gradient(90deg, #b7cbc1 3px, transparent 3px)', backgroundSize: '60px 60px'};
-// the back wall of the kitchen — drawn in its own pass behind the room (see S09)
-const KitchenBack: React.FC<{id: string; f: number}> = ({id, f}) => (
-	<>
-		{/* back wall: wallpaper, tiles, the window at night with curtains, the clock */}
-		<Card3D x={0} y={0} z={-1200} w={KW * 2} h={900}>
-			<Wallpaper id={`${id}wp`} x={0} y={0} w={KW * 2} h={900} base="#c9d8c0" line="#b0c4a6" />
-			<rect x={0} y={560} width={KW * 2} height={340} fill="#d8e4dc" />
-			{Array.from({length: Math.floor((KW * 2) / 60)}).map((_, k) => (
-				<line key={`v${k}`} x1={(k + 1) * 60} y1={560} x2={(k + 1) * 60} y2={900} stroke="#b7cbc1" strokeWidth={3} />
-			))}
-			{Array.from({length: 5}).map((_, k) => (
-				<line key={`h${k}`} x1={0} y1={560 + (k + 1) * 60} x2={KW * 2} y2={560 + (k + 1) * 60} stroke="#b7cbc1" strokeWidth={3} />
-			))}
-			<rect x={150} y={150} width={340} height={360} fill="#5a4a3a" />
-			<rect x={166} y={166} width={308} height={328} fill="#0f1834" />
-			{[
-				[196, 330],
-				[260, 380],
-				[380, 330],
-				[420, 400],
-				[200, 430],
-			].map(([x, y], k) => (
-				<rect key={k} x={x} y={y} width={22} height={26} fill="#f2c96a" opacity={0.8} />
-			))}
-			<circle cx={410} cy={214} r={20} fill="#f4f0d8" opacity={0.85} />
-			<rect x={316} y={166} width={8} height={328} fill="#5a4a3a" />
-			<rect x={166} y={262} width={308} height={8} fill="#5a4a3a" />
-			<rect x={140} y={500} width={360} height={22} fill="#e9e4d8" />
-			<path d="M 128,138 Q 158,330 138,520 L 200,520 Q 214,330 190,138 Z" fill="#e8d6a6" />
-			<path d="M 512,138 Q 482,330 502,520 L 440,520 Q 426,330 450,138 Z" fill="#e8d6a6" />
-			<rect x={116} y={126} width={408} height={14} rx={7} fill="#7a6a5a" />
-			<g transform="translate(-260,-120) scale(0.9)">
-				<WallClock x={900} y={260} h={9} m={15} tick={f} />
-			</g>
-		</Card3D>
-	</>
+// the back wall — its own pass behind the room (Chrome drops parts of a far layer when the near planes of the same
+// 3D context cross behind the camera during a push-in)
+const KitchenBack: React.FC<{id: string; f: number; morning?: boolean}> = ({id, f, morning = false}) => (
+	<Card3D x={0} y={0} z={-1200} w={KW * 2} h={900}>
+		<Wallpaper id={`${id}wp`} x={0} y={0} w={KW * 2} h={900} base="#c9d8c0" line="#b0c4a6" />
+		<rect x={0} y={560} width={KW * 2} height={340} fill="#d8e4dc" />
+		{Array.from({length: Math.floor((KW * 2) / 60)}).map((_, k) => (
+			<line key={`v${k}`} x1={(k + 1) * 60} y1={560} x2={(k + 1) * 60} y2={900} stroke="#b7cbc1" strokeWidth={3} />
+		))}
+		{Array.from({length: 5}).map((_, k) => (
+			<line key={`h${k}`} x1={0} y1={560 + (k + 1) * 60} x2={KW * 2} y2={560 + (k + 1) * 60} stroke="#b7cbc1" strokeWidth={3} />
+		))}
+		<rect x={150} y={150} width={340} height={360} fill="#5a4a3a" />
+		{morning ? (
+			<>
+				<rect x={166} y={166} width={308} height={328} fill="#cfe0ec" />
+				<rect x={166} y={380} width={308} height={114} fill="#d6c9a8" />
+				{[190, 290, 390].map((x) => (
+					<rect key={x} x={x} y={300} width={60} height={90} fill="#c2b490" />
+				))}
+			</>
+		) : (
+			<>
+				<rect x={166} y={166} width={308} height={328} fill="#0f1834" />
+				{[
+					[196, 330],
+					[260, 380],
+					[380, 330],
+					[420, 400],
+					[200, 430],
+				].map(([x, y], k) => (
+					<rect key={k} x={x} y={y} width={22} height={26} fill="#f2c96a" opacity={0.8} />
+				))}
+				<circle cx={410} cy={214} r={20} fill="#f4f0d8" opacity={0.85} />
+			</>
+		)}
+		<rect x={316} y={166} width={8} height={328} fill="#5a4a3a" />
+		<rect x={166} y={262} width={308} height={8} fill="#5a4a3a" />
+		<rect x={140} y={500} width={360} height={22} fill="#e9e4d8" />
+		<path d="M 128,138 Q 158,330 138,520 L 200,520 Q 214,330 190,138 Z" fill="#e8d6a6" />
+		<path d="M 512,138 Q 482,330 502,520 L 440,520 Q 426,330 450,138 Z" fill="#e8d6a6" />
+		<rect x={116} y={126} width={408} height={14} rx={7} fill="#7a6a5a" />
+		<g transform="translate(-260,-120) scale(0.9)">
+			<WallClock x={900} y={260} h={morning ? 7 : 6} m={morning ? 30 : 10} tick={f} />
+		</g>
+	</Card3D>
 );
-const Kitchen3D: React.FC<{id: string; f: number; talk: boolean; face: Face}> = ({id, f, talk, face}) => (
+const Kitchen3D: React.FC<{id: string; lamp?: boolean}> = ({id, lamp = true}) => (
 	<>
-		{/* floor (linoleum) */}
 		<Floor3D y={0} zNear={700} depth={1900} w={KW * 2} res={1}>
 			<defs>
 				<pattern id={`${id}lin`} width={120} height={120} patternUnits="userSpaceOnUse">
@@ -432,24 +266,21 @@ const Kitchen3D: React.FC<{id: string; f: number; talk: boolean; face: Face}> = 
 			</defs>
 			<rect width={KW * 2} height={1900} fill={`url(#${id}lin)`} />
 		</Floor3D>
-		{/* ceiling, lit by the lamp */}
 		<Floor3D y={-900} zNear={700} depth={1900} w={KW * 2} res={1}>
 			<defs>
 				<radialGradient id={`${id}ceil`} cx={0.5} cy={0.55} r={0.65}>
-					<stop offset="0" stopColor="#efe6cf" />
+					<stop offset="0" stopColor={lamp ? '#efe6cf' : '#dcd8cc'} />
 					<stop offset="1" stopColor="#8d8676" />
 				</radialGradient>
 			</defs>
 			<rect width={KW * 2} height={1900} fill={`url(#${id}ceil)`} />
 		</Floor3D>
-		{/* side walls (wallpaper above, tiles below) */}
 		{[-1, 1].map((sd) => (
 			<Card3D key={sd} x={sd * (KW - 950)} y={0} z={700} w={1900} h={900} ry={sd * -90} html>
 				<div style={{position: 'absolute', inset: 0, background: `linear-gradient(${sd < 0 ? 90 : 270}deg, #b9c8b0, #a3b29a)`}} />
 				<div style={{position: 'absolute', left: 0, right: 0, top: 560, bottom: 0, ...KITCHEN_TILE, filter: 'brightness(0.9)'}} />
 			</Card3D>
 		))}
-		{/* the table by the window: the top (a real horizontal plane — you see the oilcloth from above) and the front */}
 		<Floor3D y={-230} zNear={-820} depth={380} w={400} x={-450} res={1}>
 			<defs>
 				<pattern id={`${id}oil`} width={80} height={80} patternUnits="userSpaceOnUse">
@@ -470,7 +301,6 @@ const Kitchen3D: React.FC<{id: string; f: number; talk: boolean; face: Face}> = 
 			<rect x={22} y={34} width={22} height={196} fill="#6a4a2a" />
 			<rect x={356} y={34} width={22} height={196} fill="#6a4a2a" />
 		</Card3D>
-		{/* the gas stove, against the back wall */}
 		<Card3D x={180} y={0} z={-1060} w={340} h={402} view={[0, 0, 440, 520]}>
 			<rect x={0} y={60} width={440} height={460} fill="#ecebe6" />
 			<rect x={0} y={30} width={440} height={40} fill="#d6d4cc" />
@@ -482,7 +312,6 @@ const Kitchen3D: React.FC<{id: string; f: number; talk: boolean; face: Face}> = 
 			))}
 			<path d="M 92,-10 Q 92,-60 132,-60 L 160,-60 Q 196,-60 196,-20 L 196,10 L 92,10 Z" fill="#7d8a96" />
 		</Card3D>
-		{/* the ЗИЛ fridge against the right wall — a real box, you see its side */}
 		<Box3D x={520} y={0} z={-760} w={240} h={560} d={260} side="#cfcdc5" sideOn="left">
 			<rect x={0} y={0} width={240} height={560} rx={30} fill="#f1efe8" />
 			<rect x={0} y={0} width={240} height={560} rx={30} fill="none" stroke="#d8d5cc" strokeWidth={6} />
@@ -491,206 +320,636 @@ const Kitchen3D: React.FC<{id: string; f: number; talk: boolean; face: Face}> = 
 				ЗИЛ
 			</text>
 		</Box3D>
-		{/* mom by the window, hands on hips */}
-		<Figure3D x={-110} z={-1000} p={{kind: 'mom', id: `${id}mom`, scale: 0.48, breathe: f, face: {eyes: 'open', mouth: talk ? (Math.floor(f / 5) % 2 ? 'open' : 'flat') : 'frown', brows: 'worried', look: [0.8, 0]}, armL: {target: [-90, -560], bend: 1}, armR: {target: [90, -560], bend: -1}}} />
-		<Figure3D x={280} z={-380} p={boy(`${id}you`, {breathe: f, face})} />
-		{/* the lamp: a cord and an orange shade, hanging close to the camera */}
 		<Card3D x={0} y={-600} z={-300} w={300} h={300}>
 			<line x1={150} y1={0} x2={150} y2={200} stroke="#3a3330" strokeWidth={5} />
-			<circle cx={150} cy={262} r={150} fill="#ffe7a0" opacity={0.16} />
+			{lamp && <circle cx={150} cy={262} r={150} fill="#ffe7a0" opacity={0.16} />}
 			<path d="M 98,200 L 202,200 L 250,274 L 50,274 Z" fill="#e2803a" />
 			<path d="M 98,200 L 202,200 L 214,218 L 86,218 Z" fill="#c4672a" />
-			<ellipse cx={150} cy={276} rx={40} ry={12} fill="#fff4cc" />
+			<ellipse cx={150} cy={276} rx={40} ry={12} fill={lamp ? '#fff4cc' : '#d8d0b8'} />
 		</Card3D>
 	</>
 );
-export const S09: React.FC = () => {
+
+// ============================================================== SHOTS =======
+// 1. 1976. You are Igor Lavrov, thirteen. Your yard — хрущёвки, garages and the brick factory. (close-up → crane up)
+export const S01: React.FC = () => {
 	const f = useCurrentFrame();
-	const push = lerp(f, 70, 104, 0, 1, Easing.inOut(Easing.cubic));
-	const cam: Cam3 = {x: lerp(push, 0, 1, lerp(f, 0, 70, -80, 30), 280), y: lerp(push, 0, 1, -430, -390), z: lerp(push, 0, 1, 640, 1050)};
-	const b = project(cam, -110, -560, -1000);
+	const out = lerp(f, 104, 200, 0, 1, Easing.inOut(Easing.cubic));
+	const cam: Cam3 = {x: lerp(out, 0, 1, 0, 300), y: lerp(out, 0, 1, -380, -1150), z: lerp(out, 0, 1, 950, -1500), rx: lerp(out, 0, 1, 0, 8)};
+	const tag = (x: number, y: number, z: number) => project(cam, x, y, z);
 	return (
 		<AbsoluteFill>
-			<Scene3D cam={cam} bg="#1a1520" far={<KitchenBack id="r1s9" f={f} />} farBlur={0}>
-				<Kitchen3D id="r1s9" f={f} talk={f >= 26 && f < 46} face={{eyes: 'open', mouth: 'flat', brows: 'flat', look: [push > 0.5 ? 0 : -0.8, 0.2], blush: false}} />
+			<Scene3D cam={cam} bg={skyBg('day')} far={<YardFar f={f} />} farBlur={lerp(out, 0, 1, 7, 2.5)}>
+				<YardNear id="r1s1" />
+				<Figure3D x={0} z={0} p={igor('r1s1you', {breathe: f, face: WARY, armR: {target: [150, -260], bend: -1}, itemR: <Briefcase />})} />
 			</Scene3D>
-			<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 45%, transparent 50%, rgba(0,0,0,0.5) 100%)'}} />
-			<Bubble x={Math.max(300, b.x + 40)} y={b.y - 60} text="ГДЕ ТЫ БЫЛ?" from={26} to={64} tail="left" />
+			<div style={{position: 'absolute', top: 380, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, opacity: interpolate(f, [4, 10, 40, 48], [0, 1, 1, 0], clamp)}}>
+				<div style={{fontSize: 220, lineHeight: 1, color: '#fff', textShadow: '0 10px 0 rgba(0,0,0,0.45)', transform: `scale(${pop(f, 4, 10)})`}}>1976</div>
+				<div style={{fontSize: 46, letterSpacing: 12, color: YELLOW, textShadow: '0 4px 0 rgba(0,0,0,0.5)'}}>ОКТЯБРЬ</div>
+			</div>
+			{f >= 52 && f < 112 && <NameTag x={540} y={tag(0, -470, 0).y - 110} title="ИГОРЬ ЛАВРОВ" sub="13 ЛЕТ" at={52} pin={60} color={YELLOW} to={112} />}
+			{f >= 132 && <NameTag x={Math.max(250, tag(-2600, -3000, -6400).x)} y={Math.max(260, tag(-2600, -3000, -6400).y)} title="ХРУЩЁВКИ" at={132} color="#e9e4d8" />}
+			{f >= 150 && <NameTag x={Math.min(800, tag(2300, -1100, -1500).x)} y={tag(2300, -1100, -1500).y} title="ГАРАЖИ" at={150} color="#9fb4c8" />}
+			{f >= 168 && <NameTag x={Math.min(690, Math.max(340, tag(1300, -8200, -20000).x))} y={Math.max(260, tag(1300, -8200, -20000).y)} title="КИРПИЧНЫЙ ЗАВОД" at={168} color="#e08a5a" />}
 		</AbsoluteFill>
 	);
 };
 
-// 10. A week later Гвоздь says: «Завтра идём на Заводских. Ты — с нами».
-export const S10: React.FC = () => {
+// 2. «И тебя здесь бьют каждый день» — a shove at the garages: the camera shakes, a flash
+export const S02: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [96]);
+	const at = 30;
+	const k = interpolate(f, [at, at + 5, at + 34], [0, 1, 0.6], clamp);
+	const shake = f >= at ? Math.sin((f - at) * 2.1) * 26 * Math.exp(-(f - at) / 10) : 0;
+	const hand = interpolate(f, [at - 8, at, at + 10, at + 24], [-900, -70, -170, -900], clamp);
+	return (
+		<AbsoluteFill>
+			<CloseUp cam={{x: 1700 + shake, y: -380 + shake * 0.4, z: lerp(f, 0, 78, 640, 760)}} f={f} blur={9}>
+				<Card3D x={1700 + 150 * k} y={-420} z={-220} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
+					<g transform={`rotate(${14 * k})`}>
+						<Bust kind="boy" id="r1s2you" x={0} y={0} scale={1.4} colors={IGOR} face={f < at ? {...WARY, look: [-0.7, 0]} : {...SCARED, eyes: 'closed'}} />
+					</g>
+				</Card3D>
+				<Card3D x={1700} y={-300} z={-120} w={1400} h={600} anchor="center" view={[-700, -300, 1400, 600]}>
+					<g transform={`translate(${hand},40) rotate(-8)`}>
+						<rect x={-700} y={-70} width={620} height={140} rx={50} fill={SAZON.top} />
+						<ellipse cx={-40} cy={0} rx={96} ry={84} fill="#e8b48e" />
+					</g>
+				</Card3D>
+			</CloseUp>
+			<AbsoluteFill style={{background: '#fff', opacity: interpolate(f, [at, at + 1, at + 7], [0, 0.6, 0], clamp)}} />
+			{vignette(0.55)}
+		</AbsoluteFill>
+	);
+};
+
+// 3. At home you are «Игоречек» — mom ruffles your hair in the morning kitchen
+export const S03: React.FC = () => {
+	const f = useCurrentFrame();
+	const cam: Cam3 = {x: lerp(f, 0, 90, 90, 130), y: -440, z: lerp(f, 0, 90, 800, 920)};
+	const reach = interpolate(f, [6, 18], [0, 1], clamp);
+	const rub = Math.sin(f / 3) * 30 * reach;
+	const m = project(cam, 0, -470, -650);
+	return (
+		<AbsoluteFill>
+			<Scene3D cam={cam} bg="#1a1520" far={<KitchenBack id="r1s3" f={f} morning />} farBlur={0}>
+				<Kitchen3D id="r1s3" lamp={false} />
+				<Figure3D
+					x={0}
+					z={-650}
+					p={{
+						kind: 'mom',
+						id: 'r1s3mom',
+						scale: 0.48,
+						breathe: f,
+						face: MOM_FACE(f > 10 && f < 50, f, {eyes: 'happy'}),
+						armR: reach > 0 ? {target: [lerp(reach, 0, 1, 190, 400 + rub), lerp(reach, 0, 1, -380, -930)], bend: 1} : undefined,
+					}}
+				/>
+				<Figure3D x={200} z={-600} p={igor('r1s3you', {breathe: f, headTilt: reach * 6, face: {eyes: 'closed', mouth: 'flat', brows: 'worried', blush: true}, armR: {target: [150, -260], bend: -1}, itemR: <Briefcase />})} />
+			</Scene3D>
+			<Bubble x={Math.max(300, m.x - 40)} y={m.y - 70} text="ИГОРЕЧЕК!" from={10} to={70} tail="left" />
+		</AbsoluteFill>
+	);
+};
+
+// 4. Every morning she walks you to school and shouts across the yard: «Игоречек, шапку надень!»
+export const S04: React.FC = () => {
+	const f = useCurrentFrame();
+	const {i, t} = seg(f, [104]);
 	if (i === 0) {
-		const cam: Cam3 = {x: lerp(t, 0, 96, 1280, 1360), y: -500, z: lerp(t, 0, 96, 900, 1020), rx: -4};
-		const lab = project(cam, 1300, -8200, -20000);
+		const cam: Cam3 = {x: lerp(t, 0, 104, -380, -140), y: -470, z: lerp(t, 0, 104, 950, 1250), ry: lerp(t, 0, 104, -3, 2)};
+		const turn = t > 58;
+		const m = project(cam, -560, -560, -1450);
 		return (
 			<AbsoluteFill>
-				<Scene3D cam={cam} bg={skyBg('day')} far={<YardFar f={t} />} farBlur={4}>
-					<YardNear id="r1s10" />
-					<Figure3D x={1050} z={-950} p={gvozd('r1s10gv', {breathe: t, headTurn: 0.4, face: {...GV_FACE, mouth: Math.floor(t / 5) % 2 && t >= 46 && t < 82 ? 'open' : 'smile', look: [0.5, -0.6]}, armR: {target: [520, -880], bend: 1}})} />
-					<Figure3D x={1600} z={-800} p={boy('r1s10you', {breathe: t, face: {eyes: 'wide', pupil: 0.6, mouth: 'flat', brows: 'worried', look: [-0.6, -0.2], blush: false}})} />
+				<Scene3D cam={cam} bg={skyBg('day')} far={<SchoolYardFar f={t} />} farBlur={5}>
+					<SchoolYardNear id="r1s4" />
+					{[
+						[-900, -2500, 0],
+						[700, -2700, 1],
+						[420, -2400, 2],
+						[-420, -2900, 3],
+						[1100, -2350, 4],
+					].map(([x, z, k]) => (
+						<Figure3D key={k} x={x} z={z} p={kid(`r1s4k${k}`, k, {breathe: t + k * 7, back: !turn || k === 3, face: turn ? LAUGH(t, k) : undefined})} />
+					))}
+					<Figure3D x={lerp(t, 0, 58, -120, 120)} z={lerp(t, 0, 58, -1950, -2250)} p={igor('r1s4you', {back: !turn, walk: !turn ? t * 0.45 : undefined, breathe: t, face: {...WARY, blush: true, brows: 'worried'}, armR: {target: [150, -260], bend: -1}, itemR: <Briefcase />})} />
+					<Figure3D x={-560} z={-1450} p={{kind: 'mom', id: 'r1s4mom', scale: 0.48, back: true, plain: true, colors: MOM_COAT, breathe: t, armR: {target: [260, -1020], bend: -1}}} />
 				</Scene3D>
-				{t >= 70 && <NameTag x={Math.min(740, Math.max(340, lab.x))} y={Math.max(280, lab.y + 60)} title="ЗАВОДСКИЕ" sub="СОСЕДНИЙ ДВОР" at={70} color={RED} />}
+				<Bubble x={Math.min(620, Math.max(470, m.x + 260))} y={m.y - 40} text="ИГОРЕЧЕК, ШАПКУ НАДЕНЬ!" from={30} to={104} tail="left" />
 			</AbsoluteFill>
 		);
 	}
-	// «Ты — с нами»: he points at you
+	// you pull the red hat on, red in the face; the yard giggles behind you
+	const on = lerp(t, 14, 34, 0, 1, Easing.inOut(Easing.cubic));
 	return (
-		<CloseUp cam={{x: 1060, y: -560, z: lerp(t, 0, 20, 560, 640)}} f={t} blur={8}>
-			<Card3D x={1000} y={-560} z={-300} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
-				<GvozdHead id="r1s10cu" t={t} s={1.9} face={{...GV_FACE, brows: 'angry'}} />
-			</Card3D>
-			<Card3D x={1260} y={-260} z={lerp(t, 0, 8, -100, 120)} w={400} h={900} anchor="center" view={[-200, -450, 400, 900]}>
-				<rect x={-80} y={0} width={160} height={600} rx={40} fill="#24201d" />
-				<ellipse cx={0} cy={-20} rx={90} ry={80} fill="#e3b08a" />
-				<rect x={-22} y={-200} width={44} height={170} rx={22} fill="#e3b08a" />
+		<CloseUp cam={{x: 100, y: -470, z: lerp(t, 0, 64, 650, 760)}} f={t} far={<><SchoolYardFar f={t} /><SchoolYardNear id="r1s4cu" /></>} blur={9}>
+			<Card3D x={100} y={-470} z={-200} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
+				<Bust kind="boy" id="r1s4cu" x={0} y={0} scale={1.4} colors={IGOR} face={{eyes: 'closed', mouth: 'flat', brows: 'worried', blush: true}} />
+				<g transform={`translate(0,${lerp(on, 0, 1, -330, 0)}) scale(1.4)`}>
+					<HatArt color={HAT} />
+				</g>
 			</Card3D>
 		</CloseUp>
 	);
 };
 
-// 11. Заводские is the next yard; Санька lives there — your best friend since the first grade.
-const ZavodFar: React.FC<{f: number}> = ({f}) => (
-	<>
-		<Card3D x={1200} y={0} z={-9000} w={6000} h={9000} res={5}>
-			<FactoryArt f={f} />
-		</Card3D>
-		<Box3D x={-1700} y={0} z={-4600} w={5000} h={4400} d={3600} side="#a39b88" res={3}>
-			<Facade w={5000} h={4400} color="#cbbfa6" seed={11} cols={7} />
-		</Box3D>
-		<Box3D x={4300} y={0} z={-6200} w={5000} h={4400} d={3600} side="#9a9382" sideOn="left" res={3}>
-			<Facade w={5000} h={4400} color="#c2b8a2" seed={17} cols={7} />
-		</Box3D>
-		{[
-			[-300, -2600, 4],
-			[2300, -3400, 5],
-		].map(([x, z, k]) => (
-			<Card3D key={k} x={x} y={0} z={z} w={1000} h={2600} res={2}>
-				<TreeArt f={f} seed={k} />
-			</Card3D>
-		))}
-	</>
-);
-const FirstGrade: React.FC<{t: number}> = ({t}) => (
-	<div style={{position: 'absolute', inset: 0, background: '#f2ede2', boxShadow: '0 30px 70px rgba(0,0,0,0.6)', padding: 34, boxSizing: 'border-box'}}>
-		<div style={{position: 'relative', width: 732, height: 700, overflow: 'hidden', background: '#bfb8a8', filter: 'grayscale(1) sepia(0.35) contrast(1.05)'}}>
-			<svg width={732} height={700} viewBox="0 0 732 700">
-				<GlobalDefs />
-				<rect x={0} y={0} width={732} height={420} fill="#d8d2c4" />
-				<rect x={0} y={420} width={732} height={280} fill="#a59e8e" />
-				<rect x={40} y={60} width={652} height={300} fill="#c4bcaa" />
-				{Array.from({length: 4}).map((_, k) => (
-					<rect key={k} x={80 + k * 160} y={110} width={90} height={160} fill="#8e877a" />
-				))}
-				<Person kind="boy" id="r1s11p0" x={230} y={760} scale={0.6} colors={BOY} plain face={{eyes: 'happy', mouth: 'smile', brows: 'raised', look: [0, 0], blush: false}} armR={{target: [70, -520], bend: -1}} />
-				<Person kind="teen" id="r1s11p1" x={500} y={760} scale={0.58} colors={SANKA} plain face={{eyes: 'happy', mouth: 'smile', brows: 'raised', look: [0, 0], blush: false, glasses: false}} armR={{target: [70, -520], bend: -1}} />
-				{[230, 500].map((x) => (
-					<g key={x} transform={`translate(${x + 50},${760 - 520 * 0.6 + 100}) scale(0.6)`}>
-						<rect x={-4} y={-260} width={8} height={300} fill="#4a5a3a" />
-						{[0, 1, 2, 3, 4].map((j) => (
-							<circle key={j} cx={j % 2 ? 14 : -14} cy={-250 + j * 40} r={24} fill="#e8e0d0" />
-						))}
-					</g>
-				))}
-			</svg>
-		</div>
-		<div style={{position: 'absolute', left: 34, bottom: 34, fontFamily: "'Segoe Print', 'Comic Sans MS', cursive", fontStyle: 'italic', fontWeight: 700, fontSize: 40, color: '#3a3a5a'}}>1 сентября 1970</div>
-		<div style={{position: 'absolute', left: 200, top: 74, transform: `scale(${pop(t, 8, 10)})`, background: '#111', border: `5px solid ${YELLOW}`, borderRadius: 14, padding: '4px 18px', fontFamily: HEAVY, fontWeight: 900, fontSize: 40, color: '#fff'}}>ТЫ</div>
-		<div style={{position: 'absolute', left: 410, top: 74, transform: `scale(${pop(t, 14, 10)})`, background: '#111', border: `5px solid ${RED}`, borderRadius: 14, padding: '4px 18px', fontFamily: HEAVY, fontWeight: 900, fontSize: 40, color: '#fff'}}>САНЬКА</div>
-	</div>
-);
-export const S11: React.FC = () => {
+// 5. Сазон from 8 «Б» hears it — and now the whole school calls you «Игоречек»
+export const S05: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [84]);
+	const {i, t} = seg(f, [72]);
 	if (i === 0) {
-		const cam: Cam3 = {x: lerp(t, 0, 84, -600, -1200), y: lerp(t, 0, 84, -800, -1150), z: lerp(t, 0, 84, -200, 700), rx: -6};
-		const win = project(cam, -2230, -1560, -4590);
+		const cam: Cam3 = {x: lerp(t, 0, 72, 640, 700), y: -470, z: lerp(t, 0, 72, 880, 1120)};
+		const s = project(cam, 700, -500, -700);
 		return (
 			<AbsoluteFill>
-				<Scene3D cam={cam} bg={skyBg('day')} far={<ZavodFar f={t} />} farBlur={lerp(t, 0, 84, 3, 1.5)}>
-					<YardNear id="r1s11" garages={false} />
-					<Card3D x={-2230} y={-1560} z={-4580} w={320} h={300} anchor="center">
-						<rect x={40} y={40} width={240} height={220} fill="#ffd27a" opacity={0.95} />
-						<rect x={40} y={40} width={240} height={220} fill="none" stroke={RED} strokeWidth={14} opacity={interpolate(t, [56, 64], [0, 1], clamp)} />
-					</Card3D>
+				<Scene3D cam={cam} bg={skyBg('day')} far={<SchoolYardFar f={t} />} farBlur={6}>
+					<SchoolYardNear id="r1s5" fence={false} />
+					<Figure3D x={420} z={-820} p={sazFriend('r1s5f0', 0, {breathe: t + 5, face: LAUGH(t, 1)})} />
+					<Figure3D x={980} z={-860} p={sazFriend('r1s5f1', 1, {breathe: t + 11, face: LAUGH(t, 2)})} />
+					<Figure3D x={700} z={-700} p={sazon('r1s5saz', {breathe: t, headTurn: -0.5, face: {...SAZ_FACE, look: [-0.8, 0]}})} />
 				</Scene3D>
-				{t >= 4 && <NameTag x={540} y={360} title="ЗАВОДСКИЕ" at={4} color={RED} />}
-				{t >= 56 && <NameTag x={Math.min(760, Math.max(320, win.x))} y={Math.max(480, win.y - 200)} title="САНЬКА" sub="ЖИВЁТ ЗДЕСЬ" at={56} pin={110} color={RED} />}
+				{t >= 18 && <NameTag x={Math.min(760, Math.max(330, s.x))} y={s.y - 150} title="САЗОН" sub="8 «Б»" at={18} color={RED} />}
 			</AbsoluteFill>
 		);
 	}
-	// the old photo on the table, the camera drifting over it
+	// the whole school: kids at every depth, «ИГОРЕЧЕК!» from all sides
+	const cam: Cam3 = {x: lerp(t, 0, 78, -100, 120), y: -440, z: lerp(t, 0, 78, 500, 1000), ry: lerp(t, 0, 78, 4, -3)};
+	const KIDS = [
+		[-520, -700, 0],
+		[380, -560, 1],
+		[-180, -1100, 2],
+		[640, -1300, 3],
+		[-760, -1500, 4],
+		[140, -1700, 5],
+		[-380, -2100, 6],
+		[880, -2000, 7],
+	];
+	const calls = [
+		{k: 1, at: 6},
+		{k: 0, at: 22},
+		{k: 3, at: 38},
+		{k: 2, at: 52},
+	];
 	return (
-		<Scene3D cam={{x: lerp(t, 0, 54, -60, 60), y: lerp(t, 0, 54, -40, 20), z: lerp(t, 0, 54, 100, 220)}} bg="radial-gradient(circle at 50% 45%, #3a2a1a 0%, #120c08 70%)">
-			<Card3D x={0} y={-270} z={-200} w={800} h={900} anchor="center" ry={lerp(t, 0, 54, -8, 6)} html>
-				<FirstGrade t={t} />
-			</Card3D>
-		</Scene3D>
-	);
-};
-
-// 12. At night — a knock on the window. It's Санька: «Я слышал… Ты правда теперь с ними?»
-// The window frame is close (sharp), Санька just behind the glass, the night yard far (blurred).
-const NightWindow: React.FC<{id: string; f: number; knock?: number; push?: number}> = ({id, f, knock = 0, push = 0}) => {
-	const cam: Cam3 = {x: lerp(push, 0, 1, -60, 190), y: -880, z: lerp(push, 0, 1, 250, 760)};
-	const talk = Math.floor(f / 6) % 2 === 1 && f > 66 && f < 120;
-	return (
-		<Scene3D cam={cam} bg={`radial-gradient(circle at 72% 22%, #f4f0d8 0 2.2%, rgba(244,240,216,0.15) 3%, transparent 6%), ${skyBg('night')}`} far={<YardFar f={f} time="night" />} farBlur={6}>
-			{/* Санька outside, pressed to the glass */}
-			<Card3D x={180} y={-900} z={-420} w={800} h={900} anchor="center" view={[-400, -450, 800, 900]}>
-				<Bust kind="teen" id={`${id}sanka`} x={0} y={60} scale={1.55} colors={SANKA_NIGHT} plain face={{eyes: 'wide', pupil: 0.6, mouth: talk ? 'open' : 'flat', brows: 'worried', look: [0, 0.1], blush: false, glasses: false}} />
-				{knock > 0 && (
-					<g transform={`translate(210,${-40 - 16 * Math.max(0, Math.sin(f * 1.4)) * knock})`}>
-						<ellipse cx={0} cy={0} rx={56} ry={64} fill="#f2c3a0" />
-						<rect x={-50} y={40} width={100} height={300} rx={30} fill={SANKA_NIGHT.top} />
-					</g>
-				)}
-			</Card3D>
-			{/* the wall of your room with the window opening, frame and sill */}
-			<Card3D x={0} y={-900} z={-160} w={2400} h={2600} anchor="center" view={[-1200, -1300, 2400, 2600]}>
-				<path d="M -1200,-1300 H 1200 V 1300 H -1200 Z M -420,-560 V 520 H 420 V -560 Z" fill="#1c2236" fillRule="evenodd" />
-				<rect x={-440} y={-580} width={880} height={1120} fill="none" stroke="#4a3a2a" strokeWidth={40} />
-				<rect x={-12} y={-560} width={24} height={1080} fill="#4a3a2a" />
-				<rect x={-420} y={-340} width={840} height={22} fill="#4a3a2a" />
-				<rect x={-420} y={-560} width={840} height={1080} fill="#9fb4ff" opacity={0.06} />
-				<rect x={-500} y={530} width={1000} height={60} fill="#6a5a4a" />
-			</Card3D>
-		</Scene3D>
-	);
-};
-export const S12: React.FC = () => {
-	const f = useCurrentFrame();
-	return (
-		<AbsoluteFill style={{background: '#0b0f1e'}}>
-			<NightWindow id="r1s12" f={f} knock={interpolate(f, [12, 16, 30, 36], [0, 1, 1, 0], clamp)} push={lerp(f, 30, 120, 0, 1, Easing.inOut(Easing.cubic))} />
-			<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 45%, transparent 40%, rgba(0,0,0,0.65) 100%)'}} />
+		<AbsoluteFill>
+			<Scene3D cam={cam} bg={skyBg('day')} far={<SchoolYardFar f={t} />} farBlur={6}>
+				<SchoolYardNear id="r1s5b" fence={false} />
+				{KIDS.map(([x, z, k]) => (
+					<Figure3D key={k} x={x} z={z} p={kid(`r1s5k${k}`, k, {breathe: t + k * 5, face: LAUGH(t, k), headTurn: x > 0 ? -0.4 : 0.4})} />
+				))}
+			</Scene3D>
+			{calls.map((c) => {
+				const [x, z] = KIDS[c.k];
+				const pp = project(cam, x, -520, z);
+				return <Bubble key={c.k} x={Math.min(700, Math.max(380, pp.x))} y={pp.y - 30} text="ИГОРЕЧЕК!" from={72 + c.at} to={72 + c.at + 34} tail={pp.x > 540 ? 'right' : 'left'} />;
+			})}
 		</AbsoluteFill>
 	);
 };
 
-// 13. Finale: go with your own — against your friend? Or warn Санька and break your word?
+// 6. At the break Сазон pulls the hat off your head and throws it into a puddle. Everybody laughs.
+const PUDDLE = {x: -260, z: -300};
+export const S06: React.FC = () => {
+	const f = useCurrentFrame();
+	const {i, t} = seg(f, [62]);
+	if (i === 0) {
+		const grab = interpolate(t, [6, 16], [0, 1], clamp);
+		const thrown = t >= 30;
+		const fly = lerp(t, 30, 62, 0, 1);
+		const hx = lerp(fly, 0, 1, 160, PUDDLE.x);
+		const hy = lerp(fly, 0, 1, -600, -40) - Math.sin(fly * Math.PI) * 260;
+		const hz = lerp(fly, 0, 1, -760, PUDDLE.z);
+		const cam: Cam3 = {x: lerp(t, 20, 62, 170, 30), y: -450, z: lerp(t, 0, 62, 800, 900)};
+		return (
+			<AbsoluteFill>
+				<Scene3D cam={cam} bg={skyBg('day')} far={<SchoolYardFar f={t} />} farBlur={6}>
+					<SchoolYardNear id="r1s6" fence={false} />
+					<Puddle x={PUDDLE.x} z={PUDDLE.z} />
+					{[
+						[-560, -1200, 0],
+						[640, -1300, 1],
+						[860, -900, 2],
+					].map(([x, z, k]) => (
+						<Figure3D key={k} x={x} z={z} p={kid(`r1s6k${k}`, k + 3, {breathe: t + k * 9, face: thrown ? LAUGH(t, k) : undefined})} />
+					))}
+					<Figure3D x={300} z={-700} p={igor('r1s6you', {breathe: t, knit: grab < 0.6 ? HAT : undefined, face: grab > 0.5 ? SCARED : WARY, headTilt: grab * -6})} />
+					<Figure3D
+						x={40}
+						z={-760}
+						p={sazon('r1s6saz', {
+							breathe: t,
+							face: {...SAZ_FACE, look: [0.7, -0.2]},
+							armR: thrown ? {target: [lerp(fly, 0, 0.3, 300, -200), -760], bend: 1} : {target: [lerp(grab, 0, 1, 120, 470), lerp(grab, 0, 1, -500, -900)], bend: -1},
+							itemR: grab >= 0.6 && !thrown ? (
+								<g transform="translate(0,60) scale(0.9)">
+									<HatArt color={HAT} />
+								</g>
+							) : undefined,
+						})}
+					/>
+					{thrown && fly < 1 && (
+						<Card3D x={hx} y={hy} z={hz} w={200} h={200} anchor="center" view={[-200, -200, 400, 400]}>
+							<g transform={`rotate(${fly * 540})`}>
+								<HatArt color={HAT} />
+							</g>
+						</Card3D>
+					)}
+				</Scene3D>
+			</AbsoluteFill>
+		);
+	}
+	// low by the puddle: the hat lands with a splash, everybody laughs
+	const land = 8;
+	const fall = lerp(t, 0, land, 0, 1, Easing.in(Easing.quad));
+	const cam: Cam3 = {x: PUDDLE.x + 40, y: -170, z: lerp(t, 0, 85, 720, 820), rx: -5};
+	return (
+		<AbsoluteFill>
+			<Scene3D cam={cam} bg={skyBg('day')} far={<SchoolYardFar f={t} />} farBlur={7}>
+				<SchoolYardNear id="r1s6b" fence={false} />
+				<Puddle x={PUDDLE.x} z={PUDDLE.z} splash={t - land} />
+				{t >= land && (
+					<Floor3D y={-2} zNear={PUDDLE.z + 90} depth={180} w={220} x={PUDDLE.x + 40} res={1}>
+						<g transform="translate(110,90) scale(0.55,0.42)">
+							<HatArt color={HAT} soaked={lerp(t, land, land + 30, 0.2, 1)} />
+						</g>
+					</Floor3D>
+				)}
+				{t < land && (
+					<Card3D x={PUDDLE.x + 40} y={lerp(fall, 0, 1, -420, -10)} z={PUDDLE.z} w={200} h={200} anchor="center" view={[-200, -200, 400, 400]}>
+						<g transform={`rotate(${120 + fall * 80})`}>
+							<HatArt color={HAT} />
+						</g>
+					</Card3D>
+				)}
+				{t >= land && t < land + 20 && (
+					<Card3D x={PUDDLE.x + 40} y={-60} z={PUDDLE.z} w={500} h={300} anchor="center" view={[-250, -150, 500, 300]}>
+						{Array.from({length: 9}).map((_, k) => {
+							const a = (k / 9) * Math.PI;
+							const tt = (t - land) / 20;
+							return <circle key={k} cx={Math.cos(a) * 200 * tt} cy={-Math.sin(a) * 160 * tt + 200 * tt * tt} r={10 * (1 - tt) + 2} fill="#cfe0ec" />;
+						})}
+					</Card3D>
+				)}
+				{[
+					[-760, -1100, 0],
+					[60, -1300, 1],
+					[420, -1050, 2],
+					[-1100, -1500, 3],
+				].map(([x, z, k]) => (
+					<Figure3D key={k} x={x} z={z} p={k === 1 ? sazon('r1s6bsaz', {breathe: t, face: LAUGH(t, 0)}) : kid(`r1s6bk${k}`, k + 4, {breathe: t + k * 7, face: LAUGH(t, k)})} />
+				))}
+			</Scene3D>
+			<Ha x={300} y={560} at={62 + 14} rot={-12} />
+			<Ha x={760} y={500} at={62 + 24} rot={10} size={78} />
+			<Ha x={500} y={360} at={62 + 36} rot={-4} />
+			<Ha x={820} y={700} at={62 + 48} rot={14} />
+		</AbsoluteFill>
+	);
+};
+
+// 7. After school he catches you in the cloakroom: «Гони двадцать копеек, Игоречек»
+export const S07: React.FC = () => {
+	const f = useCurrentFrame();
+	const cam: Cam3 = {x: lerp(f, 0, 120, 60, 160), y: -430, z: interpolate(f, [0, 50, 120], [260, 720, 800], {...clamp, easing: Easing.out(Easing.quad)})};
+	const s = project(cam, 110, -520, -800);
+	return (
+		<AbsoluteFill>
+			<Scene3D cam={cam} bg="#2a2a28" far={<CloakroomBack />} farBlur={0}>
+				<Cloakroom3D id="r1s7" />
+				<Figure3D x={320} z={-900} p={igor('r1s7you', {breathe: f, face: SCARED, armL: {target: [-120, -380], bend: 1}, armR: {target: [130, -380], bend: -1}})} />
+				<Figure3D x={-160} z={-760} p={sazFriend('r1s7f', 0, {back: true, breathe: f + 6})} />
+				<Figure3D x={110} z={-800} p={sazon('r1s7saz', {back: true, breathe: f, armR: {target: [360, -560], bend: -1}})} />
+			</Scene3D>
+			{vignette(0.45)}
+			<Bubble x={Math.min(640, Math.max(400, s.x - 40))} y={s.y - 50} text="ГОНИ 20 КОПЕЕК!" from={30} to={112} tail="left" dark />
+		</AbsoluteFill>
+	);
+};
+
+// 8. You give it. You always give. But Сазон hits you anyway: «Это — чтобы завтра не забыл»
+const CLOAK_FAR = (
+	<>
+		<CloakroomBack />
+		<Cloakroom3D id="r1cuf" />
+	</>
+);
+export const S08: React.FC = () => {
+	const f = useCurrentFrame();
+	const {i, t} = seg(f, [66]);
+	if (i === 0) {
+		const take = lerp(t, 26, 40, 0, 1, Easing.in(Easing.cubic));
+		return (
+			<CloseUp cam={{x: lerp(t, 0, 66, 100, 40), y: -180, z: 800, rx: 6}} f={t} far={CLOAK_FAR} bg="#2a2a28" blur={9}>
+				<Card3D x={60} y={-300} z={-120} w={800} h={1200} anchor="center" view={[-400, -600, 800, 1200]}>
+					<Palm s={0.95}>
+						<Coin x={0} y={take * -900} s={0.9} rot={take * 40} />
+					</Palm>
+					<g transform={`translate(${lerp(t, 0, 26, -700, -120) + take * 40},${lerp(t, 0, 26, -700, -260) - take * 900}) rotate(-150)`}>
+						<rect x={-70} y={-520} width={140} height={420} rx={30} fill={SAZON.top} />
+						<ellipse cx={0} cy={-60} rx={88} ry={110} fill="#e8b48e" />
+					</g>
+				</Card3D>
+			</CloseUp>
+		);
+	}
+	const at = 20; // the punch (≈ «бьёт»)
+	const k = interpolate(t, [at, at + 4, at + 40], [0, 1, 0.55], clamp);
+	const shake = t >= at ? Math.sin((t - at) * 2.3) * 30 * Math.exp(-(t - at) / 9) : 0;
+	const fist = interpolate(t, [at - 7, at, at + 8, at + 22], [-1100, -170, -260, -1100], clamp);
+	const bruise = interpolate(t, [at + 4, at + 30], [0, 1], clamp);
+	return (
+		<AbsoluteFill>
+			<CloseUp cam={{x: 120 + shake, y: -400 + shake * 0.3, z: lerp(t, 0, 96, 640, 720)}} f={t} far={CLOAK_FAR} bg="#2a2a28" blur={9}>
+				<Card3D x={130 + 170 * k} y={-430} z={-220} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
+					<g transform={`rotate(${16 * k})`}>
+						<Bust kind="boy" id="r1s8you" x={0} y={0} scale={1.4} colors={IGOR} face={t < at ? {...SCARED, look: [-0.7, 0]} : {eyes: 'closed', mouth: 'o', brows: 'worried', blush: false, bruise}} />
+					</g>
+				</Card3D>
+				<Card3D x={130} y={-400} z={-120} w={1600} h={600} anchor="center" view={[-800, -300, 1600, 600]}>
+					<g transform={`translate(${fist},0)`}>
+						<Fist sleeve={SAZON.top ?? '#3b4660'} />
+					</g>
+				</Card3D>
+			</CloseUp>
+			<AbsoluteFill style={{background: '#fff', opacity: interpolate(t, [at, at + 1, at + 6], [0, 0.7, 0], clamp)}} />
+			{vignette(0.55)}
+			<Bubble x={430} y={640} text="ЧТОБЫ ЗАВТРА НЕ ЗАБЫЛ!" from={66 + 34} to={66 + 94} tail="left" dark />
+		</AbsoluteFill>
+	);
+};
+
+// 9. In the evening mom notices the bruise: «Игоречек, кто тебя?» — «Упал».
+export const S09: React.FC = () => {
+	const f = useCurrentFrame();
+	const push = lerp(f, 60, 110, 0, 1, Easing.inOut(Easing.cubic));
+	const cam: Cam3 = {x: lerp(push, 0, 1, 50, 170), y: lerp(push, 0, 1, -430, -400), z: lerp(push, 0, 1, 840, 1080)};
+	const touch = interpolate(f, [14, 26], [0, 1], clamp);
+	const m = project(cam, -60, -470, -760);
+	const y = project(cam, 170, -470, -640);
+	return (
+		<AbsoluteFill>
+			<Scene3D cam={cam} bg="#1a1520" far={<KitchenBack id="r1s9" f={f} />} farBlur={0}>
+				<Kitchen3D id="r1s9" />
+				<Figure3D
+					x={-60}
+					z={-760}
+					p={{kind: 'mom', id: 'r1s9mom', scale: 0.48, breathe: f, face: {eyes: 'wide', pupil: 0.7, mouth: f > 30 && f < 80 ? (Math.floor(f / 5) % 2 ? 'open' : 'o') : 'o', brows: 'worried', look: [0.8, 0]}, armR: touch > 0 ? {target: [lerp(touch, 0, 1, 200, 420), lerp(touch, 0, 1, -380, -790)], bend: 1} : undefined}}
+				/>
+				<Figure3D x={170} z={-640} p={igor('r1s9you', {breathe: f, face: {eyes: 'open', mouth: f > 96 && f < 112 ? 'o' : 'flat', brows: 'worried', look: [-0.3, 0.8], blush: false, bruise: 1}})} />
+			</Scene3D>
+			{vignette(0.5)}
+			<Bubble x={Math.max(330, m.x + 40)} y={m.y - 60} text="ИГОРЕЧЕК, КТО ТЕБЯ?" from={30} to={88} tail="left" />
+			<Bubble x={Math.min(760, y.x + 60)} y={y.y - 70} text="УПАЛ." from={96} to={138} tail="right" />
+		</AbsoluteFill>
+	);
+};
+
+// 10. But in your district there are those whom even Сазон fears. Тяп-ляп. (silhouettes walking at you at dusk)
+export const S10: React.FC = () => {
+	const f = useCurrentFrame();
+	const cam: Cam3 = {x: 1200, y: -170, z: lerp(f, 0, 135, 1300, 1150), rx: 5};
+	const slam = 98;
+	const tp = pop(f, slam, 8);
+	const sh = f >= slam ? Math.sin((f - slam) * 2) * 14 * Math.exp(-(f - slam) / 8) : 0;
+	return (
+		<AbsoluteFill>
+			<Scene3D cam={{...cam, x: cam.x + sh}} bg={skyBg('dusk')} far={<YardFar f={f} time="dusk" />} farBlur={4}>
+				<YardNear id="r1s10" time="dusk" />
+				{[-460, -230, 0, 230, 460].map((dx, k) => (
+					<Figure3D
+						key={k}
+						x={1200 + dx}
+						z={lerp(f, 0, 135, -1500, -820) - Math.abs(dx) * 0.4}
+						p={k === 2 ? gvozd('r1s10gv', {walk: f * 0.38, silhouette: '#15131c'}) : gang(`r1s10g${k}`, k, {walk: f * 0.38 + k, silhouette: '#15131c'})}
+					/>
+				))}
+			</Scene3D>
+			{vignette(0.55)}
+			{f >= slam && (
+				<div style={{position: 'absolute', top: 300, width: '100%', textAlign: 'center', transform: `scale(${tp * (1 + 0.04 * Math.sin((f - slam) / 4))}) rotate(-4deg)`, fontFamily: HEAVY, fontWeight: 900}}>
+					<div style={{fontSize: 190, lineHeight: 1, color: '#e0342b', textShadow: '0 0 0 #000, 6px 6px 0 #fff, -6px -6px 0 #fff, 6px -6px 0 #fff, -6px 6px 0 #fff, 0 16px 30px rgba(0,0,0,0.6)'}}>ТЯП-ЛЯП</div>
+				</div>
+			)}
+			<AbsoluteFill style={{background: '#fff', opacity: interpolate(f, [slam, slam + 1, slam + 6], [0, 0.5, 0], clamp)}} />
+		</AbsoluteFill>
+	);
+};
+
+// 11. They walk across the yard in caps and quilted jackets; even the seniors step aside; Сазон looks at the ground
+export const S11: React.FC = () => {
+	const f = useCurrentFrame();
+	const {i, t} = seg(f, [140]);
+	if (i === 0) {
+		const gx = lerp(t, 0, 140, -700, 760);
+		const cam: Cam3 = {x: gx - 260, y: -470, z: 900, ry: -2};
+		const aside = interpolate(gx, [-320, 160], [0, 1], clamp);
+		return (
+			<Scene3D cam={cam} bg={skyBg('dusk')} far={<YardFar f={t} time="dusk" />} farBlur={6}>
+				<YardNear id="r1s11" time="dusk" garages={false} />
+				{[
+					[260, -900, 0],
+					[470, -1000, 1],
+					[660, -880, 2],
+				].map(([x, z, k]) => (
+					<Figure3D key={k} x={x + aside * 300} z={z - aside * 420} p={sazFriend(`r1s11s${k}`, k, {breathe: t + k * 7, walk: aside > 0.05 && aside < 0.95 ? t * 0.5 + k : undefined, headTurn: -0.6, face: {eyes: 'open', mouth: 'flat', brows: 'worried', look: [-0.4, 0.8], blush: false, glasses: false}, colors: {...SAZ_FR[k % 2], top: ['#4a4038', '#38424e', '#4e4a40'][k]}})} />
+				))}
+				{[0, 1, 2, 3, 4].map((k) => (
+					<Figure3D key={`g${k}`} x={gx - k * 280} z={-760 - (k % 2) * 140} p={k === 1 ? gvozd('r1s11gv', {walk: t * 0.42 + k}) : gang(`r1s11g${k}`, k, {walk: t * 0.42 + k})} />
+				))}
+			</Scene3D>
+		);
+	}
+	// Сазон close: eyes on the ground while they pass in front of him
+	const pass = lerp(t, 0, 67, -900, 1000);
+	return (
+		<AbsoluteFill>
+			<CloseUp cam={{x: 1700, y: -470, z: lerp(t, 0, 67, 640, 720)}} f={t} time="dusk" blur={9}>
+				<Card3D x={1700} y={-470} z={-260} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
+					<Bust kind="teen" id="r1s11saz" x={0} y={0} scale={1.4} colors={SAZON} plain face={{eyes: 'open', mouth: 'flat', brows: 'worried', look: [0, 1], blush: false, glasses: false}} tilt={-6} />
+				</Card3D>
+				<Card3D x={1700 + pass} y={-300} z={160} w={700} h={1400} anchor="center" view={[-350, -700, 700, 1400]} blur={10}>
+					<path d="M -260,-420 Q -260,-560 -120,-560 L 120,-560 Q 260,-560 260,-420 L 300,700 L -300,700 Z" fill="#1d1c20" />
+					{Array.from({length: 6}).map((_, k) => (
+						<rect key={k} x={-280} y={-380 + k * 150} width={560} height={10} fill="#111" />
+					))}
+				</Card3D>
+			</CloseUp>
+			{vignette(0.5)}
+		</AbsoluteFill>
+	);
+};
+
+// 12. Among them is Гвоздь. He lives in your entrance.
+export const S12: React.FC = () => {
+	const f = useCurrentFrame();
+	return (
+		<AbsoluteFill>
+			<CloseUp cam={{x: lerp(f, 0, 99, 1040, 1100), y: -560, z: lerp(f, 0, 99, 560, 680), ry: lerp(f, 0, 99, 6, -4)}} f={f} time="dusk" blur={8}>
+				<Card3D x={1000} y={-560} z={-300} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
+					<GvozdHead id="r1s12gv" t={f} s={1.9} />
+				</Card3D>
+			</CloseUp>
+			{f >= 16 && <NameTag x={540} y={420} title="ГВОЗДЬ" sub="ЖИВЁТ В ТВОЁМ ПОДЪЕЗДЕ" at={16} color={YELLOW} />}
+		</AbsoluteFill>
+	);
+};
+
+// 13. The same evening he stops you at the garages: «Опять тебя Сазон гоняет?»
 export const S13: React.FC = () => {
+	const f = useCurrentFrame();
+	const cam: Cam3 = {x: lerp(f, 0, 120, 1740, 1800), y: -450, z: lerp(f, 0, 120, 900, 1010)};
+	const gv = lerp(f, 14, 44, 0, 1, Easing.out(Easing.quad));
+	const g = project(cam, lerp(gv, 0, 1, 2350, 1980), -560, -860);
+	return (
+		<AbsoluteFill>
+			<Scene3D cam={cam} bg={skyBg('dusk')} far={<YardFar f={f} time="dusk" />} farBlur={6}>
+				<YardNear id="r1s13" time="dusk" />
+				<Lamp3D x={1150} z={-1250} />
+				<Figure3D x={lerp(f, 0, 40, 1380, 1620)} z={-700} p={igor('r1s13you', {walk: f < 40 ? f * 0.45 : undefined, breathe: f, face: {...WARY, bruise: 1, look: [0.6, 0]}, armR: {target: [150, -260], bend: -1}, itemR: <Avoska />})} />
+				<Figure3D x={lerp(gv, 0, 1, 2350, 1980)} z={-860} p={gvozd('r1s13gv', {walk: gv < 1 ? f * 0.45 : undefined, breathe: f, face: {...GV_FACE, look: [-0.6, 0.2]}})} />
+			</Scene3D>
+			{vignette(0.45)}
+			<Bubble x={Math.min(700, Math.max(420, g.x - 60))} y={g.y - 70} text="ОПЯТЬ САЗОН ГОНЯЕТ?" from={50} to={118} tail="right" />
+		</AbsoluteFill>
+	);
+};
+
+// 14. «Пришьёшься к нам — никто тебя пальцем не тронет. Ни Сазон, ни кто другой» — Гвоздь's hand on your shoulder
+const TwoShot: React.FC<{t: number; id: string}> = ({t, id}) => (
+	<CloseUp cam={{x: lerp(t, 0, 200, 1880, 1960), y: -540, z: 560}} f={t} time="dusk" blur={8}>
+		<Card3D x={1700} y={-640} z={-420} w={760} h={900} anchor="center" view={[-380, -450, 760, 900]}>
+			<GvozdHead id={`${id}gv`} t={t} s={1.6} tilt={-4} face={{...GV_FACE, mouth: Math.floor(t / 5) % 2 && t < 120 ? 'open' : 'smile'}} />
+		</Card3D>
+		<Card3D x={2150} y={-470} z={-260} w={760} h={900} anchor="center" view={[-380, -450, 760, 900]}>
+			<Bust kind="boy" id={`${id}you`} x={0} y={0} scale={1.6} colors={IGOR} face={{eyes: 'wide', pupil: 0.6, mouth: 'flat', brows: 'raised', look: [-0.6, -0.2], blush: false, bruise: 1}} />
+			<g transform={`translate(${lerp(t, 0, 12, -420, -180)},${lerp(t, 0, 12, 600, 300)}) rotate(-50)`}>
+				<rect x={-50} y={0} width={100} height={420} rx={26} fill={GVOZD.top} />
+				<ellipse cx={0} cy={-8} rx={66} ry={54} fill="#e3b08a" />
+			</g>
+		</Card3D>
+	</CloseUp>
+);
+export const S14: React.FC = () => <TwoShot t={useCurrentFrame()} id="r1s14" />;
+
+// 15. «Только запомни: у пацанов назад дороги нет. Зашёл — значит, навсегда» (low angle on Гвоздь)
+export const S15: React.FC = () => {
+	const f = useCurrentFrame();
+	return (
+		<AbsoluteFill>
+			<CloseUp cam={{x: lerp(f, 0, 138, 1060, 1000), y: lerp(f, 0, 138, -380, -420), z: lerp(f, 0, 138, 600, 760), rx: 4}} f={f} time="dusk" blur={9}>
+				<Card3D x={1000} y={-600} z={-300} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
+					<GvozdHead id="r1s15gv" t={f} s={1.9} face={{eyes: 'narrow', mouth: Math.floor(f / 5) % 2 && f < 110 ? 'open' : 'flat', brows: 'angry', look: [0, 0.2], blush: false}} />
+				</Card3D>
+			</CloseUp>
+			{vignette(0.55)}
+			<RulePlaque label="У ПАЦАНОВ" title={'ЗАШЁЛ —\nЗНАЧИТ, НАВСЕГДА'} from={72} to={138} y={420} />
+		</AbsoluteFill>
+	);
+};
+
+// 16. «Думай до завтра. В семь — у гаражей». Гвоздь walks away; you stand alone under the lamp (the camera rises)
+const Alone: React.FC<{f: number; id: string; leave?: number}> = ({f, id, leave = 1}) => (
+	<>
+		<YardNear id={id} time="night" />
+		<Lamp3D x={1150} z={-1250} on={interpolate(f, [8, 10, 12, 14, 18], [0, 1, 0.2, 1, 1], clamp)} cone={1} />
+		<LightPool x={1700} z={-1000} on={interpolate(f, [8, 18], [0, 1], clamp)} />
+		<Figure3D x={1680} z={-1000} p={igor(`${id}you`, {breathe: f, face: {...WARY, bruise: 1, look: [0.5, 0.3]}, armR: {target: [150, -260], bend: -1}, itemR: <Avoska />})} />
+		{leave < 1 && <Figure3D x={lerp(leave, 0, 1, 1950, 3300)} z={lerp(leave, 0, 1, -1100, -1500)} p={gvozd(`${id}gv`, {back: true, walk: f * 0.42})} />}
+	</>
+);
+export const S16: React.FC = () => {
+	const f = useCurrentFrame();
+	const up = lerp(f, 40, 171, 0, 1, Easing.inOut(Easing.cubic));
+	const cam: Cam3 = {x: lerp(up, 0, 1, 1700, 1650), y: lerp(up, 0, 1, -460, -1000), z: lerp(up, 0, 1, 760, 120), rx: lerp(up, 0, 1, 0, -8)};
+	return (
+		<AbsoluteFill>
+			<Scene3D cam={cam} bg={skyBg('night')} far={<YardFar f={f} time="night" />} farBlur={lerp(up, 0, 1, 6, 3)}>
+				<Alone f={f} id="r1s16" leave={lerp(f, 30, 150, 0, 1)} />
+			</Scene3D>
+			{vignette(0.6)}
+		</AbsoluteFill>
+	);
+};
+
+// 17. At night you can't sleep. Through the wall mom whispers: «Спи, Игоречек…»
+export const S17: React.FC = () => {
+	const f = useCurrentFrame();
+	const cam: Cam3 = {x: lerp(f, 0, 123, -40, 70), y: -420, z: lerp(f, 0, 123, 640, 860)};
+	const d = project(cam, -500, -460, -1200);
+	return (
+		<AbsoluteFill>
+			<Scene3D cam={cam} bg="#0b0f1e" far={<BedroomBack f={f} />} farBlur={0}>
+				<Bedroom3D id="r1s17" />
+				{/* the pillow, you (sitting up), the bed with the blanket in a cover with the diamond opening */}
+				<Card3D x={120} y={-170} z={-930} w={420} h={170}>
+					<rect x={0} y={0} width={420} height={170} rx={60} fill="#e6e8ee" />
+				</Card3D>
+				<Card3D x={120} y={-470} z={-880} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
+					<Bust kind="boy" id="r1s17you" x={0} y={0} scale={1.0} colors={IGOR_PJ} face={{eyes: 'open', mouth: 'flat', brows: 'worried', look: [-0.8, -0.1], blush: false, bruise: 0.9}} />
+				</Card3D>
+				<Card3D x={20} y={0} z={-820} w={1100} h={300}>
+					<rect x={0} y={150} width={1100} height={150} fill="#5a4030" />
+					<path d="M 0,40 Q 550,0 1100,40 L 1100,220 L 0,220 Z" fill="#e8ecf2" />
+					<path d="M 550,60 L 700,130 L 550,200 L 400,130 Z" fill="#7a8ab0" />
+					<path d="M 0,40 Q 550,0 1100,40 L 1100,60 Q 550,22 0,60 Z" fill="#000" opacity={0.08} />
+					<rect x={0} y={0} width={40} height={300} fill="#4a3424" />
+					<rect x={1060} y={60} width={40} height={240} fill="#4a3424" />
+				</Card3D>
+			</Scene3D>
+			<AbsoluteFill style={{background: 'linear-gradient(200deg, rgba(120,150,255,0.18), rgba(0,0,30,0.25))'}} />
+			{vignette(0.6)}
+			<Bubble x={Math.max(330, d.x + 120)} y={d.y - 60} text="СПИ, ИГОРЕЧЕК…" from={56} to={123} tail="left" whisper />
+		</AbsoluteFill>
+	);
+};
+
+// 18. And in the morning Сазон will be waiting at the school again (tossing a coin)
+export const S18: React.FC = () => {
+	const f = useCurrentFrame();
+	const cam: Cam3 = {x: lerp(f, 0, 105, -420, -360), y: -480, z: lerp(f, 0, 105, 1050, 1300)};
+	const toss = Math.abs(Math.sin(f / 9));
+	const c = project(cam, -300, -560 - toss * 220, -1100);
+	return (
+		<AbsoluteFill>
+			<Scene3D cam={cam} bg={skyBg('day')} far={<SchoolYardFar f={f} />} farBlur={6}>
+				<SchoolYardNear id="r1s18" />
+				<Figure3D x={-380} z={-1100} p={sazon('r1s18saz', {breathe: f, face: {...SAZ_FACE, look: [0.1, 0]}, armR: {target: [190, -620], bend: 1}})} />
+			</Scene3D>
+			<div style={{position: 'absolute', left: c.x, top: c.y, width: 70, height: 70, marginLeft: -35, marginTop: -35, transform: `scaleX(${Math.cos(f / 2.2)})`}}>
+				<svg width={70} height={70} viewBox="-100 -100 200 200">
+					<Coin x={0} y={0} s={1} />
+				</svg>
+			</div>
+			<AbsoluteFill style={{background: 'linear-gradient(180deg, rgba(235,240,245,0.35), rgba(235,240,245,0.05) 60%)'}} />
+			{vignette(0.45)}
+		</AbsoluteFill>
+	);
+};
+
+// 19. Finale: join Тяп-ляп — and never be afraid again? Or stay «Игоречек» — and keep enduring?
+export const S19: React.FC = () => {
 	const f = useCurrentFrame();
 	return (
 		<Finale
 			next="СЕРИЯ 2"
 			series="ТЫ С КАКОГО РАЙОНА?"
-			boxes={3}
-			boxLabel="ПОНЯТИЯ"
-			opt1={{text: 'ПОЙТИ СО СВОИМИ', sub: 'против друга'}}
-			opt2={{text: 'ПРЕДУПРЕДИТЬ САНЬКУ', sub: 'и нарушить слово'}}
+			boxes={4}
+			boxLabel="ТЕРПЕНИЕ"
+			boxMark="cross"
+			opt1={{text: 'ПРИШИТЬСЯ К ТЯП-ЛЯП', sub: 'и больше не бояться'}}
+			opt2={{text: 'ОСТАТЬСЯ ИГОРЕЧКОМ', sub: 'и терпеть дальше'}}
 			tallyLine={
 				<>
-					ПОНЯТИЙ: <span style={{color: '#7ee08a'}}>2</span> · ДАЛЬШЕ — <span style={{color: YELLOW}}>ВЫБИРАЕШЬ ТЫ</span>
+					ОБИД: <span style={{color: '#ff6a5f'}}>3</span> · ДАЛЬШЕ — <span style={{color: YELLOW}}>ВЫБИРАЕШЬ ТЫ</span>
 				</>
 			}
 			bg={
 				<AbsoluteFill>
-					<NightWindow id="r1s13" f={f} push={1} />
+					<Scene3D cam={{x: 1650, y: -1000, z: 120, rx: -8}} bg={skyBg('night')} far={<YardFar f={f} time="night" />} farBlur={3}>
+						<Alone f={f + 40} id="r1s19" />
+					</Scene3D>
 					<AbsoluteFill style={{background: '#000', opacity: 0.55}} />
 				</AbsoluteFill>
 			}

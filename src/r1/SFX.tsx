@@ -9,62 +9,95 @@ type Cue = {at: number; file: string; vol?: number; len?: number};
 const W = (shot: number, ...offs: number[]): Cue[] => offs.map((o) => ({at: s(shot) + o, file: 'whoosh', vol: 0.3}));
 
 const CUES: Cue[] = [
-	// 1 1976: the yard, the garages, the brick factory
+	// 1 1976: you, Igor Lavrov; the yard
 	{at: 4, file: 'boom', vol: 0.6},
-	...W(1, 46, 100),
-	{at: 103, file: 'pop', vol: 0.35},
-	{at: 120, file: 'pop', vol: 0.35},
-	{at: 140, file: 'pop', vol: 0.35},
-	{at: 140, file: 'whistle', vol: 0.25},
-	// 2 «Ты с какого района?» every day
-	{at: s(2), file: 'steps', vol: 0.45, len: 110},
-	{at: s(2) + 8, file: 'pop', vol: 0.3},
-	{at: s(2) + 44, file: 'pop', vol: 0.3},
-	{at: s(2) + 86, file: 'pop', vol: 0.45},
-	// 3 cornered at the garages; the twenty kopecks
-	{at: s(3), file: 'bump', vol: 0.5},
-	{at: s(3) + 6, file: 'heart', vol: 0.5, len: 100},
-	{at: s(3) + 82, file: 'cloth', vol: 0.6},
-	{at: s(3) + 112, file: 'whoosh', vol: 0.3},
-	{at: s(3) + 136, file: 'tick', vol: 0.5},
-	// 4 Гвоздь; the strangers leave
-	{at: s(4) + 12, file: 'steps_slow', vol: 0.6, len: 40},
-	{at: s(4) + 39, file: 'stamp', vol: 0.5},
-	{at: s(4) + 95, file: 'steps', vol: 0.4, len: 40},
-	// 5 the coin back; «Пришьёшься к нам»
-	{at: s(5) + 18, file: 'tick', vol: 0.6},
-	...W(5, 44),
-	{at: s(5) + 55, file: 'swell', vol: 0.4},
-	// 6 evening behind the garages
-	{at: s(6), file: 'howl', vol: 0.25},
-	{at: s(6) + 110, file: 'heart_big', vol: 0.6},
-	// 7–8 the rules
-	{at: s(7) + 4, file: 'pat', vol: 0.6},
-	{at: s(8) + 77, file: 'snap', vol: 0.5},
-	// 9 mom
-	{at: s(9) + 4, file: 'plate', vol: 0.3},
-	{at: s(9) + 73, file: 'heart', vol: 0.45, len: 40},
-	// 10 a week later: «Завтра идём на Заводских»
-	...W(10, 0),
-	{at: s(10) + 72, file: 'stamp', vol: 0.45},
-	{at: s(10) + 99, file: 'heart_big', vol: 0.7},
-	// 11 Санька, the photo
-	...W(11, 0, 80),
-	{at: s(11) + 82, file: 'switch', vol: 0.4},
-	// 12 a knock on the window at night
-	{at: s(12) + 17, file: 'knock', vol: 0.8},
-	{at: s(12) + 44, file: 'gasp', vol: 0.4},
-	{at: s(12) + 94, file: 'whisper', vol: 0.35},
-	// 13 finale
-	{at: s(13), file: 'boom', vol: 1},
-	{at: s(13) + 8, file: 'pop', vol: 0.5},
-	{at: s(13) + 78, file: 'pop', vol: 0.5},
-	{at: s(13) + 150, file: 'beep', vol: 0.8},
-	{at: s(13) + 180, file: 'beep', vol: 0.8},
-	{at: s(13) + 210, file: 'beep', vol: 0.8},
-	{at: s(13) + 236, file: 'beep_final', vol: 0.9},
-	{at: s(13) + 252, file: 'whoosh', vol: 0.7},
-	// rule plaques
+	{at: 52, file: 'pop', vol: 0.4},
+	...W(1, 104),
+	{at: 132, file: 'pop', vol: 0.35},
+	{at: 150, file: 'pop', vol: 0.35},
+	{at: 168, file: 'pop', vol: 0.35},
+	{at: 168, file: 'whistle', vol: 0.2},
+	// 2 «бьют каждый день»: a shove
+	{at: s(2) + 24, file: 'whoosh', vol: 0.4},
+	{at: s(2) + 30, file: 'bump', vol: 0.8},
+	{at: s(2) + 32, file: 'heart', vol: 0.4, len: 50},
+	// 3 mom: «Игоречек!»
+	{at: s(3) + 2, file: 'plate', vol: 0.25},
+	{at: s(3) + 10, file: 'pop', vol: 0.4},
+	// 4 the school gate: «Игоречек, шапку надень!»
+	{at: s(4), file: 'steps', vol: 0.35, len: 60},
+	{at: s(4) + 30, file: 'pop', vol: 0.45},
+	{at: s(4) + 62, file: 'laugh', vol: 0.3, len: 60},
+	{at: s(4) + 118, file: 'cloth', vol: 0.5},
+	// 5 Сазон; the whole school
+	{at: s(5) + 18, file: 'stamp', vol: 0.45},
+	...W(5, 72),
+	{at: s(5) + 78, file: 'pop', vol: 0.4},
+	{at: s(5) + 94, file: 'pop', vol: 0.4},
+	{at: s(5) + 110, file: 'pop', vol: 0.4},
+	{at: s(5) + 124, file: 'pop', vol: 0.4},
+	{at: s(5) + 80, file: 'laugh', vol: 0.35, len: 70},
+	// 6 the hat into the puddle; everybody laughs
+	{at: s(6) + 8, file: 'cloth', vol: 0.6},
+	{at: s(6) + 30, file: 'whoosh', vol: 0.5},
+	{at: s(6) + 70, file: 'water', vol: 0.8, len: 50},
+	{at: s(6) + 74, file: 'laugh', vol: 0.55, len: 73},
+	// 7 the cloakroom: «Гони 20 копеек!»
+	{at: s(7), file: 'steps_slow', vol: 0.45, len: 40},
+	{at: s(7) + 20, file: 'bump', vol: 0.4},
+	{at: s(7) + 30, file: 'heart', vol: 0.45, len: 80},
+	// 8 the coin; the punch
+	{at: s(8) + 30, file: 'tick', vol: 0.6},
+	{at: s(8) + 79, file: 'whoosh', vol: 0.5},
+	{at: s(8) + 86, file: 'slam', vol: 0.7},
+	{at: s(8) + 88, file: 'heart_big', vol: 0.5},
+	// 9 mom sees the bruise
+	{at: s(9) + 4, file: 'plate', vol: 0.25},
+	{at: s(9) + 30, file: 'gasp', vol: 0.4},
+	{at: s(9) + 96, file: 'heart', vol: 0.4, len: 40},
+	// 10 Тяп-ляп
+	{at: s(10), file: 'howl', vol: 0.3},
+	{at: s(10), file: 'steps_slow', vol: 0.6, len: 135},
+	{at: s(10) + 98, file: 'boom', vol: 0.9},
+	{at: s(10) + 98, file: 'stamp', vol: 0.6},
+	// 11 they walk; Сазон looks down
+	{at: s(11), file: 'steps', vol: 0.5, len: 140},
+	...W(11, 140),
+	{at: s(11) + 146, file: 'heart', vol: 0.4, len: 60},
+	// 12 Гвоздь
+	{at: s(12) + 16, file: 'stamp', vol: 0.45},
+	{at: s(12) + 10, file: 'swell', vol: 0.3},
+	// 13 the garages: «Опять Сазон гоняет?»
+	{at: s(13), file: 'steps', vol: 0.4, len: 44},
+	{at: s(13) + 50, file: 'pop', vol: 0.35},
+	// 14 «Пришьёшься к нам…»
+	{at: s(14) + 4, file: 'pat', vol: 0.6},
+	{at: s(14) + 20, file: 'swell', vol: 0.35},
+	// 15 «Зашёл — значит, навсегда»
+	{at: s(15) + 72, file: 'stamp', vol: 0.9},
+	{at: s(15) + 74, file: 'heart_big', vol: 0.6},
+	// 16 alone under the lamp
+	{at: s(16) + 8, file: 'flicker', vol: 0.5},
+	{at: s(16) + 30, file: 'steps', vol: 0.3, len: 110},
+	{at: s(16) + 60, file: 'howl', vol: 0.25},
+	// 17 night: «Спи, Игоречек…»
+	{at: s(17) + 2, file: 'tick', vol: 0.25},
+	{at: s(17) + 56, file: 'whisper', vol: 0.35},
+	// 18 the morning: Сазон with the coin
+	...W(18, 0),
+	{at: s(18) + 20, file: 'tick', vol: 0.35},
+	{at: s(18) + 48, file: 'tick', vol: 0.35},
+	{at: s(18) + 76, file: 'tick', vol: 0.35},
+	// 19 finale
+	{at: s(19), file: 'boom', vol: 1},
+	{at: s(19) + 8, file: 'pop', vol: 0.5},
+	{at: s(19) + 78, file: 'pop', vol: 0.5},
+	{at: s(19) + 150, file: 'beep', vol: 0.8},
+	{at: s(19) + 180, file: 'beep', vol: 0.8},
+	{at: s(19) + 210, file: 'beep', vol: 0.8},
+	{at: s(19) + 236, file: 'beep_final', vol: 0.9},
+	{at: s(19) + 252, file: 'whoosh', vol: 0.7},
+	// humiliation plaques
 	...SIGNS.flatMap((g) => [
 		{at: g.at, file: 'stamp', vol: 1},
 		{at: g.at + g.hold + SIGN_FLY, file: 'pop', vol: 0.35},
@@ -73,8 +106,8 @@ const CUES: Cue[] = [
 
 const SFX_GAIN = HAS_VOICE ? 0.55 : 1;
 const clampX = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
-// a low drone all the way (no dead air between the words), a bit stronger from the evening on
-const BEDS: {file: string; a: number; b: number; vol: (old: number) => number}[] = [{file: 'drone', a: 0, b: TOTAL, vol: (o) => (o < s(6) ? 0.2 : 0.3)}];
+// a low drone all the way (no dead air between the words), a bit stronger from the evening on (Тяп-ляп)
+const BEDS: {file: string; a: number; b: number; vol: (old: number) => number}[] = [{file: 'drone', a: 0, b: TOTAL, vol: (o) => (o < s(10) ? 0.2 : 0.3)}];
 
 export const SFXR1: React.FC<{r: Remap}> = ({r}) => (
 	<>

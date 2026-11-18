@@ -1,10 +1,10 @@
 // «Ты с какого района?» — серия 1 «Игоречек» (1976), версия 3: новый сюжет, ~1,5 минуты.
 // Ты — Игорь Лавров, 13 лет, слабый; мама зовёт тебя «Игоречек», а Сазон из 8 «Б» подхватил это прозвище и травит
 // тебя (шапка в луже, двадцать копеек, синяк — три «обиды» в счётчике «ТЕРПЕНИЕ»). В районе боятся только Тяп-ляп;
-// Гвоздь из твоего подъезда предлагает пришиться: «Зашёл — значит, навсегда». В конце Игорь сам решает: «Я больше
-// не Игоречек. Я с вами» — рукопожатие «Теперь ты наш»; вопрос зрителям «А ты бы пришился?».
+// Гвоздь из твоего подъезда предлагает пришиться: «Зашёл — значит, навсегда. В семь — у нашей качалки». В конце ты
+// стоишь у двери их качалки, а на створках — «ПРИШИТЬСЯ» и «НЕ ПРИШИТЬСЯ»: выбирают зрители (1 или 2).
 // Всё в «3D-камере» (2.5D): плоские 2D-слои на настоящей глубине (components/Scene3D.tsx), задний план размыт.
-// 25 shots on the timeline of src/r1/timeline.ts (= the voice, see scripts/fit-voiceover.py --part r1).
+// 23 shots on the timeline of src/r1/timeline.ts (= the voice, see scripts/fit-voiceover.py --part r1).
 import React from 'react';
 import {AbsoluteFill, Easing, interpolate, useCurrentFrame} from 'remotion';
 import {clamp, lerp, pop, seg} from '../anim';
@@ -14,7 +14,8 @@ import {Wallpaper, WallClock} from '../components/Set';
 import {Box3D, Cam3, Card3D, Floor3D, project, Scene3D} from '../components/Scene3D';
 import * as G1 from '../g1/scenes';
 import {BOY_S, Figure3D, Ground3D, MAN_S, skyBg, Time, YardFar, YardNear} from './world3d';
-import {Avoska, Bedroom3D, BedroomBack, Briefcase, Cloakroom3D, CloakroomBack, HatArt, Puddle, SchoolFar, SchoolFenceArt} from './sets3d';
+import {Avoska, Bedroom3D, BedroomBack, Briefcase, Cloakroom3D, CloakroomBack, HatArt, KachalkaFar, Puddle, SchoolFar, SchoolFenceArt} from './sets3d';
+import {SHOTS} from './timeline';
 
 const {YELLOW, RED} = G1;
 
@@ -330,36 +331,35 @@ const Kitchen3D: React.FC<{id: string; lamp?: boolean}> = ({id, lamp = true}) =>
 );
 
 // ============================================================== SHOTS =======
-// 1. THE HOOK (cold open): tomorrow, 19:00, the garages — Гвоздь and the guys wait for your answer under the lamp.
-// «Завтра в семь у гаражей ты сделаешь выбор, после которого назад дороги нет.» The camera rushes in on Гвоздь.
+// 1. THE HOOK (cold open): tomorrow, 19:00, the door of their «качалка» — Гвоздь waits for your answer under the bulb.
+// «Завтра в семь у дверей качалки ты сделаешь выбор, после которого назад дороги нет.» The camera rushes in on Гвоздь.
 export const S01: React.FC = () => {
 	const f = useCurrentFrame();
-	const push = lerp(f, 0, 120, 0, 1, Easing.inOut(Easing.cubic));
+	const D = SHOTS[0].duration;
+	const push = lerp(f, 0, D - 18, 0, 1, Easing.inOut(Easing.cubic));
 	const cam: Cam3 = {x: lerp(push, 0, 1, 1640, 1700), y: lerp(push, 0, 1, -470, -450), z: lerp(push, 0, 1, 520, 1760)};
-	const rw = interpolate(f, [122, 138], [0, 1], clamp); // the rewind into the past
+	const rw = interpolate(f, [D - 16, D], [0, 1], clamp); // the rewind into the past
 	return (
 		<AbsoluteFill>
 			<AbsoluteFill style={{filter: rw > 0 ? `blur(${rw * 6}px) saturate(${1 - rw})` : undefined, transform: `skewX(${rw * -10}deg) scale(${1 + rw * 0.08})`}}>
-				<Scene3D cam={cam} bg={skyBg('night')} far={<YardFar f={f} time="night" />} farBlur={6}>
-					<YardNear id="r1hook" time="night" />
-					<Lamp3D x={1150} z={-1250} cone={1} />
-					<LightPool x={1700} z={-1050} />
-					<Figure3D x={1420} z={-1350} p={gang('r1s1g0', 0, {breathe: f + 9, silhouette: '#15131c'})} />
-					<Figure3D x={2010} z={-1400} p={gang('r1s1g1', 2, {breathe: f + 4, silhouette: '#15131c'})} />
-					<Figure3D x={1700} z={-1050} p={gvozd('r1s1gv', {breathe: f, face: {eyes: 'narrow', mouth: 'flat', brows: 'flat', look: [0, 0], blush: false}})} />
+				<Scene3D cam={cam} bg={skyBg('night')} far={<KachalkaFar f={f} />} farBlur={0}>
+					<Ground3D id="r1hookg" time="night" />
+					<Figure3D x={1420} z={-1120} p={gang('r1s1g0', 0, {breathe: f + 9, silhouette: '#15131c'})} />
+					<Figure3D x={1990} z={-1140} p={gang('r1s1g1', 2, {breathe: f + 4, silhouette: '#15131c'})} />
+					<Figure3D x={1700} z={-1040} p={gvozd('r1s1gv', {breathe: f, face: {eyes: 'narrow', mouth: 'flat', brows: 'flat', look: [0, 0], blush: false}})} />
 				</Scene3D>
 				{vignette(0.65)}
 			</AbsoluteFill>
-			<div style={{position: 'absolute', top: 360, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, transform: `scale(${pop(f, 6, 9)}) rotate(-3deg)`, opacity: interpolate(f, [116, 124], [1, 0], clamp)}}>
+			<div style={{position: 'absolute', top: 360, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, transform: `scale(${pop(f, 6, 9)}) rotate(-3deg)`, opacity: interpolate(f, [D - 24, D - 16], [1, 0], clamp)}}>
 				<div style={{display: 'inline-block', padding: '10px 34px', border: '8px solid #e0342b', borderRadius: 18, background: 'rgba(10,10,14,0.75)', fontSize: 92, color: '#fff', letterSpacing: 2}}>
 					ЗАВТРА · <span style={{color: '#ff5a4f'}}>19:00</span>
 				</div>
 			</div>
 			{rw > 0 &&
 				Array.from({length: 9}).map((_, k) => (
-					<div key={k} style={{position: 'absolute', left: 0, right: 0, top: ((k * 233 + f * 61) % 1920), height: 10 + (k % 3) * 8, background: '#fff', opacity: 0.35 * rw}} />
+					<div key={k} style={{position: 'absolute', left: 0, right: 0, top: (k * 233 + f * 61) % 1920, height: 10 + (k % 3) * 8, background: '#fff', opacity: 0.35 * rw}} />
 				))}
-			<AbsoluteFill style={{background: '#fff', opacity: interpolate(f, [130, 138], [0, 0.8], clamp)}} />
+			<AbsoluteFill style={{background: '#fff', opacity: interpolate(f, [D - 8, D], [0, 0.8], clamp)}} />
 		</AbsoluteFill>
 	);
 };
@@ -1018,166 +1018,119 @@ export const S20: React.FC = () => {
 	);
 };
 
-// a rubber stamp slammed onto the screen
-const Stamp: React.FC<{text: string; at: number; y?: number}> = ({text, at, y = 470}) => {
-	const f = useCurrentFrame();
-	if (f < at) return null;
-	const k = interpolate(f, [at, at + 6], [1.7, 1], {...clamp, easing: Easing.in(Easing.quad)});
-	return (
-		<div style={{position: 'absolute', left: 540, top: y, transform: `translate(-50%,-50%) rotate(-8deg) scale(${k})`, opacity: interpolate(f, [at, at + 3], [0, 1], clamp)}}>
-			<div style={{border: '12px solid #e0342b', borderRadius: 22, padding: '14px 40px', fontFamily: HEAVY, fontWeight: 900, fontSize: 92, lineHeight: 1.02, color: '#e0342b', textAlign: 'center', background: 'rgba(12,10,12,0.55)', letterSpacing: 2, whiteSpace: 'pre'}}>{text}</div>
-		</div>
-	);
-};
-
-// 21. «И ты решаешь: хватит.» — at the school gate your face changes from fear to resolve; «ТЕРПЕНИЕ ЛОПНУЛО»
+// 21. «В семь вечера ты стоишь у двери их качалки.» — you walk up to the iron door; light and the clank of iron inside
 export const S21: React.FC = () => {
 	const f = useCurrentFrame();
-	const stamp = 34;
-	const sh = f >= stamp ? Math.sin((f - stamp) * 2) * 12 * Math.exp(-(f - stamp) / 8) : 0;
-	const hard = f >= 22;
+	const cam: Cam3 = {x: 1700, y: -470, z: lerp(f, 0, 102, 420, 760)};
 	return (
 		<AbsoluteFill>
-			<CloseUp cam={{x: 100 + sh, y: -470, z: lerp(f, 0, 90, 640, 800)}} f={f} far={<><SchoolYardFar f={f} /><SchoolYardNear id="r1s21cu" /></>} blur={9}>
-				<Card3D x={100} y={-470} z={-200} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
-					<Bust kind="boy" id="r1s21you" x={0} y={0} scale={1.4} colors={IGOR} face={hard ? {eyes: 'narrow', mouth: 'flat', brows: 'angry', look: [0, 0], blush: false, bruise: 1} : {...SCARED, look: [0.5, 0], bruise: 1}} />
-				</Card3D>
-			</CloseUp>
-			{vignette(0.55)}
-			<Stamp text={'ТЕРПЕНИЕ\nЛОПНУЛО'} at={stamp} y={440} />
-			<AbsoluteFill style={{background: '#fff', opacity: interpolate(f, [stamp, stamp + 1, stamp + 6], [0, 0.4, 0], clamp)}} />
-		</AbsoluteFill>
-	);
-};
-
-// 22. «В семь вечера ты приходишь к гаражам.» — the hook's scene: you walk into the lamp light towards them
-export const S22: React.FC = () => {
-	const f = useCurrentFrame();
-	const cam: Cam3 = {x: 1700, y: -480, z: lerp(f, 0, 102, 520, 820)};
-	return (
-		<AbsoluteFill>
-			<Scene3D cam={cam} bg={skyBg('night')} far={<YardFar f={f} time="night" />} farBlur={6}>
-				<YardNear id="r1s22" time="night" />
-				<Lamp3D x={1150} z={-1250} cone={1} />
-				<LightPool x={1700} z={-1050} />
-				<Figure3D x={1420} z={-1350} p={gang('r1s22g0', 0, {breathe: f + 9, face: {eyes: 'narrow', mouth: 'flat', brows: 'flat', look: [0.3, 0.2], blush: false}})} />
-				<Figure3D x={2010} z={-1400} p={gang('r1s22g1', 2, {breathe: f + 4, face: {eyes: 'narrow', mouth: 'flat', brows: 'flat', look: [-0.3, 0.2], blush: false}})} />
-				<Figure3D x={1860} z={-1160} p={gvozd('r1s22gv', {breathe: f, face: {...GV_FACE, look: [-0.3, 0.3]}})} />
-				<Figure3D x={lerp(f, 0, 80, 1600, 1660)} z={lerp(f, 0, 80, -480, -900)} p={igor('r1s22you', {back: true, walk: f < 80 ? f * 0.42 : undefined, breathe: f})} />
+			<Scene3D cam={cam} bg={skyBg('night')} far={<KachalkaFar f={f} />} farBlur={0}>
+				<Ground3D id="r1s21g" time="night" />
+				<Figure3D x={lerp(f, 0, 70, 1620, 1680)} z={lerp(f, 0, 70, -560, -980)} p={igor('r1s21you', {back: true, walk: f < 70 ? f * 0.42 : undefined, breathe: f})} />
 			</Scene3D>
 			{vignette(0.6)}
 		</AbsoluteFill>
 	);
 };
 
-// 23. «Ну что, Игоречек, решил?» — «Я больше не Игоречек. Я с вами.»
-export const S23: React.FC = () => {
+// 22. «Шаг за эту дверь — и назад дороги нет.» — your hand stops short of the handle; your heart pounds
+export const S22: React.FC = () => {
 	const f = useCurrentFrame();
+	const reach = lerp(f, 8, 50, 0, 1, Easing.out(Easing.cubic));
+	const shake = Math.sin(f * 0.9) * 4 * interpolate(f, [50, 60], [0, 1], clamp);
+	const cam: Cam3 = {x: lerp(f, 0, 90, 1640, 1690), y: -450, z: lerp(f, 0, 90, 1080, 1160)};
 	return (
 		<AbsoluteFill>
-			<TwoShot t={f} id="r1s23" time="night" hand={false} gvTalk={[4, 50]} youFace={f < 60 ? {eyes: 'open', mouth: 'flat', brows: 'worried', look: [-0.6, -0.2], blush: false, bruise: 1} : {eyes: 'narrow', mouth: Math.floor(f / 5) % 2 && f < 150 ? 'open' : 'flat', brows: 'angry', look: [-0.5, -0.1], blush: false, bruise: 1}} />
-			{vignette(0.55)}
-			<Bubble x={540} y={470} text="НУ ЧТО, ИГОРЕЧЕК, РЕШИЛ?" from={4} to={60} tail="left" />
-			<Bubble x={640} y={560} text="Я БОЛЬШЕ НЕ ИГОРЕЧЕК." from={64} to={116} tail="right" />
-			<Bubble x={700} y={560} text="Я С ВАМИ." from={118} to={168} tail="right" />
-		</AbsoluteFill>
-	);
-};
-
-// 24. Гвоздь holds out his hand: «Теперь ты наш». But this will have to be paid for. (handshake → the camera flies up)
-export const S24: React.FC = () => {
-	const f = useCurrentFrame();
-	const {i, t} = seg(f, [100]);
-	if (i === 0) {
-		const grip = lerp(t, 6, 22, 0, 1, Easing.out(Easing.cubic));
-		const sh = Math.sin(t / 3) * 12 * interpolate(t, [22, 28, 60, 70], [0, 1, 1, 0], clamp);
-		return (
-			<AbsoluteFill>
-				<CloseUp cam={{x: lerp(t, 0, 100, 1880, 1940), y: -500, z: 700}} f={t} time="night" blur={9}>
-					<Card3D x={1900} y={-500} z={-150} w={1300} h={800} anchor="center" view={[-650, -400, 1300, 800]}>
-						<g transform={`translate(0,${sh})`}>
-							<g transform={`translate(${lerp(grip, 0, 1, -900, -640)},60) rotate(-12)`}>
-								<rect x={0} y={-70} width={560} height={140} rx={50} fill={IGOR.top} />
-								<rect x={520} y={-74} width={50} height={148} rx={14} fill="#e9e4d8" />
-							</g>
-							<g transform={`translate(${lerp(grip, 0, 1, 900, 650)},10) rotate(12)`}>
-								<rect x={-600} y={-80} width={600} height={160} rx={50} fill={GVOZD.top} />
-							</g>
-							<g opacity={grip}>
-								<ellipse cx={20} cy={-10} rx={130} ry={96} fill="#e3b08a" />
-								<ellipse cx={-20} cy={30} rx={110} ry={84} fill="#f6cba8" />
-								<path d="M -70,-20 Q -20,-60 50,-30" stroke="#c99a76" strokeWidth={10} fill="none" />
-							</g>
-						</g>
-					</Card3D>
-				</CloseUp>
-				{vignette(0.55)}
-				<Bubble x={560} y={560} text="ТЕПЕРЬ ТЫ НАШ." from={30} to={100} tail="left" />
-			</AbsoluteFill>
-		);
-	}
-	// you among them under the lamp — the camera flies up and away into the night
-	const up = lerp(t, 0, 116, 0, 1, Easing.inOut(Easing.cubic));
-	const cam: Cam3 = {x: 1720, y: lerp(up, 0, 1, -480, -1150), z: lerp(up, 0, 1, 700, -300), rx: lerp(up, 0, 1, 0, -10)};
-	return (
-		<AbsoluteFill>
-			<Scene3D cam={cam} bg={skyBg('night')} far={<YardFar f={t} time="night" />} farBlur={lerp(up, 0, 1, 6, 3)}>
-				<YardNear id="r1s24" time="night" />
-				<Lamp3D x={1150} z={-1250} cone={1} />
-				<LightPool x={1700} z={-1050} />
-				{[
-					[1380, -1250, 0],
-					[2060, -1300, 2],
-					[1180, -1450, 1],
-					[2260, -1500, 3],
-				].map(([x, z, k]) => (
-					<Figure3D key={k} x={x} z={z} p={gang(`r1s24g${k}`, k, {breathe: t + k * 7})} />
-				))}
-				<Figure3D x={1860} z={-1120} p={gvozd('r1s24gv', {breathe: t, armL: {target: [-170, -560], bend: 1}})} />
-				<Figure3D x={1660} z={-1040} p={igor('r1s24you', {breathe: t, face: {eyes: 'narrow', mouth: 'flat', brows: 'angry', look: [0, 0], blush: false, bruise: 1}})} />
+			<Scene3D cam={cam} bg={skyBg('night')} far={<KachalkaFar f={f} />} farBlur={0}>
+				<Ground3D id="r1s22g" time="night" />
+				<Card3D x={1700} y={-330} z={-1160} w={900} h={700} anchor="center" view={[-450, -350, 900, 700]}>
+					<g transform={`translate(${lerp(reach, 0, 1, -760, -300) + shake},${lerp(reach, 0, 1, 360, 60)}) rotate(-20)`}>
+						<rect x={-560} y={-60} width={520} height={120} rx={44} fill={IGOR.top} />
+						<rect x={-60} y={-64} width={40} height={128} rx={12} fill="#e9e4d8" />
+						<ellipse cx={30} cy={0} rx={80} ry={64} fill="#f6cba8" />
+						{[-36, -12, 12, 36].map((y) => (
+							<rect key={y} x={70} y={y - 11} width={60} height={22} rx={11} fill="#f6cba8" />
+						))}
+					</g>
+				</Card3D>
 			</Scene3D>
 			{vignette(0.65)}
-			<AbsoluteFill style={{background: '#000', opacity: interpolate(t, [80, 116], [0, 0.45], clamp)}} />
+			<AbsoluteFill style={{background: '#300', opacity: 0.12 * (0.5 + 0.5 * Math.sin(f / 4))}} />
 		</AbsoluteFill>
 	);
 };
 
-// 25. «А ты бы пришился? Пиши в комментариях!» — then the series card
-export const S25: React.FC = () => {
+// 23. Finale: the choice is written on the door — «ПРИШИТЬСЯ» on the left leaf, «НЕ ПРИШИТЬСЯ» on the right.
+// «Пришиться — и больше никогда не бояться? Или не пришиться — и остаться Игоречком?» 3 — 2 — 1, comments, next episode.
+export const S23: React.FC = () => {
 	const f = useCurrentFrame();
-	const card = interpolate(f, [92, 100], [0, 1], clamp);
+	const cam: Cam3 = {x: 1700, y: -300, z: lerp(f, 0, 300, 1835, 1870)};
+	const L = project(cam, 1595, -330, -1300);
+	const R = project(cam, 1805, -330, -1300);
+	const nums = [
+		{n: '3', at: 150},
+		{n: '2', at: 180},
+		{n: '1', at: 210},
+	];
+	const cur = [...nums].reverse().find((x) => f >= x.at);
+	const final = f >= 236;
+	const counting = f >= 150 && f < 236;
+	const hot = counting ? (Math.floor((f - 150) / 15) % 2 === 0 ? 1 : 2) : 0;
+	const endCard = interpolate(f, [252, 260], [0, 1], clamp);
+	const word = (p: {x: number; y: number}, idx: 1 | 2, at: number, lines: string[], sub: string, color: string) => {
+		const pp = pop(f, at, 11);
+		return (
+			<div style={{position: 'absolute', left: p.x, top: p.y, transform: `translate(-50%,-50%) rotate(${idx === 1 ? -3 : 3}deg) scale(${pp * (hot === idx ? 1.07 : 1)})`, textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, width: 340}}>
+				<div style={{display: 'inline-flex', width: 104, height: 104, borderRadius: 52, background: color, border: '6px solid #fff', color: '#fff', fontSize: 64, alignItems: 'center', justifyContent: 'center', boxShadow: hot === idx ? `0 0 40px ${color}` : 'none'}}>{idx}</div>
+				{lines.map((l) => (
+					<div key={l} style={{fontSize: 52, lineHeight: 1.02, color: hot === idx ? '#fff' : idx === 1 ? '#ffd34a' : '#ff7a6f', marginTop: 10, textShadow: '0 5px 0 rgba(0,0,0,0.6), 0 0 18px rgba(0,0,0,0.6)'}}>
+						{l}
+					</div>
+				))}
+				<div style={{fontSize: 26, color: '#f2efe6', marginTop: 8, textShadow: '0 3px 0 rgba(0,0,0,0.7)'}}>{sub}</div>
+			</div>
+		);
+	};
 	return (
 		<AbsoluteFill>
-			<Scene3D cam={{x: 1720, y: -1150, z: -300, rx: -10}} bg={skyBg('night')} far={<YardFar f={f + 116} time="night" />} farBlur={4}>
-				<YardNear id="r1s25" time="night" />
-				<Lamp3D x={1150} z={-1250} cone={1} />
-				<LightPool x={1700} z={-1050} />
+			<Scene3D cam={cam} bg={skyBg('night')} far={<KachalkaFar f={f} />} farBlur={0}>
+				<Ground3D id="r1s23g" time="night" />
 			</Scene3D>
-			<AbsoluteFill style={{background: '#000', opacity: 0.6}} />
-			<div style={{position: 'absolute', top: 560, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, opacity: 1 - card}}>
-				<div style={{fontSize: 104, lineHeight: 1.05, color: '#fff', transform: `scale(${pop(f, 4, 10)})`, textShadow: '0 8px 0 rgba(0,0,0,0.5)'}}>
-					А ТЫ БЫ
-					<br />
-					<span style={{color: YELLOW}}>ПРИШИЛСЯ?</span>
-				</div>
-				<div style={{display: 'flex', justifyContent: 'center', gap: 30, marginTop: 50, transform: `scale(${pop(f, 18, 10)})`}}>
-					<div style={{background: '#3b82f6', color: '#fff', borderRadius: 22, padding: '14px 46px', fontSize: 64}}>ДА</div>
-					<div style={{background: '#e0342b', color: '#fff', borderRadius: 22, padding: '14px 46px', fontSize: 64}}>НЕТ</div>
-				</div>
-				<div style={{fontSize: 44, color: '#fff', marginTop: 40, opacity: interpolate(f, [26, 34], [0, 1], clamp)}}>ПИШИ В КОММЕНТАРИЯХ</div>
+			<AbsoluteFill style={{background: '#000', opacity: 0.35}} />
+			{vignette(0.6)}
+			<div style={{position: 'absolute', top: 250, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, fontSize: 86, color: '#fff', transform: `scale(${pop(f, 6, 10)})`, textShadow: '0 8px 0 #6b4a00, 0 0 30px rgba(255,211,74,0.45)'}}>
+				ЧТО <span style={{color: YELLOW}}>ВЫБЕРЕШЬ?</span>
 			</div>
-			{card > 0 && (
-				<AbsoluteFill style={{opacity: card, background: 'radial-gradient(circle at 50% 42%, #1d2a55 0%, #0a1024 55%, #04060d 100%)'}}>
-					<div style={{position: 'absolute', top: 560, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900}}>
+			{word({x: L.x, y: L.y}, 1, 10, ['ПРИШИТЬСЯ'], 'и больше не бояться', '#3b82f6')}
+			{word({x: R.x, y: R.y}, 2, 80, ['НЕ', 'ПРИШИТЬСЯ'], 'и остаться Игоречком', '#e0342b')}
+			{cur && !final && (
+				<div style={{position: 'absolute', left: 540, top: 1500, width: 200, height: 200, marginLeft: -100, borderRadius: 100, background: YELLOW, border: '8px solid #111', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: HEAVY, fontWeight: 900, fontSize: 140, color: '#111', transform: `scale(${pop(f, cur.at, 8) * interpolate(f, [cur.at + 22, cur.at + 30], [1, 0.6], clamp)})`}}>
+					{cur.n}
+				</div>
+			)}
+			{final && (
+				<div style={{position: 'absolute', left: 40, width: 1000, top: 1470, textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, transform: `scale(${pop(f, 236, 9)})`}}>
+					<div style={{fontSize: 96, color: YELLOW, textShadow: '0 6px 0 #000'}}>ВЫБИРАЙ!</div>
+					<div style={{fontSize: 44, color: '#fff', textShadow: '0 4px 0 #000', marginTop: 6}}>ПИШИ 1 ИЛИ 2 В КОММЕНТАРИЯХ</div>
+				</div>
+			)}
+			{endCard > 0 && (
+				<AbsoluteFill style={{opacity: endCard, background: 'radial-gradient(circle at 50% 42%, #1d2a55 0%, #0a1024 55%, #04060d 100%)'}}>
+					<div style={{position: 'absolute', top: 500, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900}}>
 						<div style={{fontSize: 40, letterSpacing: 8, color: YELLOW}}>ТЫ С КАКОГО РАЙОНА?</div>
-						<div style={{fontSize: 190, lineHeight: 1, color: '#fff', marginTop: 18, transform: `scale(${pop(f, 94, 10)})`}}>СЕРИЯ 2</div>
+						<div style={{fontSize: 190, lineHeight: 1, color: '#fff', marginTop: 18, transform: `scale(${pop(f, 254, 10)})`}}>СЕРИЯ 2</div>
 						<div style={{fontSize: 56, color: RED, marginTop: 8}}>СКОРО</div>
-						<div style={{display: 'inline-block', marginTop: 60, background: '#ff2d3d', borderRadius: 60, padding: '22px 70px', fontSize: 52, color: '#fff', boxShadow: '0 0 40px rgba(255,45,61,0.6)', transform: `scale(${1 + Math.sin(f / 5) * 0.04})`}}>
+						<div style={{display: 'inline-block', marginTop: 50, background: YELLOW, color: '#111', borderRadius: 18, padding: '10px 30px', fontSize: 38}}>ПИШИ 1 ИЛИ 2 В КОММЕНТАРИЯХ</div>
+						<div style={{fontSize: 30, color: '#9fb0d6', marginTop: 30, letterSpacing: 1}}>
+							ОБИД: <span style={{color: '#ff6a5f'}}>3</span> · ДАЛЬШЕ — <span style={{color: YELLOW}}>ВЫБИРАЕШЬ ТЫ</span>
+						</div>
+						<div style={{display: 'inline-block', marginTop: 46, background: '#ff2d3d', borderRadius: 60, padding: '22px 70px', fontSize: 52, color: '#fff', boxShadow: '0 0 40px rgba(255,45,61,0.6)', transform: `scale(${1 + Math.sin(f / 5) * 0.04})`}}>
 							ПОДПИШИСЬ
 						</div>
 					</div>
 				</AbsoluteFill>
 			)}
+			<AbsoluteFill style={{background: '#fff', opacity: lerp(f, 0, 10, 0.9, 0)}} />
 		</AbsoluteFill>
 	);
 };

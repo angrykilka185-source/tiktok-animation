@@ -5,7 +5,7 @@ import React from 'react';
 import {Box3D, Card3D, Floor3D} from '../components/Scene3D';
 import {KnitHat} from '../components/Person';
 import {HEAVY} from '../components/Overlays';
-import {Time, TreeArt} from './world3d';
+import {Ground3D, Time, TreeArt} from './world3d';
 
 // ------------------------------------------------------------------ school ----
 // the façade of a three-storey school (w × h): yellow plaster, white pilasters, big windows
@@ -343,3 +343,106 @@ export const BedroomBack: React.FC<{f: number; doorLight?: number}> = ({f, doorL
 		<rect x={44} y={884} width={212} height={16} fill="#ffd98a" opacity={0.85 * doorLight} />
 	</Card3D>
 );
+
+// ------------------------------------------------------------------ the gang's «качалка» (a basement gym) ----
+// the end wall of a building with the iron door of the basement gym (art w × h, the door centred at the bottom):
+// plaster with bare bricks, a drainpipe, «КАЧАЛКА» painted above the door with a barbell, light under the door.
+// `signs` writes the choice on the two door leaves.
+export const KachalkaArt: React.FC<{w: number; h: number; inside?: number; signs?: number}> = ({w, h, inside = 1, signs = 0}) => {
+	const dx = w / 2;
+	const dw = 420;
+	const dh = 640;
+	const top = h - dh;
+	return (
+		<g>
+			<rect width={w} height={h} fill="#a99d88" />
+			{[
+				[180, 260, 520, 300],
+				[w - 760, 420, 460, 260],
+				[dx + 340, top - 300, 300, 200],
+			].map(([x, y, bw, bh], k) => (
+				<g key={k}>
+					<rect x={x} y={y} width={bw} height={bh} fill="#8f4e3a" />
+					{Array.from({length: Math.floor(bh / 34)}).map((_, r) => (
+						<g key={r}>
+							<rect x={x} y={y + r * 34 + 30} width={bw} height={4} fill="#c9b9a0" opacity={0.6} />
+							{Array.from({length: Math.floor(bw / 90)}).map((__, c) => (
+								<rect key={c} x={x + c * 90 + (r % 2) * 45} y={y + r * 34} width={4} height={30} fill="#c9b9a0" opacity={0.6} />
+							))}
+						</g>
+					))}
+				</g>
+			))}
+			<rect x={w - 300} y={0} width={44} height={h} fill="#7d7f80" />
+			{[300, 900, 1500].map((y) => (
+				<rect key={y} x={w - 312} y={y} width={68} height={16} fill="#5d5f60" />
+			))}
+			{/* «КАЧАЛКА» in white paint with drips, a barbell */}
+			<g transform={`translate(${dx},${top - 190}) rotate(-3)`}>
+				<text x={0} y={0} textAnchor="middle" fontFamily={HEAVY} fontWeight={900} fontSize={120} fill="#f2efe6" opacity={0.92} letterSpacing={6}>
+					КАЧАЛКА
+				</text>
+				{[-220, -60, 130, 250].map((x, k) => (
+					<rect key={k} x={x} y={8} width={8} height={30 + (k % 2) * 26} rx={4} fill="#f2efe6" opacity={0.8} />
+				))}
+				<g transform="translate(0,70)" fill="#f2efe6" opacity={0.85}>
+					<rect x={-170} y={-6} width={340} height={12} rx={6} />
+					<rect x={-150} y={-40} width={30} height={80} rx={8} />
+					<rect x={120} y={-40} width={30} height={80} rx={8} />
+				</g>
+			</g>
+			{/* the iron door: two leaves, rivets, rust, the handle, light from inside under it */}
+			<rect x={dx - dw / 2 - 30} y={top - 30} width={dw + 60} height={dh + 30} fill="#3a3e3a" />
+			{[-1, 1].map((sd) => {
+				const lx = sd < 0 ? dx - dw / 2 : dx;
+				return (
+					<g key={sd}>
+						<rect x={lx + 4} y={top} width={dw / 2 - 8} height={dh - 14} fill="#3f5a4a" />
+						<rect x={lx + 24} y={top + 30} width={dw / 2 - 48} height={dh - 80} fill="none" stroke="#33493c" strokeWidth={10} />
+						{Array.from({length: 6}).map((_, r) => (
+							<circle key={r} cx={lx + 16} cy={top + 40 + r * 100} r={6} fill="#2c3a32" />
+						))}
+						<path d={`M ${lx + 60},${top + 120} q 10,120 -6,260`} stroke="#7a4a2a" strokeWidth={14} opacity={0.35} fill="none" />
+						{signs > 0 && (
+							<text x={lx + dw / 4} y={top + dh * 0.42} textAnchor="middle" fontFamily={HEAVY} fontWeight={900} fontSize={sd < 0 ? 40 : 30} fill={sd < 0 ? '#ffd34a' : '#ff6a5f'} opacity={signs} transform={`rotate(${sd * 2} ${lx + dw / 4} ${top + dh * 0.42})`}>
+								{sd < 0 ? 'ПРИШИТЬСЯ' : 'НЕ ПРИШИТЬСЯ'}
+							</text>
+						)}
+					</g>
+				);
+			})}
+			<rect x={dx - 46} y={top + dh * 0.5} width={28} height={70} rx={8} fill="#9a9a9a" />
+			<rect x={dx + 18} y={top + dh * 0.5} width={28} height={70} rx={8} fill="#9a9a9a" />
+			<rect x={dx - dw / 2 + 6} y={h - 14} width={dw - 12} height={14} fill="#ffd98a" opacity={0.85 * inside} />
+		</g>
+	);
+};
+// the качалка: the end wall with the door (z −1300, door at x), the step, a caged bulb above the door, its light.
+// Drawn in its OWN pass (Scene3D `far`, farBlur 0) — in one 3D context with the ground (which crosses behind the camera)
+// Chrome drops half of this big wall. The ground goes to the near pass: <Ground3D id time="night" />.
+export const KachalkaFar: React.FC<{f: number; x?: number; signs?: number}> = ({f, x = 1700, signs = 0}) => {
+	const flick = 0.85 + 0.15 * Math.sin(f * 1.7) * Math.sin(f * 0.37);
+	return (
+		<>
+			<Card3D x={x} y={0} z={-1300} w={3200} h={2000} res={2}>
+				<KachalkaArt w={3200} h={2000} signs={signs} />
+			</Card3D>
+			<Card3D x={x} y={0} z={-1240} w={560} h={36}>
+				<rect width={560} height={36} fill="#a39d90" />
+				<rect width={560} height={8} fill="#b9b3a6" />
+			</Card3D>
+			<Card3D x={x} y={-700} z={-1270} w={300} h={300} anchor="center">
+				<circle cx={150} cy={150} r={140} fill="#ffe7a0" opacity={0.2 * flick} />
+				<path d="M 150,20 L 150,90" stroke="#3a3a3a" strokeWidth={8} />
+				<circle cx={150} cy={140} r={34} fill="#fff1c0" opacity={flick} />
+				<g stroke="#3a3a3a" strokeWidth={5} fill="none">
+					<circle cx={150} cy={140} r={44} />
+					<path d="M 106,140 L 194,140 M 150,96 L 150,184 M 119,109 L 181,171 M 181,109 L 119,171" />
+				</g>
+			</Card3D>
+			<Card3D x={x} y={0} z={-1250} w={900} h={700}>
+				<path d="M 380,10 L 520,10 L 900,700 L 0,700 Z" fill="#ffe7a0" opacity={0.1 * flick} />
+			</Card3D>
+		</>
+	);
+};

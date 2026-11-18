@@ -9,7 +9,7 @@ type Cue = {at: number; file: string; vol?: number; len?: number};
 const W = (shot: number, ...offs: number[]): Cue[] => offs.map((o) => ({at: s(shot) + o, file: 'whoosh', vol: 0.3}));
 
 const CUES: Cue[] = [
-	// 1 the hook: tomorrow 19:00 at the garages; the rewind
+	// 1 the hook: tomorrow 19:00 at the door of the качалка; the rewind
 	{at: 0, file: 'heart', vol: 0.5, len: 130},
 	{at: 2, file: 'flicker', vol: 0.4},
 	{at: 6, file: 'stamp', vol: 0.9},
@@ -94,26 +94,23 @@ const CUES: Cue[] = [
 	{at: s(20) + 20, file: 'tick', vol: 0.35},
 	{at: s(20) + 48, file: 'tick', vol: 0.35},
 	{at: s(20) + 76, file: 'tick', vol: 0.35},
-	// 21 «хватит» — ТЕРПЕНИЕ ЛОПНУЛО
-	{at: s(21) + 20, file: 'heart_big', vol: 0.6},
-	{at: s(21) + 34, file: 'boom', vol: 0.8},
-	{at: s(21) + 34, file: 'stamp', vol: 1},
-	// 22 19:00, the garages: you walk into the light
-	{at: s(22), file: 'steps', vol: 0.45, len: 80},
-	{at: s(22) + 6, file: 'howl', vol: 0.25},
-	// 23 «Ну что, Игоречек, решил?» — «Я с вами»
-	{at: s(23) + 4, file: 'pop', vol: 0.4},
-	{at: s(23) + 64, file: 'pop', vol: 0.4},
-	{at: s(23) + 118, file: 'stamp', vol: 0.5},
-	// 24 the handshake; the camera flies up
-	{at: s(24) + 22, file: 'pat', vol: 0.7},
-	{at: s(24) + 30, file: 'swell', vol: 0.5},
-	...W(24, 100),
-	{at: s(24) + 110, file: 'heart_big', vol: 0.5},
-	// 25 «А ты бы пришился?» — the series card
-	{at: s(25) + 4, file: 'boom', vol: 0.8},
-	{at: s(25) + 18, file: 'pop', vol: 0.5},
-	{at: s(25) + 92, file: 'whoosh', vol: 0.7},
+	// 21 19:00, the door of the качалка: you walk up; iron clanks inside
+	{at: s(21), file: 'steps', vol: 0.45, len: 70},
+	{at: s(21) + 20, file: 'slam', vol: 0.2},
+	{at: s(21) + 52, file: 'slam', vol: 0.2},
+	{at: s(21) + 84, file: 'slam', vol: 0.2},
+	// 22 your hand stops short of the handle
+	{at: s(22), file: 'heart_big', vol: 0.6},
+	{at: s(22) + 40, file: 'heart', vol: 0.5, len: 50},
+	// 23 finale: the choice on the door
+	{at: s(23), file: 'boom', vol: 1},
+	{at: s(23) + 10, file: 'pop', vol: 0.5},
+	{at: s(23) + 80, file: 'pop', vol: 0.5},
+	{at: s(23) + 150, file: 'beep', vol: 0.8},
+	{at: s(23) + 180, file: 'beep', vol: 0.8},
+	{at: s(23) + 210, file: 'beep', vol: 0.8},
+	{at: s(23) + 236, file: 'beep_final', vol: 0.9},
+	{at: s(23) + 252, file: 'whoosh', vol: 0.7},
 	// humiliation plaques
 	...SIGNS.flatMap((g) => [
 		{at: g.at, file: 'stamp', vol: 1},

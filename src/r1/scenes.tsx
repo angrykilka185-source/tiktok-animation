@@ -335,9 +335,9 @@ const Kitchen3D: React.FC<{id: string; lamp?: boolean}> = ({id, lamp = true}) =>
 // «Завтра в семь у гаражей ты сделаешь выбор, после которого назад дороги нет.» The camera rushes in on Гвоздь.
 export const S01: React.FC = () => {
 	const f = useCurrentFrame();
-	const push = lerp(f, 0, 140, 0, 1, Easing.inOut(Easing.cubic));
+	const push = lerp(f, 0, 120, 0, 1, Easing.inOut(Easing.cubic));
 	const cam: Cam3 = {x: lerp(push, 0, 1, 1640, 1700), y: lerp(push, 0, 1, -470, -450), z: lerp(push, 0, 1, 520, 1760)};
-	const rw = interpolate(f, [148, 168], [0, 1], clamp); // the rewind into the past
+	const rw = interpolate(f, [122, 138], [0, 1], clamp); // the rewind into the past
 	return (
 		<AbsoluteFill>
 			<AbsoluteFill style={{filter: rw > 0 ? `blur(${rw * 6}px) saturate(${1 - rw})` : undefined, transform: `skewX(${rw * -10}deg) scale(${1 + rw * 0.08})`}}>
@@ -351,7 +351,7 @@ export const S01: React.FC = () => {
 				</Scene3D>
 				{vignette(0.65)}
 			</AbsoluteFill>
-			<div style={{position: 'absolute', top: 360, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, transform: `scale(${pop(f, 6, 9)}) rotate(-3deg)`, opacity: interpolate(f, [140, 150], [1, 0], clamp)}}>
+			<div style={{position: 'absolute', top: 360, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, transform: `scale(${pop(f, 6, 9)}) rotate(-3deg)`, opacity: interpolate(f, [116, 124], [1, 0], clamp)}}>
 				<div style={{display: 'inline-block', padding: '10px 34px', border: '8px solid #e0342b', borderRadius: 18, background: 'rgba(10,10,14,0.75)', fontSize: 92, color: '#fff', letterSpacing: 2}}>
 					ЗАВТРА · <span style={{color: '#ff5a4f'}}>19:00</span>
 				</div>
@@ -360,7 +360,7 @@ export const S01: React.FC = () => {
 				Array.from({length: 9}).map((_, k) => (
 					<div key={k} style={{position: 'absolute', left: 0, right: 0, top: ((k * 233 + f * 61) % 1920), height: 10 + (k % 3) * 8, background: '#fff', opacity: 0.35 * rw}} />
 				))}
-			<AbsoluteFill style={{background: '#fff', opacity: interpolate(f, [160, 168], [0, 0.8], clamp)}} />
+			<AbsoluteFill style={{background: '#fff', opacity: interpolate(f, [130, 138], [0, 0.8], clamp)}} />
 		</AbsoluteFill>
 	);
 };
@@ -426,7 +426,7 @@ export const S02: React.FC = () => {
 // 3. (after the flashback) 1976. You are Igor Lavrov, thirteen — your yard. (close-up → crane up)
 export const S03: React.FC = () => {
 	const f = useCurrentFrame();
-	const out = lerp(f, 66, 138, 0, 1, Easing.inOut(Easing.cubic));
+	const out = lerp(f, 96, 129, 0, 1, Easing.inOut(Easing.cubic));
 	const cam: Cam3 = {x: lerp(out, 0, 1, 0, 300), y: lerp(out, 0, 1, -380, -1150), z: lerp(out, 0, 1, 950, -1500), rx: lerp(out, 0, 1, 0, 8)};
 	const tag = (x: number, y: number, z: number) => project(cam, x, y, z);
 	return (
@@ -439,10 +439,7 @@ export const S03: React.FC = () => {
 				<div style={{fontSize: 220, lineHeight: 1, color: '#fff', textShadow: '0 10px 0 rgba(0,0,0,0.45)', transform: `scale(${pop(f, 2, 10)})`}}>1976</div>
 				<div style={{fontSize: 46, letterSpacing: 12, color: YELLOW, textShadow: '0 4px 0 rgba(0,0,0,0.5)'}}>ОКТЯБРЬ</div>
 			</div>
-			{f >= 36 && f < 84 && <NameTag x={540} y={tag(0, -470, 0).y - 110} title="ИГОРЬ ЛАВРОВ" sub="13 ЛЕТ" at={36} pin={60} color={YELLOW} to={84} />}
-			{f >= 96 && <NameTag x={Math.max(250, tag(-2600, -3000, -6400).x)} y={Math.max(260, tag(-2600, -3000, -6400).y)} title="ХРУЩЁВКИ" at={96} color="#e9e4d8" />}
-			{f >= 108 && <NameTag x={Math.min(800, tag(2300, -1100, -1500).x)} y={tag(2300, -1100, -1500).y} title="ГАРАЖИ" at={108} color="#9fb4c8" />}
-			{f >= 120 && <NameTag x={Math.min(690, Math.max(340, tag(1300, -8200, -20000).x))} y={Math.max(260, tag(1300, -8200, -20000).y)} title="КИРПИЧНЫЙ ЗАВОД" at={120} color="#e08a5a" />}
+			{f >= 50 && f < 98 && <NameTag x={540} y={tag(0, -470, 0).y - 110} title="ИГОРЬ ЛАВРОВ" sub="13 ЛЕТ" at={50} pin={60} color={YELLOW} to={98} />}
 		</AbsoluteFill>
 	);
 };
@@ -500,7 +497,7 @@ export const S05: React.FC = () => {
 				/>
 				<Figure3D x={200} z={-600} p={igor('r1s3you', {breathe: f, headTilt: reach * 6, face: {eyes: 'closed', mouth: 'flat', brows: 'worried', blush: true}, armR: {target: [150, -260], bend: -1}, itemR: <Briefcase />})} />
 			</Scene3D>
-			<Bubble x={Math.max(300, m.x - 40)} y={m.y - 70} text="ИГОРЕЧЕК!" from={10} to={70} tail="left" />
+			<Bubble x={Math.max(300, m.x - 40)} y={m.y - 70} text="ИГОРЕЧЕК!" from={24} to={86} tail="left" />
 		</AbsoluteFill>
 	);
 };
@@ -508,10 +505,10 @@ export const S05: React.FC = () => {
 // 6. Every morning she walks you to school and shouts across the yard: «Игоречек, шапку надень!»
 export const S06: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [104]);
+	const {i, t} = seg(f, [128]);
 	if (i === 0) {
-		const cam: Cam3 = {x: lerp(t, 0, 104, -380, -140), y: -470, z: lerp(t, 0, 104, 950, 1250), ry: lerp(t, 0, 104, -3, 2)};
-		const turn = t > 58;
+		const cam: Cam3 = {x: lerp(t, 0, 128, -380, -140), y: -470, z: lerp(t, 0, 128, 950, 1250), ry: lerp(t, 0, 128, -3, 2)};
+		const turn = t > 108;
 		const m = project(cam, -560, -560, -1450);
 		return (
 			<AbsoluteFill>
@@ -526,17 +523,17 @@ export const S06: React.FC = () => {
 					].map(([x, z, k]) => (
 						<Figure3D key={k} x={x} z={z} p={kid(`r1s4k${k}`, k, {breathe: t + k * 7, back: !turn || k === 3, face: turn ? LAUGH(t, k) : undefined})} />
 					))}
-					<Figure3D x={lerp(t, 0, 58, -120, 120)} z={lerp(t, 0, 58, -1950, -2250)} p={igor('r1s4you', {back: !turn, walk: !turn ? t * 0.45 : undefined, breathe: t, face: {...WARY, blush: true, brows: 'worried'}, armR: {target: [150, -260], bend: -1}, itemR: <Briefcase />})} />
+					<Figure3D x={lerp(t, 0, 100, -120, 120)} z={lerp(t, 0, 100, -1950, -2250)} p={igor('r1s4you', {back: !turn, walk: !turn ? t * 0.45 : undefined, breathe: t, face: {...WARY, blush: true, brows: 'worried'}, armR: {target: [150, -260], bend: -1}, itemR: <Briefcase />})} />
 					<Figure3D x={-560} z={-1450} p={{kind: 'mom', id: 'r1s4mom', scale: 0.48, back: true, plain: true, colors: MOM_COAT, breathe: t, armR: {target: [260, -1020], bend: -1}}} />
 				</Scene3D>
-				<Bubble x={Math.min(620, Math.max(470, m.x + 260))} y={m.y - 40} text="ИГОРЕЧЕК, ШАПКУ НАДЕНЬ!" from={30} to={104} tail="left" />
+				<Bubble x={Math.min(620, Math.max(470, m.x + 260))} y={m.y - 40} text="ИГОРЕЧЕК, ШАПКУ НАДЕНЬ!" from={98} to={128} tail="left" />
 			</AbsoluteFill>
 		);
 	}
 	// you pull the red hat on, red in the face; the yard giggles behind you
-	const on = lerp(t, 14, 34, 0, 1, Easing.inOut(Easing.cubic));
+	const on = lerp(t, 8, 28, 0, 1, Easing.inOut(Easing.cubic));
 	return (
-		<CloseUp cam={{x: 100, y: -470, z: lerp(t, 0, 64, 650, 760)}} f={t} far={<><SchoolYardFar f={t} /><SchoolYardNear id="r1s4cu" /></>} blur={9}>
+		<CloseUp cam={{x: 100, y: -470, z: lerp(t, 0, 40, 650, 740)}} f={t} far={<><SchoolYardFar f={t} /><SchoolYardNear id="r1s4cu" /></>} blur={9}>
 			<Card3D x={100} y={-470} z={-200} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
 				<Bust kind="boy" id="r1s4cu" x={0} y={0} scale={1.4} colors={IGOR} face={{eyes: 'closed', mouth: 'flat', brows: 'worried', blush: true}} />
 				<g transform={`translate(0,${lerp(on, 0, 1, -330, 0)}) scale(1.4)`}>
@@ -579,10 +576,10 @@ export const S07: React.FC = () => {
 		[880, -2000, 7],
 	];
 	const calls = [
-		{k: 1, at: 6},
-		{k: 0, at: 22},
-		{k: 3, at: 38},
-		{k: 2, at: 52},
+		{k: 1, at: 4},
+		{k: 0, at: 16},
+		{k: 3, at: 28},
+		{k: 2, at: 40},
 	];
 	return (
 		<AbsoluteFill>
@@ -605,15 +602,15 @@ export const S07: React.FC = () => {
 const PUDDLE = {x: -260, z: -300};
 export const S08: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [62]);
+	const {i, t} = seg(f, [80]);
 	if (i === 0) {
-		const grab = interpolate(t, [6, 16], [0, 1], clamp);
-		const thrown = t >= 30;
-		const fly = lerp(t, 30, 62, 0, 1);
+		const grab = interpolate(t, [30, 42], [0, 1], clamp);
+		const thrown = t >= 56;
+		const fly = lerp(t, 56, 80, 0, 1);
 		const hx = lerp(fly, 0, 1, 160, PUDDLE.x);
 		const hy = lerp(fly, 0, 1, -600, -40) - Math.sin(fly * Math.PI) * 260;
 		const hz = lerp(fly, 0, 1, -760, PUDDLE.z);
-		const cam: Cam3 = {x: lerp(t, 20, 62, 170, 30), y: -450, z: lerp(t, 0, 62, 800, 900)};
+		const cam: Cam3 = {x: lerp(t, 40, 80, 170, 30), y: -450, z: lerp(t, 0, 80, 800, 900)};
 		return (
 			<AbsoluteFill>
 				<Scene3D cam={cam} bg={skyBg('day')} far={<SchoolYardFar f={t} />} farBlur={6}>
@@ -653,9 +650,9 @@ export const S08: React.FC = () => {
 		);
 	}
 	// low by the puddle: the hat lands with a splash, everybody laughs
-	const land = 8;
+	const land = 6;
 	const fall = lerp(t, 0, land, 0, 1, Easing.in(Easing.quad));
-	const cam: Cam3 = {x: PUDDLE.x + 40, y: -170, z: lerp(t, 0, 85, 720, 820), rx: -5};
+	const cam: Cam3 = {x: PUDDLE.x + 40, y: -170, z: lerp(t, 0, 49, 720, 800), rx: -5};
 	return (
 		<AbsoluteFill>
 			<Scene3D cam={cam} bg={skyBg('day')} far={<SchoolYardFar f={t} />} farBlur={7}>
@@ -693,10 +690,10 @@ export const S08: React.FC = () => {
 					<Figure3D key={k} x={x} z={z} p={k === 1 ? sazon('r1s6bsaz', {breathe: t, face: LAUGH(t, 0)}) : kid(`r1s6bk${k}`, k + 4, {breathe: t + k * 7, face: LAUGH(t, k)})} />
 				))}
 			</Scene3D>
-			<Ha x={300} y={560} at={62 + 14} rot={-12} />
-			<Ha x={760} y={500} at={62 + 24} rot={10} size={78} />
-			<Ha x={500} y={360} at={62 + 36} rot={-4} />
-			<Ha x={820} y={700} at={62 + 48} rot={14} />
+			<Ha x={300} y={560} at={80 + 12} rot={-12} />
+			<Ha x={760} y={500} at={80 + 20} rot={10} size={78} />
+			<Ha x={500} y={360} at={80 + 28} rot={-4} />
+			<Ha x={820} y={700} at={80 + 36} rot={14} />
 		</AbsoluteFill>
 	);
 };
@@ -715,7 +712,7 @@ export const S09: React.FC = () => {
 				<Figure3D x={110} z={-800} p={sazon('r1s7saz', {back: true, breathe: f, armR: {target: [360, -560], bend: -1}})} />
 			</Scene3D>
 			{vignette(0.45)}
-			<Bubble x={Math.min(640, Math.max(400, s.x - 40))} y={s.y - 50} text="ГОНИ 20 КОПЕЕК!" from={30} to={112} tail="left" dark />
+			<Bubble x={Math.min(640, Math.max(400, s.x - 40))} y={s.y - 50} text="ГОНИ 20 КОПЕЕК!" from={68} to={123} tail="left" dark />
 		</AbsoluteFill>
 	);
 };
@@ -729,11 +726,11 @@ const CLOAK_FAR = (
 );
 export const S10: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [66]);
+	const {i, t} = seg(f, [90]);
 	if (i === 0) {
 		const take = lerp(t, 26, 40, 0, 1, Easing.in(Easing.cubic));
 		return (
-			<CloseUp cam={{x: lerp(t, 0, 66, 100, 40), y: -180, z: 800, rx: 6}} f={t} far={CLOAK_FAR} bg="#2a2a28" blur={9}>
+			<CloseUp cam={{x: lerp(t, 0, 90, 100, 30), y: -180, z: 800, rx: 6}} f={t} far={CLOAK_FAR} bg="#2a2a28" blur={9}>
 				<Card3D x={60} y={-300} z={-120} w={800} h={1200} anchor="center" view={[-400, -600, 800, 1200]}>
 					<Palm s={0.95}>
 						<Coin x={0} y={take * -900} s={0.9} rot={take * 40} />
@@ -753,7 +750,7 @@ export const S10: React.FC = () => {
 	const bruise = interpolate(t, [at + 4, at + 30], [0, 1], clamp);
 	return (
 		<AbsoluteFill>
-			<CloseUp cam={{x: 120 + shake, y: -400 + shake * 0.3, z: lerp(t, 0, 96, 640, 720)}} f={t} far={CLOAK_FAR} bg="#2a2a28" blur={9}>
+			<CloseUp cam={{x: 120 + shake, y: -400 + shake * 0.3, z: lerp(t, 0, 90, 640, 720)}} f={t} far={CLOAK_FAR} bg="#2a2a28" blur={9}>
 				<Card3D x={130 + 170 * k} y={-430} z={-220} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
 					<g transform={`rotate(${16 * k})`}>
 						<Bust kind="boy" id="r1s8you" x={0} y={0} scale={1.4} colors={IGOR} face={t < at ? {...SCARED, look: [-0.7, 0]} : {eyes: 'closed', mouth: 'o', brows: 'worried', blush: false, bruise}} />
@@ -767,7 +764,7 @@ export const S10: React.FC = () => {
 			</CloseUp>
 			<AbsoluteFill style={{background: '#fff', opacity: interpolate(t, [at, at + 1, at + 6], [0, 0.7, 0], clamp)}} />
 			{vignette(0.55)}
-			<Bubble x={430} y={640} text="ЧТОБЫ ЗАВТРА НЕ ЗАБЫЛ!" from={66 + 34} to={66 + 94} tail="left" dark />
+			<Bubble x={430} y={640} text="ЧТОБЫ ЗАВТРА НЕ ЗАБЫЛ!" from={124} to={180} tail="left" dark />
 		</AbsoluteFill>
 	);
 };
@@ -775,7 +772,7 @@ export const S10: React.FC = () => {
 // 11. In the evening mom notices the bruise: «Игоречек, кто тебя?» — «Упал».
 export const S11: React.FC = () => {
 	const f = useCurrentFrame();
-	const push = lerp(f, 60, 110, 0, 1, Easing.inOut(Easing.cubic));
+	const push = lerp(f, 100, 150, 0, 1, Easing.inOut(Easing.cubic));
 	const cam: Cam3 = {x: lerp(push, 0, 1, 50, 170), y: lerp(push, 0, 1, -430, -400), z: lerp(push, 0, 1, 840, 1080)};
 	const touch = interpolate(f, [14, 26], [0, 1], clamp);
 	const m = project(cam, -60, -470, -760);
@@ -787,13 +784,13 @@ export const S11: React.FC = () => {
 				<Figure3D
 					x={-60}
 					z={-760}
-					p={{kind: 'mom', id: 'r1s9mom', scale: 0.48, breathe: f, face: {eyes: 'wide', pupil: 0.7, mouth: f > 30 && f < 80 ? (Math.floor(f / 5) % 2 ? 'open' : 'o') : 'o', brows: 'worried', look: [0.8, 0]}, armR: touch > 0 ? {target: [lerp(touch, 0, 1, 200, 420), lerp(touch, 0, 1, -380, -790)], bend: 1} : undefined}}
+					p={{kind: 'mom', id: 'r1s9mom', scale: 0.48, breathe: f, face: {eyes: 'wide', pupil: 0.7, mouth: f > 58 && f < 100 ? (Math.floor(f / 5) % 2 ? 'open' : 'o') : 'o', brows: 'worried', look: [0.8, 0]}, armR: touch > 0 ? {target: [lerp(touch, 0, 1, 200, 420), lerp(touch, 0, 1, -380, -790)], bend: 1} : undefined}}
 				/>
-				<Figure3D x={170} z={-640} p={igor('r1s9you', {breathe: f, face: {eyes: 'open', mouth: f > 96 && f < 112 ? 'o' : 'flat', brows: 'worried', look: [-0.3, 0.8], blush: false, bruise: 1}})} />
+				<Figure3D x={170} z={-640} p={igor('r1s9you', {breathe: f, face: {eyes: 'open', mouth: f > 142 && f < 156 ? 'o' : 'flat', brows: 'worried', look: [-0.3, 0.8], blush: false, bruise: 1}})} />
 			</Scene3D>
 			{vignette(0.5)}
-			<Bubble x={Math.max(330, m.x + 40)} y={m.y - 60} text="ИГОРЕЧЕК, КТО ТЕБЯ?" from={30} to={88} tail="left" />
-			<Bubble x={Math.min(760, y.x + 60)} y={y.y - 70} text="УПАЛ." from={96} to={138} tail="right" />
+			<Bubble x={Math.max(330, m.x + 40)} y={m.y - 60} text="ИГОРЕЧЕК, КТО ТЕБЯ?" from={58} to={118} tail="left" />
+			<Bubble x={Math.min(760, y.x + 60)} y={y.y - 70} text="УПАЛ." from={140} to={163} tail="right" />
 		</AbsoluteFill>
 	);
 };
@@ -832,11 +829,11 @@ export const S12: React.FC = () => {
 // 13. They walk across the yard in caps and quilted jackets; even the seniors step aside; Сазон looks at the ground
 export const S13: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [130]);
+	const {i, t} = seg(f, [112]);
 	if (i === 0) {
-		const gx = lerp(t, 0, 130, -700, 760);
+		const gx = lerp(t, 0, 112, -700, 760);
 		const cam: Cam3 = {x: gx - 260, y: -470, z: 900, ry: -2};
-		const aside = interpolate(gx, [-320, 160], [0, 1], clamp);
+		const aside = interpolate(gx, [100, 500], [0, 1], clamp);
 		return (
 			<Scene3D cam={cam} bg={skyBg('dusk')} far={<YardFar f={t} time="dusk" />} farBlur={6}>
 				<YardNear id="r1s11" time="dusk" garages={false} />
@@ -854,10 +851,10 @@ export const S13: React.FC = () => {
 		);
 	}
 	// Сазон close: eyes on the ground while they pass in front of him
-	const pass = lerp(t, 0, 62, -900, 1000);
+	const pass = lerp(t, 0, 53, -900, 1000);
 	return (
 		<AbsoluteFill>
-			<CloseUp cam={{x: 1700, y: -470, z: lerp(t, 0, 62, 640, 720)}} f={t} time="dusk" blur={9}>
+			<CloseUp cam={{x: 1700, y: -470, z: lerp(t, 0, 53, 640, 720)}} f={t} time="dusk" blur={9}>
 				<Card3D x={1700} y={-470} z={-260} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
 					<Bust kind="teen" id="r1s11saz" x={0} y={0} scale={1.4} colors={SAZON} plain face={{eyes: 'open', mouth: 'flat', brows: 'worried', look: [0, 1], blush: false, glasses: false}} tilt={-6} />
 				</Card3D>
@@ -903,7 +900,7 @@ export const S15: React.FC = () => {
 				<Figure3D x={lerp(gv, 0, 1, 2350, 1980)} z={-860} p={gvozd('r1s13gv', {walk: gv < 1 ? f * 0.45 : undefined, breathe: f, face: {...GV_FACE, look: [-0.6, 0.2]}})} />
 			</Scene3D>
 			{vignette(0.45)}
-			<Bubble x={Math.min(700, Math.max(420, g.x - 60))} y={g.y - 70} text="ОПЯТЬ САЗОН ГОНЯЕТ?" from={50} to={118} tail="right" />
+			<Bubble x={Math.min(700, Math.max(420, g.x - 60))} y={g.y - 70} text="ОПЯТЬ САЗОН ГОНЯЕТ?" from={64} to={112} tail="right" />
 		</AbsoluteFill>
 	);
 };
@@ -936,7 +933,7 @@ export const S17: React.FC = () => {
 				</Card3D>
 			</CloseUp>
 			{vignette(0.55)}
-			<RulePlaque label="У ПАЦАНОВ" title={'ЗАШЁЛ —\nЗНАЧИТ, НАВСЕГДА'} from={72} to={138} y={420} />
+			<RulePlaque label="У ПАЦАНОВ" title={'ЗАШЁЛ —\nЗНАЧИТ, НАВСЕГДА'} from={88} to={143} y={420} />
 		</AbsoluteFill>
 	);
 };
@@ -953,12 +950,12 @@ const Alone: React.FC<{f: number; id: string; leave?: number}> = ({f, id, leave 
 );
 export const S18: React.FC = () => {
 	const f = useCurrentFrame();
-	const up = lerp(f, 40, 171, 0, 1, Easing.inOut(Easing.cubic));
+	const up = lerp(f, 70, 160, 0, 1, Easing.inOut(Easing.cubic));
 	const cam: Cam3 = {x: lerp(up, 0, 1, 1700, 1650), y: lerp(up, 0, 1, -460, -1000), z: lerp(up, 0, 1, 760, 120), rx: lerp(up, 0, 1, 0, -8)};
 	return (
 		<AbsoluteFill>
 			<Scene3D cam={cam} bg={skyBg('night')} far={<YardFar f={f} time="night" />} farBlur={lerp(up, 0, 1, 6, 3)}>
-				<Alone f={f} id="r1s16" leave={lerp(f, 30, 150, 0, 1)} />
+				<Alone f={f} id="r1s16" leave={lerp(f, 78, 158, 0, 1)} />
 			</Scene3D>
 			{vignette(0.6)}
 		</AbsoluteFill>
@@ -992,7 +989,7 @@ export const S19: React.FC = () => {
 			</Scene3D>
 			<AbsoluteFill style={{background: 'linear-gradient(200deg, rgba(120,150,255,0.18), rgba(0,0,30,0.25))'}} />
 			{vignette(0.6)}
-			<Bubble x={Math.max(330, d.x + 120)} y={d.y - 60} text="СПИ, ИГОРЕЧЕК…" from={56} to={123} tail="left" whisper />
+			<Bubble x={Math.max(330, d.x + 120)} y={d.y - 60} text="СПИ, ИГОРЕЧЕК…" from={84} to={124} tail="left" whisper />
 		</AbsoluteFill>
 	);
 };

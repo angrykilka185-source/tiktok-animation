@@ -2,7 +2,7 @@
 // Authoring timeline = the voice (scripts/fit-voiceover.py --part r1).
 import {FPS, makeShots, Sign} from '../timeline';
 
-export const SHOT_SECONDS = [5.6, 3.0, 4.6, 2.6, 3.0, 5.6, 5.0, 4.9, 4.0, 5.4, 4.6, 4.5, 6.4, 3.3, 4.0, 4.8, 4.6, 5.7, 4.1, 3.5, 11.2];
+export const SHOT_SECONDS = [4.6, 2.833, 4.3, 2.067, 3.067, 5.567, 4.7, 4.3, 4.1, 6.0, 5.433, 4.033, 5.5, 3.033, 3.733, 4.367, 4.767, 5.333, 4.133, 2.8, 12.333];
 const built = makeShots(SHOT_SECONDS);
 export const SHOTS = built.shots;
 export const TOTAL = built.total;
@@ -15,7 +15,7 @@ const s = shotStart;
 export const SIGNS: Sign[] = [
 	{n: 1, title: 'ШАПКА\nВ ЛУЖЕ', at: s(8) + 96, hold: 40, y: 430},
 	{n: 2, title: 'МИНУС\n20 КОПЕЕК', at: s(10) + 30, hold: 34, y: 430},
-	{n: 3, title: 'СИНЯК', at: s(11) + 22, hold: 36, y: 430},
+	{n: 3, title: 'СИНЯК', at: s(11) + 40, hold: 36, y: 430},
 ];
 
 // the hook is tomorrow evening; then the clock jumps back a day (the flashback)

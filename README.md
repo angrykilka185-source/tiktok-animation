@@ -362,5 +362,7 @@ Narrator» (запись автора). Текст — `deliverables/s-kakogo-ra
 
 ```bash
 python3 scripts/fit-voiceover.py assets/rayon-1.mp3 --part r1
-npx remotion render Rayon1 out/rayon-1.mp4
+# 3D-сцены тяжёлые для браузера: рендер тремя частями параллельно (у каждой свой браузер), движок --gl=swangle,
+# звук — из лёгкой композиции Rayon1Audio (без картинки). ~20 минут вместо полутора часов.
+scripts/render-parallel.sh Rayon1 Rayon1Audio out/rayon-1.mp4
 ```

@@ -379,7 +379,7 @@ const Blackboard: React.FC<{f: number}> = ({f}) => {
 				{word.slice(0, shown)}
 			</text>
 			{f > 64 && (
-				<g transform="translate(1380,250) rotate(6) scale(0.7)" stroke="#f2f4ee" strokeWidth={9} fill="none" strokeLinecap="round" opacity={interpolate(f, [64, 70], [0, 0.9], clamp)}>
+				<g transform="translate(1380,190) rotate(6) scale(0.7)" stroke="#f2f4ee" strokeWidth={9} fill="none" strokeLinecap="round" opacity={interpolate(f, [64, 70], [0, 0.9], clamp)}>
 					<circle cx={0} cy={0} r={60} />
 					<path d="M -66,-20 Q 0,-110 66,-20 M 20,-90 l 16,-30" />
 					<circle cx={40} cy={-126} r={14} />

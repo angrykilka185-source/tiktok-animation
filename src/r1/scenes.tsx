@@ -556,20 +556,20 @@ export const S10: React.FC = () => {
 // 11. Заводские is the next yard; Санька lives there — your best friend since the first grade.
 const ZavodFar: React.FC<{f: number}> = ({f}) => (
 	<>
-		<Card3D x={1200} y={0} z={-9000} w={6000} h={9000}>
+		<Card3D x={1200} y={0} z={-9000} w={6000} h={9000} res={5}>
 			<FactoryArt f={f} />
 		</Card3D>
-		<Box3D x={-1700} y={0} z={-4600} w={5000} h={4400} d={3600} side="#a39b88">
+		<Box3D x={-1700} y={0} z={-4600} w={5000} h={4400} d={3600} side="#a39b88" res={3}>
 			<Facade w={5000} h={4400} color="#cbbfa6" seed={11} cols={7} />
 		</Box3D>
-		<Box3D x={4300} y={0} z={-6200} w={5000} h={4400} d={3600} side="#9a9382" sideOn="left">
+		<Box3D x={4300} y={0} z={-6200} w={5000} h={4400} d={3600} side="#9a9382" sideOn="left" res={3}>
 			<Facade w={5000} h={4400} color="#c2b8a2" seed={17} cols={7} />
 		</Box3D>
 		{[
 			[-300, -2600, 4],
 			[2300, -3400, 5],
 		].map(([x, z, k]) => (
-			<Card3D key={k} x={x} y={0} z={z} w={1000} h={2600}>
+			<Card3D key={k} x={x} y={0} z={z} w={1000} h={2600} res={2}>
 				<TreeArt f={f} seed={k} />
 			</Card3D>
 		))}

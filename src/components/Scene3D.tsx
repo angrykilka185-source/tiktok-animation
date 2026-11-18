@@ -59,7 +59,9 @@ export const Scene3D: React.FC<{cam: Cam3; bg?: string; far?: React.ReactNode; f
 );
 
 // a flat card: (x, y) = the card's anchor point in the world — bottom centre by default (things standing on the ground)
-// `view` = the SVG viewBox of the art inside; `ry` turns the card (side walls); `blur` overrides the depth of field
+// `view` = the SVG viewBox of the art inside; `ry` turns the card (side walls); `blur` overrides the depth of field.
+// `res` > 1 rasterises the art that many times smaller and scales it back up: Chrome rasterises a 3D card at its own
+// CSS size whatever its distance, so a huge far card (a house, the factory) would cost tens of megapixels per frame.
 export const Card3D: React.FC<{
 	x: number;
 	y: number;
@@ -73,20 +75,22 @@ export const Card3D: React.FC<{
 	opacity?: number;
 	children: React.ReactNode;
 	html?: boolean;
-}> = ({x, y, z, w, h, view, anchor = 'bottom', ry = 0, blur, opacity = 1, children, html = false}) => {
+	res?: number;
+}> = ({x, y, z, w, h, view, anchor = 'bottom', ry = 0, blur, opacity = 1, children, html = false, res = 1}) => {
 	const b = blur ?? 0;
 	const left = x - w / 2;
 	const top = anchor === 'bottom' ? y - h : y - h / 2;
+	const r = ry === 0 && !html ? Math.max(1, res) : 1;
 	return (
 		<div
 			style={{
 				position: 'absolute',
 				left: 0,
 				top: 0,
-				width: w,
-				height: h,
-				transform: `translate3d(${left}px, ${top}px, ${z}px) rotateY(${ry}deg)`,
-				transformOrigin: ry > 0 ? '0% 50%' : ry < 0 ? '100% 50%' : '50% 50%',
+				width: w / r,
+				height: h / r,
+				transform: `translate3d(${left}px, ${top}px, ${z}px) rotateY(${ry}deg)${r > 1 ? ` scale(${r})` : ''}`,
+				transformOrigin: r > 1 ? '0 0' : ry > 0 ? '0% 50%' : ry < 0 ? '100% 50%' : '50% 50%',
 				filter: b > 0.3 ? `blur(${b.toFixed(1)}px)` : undefined,
 				opacity,
 			}}
@@ -94,7 +98,7 @@ export const Card3D: React.FC<{
 			{html ? (
 				children
 			) : (
-				<svg width={w} height={h} viewBox={(view ?? [0, 0, w, h]).join(' ')} style={{position: 'absolute', inset: 0, overflow: 'visible'}}>
+				<svg width={w / r} height={h / r} viewBox={(view ?? [0, 0, w, h]).join(' ')} style={{position: 'absolute', inset: 0, overflow: 'visible'}}>
 					{children}
 				</svg>
 			)}
@@ -125,7 +129,7 @@ export const Floor3D: React.FC<{y: number; zNear: number; depth: number; w: numb
 );
 
 // a building block as a real box: the front wall (your 2D art) and a darker side wall going back
-export const Box3D: React.FC<{x: number; y: number; z: number; w: number; h: number; d: number; side?: string; roof?: string | null; children: React.ReactNode; blur?: number; sideOn?: 'left' | 'right'}> = ({
+export const Box3D: React.FC<{x: number; y: number; z: number; w: number; h: number; d: number; side?: string; roof?: string | null; children: React.ReactNode; blur?: number; sideOn?: 'left' | 'right'; res?: number}> = ({
 	x,
 	y,
 	z,
@@ -137,8 +141,10 @@ export const Box3D: React.FC<{x: number; y: number; z: number; w: number; h: num
 	children,
 	blur,
 	sideOn = 'right',
+	res = 1,
 }) => {
 	const b = blur ?? 0;
+	const r = Math.max(1, res);
 	const f = b > 0.3 ? `blur(${b.toFixed(1)}px)` : undefined;
 	const sx = sideOn === 'right' ? x + w / 2 : x - w / 2;
 	return (
@@ -148,8 +154,8 @@ export const Box3D: React.FC<{x: number; y: number; z: number; w: number; h: num
 			{/* roof */}
 			{roof && <div style={{position: 'absolute', left: 0, top: 0, width: w, height: d, transformOrigin: '50% 0%', transform: `translate3d(${x - w / 2}px, ${y - h}px, ${z}px) rotateX(-90deg)`, background: roof, filter: f}} />}
 			{/* front wall */}
-			<div style={{position: 'absolute', left: 0, top: 0, width: w, height: h, transform: `translate3d(${x - w / 2}px, ${y - h}px, ${z}px)`, filter: f}}>
-				<svg width={w} height={h} style={{position: 'absolute', inset: 0, overflow: 'visible'}}>
+			<div style={{position: 'absolute', left: 0, top: 0, width: w / r, height: h / r, transformOrigin: '0 0', transform: `translate3d(${x - w / 2}px, ${y - h}px, ${z}px)${r > 1 ? ` scale(${r})` : ''}`, filter: f}}>
+				<svg width={w / r} height={h / r} viewBox={`0 0 ${w} ${h}`} style={{position: 'absolute', inset: 0, overflow: 'visible'}}>
 					{children}
 				</svg>
 			</div>

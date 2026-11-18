@@ -148,26 +148,35 @@ export const FenceArt: React.FC<{w: number}> = ({w}) => (
 	</g>
 );
 
-// the ground: asphalt with fallen leaves (pattern), near edge at zNear (drawn in 1/6 units, see Floor3D)
-export const Ground3D: React.FC<{id: string; time: Time; zNear?: number}> = ({id, time, zNear = 2500}) => (
-	<Floor3D y={0} zNear={zNear} depth={42000} w={60000} res={6}>
-		<defs>
-			<pattern id={`${id}gp`} width={150} height={150} patternUnits="userSpaceOnUse">
-				<rect width={150} height={150} fill={time === 'day' ? '#77726a' : time === 'dusk' ? '#4a4646' : '#22222a'} />
-				<ellipse cx={34} cy={50} rx={30} ry={15} fill="#000" opacity={0.06} />
-				{[
-					[20, 24, '#d9a23a'],
-					[106, 36, '#c9782a'],
-					[64, 102, '#b8682a'],
-					[126, 120, '#e0b44a'],
-				].map(([x, y, c], k) => (
-					<ellipse key={k} cx={x as number} cy={y as number} rx={6} ry={3} fill={c as string} opacity={time === 'day' ? 0.85 : 0.4} transform={`rotate(${k * 40} ${x} ${y})`} />
-				))}
-			</pattern>
-		</defs>
-		<rect x={0} y={0} width={10000} height={7000} fill={`url(#${id}gp)`} />
-	</Floor3D>
-);
+// the ground: asphalt with fallen leaves near the camera (a 53 × 30 m plane rasterised 5× smaller, see Floor3D) and a
+// plain far plane beyond it — a solid colour is free to draw, a huge pattern costs seconds per frame
+const GR = 5;
+export const Ground3D: React.FC<{id: string; time: Time; zNear?: number}> = ({id, time, zNear = 2500}) => {
+	const base = time === 'day' ? '#77726a' : time === 'dusk' ? '#4a4646' : '#22222a';
+	const u = 6 / GR; // the leaves keep their world size
+	return (
+		<>
+			<Floor3D y={0} zNear={zNear} depth={9000} w={16000} x={1000} res={GR}>
+				<defs>
+					<pattern id={`${id}gp`} width={150 * u} height={150 * u} patternUnits="userSpaceOnUse">
+						<rect width={150 * u} height={150 * u} fill={base} />
+						<ellipse cx={34 * u} cy={50 * u} rx={30 * u} ry={15 * u} fill="#000" opacity={0.06} />
+						{[
+							[20, 24, '#d9a23a'],
+							[106, 36, '#c9782a'],
+							[64, 102, '#b8682a'],
+							[126, 120, '#e0b44a'],
+						].map(([x, y, c], k) => (
+							<ellipse key={k} cx={(x as number) * u} cy={(y as number) * u} rx={6 * u} ry={3 * u} fill={c as string} opacity={time === 'day' ? 0.85 : 0.4} transform={`rotate(${k * 40} ${(x as number) * u} ${(y as number) * u})`} />
+						))}
+					</pattern>
+				</defs>
+				<rect x={0} y={0} width={16000 / GR} height={9000 / GR} fill={`url(#${id}gp)`} />
+			</Floor3D>
+			<div style={{position: 'absolute', left: 0, top: 0, width: 60000, height: 40000, background: base, transformOrigin: '50% 0%', transform: `translate3d(-30000px, 0px, ${zNear - 9000}px) rotateX(-90deg)`}} />
+		</>
+	);
+};
 
 // the sky: the stage background (infinitely far — it doesn't slide)
 export const skyBg = (time: Time) => `linear-gradient(180deg, ${SKY[time][0]} 0%, ${SKY[time][0]} 22%, ${SKY[time][1]} 58%, ${SKY[time][1]} 100%)`;
@@ -179,13 +188,13 @@ export const YardFar: React.FC<{f: number; time?: Time}> = ({f, time = 'day'}) =
 	const wall2 = time === 'day' ? '#c9c2b0' : time === 'dusk' ? '#8a8072' : '#43414a';
 	return (
 		<>
-			<Card3D x={1300} y={0} z={-20000} w={6000} h={9000}>
+			<Card3D x={1300} y={0} z={-20000} w={6000} h={9000} res={6}>
 				<FactoryArt f={f} />
 			</Card3D>
-			<Box3D x={-2600} y={0} z={-6400} w={5600} h={4400} d={3600} side={time === 'day' ? '#a39b88' : '#3a3840'}>
+			<Box3D x={-2600} y={0} z={-6400} w={5600} h={4400} d={3600} side={time === 'day' ? '#a39b88' : '#3a3840'} res={4}>
 				<Facade w={5600} h={4400} color={wall} lit={lit} seed={3} cols={8} />
 			</Box3D>
-			<Box3D x={4600} y={0} z={-8400} w={5600} h={4400} d={3600} side={time === 'day' ? '#9a9382' : '#36343c'} sideOn="left">
+			<Box3D x={4600} y={0} z={-8400} w={5600} h={4400} d={3600} side={time === 'day' ? '#9a9382' : '#36343c'} sideOn="left" res={4}>
 				<Facade w={5600} h={4400} color={wall2} lit={lit} seed={7} cols={8} />
 			</Box3D>
 			{[
@@ -193,7 +202,7 @@ export const YardFar: React.FC<{f: number; time?: Time}> = ({f, time = 'day'}) =
 				[1100, -4400, 2],
 				[-500, -2300, 3],
 			].map(([x, z, k]) => (
-				<Card3D key={k} x={x} y={0} z={z} w={1000} h={2600}>
+				<Card3D key={k} x={x} y={0} z={z} w={1000} h={2600} res={2}>
 					<TreeArt f={f} seed={k} />
 				</Card3D>
 			))}

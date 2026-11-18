@@ -57,7 +57,10 @@ export type PersonProps = {
 	hideLegs?: boolean;
 	towel?: boolean;
 	armsBehind?: boolean; // arms drawn behind the body (hands hidden behind the back)
-	plain?: boolean; // extras: a plain jacket / dress (no work-jacket stripes, no dress dots or apron)
+	plain?: boolean; // extras: a plain jacket / dress (no work-jacket stripes, no dress dots or apron); hoodie kinds: a plain jacket (no hood)
+	cap?: string; // a flat cap of this colour (the 70s)
+	quilt?: boolean; // a quilted jacket (телогрейка): stitched bands across the torso
+	pioneer?: boolean; // a white shirt collar and a red pioneer tie (school uniform)
 };
 
 export const PALETTE = {
@@ -456,6 +459,19 @@ export const Head: React.FC<{
 	);
 };
 
+// a flat cap (кепка) over the hair; the visor points at the camera (no visor from behind)
+export const Cap: React.FC<{hw: number; hh: number; color: string; back?: boolean; turn?: number}> = ({hw, hh, color, back, turn = 0}) => {
+	const tx = turn * hw * 0.12;
+	return (
+		<g>
+			<path d={`M ${-hw * 1.1},${-hh * 0.3} C ${-hw * 1.16},${-hh * 1.3} ${hw * 1.16},${-hh * 1.3} ${hw * 1.1},${-hh * 0.3} Q 0,${-hh * 0.42} ${-hw * 1.1},${-hh * 0.3} Z`} fill={color} />
+			<path d={`M ${-hw * 1.1},${-hh * 0.3} Q 0,${-hh * 0.42} ${hw * 1.1},${-hh * 0.3}`} stroke="rgba(0,0,0,0.35)" strokeWidth={hw * 0.08} fill="none" />
+			{!back && <ellipse cx={tx} cy={-hh * 0.3} rx={hw * 0.95} ry={hh * 0.13} fill={color} stroke="rgba(0,0,0,0.3)" strokeWidth={hw * 0.05} />}
+			<circle cx={0} cy={-hh * 1.02} r={hw * 0.09} fill="rgba(0,0,0,0.3)" />
+		</g>
+	);
+};
+
 // ---------------------------------------------------------------------------
 // The signature look: a darker copy of the silhouette on the right half.
 export const Shaded: React.FC<{id: string; x0?: number; enabled?: boolean; opacity?: number; children: React.ReactNode}> = ({
@@ -603,6 +619,8 @@ export const Person: React.FC<PersonProps> = (p) => {
 		torso = (
 			<g>
 				<path d={`M ${-sw},${shY + 30} Q ${-sw},${shY} ${-sw + 34},${shY} L ${sw - 34},${shY} Q ${sw},${shY} ${sw},${shY + 30} L ${hwid + 6},${hipY + 18} L ${-hwid - 6},${hipY + 18} Z`} fill={top} />
+				{!sil && p.quilt && Array.from({length: 6}).map((_, k) => <rect key={`q${k}`} x={-sw + 6} y={shY + 40 + k * ((sp.torso - 50) / 6)} width={sw * 2 - 12} height={5} fill={topDark} opacity={0.8} />)}
+				{!sil && p.quilt && !p.back && <line x1={0} y1={shY + 10} x2={0} y2={hipY + 16} stroke={topDark} strokeWidth={6} />}
 				{!sil && p.kind === 'dad' && p.plain && !p.back && <path d={`M -34,${shY} L 0,${shY + 58} L 34,${shY}`} fill={sp.skin} />}
 				{!sil && p.kind === 'dad' && !p.plain && (
 					<>
@@ -621,7 +639,7 @@ export const Person: React.FC<PersonProps> = (p) => {
 						<rect x={-hwid - 6} y={hipY - 6} width={hwid * 2 + 12} height={26} fill="#2b2e33" />
 					</>
 				)}
-				{!sil && isHoodie(p.kind) && (
+				{!sil && isHoodie(p.kind) && !p.plain && (
 					<>
 						{!p.back ? (
 							<>
@@ -679,8 +697,20 @@ export const Person: React.FC<PersonProps> = (p) => {
 	const head = (
 		<g transform={`translate(0,${headCY}) rotate(${p.headTilt ?? 0})`}>
 			<Head kind={p.kind} face={p.face} back={p.back} turn={p.headTurn} silhouette={sil} uid={p.id} colors={p.colors} />
+			{p.cap && <Cap hw={sp.hw} hh={sp.hh} color={sil ?? p.cap} back={p.back} turn={p.headTurn ?? 0} />}
 		</g>
 	);
+
+	const pioneerTie =
+		p.pioneer && !sil && !p.back ? (
+			<g>
+				<path d={`M -46,${shY - 4} L -6,${shY + 26} L -40,${shY + 40} Z`} fill="#f4f2ec" />
+				<path d={`M 46,${shY - 4} L 6,${shY + 26} L 40,${shY + 40} Z`} fill="#f4f2ec" />
+				<path d={`M -14,${shY + 18} L 14,${shY + 18} L 10,${shY + 34} L -10,${shY + 34} Z`} fill="#c8102e" />
+				<path d={`M -8,${shY + 32} L -30,${shY + 120} L -14,${shY + 124} L 0,${shY + 40} Z`} fill="#d81e2c" />
+				<path d={`M 8,${shY + 32} L 26,${shY + 112} L 12,${shY + 118} L 0,${shY + 40} Z`} fill="#b70e1e" />
+			</g>
+		) : null;
 
 	const body = (
 		<g transform={`translate(0,${bob}) scale(${1 - breathe * 0.4},${1 + breathe})`}>
@@ -692,6 +722,7 @@ export const Person: React.FC<PersonProps> = (p) => {
 			{p.back ? backpack : null}
 			{backpackStraps}
 			{p.kind === 'girl' && !sil && !p.plain && <GirlNeck y0={shY} front={!p.back} />}
+			{pioneerTie}
 			{head}
 			{p.armsBehind ? null : arms}
 		</g>

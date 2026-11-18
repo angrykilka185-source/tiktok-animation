@@ -94,15 +94,26 @@ const CUES: Cue[] = [
 	{at: s(20) + 20, file: 'tick', vol: 0.35},
 	{at: s(20) + 48, file: 'tick', vol: 0.35},
 	{at: s(20) + 76, file: 'tick', vol: 0.35},
-	// 21 finale
-	{at: s(21), file: 'boom', vol: 1},
-	{at: s(21) + 8, file: 'pop', vol: 0.5},
-	{at: s(21) + 78, file: 'pop', vol: 0.5},
-	{at: s(21) + 150, file: 'beep', vol: 0.8},
-	{at: s(21) + 180, file: 'beep', vol: 0.8},
-	{at: s(21) + 210, file: 'beep', vol: 0.8},
-	{at: s(21) + 236, file: 'beep_final', vol: 0.9},
-	{at: s(21) + 252, file: 'whoosh', vol: 0.7},
+	// 21 «хватит» — ТЕРПЕНИЕ ЛОПНУЛО
+	{at: s(21) + 20, file: 'heart_big', vol: 0.6},
+	{at: s(21) + 34, file: 'boom', vol: 0.8},
+	{at: s(21) + 34, file: 'stamp', vol: 1},
+	// 22 19:00, the garages: you walk into the light
+	{at: s(22), file: 'steps', vol: 0.45, len: 80},
+	{at: s(22) + 6, file: 'howl', vol: 0.25},
+	// 23 «Ну что, Игоречек, решил?» — «Я с вами»
+	{at: s(23) + 4, file: 'pop', vol: 0.4},
+	{at: s(23) + 64, file: 'pop', vol: 0.4},
+	{at: s(23) + 118, file: 'stamp', vol: 0.5},
+	// 24 the handshake; the camera flies up
+	{at: s(24) + 22, file: 'pat', vol: 0.7},
+	{at: s(24) + 30, file: 'swell', vol: 0.5},
+	...W(24, 100),
+	{at: s(24) + 110, file: 'heart_big', vol: 0.5},
+	// 25 «А ты бы пришился?» — the series card
+	{at: s(25) + 4, file: 'boom', vol: 0.8},
+	{at: s(25) + 18, file: 'pop', vol: 0.5},
+	{at: s(25) + 92, file: 'whoosh', vol: 0.7},
 	// humiliation plaques
 	...SIGNS.flatMap((g) => [
 		{at: g.at, file: 'stamp', vol: 1},

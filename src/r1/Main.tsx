@@ -36,3 +36,11 @@ export const Rayon1: React.FC = () => (
 		<SFXR1 r={RR1} />
 	</AbsoluteFill>
 );
+
+// the same sound without the picture — an audio-only render of the 3D episode then takes seconds, not an hour
+// (npx remotion render Rayon1Audio out/r1-audio.wav --codec=wav)
+export const Rayon1Audio: React.FC = () => (
+	<AbsoluteFill style={{background: '#000'}}>
+		<SFXR1 r={RR1} />
+	</AbsoluteFill>
+);

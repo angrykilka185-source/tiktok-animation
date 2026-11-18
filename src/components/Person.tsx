@@ -22,6 +22,7 @@ export type Face = {
 	sweat?: number; // 0..1
 	stubble?: boolean;
 	blush?: boolean;
+	glasses?: boolean; // the «Голосовые» teen wears glasses unless false
 };
 
 // ku / kf: visible length of the upper arm / forearm (0..1). Values < 1 fake
@@ -30,7 +31,7 @@ export type ArmPose =
 	| {shoulder: number; elbow: number; ku?: number; kf?: number}
 	| {target: [number, number]; bend?: 1 | -1; ku?: number; kf?: number};
 
-export type Kind = 'dad' | 'mom' | 'son' | 'teen' | 'girl'; // teen = hero of «Голосовые из завтра», girl = hero of «Кнопка 13»
+export type Kind = 'dad' | 'mom' | 'son' | 'teen' | 'girl' | 'boy'; // teen = hero of «Голосовые из завтра», girl = hero of «Кнопка 13», boy = hero of «Ты с какого района?» (1976)
 
 export type Colors = Partial<Pick<Spec, 'top' | 'topDark' | 'pants' | 'shoes' | 'hair' | 'skin'>>;
 
@@ -118,6 +119,14 @@ export const SPECS: Record<Kind, Spec> = {
 		upper: 170, fore: 160, armW: 50, hand: 24,
 		top: '#cf4a3c', topDark: '#b13c30', pants: '#2b2d33', shoes: '#e8e6e0', hair: '#1f1a1a', skin: '#e8b48e',
 	},
+	boy: {
+		leg: 336, legW: 64, legGap: 12,
+		torso: 304, shoulderW: 220, hipW: 194,
+		neck: 32, neckW: 46,
+		hw: 84, hh: 94,
+		upper: 162, fore: 152, armW: 54, hand: 25,
+		top: '#2c3a66', topDark: '#222e52', pants: '#2c3a66', shoes: '#1a1a1e', hair: '#b4542a', skin: '#f6cba8',
+	},
 	girl: {
 		leg: 350, legW: 54, legGap: 16,
 		torso: 300, shoulderW: 200, hipW: 186,
@@ -194,8 +203,8 @@ export const Head: React.FC<{
 
 	const ears = (
 		<>
-			<ellipse cx={-hw * 1.0} cy={hh * 0.08} rx={hw * 0.17} ry={hh * 0.17} fill={skin} />
-			<ellipse cx={hw * 1.0} cy={hh * 0.08} rx={hw * 0.17} ry={hh * 0.17} fill={skin} />
+			<ellipse cx={-hw * (kind === 'boy' ? 1.04 : 1.0)} cy={hh * 0.08} rx={hw * (kind === 'boy' ? 0.25 : 0.17)} ry={hh * (kind === 'boy' ? 0.24 : 0.17)} fill={skin} />
+			<ellipse cx={hw * (kind === 'boy' ? 1.04 : 1.0)} cy={hh * 0.08} rx={hw * (kind === 'boy' ? 0.25 : 0.17)} ry={hh * (kind === 'boy' ? 0.24 : 0.17)} fill={skin} />
 		</>
 	);
 
@@ -237,6 +246,17 @@ export const Head: React.FC<{
 				fill={hair}
 				stroke={hair}
 				strokeWidth={hw * 0.08}
+				strokeLinejoin="round"
+			/>
+		);
+	} else if (kind === 'boy') {
+		const P = (x: number, y: number) => `${hw * x},${hh * y}`;
+		hairFront = (
+			<path
+				d={`M ${P(-1.1, 0.02)} C ${P(-1.26, -1.36)} ${P(1.26, -1.36)} ${P(1.1, 0.02)} L ${P(0.98, -0.02)} L ${P(0.96, -0.36)} L ${P(0.7, -0.3)} L ${P(0.52, -0.38)} L ${P(0.28, -0.3)} L ${P(0.06, -0.38)} L ${P(-0.18, -0.3)} L ${P(-0.42, -0.38)} L ${P(-0.66, -0.3)} L ${P(-0.96, -0.36)} L ${P(-0.98, -0.02)} Z`}
+				fill={hair}
+				stroke={hair}
+				strokeWidth={hw * 0.05}
 				strokeLinejoin="round"
 			/>
 		);
@@ -418,7 +438,7 @@ export const Head: React.FC<{
 				)}
 				{eye(-ex)}
 				{eye(ex)}
-				{kind === 'teen' && (
+				{kind === 'teen' && face.glasses !== false && (
 					<g stroke="#1d1d22" strokeWidth={hw * 0.065} fill="none" strokeLinecap="round">
 						<circle cx={-ex} cy={ey} r={hw * 0.33} fill="#ffffff" fillOpacity={0.08} />
 						<circle cx={ex} cy={ey} r={hw * 0.33} fill="#ffffff" fillOpacity={0.08} />
@@ -447,6 +467,10 @@ export const Head: React.FC<{
 						<path d={`M ${ex},${ey + eRy} L ${ex + 2},${ey + eRy + hh * 0.55 * tears}`} stroke={PALETTE.tear} strokeWidth={hw * 0.07} strokeLinecap="round" />
 					</>
 				)}
+				{kind === 'boy' && !silhouette &&
+					[
+						[-0.5, 0.22], [-0.38, 0.3], [-0.58, 0.34], [-0.44, 0.16], [0.5, 0.22], [0.38, 0.3], [0.58, 0.34], [0.44, 0.16], [-0.08, 0.12], [0.08, 0.14],
+					].map(([fx, fy], i) => <circle key={`fr${i}`} cx={hw * fx} cy={hh * fy} r={hw * 0.035} fill="#c77a4a" opacity={0.7} />)}
 				{(face.sweat ?? 0) > 0 && (
 					<path
 						d={`M ${hw * 0.82},${-hh * 0.5 + hh * 0.3 * (face.sweat ?? 0)} q ${-hw * 0.09},${hh * 0.12} 0,${hh * 0.15} q ${hw * 0.09},${-hh * 0.03} 0,${-hh * 0.15} Z`}
@@ -738,7 +762,7 @@ export const Person: React.FC<PersonProps> = (p) => {
 };
 
 // Head-and-shoulders bust for close-ups (head centred at 0,0).
-export const Bust: React.FC<{kind: Kind; id: string; face?: Face; x?: number; y?: number; scale?: number; tilt?: number; turn?: number; colors?: Colors}> = ({
+export const Bust: React.FC<{kind: Kind; id: string; face?: Face; x?: number; y?: number; scale?: number; tilt?: number; turn?: number; colors?: Colors; plain?: boolean}> = ({
 	kind,
 	id,
 	face,
@@ -748,6 +772,7 @@ export const Bust: React.FC<{kind: Kind; id: string; face?: Face; x?: number; y?
 	tilt = 0,
 	turn = 0,
 	colors,
+	plain = false,
 }) => {
 	const sp = {...SPECS[kind], ...(colors ?? {})};
 	const neckTop = sp.hh * 0.85;
@@ -759,7 +784,15 @@ export const Bust: React.FC<{kind: Kind; id: string; face?: Face; x?: number; y?
 				<g>
 					<rect x={-sp.neckW / 2} y={neckTop - 30} width={sp.neckW} height={sp.neck + 60} fill={sp.skin} />
 					<path d={`M ${-sw - 60},${shY + 600} L ${-sw},${shY + 60} Q ${-sw},${shY} ${-sw + 60},${shY} L ${sw - 60},${shY} Q ${sw},${shY} ${sw},${shY + 60} L ${sw + 60},${shY + 600} Z`} fill={sp.top} />
-					{isHoodie(kind) && (
+					{/* plain: a jacket with lapels over a light sweater instead of the hoodie */}
+					{isHoodie(kind) && plain && (
+						<>
+							<path d={`M -44,${shY - 2} L 0,${shY + 76} L 44,${shY - 2} Z`} fill="#d9d2c0" />
+							<path d={`M -58,${shY - 6} L -6,${shY + 130} L -34,${shY + 168} L -100,${shY + 14} Z`} fill={sp.topDark} />
+							<path d={`M 58,${shY - 6} L 6,${shY + 130} L 34,${shY + 168} L 100,${shY + 14} Z`} fill={sp.topDark} />
+						</>
+					)}
+					{isHoodie(kind) && !plain && (
 						<>
 							<path d={`M -70,${shY - 2} Q 0,${shY + 60} 70,${shY - 2}`} fill={sp.topDark} />
 							<line x1={-22} y1={shY + 30} x2={-26} y2={shY + 150} stroke="#f7efe3" strokeWidth={7} strokeLinecap="round" />

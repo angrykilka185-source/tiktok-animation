@@ -122,6 +122,7 @@ const HAPPY: Record<Kind, Face> = {
 	teen: {eyes: 'open', mouth: 'smile', brows: 'neutral', look: [0, 0]},
 	dad: {},
 	mom: {},
+	boy: {},
 };
 const HOPE: Record<Kind, Face> = {
 	girl: {eyes: 'wide', mouth: 'smile', brows: 'raised', look: [0, 0], pupil: 0.8},
@@ -129,6 +130,7 @@ const HOPE: Record<Kind, Face> = {
 	teen: {eyes: 'wide', mouth: 'smile', brows: 'raised', look: [0, 0], pupil: 0.8},
 	dad: {},
 	mom: {},
+	boy: {},
 };
 
 // the hand of the son from «Вахта» (orange sleeve), pointing up-left

@@ -49,7 +49,7 @@ export const SEATS = [-3, -2, -1, 0, 1, 2, 3, 4];
 export const SON_SEAT = 0;
 export const DAD_SEAT = 1;
 // people in the seats, relative to the row's perspective scale (heads and shoulders above the seat backs)
-export const VSCALE: Record<Kind, number> = {son: 0.64, girl: 0.64, teen: 0.62, mom: 0.6, dad: 0.6};
+export const VSCALE: Record<Kind, number> = {son: 0.64, girl: 0.64, teen: 0.62, mom: 0.6, dad: 0.6, boy: 0.64};
 
 // popcorn in a striped bucket; (x, y) = bottom centre
 export const Popcorn: React.FC<{x: number; y: number; s: number}> = ({x, y, s}) => (

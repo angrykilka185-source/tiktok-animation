@@ -13,8 +13,8 @@ const s = shotStart;
 
 // the rules of the yard — plaques that fly into the «ПОНЯТИЯ» counter
 export const SIGNS: Sign[] = [
-	{n: 1, title: 'СВОИХ\nНЕ СДАЮТ', at: s(7) + 58, hold: 44},
-	{n: 2, title: 'СЛОВО ДАЛ —\nДЕРЖИ', at: s(8) + 30, hold: 40},
+	{n: 1, title: 'СВОИХ\nНЕ СДАЮТ', at: s(7) + 58, hold: 44, y: 430},
+	{n: 2, title: 'СЛОВО ДАЛ —\nДЕРЖИ', at: s(8) + 30, hold: 40, y: 430},
 ];
 
 export const CLOCK: {from: number; text: string}[] = [

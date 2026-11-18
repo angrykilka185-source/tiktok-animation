@@ -20,7 +20,7 @@ const SEAT = '#a82a2a';
 const SEAT_D = '#7e1d1d';
 
 // play a scene from its frame `at` (the film on the screen)
-const Play: React.FC<{at: number; children: React.ReactNode}> = ({at, children}) => (
+export const Play: React.FC<{at: number; children: React.ReactNode}> = ({at, children}) => (
 	<Sequence from={-at} layout="none">
 		{children}
 	</Sequence>
@@ -28,7 +28,7 @@ const Play: React.FC<{at: number; children: React.ReactNode}> = ({at, children})
 
 // ======================================================= scene pieces =====
 // a cinema seat seen from the front; (x, y) = front edge of the cushion
-const Seat: React.FC<{x: number; y: number; s: number; up?: number}> = ({x, y, s, up = 0}) => (
+export const Seat: React.FC<{x: number; y: number; s: number; up?: number}> = ({x, y, s, up = 0}) => (
 	<g>
 		<rect x={x - 64 * s} y={y - 200 * s} width={128 * s} height={196 * s} rx={30 * s} fill={SEAT_D} />
 		<rect x={x - 54 * s} y={y - 186 * s} width={108 * s} height={150 * s} rx={22 * s} fill={SEAT} />
@@ -39,20 +39,20 @@ const Seat: React.FC<{x: number; y: number; s: number; up?: number}> = ({x, y, s
 		<rect x={x + 66 * s} y={y - 70 * s} width={16 * s} height={110 * s} rx={6 * s} fill="#2a2226" />
 	</g>
 );
-const AISLE = 140; // a cross aisle in front of row 7: nobody in front hides you and dad
-const rowY = (k: number) => 1820 - (k - 1) * 118 + (k <= 6 ? AISLE : 0); // k = 1 is the row nearest to the screen
-const rowS = (k: number) => 1.05 - 0.06 * (k - 1);
+export const AISLE = 140; // a cross aisle in front of row 7: nobody in front hides you and dad
+export const rowY = (k: number) => 1820 - (k - 1) * 118 + (k <= 6 ? AISLE : 0); // k = 1 is the row nearest to the screen
+export const rowS = (k: number) => 1.05 - 0.06 * (k - 1);
 // seats i = -3..4; 0 and 1 are the middle ones. Even rows are staggered half a seat to the left
 // (so the seat «right behind you» in row 8 shows beside your head)
-const seatX = (k: number, i: number) => 540 + (i - 0.5 - (k % 2 === 0 ? 0.5 : 0)) * 205 * rowS(k);
-const SEATS = [-3, -2, -1, 0, 1, 2, 3, 4];
-const SON_SEAT = 0;
-const DAD_SEAT = 1;
+export const seatX = (k: number, i: number) => 540 + (i - 0.5 - (k % 2 === 0 ? 0.5 : 0)) * 205 * rowS(k);
+export const SEATS = [-3, -2, -1, 0, 1, 2, 3, 4];
+export const SON_SEAT = 0;
+export const DAD_SEAT = 1;
 // people in the seats, relative to the row's perspective scale (heads and shoulders above the seat backs)
-const VSCALE: Record<Kind, number> = {son: 0.64, girl: 0.64, teen: 0.62, mom: 0.6, dad: 0.6};
+export const VSCALE: Record<Kind, number> = {son: 0.64, girl: 0.64, teen: 0.62, mom: 0.6, dad: 0.6};
 
 // popcorn in a striped bucket; (x, y) = bottom centre
-const Popcorn: React.FC<{x: number; y: number; s: number}> = ({x, y, s}) => (
+export const Popcorn: React.FC<{x: number; y: number; s: number}> = ({x, y, s}) => (
 	<g transform={`translate(${x},${y}) scale(${s})`}>
 		{[-30, -6, 18, 38, -18, 8, 30].map((px, k) => (
 			<circle key={k} cx={px * 0.9} cy={-112 - (k > 3 ? 18 : 0)} r={18} fill="#fff3c4" stroke="#e8c870" strokeWidth={3} />
@@ -66,7 +66,7 @@ const Popcorn: React.FC<{x: number; y: number; s: number}> = ({x, y, s}) => (
 
 type Arm = {target: [number, number]; bend?: 1 | -1; ku?: number; kf?: number};
 // one of the two heroes sitting in a seat of row k (hips on the cushion)
-const Sitter: React.FC<{kind: 'son' | 'dad'; k: number; i: number; id: string; f: number; face?: Face; back?: boolean; silhouette?: string; headTurn?: number; lean?: number; armL?: Arm; armR?: Arm; popcorn?: boolean}> = ({
+export const Sitter: React.FC<{kind: 'son' | 'dad'; k: number; i: number; id: string; f: number; face?: Face; back?: boolean; silhouette?: string; headTurn?: number; lean?: number; armL?: Arm; armR?: Arm; popcorn?: boolean}> = ({
 	kind,
 	k,
 	i,
@@ -93,7 +93,7 @@ const Sitter: React.FC<{kind: 'son' | 'dad'; k: number; i: number; id: string; f
 	);
 };
 // dad's ticket, left on his seat when he is gone
-const SeatTicket: React.FC = () => (
+export const SeatTicket: React.FC = () => (
 	<g transform={`translate(${seatX(7, DAD_SEAT)},${rowY(7) - 18}) rotate(-8) scale(${rowS(7)})`}>
 		<rect x={-34} y={-12} width={68} height={26} rx={3} fill="#f4e6c4" />
 		<rect x={18} y={-12} width={2} height={26} fill="#c9b48a" />
@@ -101,7 +101,7 @@ const SeatTicket: React.FC = () => (
 );
 
 // where a hero's face is in the scene (for spotlights and labels)
-const faceAt = (kind: 'son' | 'dad', k: number, i: number) => {
+export const faceAt = (kind: 'son' | 'dad', k: number, i: number) => {
 	const sp = SPECS[kind];
 	const s = rowS(k) * VSCALE[kind];
 	const hip = rowY(k) - 26 * rowS(k);
@@ -113,7 +113,7 @@ const VCOL = ['#3b6fd6', '#d65a3b', '#3d8b5a', '#8a5ab8', '#e0a526', '#2a9a9a', 
 const VHAIR = ['#2a1a12', '#8a5a32', '#e8c060', '#c27b3a', '#1f1a1a', '#a6a6a6', '#5a3a2a'];
 const VKINDS = ['son', 'girl', 'mom', 'dad', 'teen', 'mom', 'dad'] as const;
 type Mood = 'laugh' | 'watch' | 'clap';
-const Viewer: React.FC<{k: number; i: number; f: number; mood: Mood; idp: string}> = ({k, i, f, mood, idp}) => {
+export const Viewer: React.FC<{k: number; i: number; f: number; mood: Mood; idp: string}> = ({k, i, f, mood, idp}) => {
 	const seed = k * 11 + (i + 3) * 7;
 	const front = k === 6 && (i === SON_SEAT || i === DAD_SEAT);
 	const kind: Kind = front ? (i === SON_SEAT ? 'girl' : 'son') : VKINDS[Math.floor(rnd(seed) * VKINDS.length)];
@@ -147,7 +147,7 @@ const Viewer: React.FC<{k: number; i: number; f: number; mood: Mood; idp: string
 // the hall seen from the screen: rows of red seats (full of people if `full`), the projector beam.
 // children = the heroes in row 7; row8 = whoever is in the seat right behind you
 // dim = 0..1 darkens everybody but the heroes (they are what the shot is about)
-const HallFront: React.FC<{f: number; idp: string; full?: boolean; mood?: Mood; light?: number; dim?: number; children?: React.ReactNode; row8?: React.ReactNode; emptyBehind?: boolean; behindUp?: number; behindRing?: number; hideRow7?: boolean; behindOnly?: boolean}> = ({
+export const HallFront: React.FC<{f: number; idp: string; full?: boolean; mood?: Mood; light?: number; dim?: number; children?: React.ReactNode; row8?: React.ReactNode; emptyBehind?: boolean; behindUp?: number; behindRing?: number; hideRow7?: boolean; behindOnly?: boolean}> = ({
 	f,
 	idp,
 	full = true,
@@ -218,7 +218,7 @@ const HallFront: React.FC<{f: number; idp: string; full?: boolean; mood?: Mood; 
 };
 
 // a head-and-shoulders silhouette of somebody in the audience, seen from behind
-const HeadSil: React.FC<{x: number; y: number; s: number}> = ({x, y, s}) => (
+export const HeadSil: React.FC<{x: number; y: number; s: number}> = ({x, y, s}) => (
 	<g transform={`translate(${x},${y}) scale(${s})`}>
 		<path d="M -110,140 Q -110,60 -40,50 L 40,50 Q 110,60 110,140 L 110,240 L -110,240 Z" fill="#0d0a0c" />
 		<ellipse cx={0} cy={0} rx={62} ry={74} fill="#0d0a0c" />
@@ -226,7 +226,8 @@ const HeadSil: React.FC<{x: number; y: number; s: number}> = ({x, y, s}) => (
 );
 
 // the cinema screen seen over the audience; `children` is the film (a 1080×1920 scene, its middle band shown)
-const ScreenView: React.FC<{f: number; children?: React.ReactNode; zoom?: number; dark?: number; heads?: 'both' | 'son'}> = ({f, children, zoom = 1, dark = 0, heads = 'both'}) => {
+export const ScreenView: React.FC<{f: number; children?: React.ReactNode; zoom?: number; dark?: number; heads?: 'both' | 'son'; bob?: number}> = ({f, children, zoom = 1, dark = 0, heads = 'both', bob = 0}) => {
+	const b = (i: number) => (bob ? -Math.abs(Math.sin(f / 2.2 + i * 1.7)) * bob : 0); // heads shaking with laughter
 	const flick = 0.94 + 0.06 * rnd(Math.floor(f / 2));
 	return (
 		<AbsoluteFill style={{background: '#050507', overflow: 'hidden'}}>
@@ -248,10 +249,10 @@ const ScreenView: React.FC<{f: number; children?: React.ReactNode; zoom?: number
 					<rect x={0} y={1230} width={1080} height={690} fill="url(#f1spill)" />
 					{/* a full hall: heads of the rows in front of the camera */}
 					{[-3, -2, -1, 0, 1, 2, 3, 4].map((i) => (
-						<HeadSil key={`a${i}`} x={540 + (i - 0.5) * 175} y={1290 + (i % 2) * 6} s={0.42} />
+						<HeadSil key={`a${i}`} x={540 + (i - 0.5) * 175} y={1290 + (i % 2) * 6 + b(i)} s={0.42} />
 					))}
 					{[-2, -1, 2, 3].map((i) => (
-						<HeadSil key={`b${i}`} x={540 + (i - 0.5) * 210} y={1345} s={0.6} />
+						<HeadSil key={`b${i}`} x={540 + (i - 0.5) * 210} y={1345 + b(i + 9)} s={0.6} />
 					))}
 					<HeadSil x={470} y={1340} s={0.52} />
 					{heads === 'both' && <HeadSil x={660} y={1318} s={0.66} />}
@@ -259,7 +260,7 @@ const ScreenView: React.FC<{f: number; children?: React.ReactNode; zoom?: number
 						<rect key={`r7${i}`} x={540 + (i - 0.5) * 230 - 100} y={1430} width={200} height={240} rx={40} fill="#1f0a0c" />
 					))}
 					{[-1, 0, 1, 2].map((i) => (
-						<HeadSil key={`c${i}`} x={540 + (i - 0.5) * 330} y={1690} s={1.0} />
+						<HeadSil key={`c${i}`} x={540 + (i - 0.5) * 330} y={1690 + b(i + 4) * 1.6} s={1.0} />
 					))}
 				</svg>
 			</AbsoluteFill>
@@ -268,7 +269,7 @@ const ScreenView: React.FC<{f: number; children?: React.ReactNode; zoom?: number
 };
 
 // a film title card on the screen, «Папа» style
-const FilmTitle: React.FC<{t: number; big: string; small?: string; color?: string; size?: number}> = ({t, big, small, color = '#fff', size = 120}) => (
+export const FilmTitle: React.FC<{t: number; big: string; small?: string; color?: string; size?: number}> = ({t, big, small, color = '#fff', size = 120}) => (
 	<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 45%, #3a2a10 0%, #1a1208 58%, #070503 100%)'}}>
 		<div style={{position: 'absolute', top: 760, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900}}>
 			{small && <div style={{fontSize: 40, letterSpacing: 12, color: '#ff4a3d', opacity: interpolate(t, [0, 8], [0, 1], clamp)}}>{small}</div>}
@@ -316,7 +317,7 @@ const SpaceToon: React.FC<{t: number; end?: boolean}> = ({t, end = false}) => {
 };
 
 // the picture tears: shifted slices, colour fringes, colour bars and noise, then black
-const BrokenFeed: React.FC<{t: number; jerk: number; bars: number; black: number; children: React.ReactNode}> = ({t, jerk, bars, black, children}) => (
+export const BrokenFeed: React.FC<{t: number; jerk: number; bars: number; black: number; children: React.ReactNode}> = ({t, jerk, bars, black, children}) => (
 	<AbsoluteFill style={{background: '#000', overflow: 'hidden'}}>
 		{jerk <= 0 && children}
 		{jerk > 0 && Array.from({length: 12}).map((_, k) => {
@@ -345,7 +346,7 @@ const BrokenFeed: React.FC<{t: number; jerk: number; bars: number; black: number
 );
 
 // the ticket: front (the cartoon, hall, row, seat, price) or back (dad's handwriting); write = 0..1
-const Ticket: React.FC<{side: 'front' | 'back'; write?: number}> = ({side, write = 1}) => (
+export const Ticket: React.FC<{side: 'front' | 'back'; write?: number}> = ({side, write = 1}) => (
 	<div style={{position: 'absolute', left: 140, top: 520, width: 800, height: 420, borderRadius: 18, background: side === 'front' ? '#f4e6c4' : '#efe2c0', boxShadow: '0 30px 60px rgba(0,0,0,0.5)', fontFamily: HEAVY, fontWeight: 900, color: '#3a2a1a', overflow: 'hidden', boxSizing: 'border-box', padding: '34px 50px'}}>
 		<div style={{position: 'absolute', left: 600, top: 0, bottom: 0, borderLeft: '6px dashed #c9b48a'}} />
 		{side === 'front' ? (
@@ -432,7 +433,7 @@ const Entrance: React.FC = () => (
 );
 
 // the hall as the film shows it (full, like the real one)
-const FilmHall: React.FC<{t: number; idp: string; sonBack?: boolean; dad?: boolean; ring?: number; shadow?: number; zoom?: number}> = ({t, idp, sonBack = false, dad = true, ring = 0, shadow = 0, zoom = 1.7}) => (
+export const FilmHall: React.FC<{t: number; idp: string; sonBack?: boolean; dad?: boolean; ring?: number; shadow?: number; zoom?: number}> = ({t, idp, sonBack = false, dad = true, ring = 0, shadow = 0, zoom = 1.7}) => (
 	<Stage cam={{s: zoom, cx: 540, cy: 900}} light={{glow: 0, vignette: 0.8}} bg="#1d161b">
 		<HallFront
 			f={t}
@@ -454,7 +455,7 @@ const FilmHall: React.FC<{t: number; idp: string; sonBack?: boolean; dad?: boole
 	</Stage>
 );
 
-const Label: React.FC<{p: number; x: number; y: number; text: string; color: string}> = ({p, x, y, text, color}) =>
+export const Label: React.FC<{p: number; x: number; y: number; text: string; color: string}> = ({p, x, y, text, color}) =>
 	p > 0.01 ? <div style={{position: 'absolute', left: x, top: y, transform: `scale(${p})`, transformOrigin: '0 0', background: 'rgba(14,14,16,0.9)', border: `5px solid ${color}`, borderRadius: 14, padding: '4px 20px', fontFamily: HEAVY, fontWeight: 900, fontSize: 42, color}}>{text}</div> : null;
 
 // ============================================================== SHOTS =======

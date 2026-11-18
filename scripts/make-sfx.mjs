@@ -873,3 +873,45 @@ write('lift_ding', room(add(ping([1318.5, 2637], 1.2, 0.35), ping([1046.5, 2093]
 	}
 	write('siren', room(lowpass(x, 3200), 0.45, 2.2), 0.5);
 }
+
+// ---------- «Фильм про тебя», часть 2 ----------
+// the film projector: the claw clicking 24 times a second over the motor hum (loops cleanly at 4 s)
+{
+	const dur = 4;
+	const x = buf(dur);
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		x[i] = 0.18 * Math.sin(2 * Math.PI * 100 * t) + 0.08 * Math.sin(2 * Math.PI * 200 * t) + 0.05 * Math.sin(2 * Math.PI * 300 * t) + 0.03 * noise();
+	}
+	for (let k = 0; k < dur * 24; k++) {
+		const c = click(0.012, 2400 + 600 * rnd(), 4);
+		add(x, c, k / 24, 0.55 + 0.15 * rnd());
+		add(x, click(0.008, 900, 2), k / 24 + 0.018, 0.25);
+	}
+	write('projector', room(bandpass(x, 60, 6000), 0.12, 0.6), 0.6);
+}
+// a full hall laughing: many voices, each a few «ha»s (a buzz through «a» formants), with room echo
+{
+	const dur = 3.2;
+	const x = buf(dur);
+	for (let v = 0; v < 14; v++) {
+		const f0 = 150 + rnd() * 160;
+		let t = rnd() * 0.6;
+		const n = 3 + Math.floor(rnd() * 4);
+		for (let h = 0; h < n && t < dur - 0.3; h++) {
+			const len = 0.11 + rnd() * 0.06;
+			const y = buf(len);
+			let ph = 0;
+			for (let i = 0; i < y.length; i++) {
+				const tt = i / SR;
+				ph += (f0 * (1 - 0.15 * tt / len) * (1 - 0.04 * h)) / SR;
+				const saw = 2 * (ph % 1) - 1;
+				y[i] = (saw * 0.7 + noise() * 0.5) * Math.sin(Math.PI * Math.min(1, tt / len));
+			}
+			const vowel = reso(reso(y, 750 + rnd() * 150, 6), 1150 + rnd() * 200, 5);
+			add(x, vowel, t, (0.6 + 0.4 * rnd()) * (1 - 0.1 * h));
+			t += len + 0.04 + rnd() * 0.05;
+		}
+	}
+	write('laugh', room(bandpass(x, 200, 4500), 0.4, 1.6), 0.5);
+}

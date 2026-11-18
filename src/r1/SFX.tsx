@@ -10,12 +10,12 @@ const W = (shot: number, ...offs: number[]): Cue[] => offs.map((o) => ({at: s(sh
 
 const CUES: Cue[] = [
 	// 1 the hook: tomorrow 19:00 at the door of the качалка; the rewind
-	{at: 0, file: 'heart', vol: 0.5, len: 130},
+	{at: 0, file: 'heart', vol: 0.5, len: 146},
 	{at: 2, file: 'flicker', vol: 0.4},
 	{at: 6, file: 'stamp', vol: 0.9},
-	{at: 100, file: 'swell', vol: 0.4},
-	{at: 120, file: 'rewind', vol: 0.8},
-	{at: 132, file: 'whoosh', vol: 0.7},
+	{at: 114, file: 'swell', vol: 0.4},
+	{at: 134, file: 'rewind', vol: 0.8},
+	{at: 146, file: 'whoosh', vol: 0.7},
 	// 2 the blackboard: «ИГОРЕЧЕК» in chalk
 	{at: s(2) + 26, file: 'typing', vol: 0.35, len: 38},
 	{at: s(2) + 70, file: 'laugh', vol: 0.4, len: 22},
@@ -64,8 +64,8 @@ const CUES: Cue[] = [
 	// 12 Тяп-ляп
 	{at: s(12), file: 'howl', vol: 0.3},
 	{at: s(12), file: 'steps_slow', vol: 0.6, len: 135},
-	{at: s(12) + 98, file: 'boom', vol: 0.9},
-	{at: s(12) + 98, file: 'stamp', vol: 0.6},
+	{at: s(12) + 102, file: 'boom', vol: 0.9},
+	{at: s(12) + 102, file: 'stamp', vol: 0.6},
 	// 13 they walk; Сазон looks down
 	{at: s(13), file: 'steps', vol: 0.5, len: 112},
 	...W(13, 112),
@@ -84,7 +84,7 @@ const CUES: Cue[] = [
 	{at: s(17) + 90, file: 'heart_big', vol: 0.6},
 	// 18 alone under the lamp
 	{at: s(18) + 8, file: 'flicker', vol: 0.5},
-	{at: s(18) + 78, file: 'steps', vol: 0.3, len: 80},
+	{at: s(18) + 86, file: 'steps', vol: 0.3, len: 80},
 	{at: s(18) + 100, file: 'howl', vol: 0.25},
 	// 19 night: «Спи, Игоречек…»
 	{at: s(19) + 2, file: 'tick', vol: 0.25},
@@ -98,7 +98,7 @@ const CUES: Cue[] = [
 	{at: s(21), file: 'steps', vol: 0.45, len: 70},
 	{at: s(21) + 20, file: 'slam', vol: 0.2},
 	{at: s(21) + 52, file: 'slam', vol: 0.2},
-	{at: s(21) + 84, file: 'slam', vol: 0.2},
+	{at: s(21) + 66, file: 'slam', vol: 0.2},
 	// 22 your hand stops short of the handle
 	{at: s(22), file: 'heart_big', vol: 0.6},
 	{at: s(22) + 40, file: 'heart', vol: 0.5, len: 50},

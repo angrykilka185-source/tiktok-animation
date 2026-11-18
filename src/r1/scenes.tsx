@@ -800,7 +800,7 @@ export const S11: React.FC = () => {
 export const S12: React.FC = () => {
 	const f = useCurrentFrame();
 	const cam: Cam3 = {x: 1200, y: -170, z: lerp(f, 0, 135, 1300, 1150), rx: 5};
-	const slam = 98;
+	const slam = 102;
 	const tp = pop(f, slam, 8);
 	const sh = f >= slam ? Math.sin((f - slam) * 2) * 14 * Math.exp(-(f - slam) / 8) : 0;
 	return (
@@ -958,7 +958,7 @@ export const S18: React.FC = () => {
 	return (
 		<AbsoluteFill>
 			<Scene3D cam={cam} bg={skyBg('night')} far={<YardFar f={f} time="night" />} farBlur={lerp(up, 0, 1, 6, 3)}>
-				<Alone f={f} id="r1s16" leave={lerp(f, 78, 158, 0, 1)} />
+				<Alone f={f} id="r1s16" leave={lerp(f, 86, 166, 0, 1)} />
 			</Scene3D>
 			{vignette(0.6)}
 		</AbsoluteFill>

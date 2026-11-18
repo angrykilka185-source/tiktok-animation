@@ -2,7 +2,7 @@
 // Authoring timeline = the voice (scripts/fit-voiceover.py --part r1).
 import {FPS, makeShots, Sign} from '../timeline';
 
-export const SHOT_SECONDS = [4.6, 2.833, 4.3, 2.067, 3.067, 5.567, 4.7, 4.3, 4.1, 6.0, 5.433, 4.033, 5.5, 3.033, 3.733, 4.367, 4.767, 5.333, 4.133, 2.8, 3.4, 3.0, 12.3];
+export const SHOT_SECONDS = [5.067, 2.9, 4.267, 2.067, 3.2, 5.5, 4.5, 4.3, 4.1, 5.967, 5.333, 4.267, 5.467, 3.1, 3.9, 4.5, 4.833, 5.667, 4.233, 2.933, 2.567, 2.6, 12.067];
 const built = makeShots(SHOT_SECONDS);
 export const SHOTS = built.shots;
 export const TOTAL = built.total;

@@ -92,9 +92,9 @@ const CUES: Cue[] = [
 
 const SFX_GAIN = HAS_VOICE ? 0.55 : 1;
 const clampX = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
-// the night drone from the foyer on; the projector chatter from the booth door (far) to the end (near)
+// a low drone all the way; the projector chatter from the booth door (far) to the end (near)
 const BEDS: {file: string; a: number; b: number; vol: (old: number) => number}[] = [
-	{file: 'drone', a: s(5), b: TOTAL, vol: () => 0.3},
+	{file: 'drone', a: 0, b: TOTAL, vol: (o) => (o < s(5) ? 0.22 : 0.3)}, // the hall hum from the first frame: no dead air between the words
 	{
 		file: 'projector',
 		a: s(8),

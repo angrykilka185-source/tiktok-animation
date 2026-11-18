@@ -13,14 +13,14 @@ const CUES: Cue[] = [
 	{at: 0, file: 'rewind', vol: 0.45},
 	{at: 4, file: 'creak', vol: 0.4},
 	...W(1, 70),
-	{at: 90, file: 'tear', vol: 0.35},
+	{at: 100, file: 'tear', vol: 0.35},
 	// 2 title: part 2, you chose to look for dad
 	{at: s(2), file: 'boom', vol: 0.85},
 	{at: s(2) + 28, file: 'pop', vol: 0.45},
 	// 3 you run out of the hall
 	{at: s(3), file: 'steps', vol: 0.7, len: 60},
 	{at: s(3) + 6, file: 'laugh', vol: 0.3},
-	{at: s(3) + 52, file: 'handle', vol: 0.5},
+	{at: s(3) + 36, file: 'handle', vol: 0.5},
 	// 4 on the screen behind you — you run out too
 	{at: s(4), file: 'glitch', vol: 0.35},
 	{at: s(4) + 4, file: 'steps', vol: 0.35, len: 60},
@@ -32,48 +32,48 @@ const CUES: Cue[] = [
 	// 6 you on every poster
 	...W(6, 4, 60),
 	{at: s(6) + 30, file: 'swell', vol: 0.45},
-	{at: s(6) + 96, file: 'stamp', vol: 0.55},
+	{at: s(6) + 88, file: 'stamp', vol: 0.55},
 	// 7 calling dad → his ringtone somewhere above the hall
 	{at: s(7) + 6, file: 'beep', vol: 0.18, len: 6},
 	{at: s(7) + 14, file: 'beep', vol: 0.18, len: 6},
 	{at: s(7) + 22, file: 'beep', vol: 0.18, len: 6},
-	{at: s(7) + 56, file: 'ringtone', vol: 0.35, len: 70},
+	{at: s(7) + 34, file: 'ringtone', vol: 0.35, len: 64},
 	// 8 the projection booth door, the beam
 	{at: s(8), file: 'whoosh', vol: 0.3},
-	{at: s(8) + 50, file: 'swell', vol: 0.35},
+	{at: s(8) + 64, file: 'swell', vol: 0.35},
 	// 9 the narrow stairs
 	{at: s(9), file: 'steps_slow', vol: 0.6, len: 90},
 	{at: s(9) + 60, file: 'creak', vol: 0.5},
 	// 10 nobody — dad's phone ringing with your call
 	{at: s(10) + 6, file: 'vibrate', vol: 0.7, len: 70},
 	{at: s(10) + 6, file: 'ringtone', vol: 0.6, len: 110},
-	{at: s(10) + 70, file: 'pop', vol: 0.4},
+	{at: s(10) + 82, file: 'pop', vol: 0.4},
 	// 11 dad is on the screen, inside the film
 	{at: s(11), file: 'whoosh', vol: 0.35},
-	{at: s(11) + 60, file: 'heart_big', vol: 0.75},
-	{at: s(11) + 64, file: 'swell', vol: 0.45},
+	{at: s(11) + 64, file: 'heart_big', vol: 0.75},
+	{at: s(11) + 70, file: 'swell', vol: 0.45},
 	// 12 he knocks from inside; the hall laughs
-	{at: s(12) + 8, file: 'knock', vol: 0.75},
-	{at: s(12) + 30, file: 'knock', vol: 0.75},
-	{at: s(12) + 52, file: 'knock', vol: 0.75},
-	{at: s(12) + 84, file: 'laugh', vol: 0.55},
+	{at: s(12) + 9, file: 'knock', vol: 0.75},
+	{at: s(12) + 24, file: 'knock', vol: 0.75},
+	{at: s(12) + 40, file: 'knock', vol: 0.75},
+	{at: s(12) + 88, file: 'laugh', vol: 0.55},
 	// 13 a new line appears on the ticket
 	{at: s(13), file: 'whoosh', vol: 0.3},
-	{at: s(13) + 40, file: 'whisper', vol: 0.4},
-	{at: s(13) + 120, file: 'heart_big', vol: 0.7},
+	{at: s(13) + 68, file: 'whisper', vol: 0.4},
+	{at: s(13) + 143, file: 'heart_big', vol: 0.7},
 	// 14 the reel: a couple of minutes left
 	{at: s(14), file: 'tick', vol: 0.45},
-	{at: s(14) + 30, file: 'tick', vol: 0.45},
-	{at: s(14) + 60, file: 'tick', vol: 0.45},
+	{at: s(14) + 25, file: 'tick', vol: 0.45},
+	{at: s(14) + 50, file: 'tick', vol: 0.45},
 	// 15 the steps creak behind you
-	{at: s(15) + 6, file: 'floorcreak', vol: 0.6},
-	{at: s(15) + 40, file: 'floorcreak', vol: 0.6},
-	{at: s(15) + 74, file: 'floorcreak', vol: 0.7},
+	{at: s(15) + 14, file: 'floorcreak', vol: 0.6},
+	{at: s(15) + 44, file: 'floorcreak', vol: 0.6},
+	{at: s(15) + 76, file: 'floorcreak', vol: 0.7},
 	{at: s(15) + 10, file: 'heart', vol: 0.55, len: 90},
 	// 16 on the screen: you in this booth — and him behind you
 	{at: s(16), file: 'glitch', vol: 0.4},
-	{at: s(16) + 90, file: 'heart_big', vol: 0.85},
-	{at: s(16) + 96, file: 'whisper', vol: 0.45},
+	{at: s(16) + 108, file: 'heart_big', vol: 0.85},
+	{at: s(16) + 112, file: 'whisper', vol: 0.45},
 	// 17 finale
 	{at: s(17), file: 'boom', vol: 1},
 	{at: s(17) + 8, file: 'pop', vol: 0.5},

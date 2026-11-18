@@ -2,7 +2,7 @@
 // Authoring timeline ≈ the final edit (scripts/fit-voiceover.py --part f2 retimes it to the voice).
 import {FPS, makeShots, Sign} from '../timeline';
 
-export const SHOT_SECONDS = [5.2, 2.8, 2.2, 4.2, 2.0, 4.4, 4.0, 3.6, 3.4, 4.8, 4.4, 4.2, 5.6, 2.4, 3.6, 4.4, 10];
+export const SHOT_SECONDS = [4.867, 2.4, 1.3, 3.967, 1.5, 3.567, 3.267, 3.167, 3.133, 4.367, 3.867, 4.167, 5.6, 1.7, 3.533, 4.067, 11.6];
 const built = makeShots(SHOT_SECONDS);
 export const SHOTS = built.shots;
 export const TOTAL = built.total;
@@ -13,8 +13,8 @@ const s = shotStart;
 
 // what the film shows — and happens for real
 export const SIGNS: Sign[] = [
-	{n: 3, title: 'ФИЛЬМ ИДЁТ\nЗА ТОБОЙ', at: s(4) + 70, hold: 26, y: 1540},
-	{n: 4, title: 'ПАПА\nВНУТРИ ФИЛЬМА', at: s(12) + 70, hold: 26, y: 1540},
+	{n: 3, title: 'ФИЛЬМ ИДЁТ\nЗА ТОБОЙ', at: s(4) + 82, hold: 24, y: 1540},
+	{n: 4, title: 'ПАПА\nВНУТРИ ФИЛЬМА', at: s(11) + 90, hold: 24, y: 1540},
 ];
 
 // «плёнки — на пару минут»: from the reel on, the clock counts down what is left of the film
@@ -30,7 +30,7 @@ export const EPF2 = {
 	signs: SIGNS,
 	slots: 5, // whisper ✓, dad gone ✓ (part 1), the film follows you ✓, dad inside the film ✓, him behind you «?»
 	prefilled: 2,
-	pending: [{n: 5, at: s(16) + 96}],
+	pending: [{n: 5, at: s(16) + 112}],
 	counterFrom: 10,
 	hideFrom: s(17) + 248,
 	night: [[0, s(17) + 300]] as [number, number][],

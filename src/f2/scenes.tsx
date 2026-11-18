@@ -23,8 +23,8 @@ const SCARED: Face = {eyes: 'wide', pupil: 0.45, mouth: 'o', brows: 'worried', l
 // ============================================================ pieces ======
 // you run along the aisle in front of row 7 to the green «ВЫХОД»; the hall laughs at the screen.
 // The camera follows you; the audience is darker so you stand out.
-const RunHall: React.FC<{t: number; idp: string}> = ({t, idp}) => {
-	const k = lerp(t, 0, 62, 0, 1, Easing.inOut(Easing.quad));
+const RunHall: React.FC<{t: number; idp: string; dur?: number}> = ({t, idp, dur = 40}) => {
+	const k = lerp(t, 0, dur, 0, 1, Easing.inOut(Easing.quad));
 	const sx = 560 + 470 * k;
 	const s = rowS(7) * 0.64;
 	const feet = rowY(7) + 78;
@@ -333,7 +333,7 @@ const TicketNew: React.FC<{write: number}> = ({write}) => (
 // 1. Recap of part 1: dad vanished from the seat next to you; only his ticket: «Не досматривай».
 export const S01: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [84]);
+	const {i, t} = seg(f, [96]);
 	return (
 		<Recap f={f} label="◀◀ ЧАСТЬ 1">
 			{i === 0 ? (
@@ -341,7 +341,7 @@ export const S01: React.FC = () => {
 					<HallFront f={t} idp="f2s1v" dim={0.55}>
 						<Sitter kind="son" k={7} i={SON_SEAT} id="f2s1s" f={t} headTurn={0.5} face={{eyes: 'wide', pupil: 0.5, mouth: 'o', brows: 'raised', look: [0.9, 0], blush: false}} />
 						<SeatTicket />
-						<ellipse cx={seatX(7, DAD_SEAT)} cy={rowY(7) - 75} rx={78} ry={104} fill="none" stroke={RED} strokeWidth={6} opacity={Math.min(1, pop(t, 30, 10))} />
+						<ellipse cx={seatX(7, DAD_SEAT)} cy={rowY(7) - 75} rx={78} ry={104} fill="none" stroke={RED} strokeWidth={6} opacity={Math.min(1, pop(t, 54, 10))} />
 					</HallFront>
 				</Stage>
 			) : (
@@ -397,13 +397,13 @@ export const S04: React.FC = () => {
 			<AbsoluteFill style={{clipPath: 'inset(0 0 50% 0)'}}>
 				<div style={{position: 'absolute', inset: 0, transform: 'translateY(-210px)'}}>
 					<ScreenView f={f} heads="son">
-						<RunHall t={f + 4} idp="f2s4a" />
+						<RunHall t={f + 4} idp="f2s4a" dur={110} />
 					</ScreenView>
 				</div>
 			</AbsoluteFill>
 			<AbsoluteFill style={{clipPath: 'inset(50% 0 0 0)'}}>
 				<div style={{position: 'absolute', inset: 0, transform: 'translateY(380px)'}}>
-					<RunHall t={f} idp="f2s4b" />
+					<RunHall t={f} idp="f2s4b" dur={110} />
 				</div>
 			</AbsoluteFill>
 			<div style={{position: 'absolute', left: 0, top: 954, width: 1080, height: 12, background: '#fff'}} />
@@ -426,7 +426,7 @@ export const S05: React.FC = () => {
 // 6. From every poster — you: «Фильм про тебя. Сегодня».
 export const S06: React.FC = () => {
 	const f = useCurrentFrame();
-	const pan = lerp(f, 0, 132, 140, -140, Easing.inOut(Easing.sin));
+	const pan = lerp(f, 0, 107, 140, -140, Easing.inOut(Easing.sin));
 	const when = interpolate(f, [86, 96], [0.3, 1], clamp);
 	return (
 		<AbsoluteFill style={{background: '#2a0c12', overflow: 'hidden'}}>
@@ -444,15 +444,15 @@ export const S06: React.FC = () => {
 // 7. You call dad — and somewhere above the hall his ringtone plays.
 export const S07: React.FC = () => {
 	const f = useCurrentFrame();
-	const up = lerp(f, 52, 76, 0, 1);
+	const up = lerp(f, 30, 54, 0, 1);
 	return (
 		<AbsoluteFill style={{background: '#14080b', overflow: 'hidden'}}>
 			<AbsoluteFill style={{transform: `translateY(${360 * up}px)`}}>
 				<Foyer t={f} idp="f2s7" />
 			</AbsoluteFill>
-			{f >= 56 &&
+			{f >= 36 &&
 				Array.from({length: 7}).map((_, k) => {
-					const tt = f - 56 - k * 6;
+					const tt = f - 36 - k * 6;
 					if (tt < 0) return null;
 					return (
 						<div key={k} style={{position: 'absolute', left: 300 + rnd(k) * 480 + Math.sin(tt / 6 + k) * 30, top: 380 - tt * 2.2, fontFamily: HEAVY, fontSize: 70 + rnd(k + 3) * 40, color: YELLOW, opacity: Math.max(0, 1 - tt / 60), textShadow: '0 0 20px rgba(255,211,74,0.7)'}}>
@@ -551,7 +551,7 @@ export const S09: React.FC = () => {
 // 10. Inside — nobody. Only dad's phone. On its screen — your call.
 export const S10: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [84]);
+	const {i, t} = seg(f, [82]);
 	if (i === 0) {
 		return (
 			<AbsoluteFill style={{background: '#26332e', overflow: 'hidden'}}>
@@ -577,7 +577,7 @@ export const S10: React.FC = () => {
 // 11. Through the porthole — the hall. And dad: on the screen, inside the film.
 export const S11: React.FC = () => {
 	const f = useCurrentFrame();
-	const zoom = lerp(f, 30, 120, 1.0, 1.9, Easing.inOut(Easing.cubic));
+	const zoom = lerp(f, 36, 100, 1.0, 1.9, Easing.inOut(Easing.cubic));
 	return (
 		<Porthole f={f} zoom={zoom}>
 			<DadInFilm t={f} idp="f2s11" shout={false} />
@@ -589,8 +589,8 @@ export const S11: React.FC = () => {
 export const S12: React.FC = () => {
 	const f = useCurrentFrame();
 	return (
-		<ScreenView f={f} zoom={lerp(f, 0, 126, 1.0, 1.08)} heads="both" bob={f > 60 ? 16 : 0}>
-			<DadInFilm t={f} idp="f2s12" knocks={[8, 30, 52]} />
+		<ScreenView f={f} zoom={lerp(f, 0, 125, 1.0, 1.08)} heads="both" bob={f > 86 ? 16 : 0}>
+			<DadInFilm t={f} idp="f2s12" knocks={[9, 24, 40]} />
 		</ScreenView>
 	);
 };
@@ -601,7 +601,7 @@ export const S13: React.FC = () => {
 	return (
 		<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 45%, #2a2030 0%, #08060a 75%)'}}>
 			<div style={{position: 'absolute', inset: 0, transform: `rotate(-2deg) scale(${lerp(f, 0, 168, 1.0, 1.06)})`}}>
-				<TicketNew write={lerp(f, 30, 130, 0, 1, Easing.linear)} />
+				<TicketNew write={lerp(f, 66, 150, 0, 1, Easing.linear)} />
 			</div>
 		</AbsoluteFill>
 	);
@@ -655,9 +655,9 @@ export const S15: React.FC = () => {
 // 16. On the screen in the hall — you in this booth. And behind you — him.
 export const S16: React.FC = () => {
 	const f = useCurrentFrame();
-	const him = lerp(f, 40, 110, 0, 1);
+	const him = lerp(f, 70, 112, 0, 1);
 	return (
-		<Porthole f={f} zoom={lerp(f, 0, 132, 1.0, 1.35, Easing.inOut(Easing.cubic))}>
+		<Porthole f={f} zoom={lerp(f, 0, 122, 1.0, 1.35, Easing.inOut(Easing.cubic))}>
 			<AbsoluteFill style={{background: '#26332e'}}>
 				<Booth t={f} idp="f2s16" you him={him} />
 			</AbsoluteFill>

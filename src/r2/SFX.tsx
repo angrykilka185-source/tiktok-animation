@@ -102,22 +102,27 @@ const CUES: Cue[] = [
 	{at: s(23) + 4, file: 'tick', vol: 0.25, len: 150},
 	{at: s(23) + 50, file: 'pop', vol: 0.4},
 	{at: s(23) + 142, file: 'pop', vol: 0.4},
-	// 24 a week later: Сазон
-	...W(24, 0),
-	{at: s(24) + 113, file: 'pop', vol: 0.4},
-	// 25 «Я теперь тяп-ляповский» — «Докажи»
-	{at: s(25) + 24, file: 'pop', vol: 0.4},
-	{at: s(25) + 82, file: 'laugh', vol: 0.4, len: 40},
-	{at: s(25) + 102, file: 'pop', vol: 0.45},
-	// 26 finale
-	{at: s(26), file: 'boom', vol: 1},
-	{at: s(26) + 8, file: 'pop', vol: 0.5},
-	{at: s(26) + 78, file: 'pop', vol: 0.5},
-	{at: s(26) + 150, file: 'beep', vol: 0.8},
-	{at: s(26) + 180, file: 'beep', vol: 0.8},
-	{at: s(26) + 210, file: 'beep', vol: 0.8},
-	{at: s(26) + 236, file: 'beep_final', vol: 0.9},
-	{at: s(26) + 252, file: 'whoosh', vol: 0.7},
+	// 24 the notebook: the pen scratches «Т» and «К»
+	{at: s(24) + 24, file: 'cloth', vol: 0.35},
+	{at: s(24) + 92, file: 'pop', vol: 0.35},
+	{at: s(24) + 101, file: 'pop', vol: 0.35},
+	// 25 a week later: Сазон
+	...W(25, 0),
+	{at: s(25) + 113, file: 'pop', vol: 0.4},
+	// 26 «Я теперь тяп-ляповский» — «Докажи»
+	{at: s(26) + 24, file: 'pop', vol: 0.4},
+	{at: s(26) + 82, file: 'laugh', vol: 0.4, len: 40},
+	{at: s(26) + 102, file: 'pop', vol: 0.45},
+	// 27 finale
+	{at: s(27), file: 'boom', vol: 1},
+	{at: s(27) + 8, file: 'pop', vol: 0.5},
+	{at: s(27) + 78, file: 'pop', vol: 0.5},
+	{at: s(27) + 150, file: 'beep', vol: 0.8},
+	{at: s(27) + 180, file: 'beep', vol: 0.8},
+	{at: s(27) + 210, file: 'beep', vol: 0.8},
+	{at: s(27) + 236, file: 'beep_final', vol: 0.9},
+	{at: s(27) + 252, file: 'whoosh', vol: 0.7},
+	{at: s(27) + 284, file: 'pop', vol: 0.5},
 	// rule plaques
 	...SIGNS.flatMap((g) => [
 		{at: g.at, file: 'stamp', vol: 1},
@@ -128,7 +133,7 @@ const CUES: Cue[] = [
 const SFX_GAIN = HAS_VOICE ? 0.55 : 1;
 const clampX = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 // a low drone all the way (no dead air between the words), stronger in the basement (night)
-const BEDS: {file: string; a: number; b: number; vol: (old: number) => number}[] = [{file: 'drone', a: 0, b: TOTAL, vol: (o) => (o < s(24) ? 0.3 : 0.2)}];
+const BEDS: {file: string; a: number; b: number; vol: (old: number) => number}[] = [{file: 'drone', a: 0, b: TOTAL, vol: (o) => (o < s(25) ? 0.3 : 0.2)}];
 
 export const SFXR2: React.FC<{r: Remap}> = ({r}) => (
 	<>

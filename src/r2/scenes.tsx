@@ -910,9 +910,9 @@ export const S22: React.FC = () => {
 export const S23: React.FC = () => {
 	const f = useCurrentFrame();
 	const D = SHOTS[22].duration;
-	const cam: Cam3 = {x: lerp(f, 0, D, -70, 30), y: -470, z: lerp(f, 0, D, 830, 990)};
-	const m = project(cam, -300, -560, -640);
-	const y = project(cam, 120, -520, -880);
+	const cam: Cam3 = {x: lerp(f, 0, D, -40, 40), y: -400, z: lerp(f, 0, D, 880, 1020)};
+	const m = project(cam, -220, -560, -760);
+	const y = project(cam, 120, -380, -905);
 	const momTalk = f > 50 && f < 104 && Math.floor(f / 5) % 2 === 1;
 	const youTalk = f > 142 && f < 160 && Math.floor(f / 5) % 2 === 1;
 	return (
@@ -920,7 +920,7 @@ export const S23: React.FC = () => {
 			<Scene3D cam={cam} bg="#e9e5d9" far={<HospitalBack />} farBlur={0}>
 				<Hospital3D id="r2s23" />
 				{/* the IV stand */}
-				<Card3D x={480} y={0} z={-1040} w={200} h={760}>
+				<Card3D x={420} y={0} z={-1040} w={200} h={760}>
 					<rect x={96} y={60} width={8} height={700} fill="#b9bcc4" />
 					<rect x={40} y={60} width={120} height={8} fill="#b9bcc4" />
 					<rect x={44} y={66} width={44} height={84} rx={10} fill="#eef3f6" stroke="#b9bcc4" strokeWidth={3} />
@@ -928,31 +928,33 @@ export const S23: React.FC = () => {
 					<path d="M 66,150 Q 70,300 10,420" stroke="#d6dade" strokeWidth={4} fill="none" />
 					<path d="M 60,750 L 140,750 M 100,700 L 100,760" stroke="#9fa3ab" strokeWidth={10} />
 				</Card3D>
-				{/* the iron bed: headboard bars, the pillow, you (sitting up), the blanket */}
-				<Card3D x={120} y={0} z={-990} w={760} h={560}>
-					<rect x={0} y={60} width={20} height={500} fill="#e2e4e8" />
-					<rect x={740} y={60} width={20} height={500} fill="#e2e4e8" />
-					<rect x={0} y={60} width={760} height={18} fill="#e2e4e8" />
-					{Array.from({length: 8}).map((_, k) => (
-						<rect key={k} x={70 + k * 86} y={78} width={10} height={300} fill="#e2e4e8" />
+				{/* the iron bed: headboard bars, the pillow, you (sitting up — a boy's size next to mom), the blanket */}
+				<Card3D x={120} y={0} z={-990} w={500} h={400}>
+					<rect x={0} y={40} width={14} height={360} fill="#e2e4e8" />
+					<rect x={486} y={40} width={14} height={360} fill="#e2e4e8" />
+					<rect x={0} y={40} width={500} height={13} fill="#e2e4e8" />
+					{Array.from({length: 7}).map((_, k) => (
+						<rect key={k} x={48 + k * 66} y={53} width={8} height={210} fill="#e2e4e8" />
 					))}
 				</Card3D>
-				<Card3D x={120} y={-200} z={-940} w={460} h={190}>
-					<rect x={0} y={0} width={460} height={190} rx={60} fill="#f7f7f4" />
+				<Card3D x={120} y={-168} z={-950} w={280} h={120}>
+					<rect x={0} y={0} width={280} height={120} rx={40} fill="#f7f7f4" />
 				</Card3D>
-				<Card3D x={120} y={-500} z={-890} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
-					<Bust kind="boy" id="r2s23you" x={0} y={0} scale={1.0} colors={IGOR_PJ} face={{eyes: f > 120 ? 'narrow' : 'open', mouth: youTalk ? 'open' : f > 150 ? 'tight' : 'flat', brows: f > 120 ? 'flat' : 'worried', look: [-0.7, 0], blush: false, bruise: 1}} />
-					<Bandage />
+				<Card3D x={120} y={-330} z={-905} w={500} h={560} anchor="center" view={[-250, -280, 500, 560]}>
+					<g transform="scale(0.52)">
+						<Bust kind="boy" id="r2s23you" x={0} y={0} scale={1.0} colors={IGOR_PJ} face={{eyes: f > 120 ? 'narrow' : 'open', mouth: youTalk ? 'open' : f > 150 ? 'tight' : 'flat', brows: f > 120 ? 'flat' : 'worried', look: [-0.7, 0], blush: false, bruise: 1}} />
+						<Bandage />
+					</g>
 				</Card3D>
-				<Card3D x={120} y={0} z={-830} w={900} h={330}>
-					<rect x={0} y={170} width={900} height={160} fill="#d2d5dc" />
-					<path d="M 0,40 Q 450,0 900,40 L 900,250 L 0,250 Z" fill="#8b97ad" />
-					<path d="M 0,40 Q 450,0 900,40 L 900,90 Q 450,52 0,90 Z" fill="#f7f7f4" />
-					<rect x={0} y={60} width={22} height={270} fill="#e2e4e8" />
-					<rect x={878} y={60} width={22} height={270} fill="#e2e4e8" />
+				<Card3D x={120} y={0} z={-860} w={560} h={230}>
+					<rect x={0} y={120} width={560} height={110} fill="#d2d5dc" />
+					<path d="M 0,30 Q 280,0 560,30 L 560,175 L 0,175 Z" fill="#8b97ad" />
+					<path d="M 0,30 Q 280,0 560,30 L 560,64 Q 280,38 0,64 Z" fill="#f7f7f4" />
+					<rect x={0} y={40} width={16} height={190} fill="#e2e4e8" />
+					<rect x={544} y={40} width={16} height={190} fill="#e2e4e8" />
 				</Card3D>
 				{/* the bedside cabinet with the oranges mom brought */}
-				<Card3D x={-470} y={0} z={-1000} w={300} h={560}>
+				<Card3D x={-450} y={0} z={-1010} w={300} h={560}>
 					<rect x={20} y={200} width={260} height={360} fill="#e6e2d8" />
 					<rect x={40} y={260} width={220} height={150} fill="#dcd8cc" />
 					<circle cx={150} cy={335} r={8} fill="#9a958a" />
@@ -968,7 +970,7 @@ export const S23: React.FC = () => {
 					<path d="M 150,190 L 230,190 L 246,120 L 140,120 Z" fill="none" stroke="#c9a46a" strokeWidth={3} />
 				</Card3D>
 				{/* mom at the bed, crying */}
-				<Figure3D x={-300} z={-640} p={{kind: 'mom', id: 'r2s23mom', scale: 0.48, breathe: f, face: {eyes: 'open', mouth: momTalk ? 'open' : 'wobble', brows: 'sad', look: [0.8, 0.1], tears: interpolate(f, [10, 60], [0.3, 1], clamp)}, armL: {target: [-60, -520], bend: 1}, armR: {target: [90, -560], bend: -1}}} />
+				<Figure3D x={-220} z={-760} p={{kind: 'mom', id: 'r2s23mom', scale: 0.48, breathe: f, face: {eyes: 'open', mouth: momTalk ? 'open' : 'wobble', brows: 'sad', look: [0.8, 0.1], tears: interpolate(f, [10, 60], [0.3, 1], clamp)}, armL: {target: [-60, -520], bend: 1}, armR: {target: [90, -560], bend: -1}}} />
 			</Scene3D>
 			{vignette(0.4)}
 			<Bubble x={540} y={Math.max(400, m.y - 90)} text="ИГОРЕЧЕК, КТО ТЕБЯ ТАК?" from={50} to={110} tail="left" />
@@ -977,8 +979,80 @@ export const S23: React.FC = () => {
 	);
 };
 
-// 24. «Через неделю тебя выписывают. А у школы снова ждёт Сазон: «Гони двадцать копеек, Игоречек».»
+// 24. «Весь день ты рисуешь в тетрадке их знак: Т и К.» — a squared school notebook on the hospital blanket; your hand
+// draws two big letters, then goes over them again and again (рисуешь@26, знак@79, Т@92, К@101)
+type Seg2 = [number, number, number, number];
+const TK: Seg2[] = [
+	[250, 470, 520, 470], // Т: the bar
+	[385, 470, 385, 800], // Т: the stem
+	[610, 470, 610, 800], // К: the stem
+	[820, 470, 615, 640], // К: the upper arm
+	[640, 625, 840, 800], // К: the lower arm
+];
+const segLen = (s: Seg2) => Math.hypot(s[2] - s[0], s[3] - s[1]);
+const TK_LEN = TK.reduce((a, s) => a + segLen(s), 0);
 export const S24: React.FC = () => {
+	const f = useCurrentFrame();
+	const drawn = interpolate(f, [24, 96], [0, TK_LEN], clamp); // ink laid so far (one pass)
+	const bold = interpolate(f, [96, 106], [0, 1], clamp); // …and over it again
+	let left = drawn;
+	let tip: [number, number] = [TK[0][0], TK[0][1]];
+	const segs = TK.map((s, k) => {
+		const L = segLen(s);
+		const u = Math.max(0, Math.min(1, left / L));
+		left -= L;
+		if (u > 0 && u < 1) tip = [s[0] + (s[2] - s[0]) * u, s[1] + (s[3] - s[1]) * u];
+		if (u >= 1 && k === TK.length - 1) tip = [s[2], s[3]];
+		return {s, u};
+	});
+	if (f < 24) tip = [TK[0][0] - 40, TK[0][1] + 30];
+	const wob = bold > 0 && bold < 1 ? Math.sin(f * 1.3) * 10 : 0;
+	const [px, py] = [tip[0] + wob, tip[1] + wob * 0.6];
+	return (
+		<AbsoluteFill style={{background: 'linear-gradient(180deg, #7f8ba3, #6f7a92)'}}>
+			<AbsoluteFill style={{transform: `scale(${lerp(f, 0, 108, 1.0, 1.08)}) rotate(${lerp(f, 0, 108, -2, 0)}deg)`}}>
+				{/* the sheet fold of the blanket */}
+				<div style={{position: 'absolute', left: -100, right: -100, top: 1460, height: 220, background: '#f2f2ee', transform: 'rotate(-3deg)'}} />
+				<svg width={1080} height={1920} style={{position: 'absolute', inset: 0}}>
+					<defs>
+						<pattern id="r2s24grid" width={36} height={36} patternUnits="userSpaceOnUse">
+							<rect width={36} height={36} fill="#f6f4ec" />
+							<path d="M 36,0 L 0,0 0,36" fill="none" stroke="#a9c3df" strokeWidth={2} />
+						</pattern>
+					</defs>
+					<g transform="translate(540,880) rotate(-5) translate(-540,-880)">
+						<rect x={130} y={300} width={830} height={1080} fill="#000" opacity={0.25} transform="translate(14,18)" />
+						<rect x={130} y={300} width={830} height={1080} fill="url(#r2s24grid)" />
+						<line x1={230} y1={300} x2={230} y2={1380} stroke="#e07a7a" strokeWidth={3} />
+						<text x={760} y={380} fontFamily="'DejaVu Serif', serif" fontStyle="italic" fontSize={40} fill="#2a3a8a" opacity={0.85}>Лавр</text>
+						<text x={262} y={380} fontFamily="'DejaVu Serif', serif" fontStyle="italic" fontSize={32} fill="#2a3a8a" opacity={0.6}>4 окт.</text>
+						{segs.map(({s, u}, k) =>
+							u > 0 ? (
+								<g key={k}>
+									<line x1={s[0] + 7} y1={s[1] + 7} x2={s[0] + (s[2] - s[0]) * u + 7} y2={s[1] + (s[3] - s[1]) * u + 7} stroke="#7f95d6" strokeWidth={18 + 14 * bold} strokeLinecap="round" opacity={0.5 * bold} />
+									<line x1={s[0]} y1={s[1]} x2={s[0] + (s[2] - s[0]) * u} y2={s[1] + (s[3] - s[1]) * u} stroke="#1f3a93" strokeWidth={16 + 14 * bold} strokeLinecap="round" />
+								</g>
+							) : null,
+						)}
+						{/* your hand with the pen */}
+						<g transform={`translate(${px},${py}) rotate(-28)`}>
+							<rect x={70} y={150} width={190} height={560} rx={70} fill={IGOR_PJ.topDark} stroke="#7d8fb0" strokeWidth={5} transform="rotate(-8)" />
+							<rect x={66} y={150} width={198} height={40} rx={18} fill="#b9c8de" transform="rotate(-8)" />
+							<ellipse cx={52} cy={128} rx={78} ry={64} fill="#f6cba8" stroke="#e2ae88" strokeWidth={4} />
+							<ellipse cx={20} cy={96} rx={26} ry={20} fill="#efbf98" />
+							<rect x={-6} y={-6} width={16} height={170} rx={7} fill="#3d5bd0" transform="rotate(-6)" />
+							<path d="M -6,-6 L 2,-26 L 10,-6 Z" fill="#c9c9c9" transform="rotate(-6)" />
+						</g>
+					</g>
+				</svg>
+			</AbsoluteFill>
+			{vignette(0.45)}
+		</AbsoluteFill>
+	);
+};
+
+// 25. «Через неделю тебя выписывают. А у школы снова ждёт Сазон: «Гони двадцать копеек, Игоречек».»
+export const S25: React.FC = () => {
 	const f = useCurrentFrame();
 	const cam: Cam3 = {x: lerp(f, 0, 169, -260, -200), y: -470, z: lerp(f, 0, 169, 800, 960)};
 	const sz = project(cam, -330, -540, -1150);
@@ -998,8 +1072,8 @@ export const S24: React.FC = () => {
 	);
 };
 
-// 25. «Я теперь тяп-ляповский.» — Сазон laughs: «Докажи.»
-export const S25: React.FC = () => {
+// 26. «Я теперь тяп-ляповский.» — Сазон laughs: «Докажи.»
+export const S26: React.FC = () => {
 	const f = useCurrentFrame();
 	return (
 		<AbsoluteFill>
@@ -1018,8 +1092,8 @@ export const S25: React.FC = () => {
 	);
 };
 
-// 26. Finale: call the guys — let them deal with him? Or hit Сазон yourself?
-export const S26: React.FC = () => {
+// 27. Finale: call the guys — let them deal with him? Or hit Сазон yourself?
+export const S27: React.FC = () => {
 	const f = useCurrentFrame();
 	return (
 		<Finale
@@ -1031,6 +1105,8 @@ export const S26: React.FC = () => {
 			opt1={{text: 'ПОЗВАТЬ ПАЦАНОВ', sub: 'пусть разберутся'}}
 			opt2={{text: 'УДАРИТЬ САМОМУ', sub: 'и доказать, что ты Лавр'}}
 			note="По мотивам истории группировки «Тяп-ляп» (Казань, 1970-е). Герои и события сериала вымышлены."
+			promo="700 ПОДПИСЧИКОВ — ОТКРЫВАЮ ТГК"
+			promoAt={284}
 			tallyLine={
 				<>
 					ПОНЯТИЙ: <span style={{color: '#7ee08a'}}>2</span> · ДАЛЬШЕ — <span style={{color: YELLOW}}>ВЫБИРАЕШЬ ТЫ</span>

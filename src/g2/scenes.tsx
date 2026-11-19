@@ -736,13 +736,15 @@ export const S14: React.FC = () => <Finale />;
 // the finale card; `next` = what the end card announces, `boxes` = predictions (the last one «?»),
 // opt1/opt2 = the two choices, tally = «2 ИЗ 3» / «ТРЕТЬЕ», bg = the picture behind the cards
 type Opt = {text: string; sub: string};
-export const Finale: React.FC<{next?: string; boxes?: number; opt1?: Opt; opt2?: Opt; tally?: {done: string; rest: string}; bg?: React.ReactNode; series?: string; boxLabel?: string; tallyLine?: React.ReactNode; boxMark?: 'check' | 'cross'; note?: string}> = ({
+export const Finale: React.FC<{next?: string; boxes?: number; opt1?: Opt; opt2?: Opt; tally?: {done: string; rest: string}; bg?: React.ReactNode; series?: string; boxLabel?: string; tallyLine?: React.ReactNode; boxMark?: 'check' | 'cross'; note?: string; promo?: string; promoAt?: number}> = ({
 	next = 'СЕРИЯ 3',
 	series = 'ГОЛОСОВЫЕ ИЗ ЗАВТРА',
 	boxLabel = 'СБЫЛОСЬ',
 	tallyLine,
 	boxMark = 'check',
 	note,
+	promo,
+	promoAt = 270,
 	boxes = 3,
 	opt1 = {text: 'НЕ ВЫХОДИТЬ', sub: 'послушаться голосового'},
 	opt2 = {text: 'ВЫЙТИ', sub: 'и проверить, кто врёт'},
@@ -878,7 +880,7 @@ export const Finale: React.FC<{next?: string; boxes?: number; opt1?: Opt; opt2?:
 			)}
 			{endCard > 0 && (
 				<AbsoluteFill style={{opacity: endCard, background: 'radial-gradient(circle at 50% 42%, #1d2a55 0%, #0a1024 55%, #04060d 100%)'}}>
-					<div style={{position: 'absolute', top: 500, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900}}>
+					<div style={{position: 'absolute', top: promo ? 420 : 500, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900}}>
 						<div style={{fontSize: 40, letterSpacing: 8, color: YELLOW}}>{series}</div>
 						<div style={{fontSize: 190, lineHeight: 1, color: '#fff', marginTop: 18, transform: `scale(${pop(f, 254, 10)})`}}>{next}</div>
 						<div style={{fontSize: 56, color: RED, marginTop: 8}}>СКОРО</div>
@@ -893,6 +895,16 @@ export const Finale: React.FC<{next?: string; boxes?: number; opt1?: Opt; opt2?:
 						<div style={{display: 'inline-block', marginTop: 46, background: '#ff2d3d', borderRadius: 60, padding: '22px 70px', fontSize: 52, color: '#fff', boxShadow: '0 0 40px rgba(255,45,61,0.6)', transform: `scale(${1 + Math.sin(f / 5) * 0.04})`}}>
 							ПОДПИШИСЬ
 						</div>
+						{promo && (
+							<div>
+								<div style={{display: 'inline-flex', alignItems: 'center', gap: 16, marginTop: 40, background: '#229ed9', borderRadius: 24, padding: '14px 30px', fontSize: 38, color: '#fff', opacity: f >= promoAt ? 1 : 0, transform: `scale(${f >= promoAt ? pop(f, promoAt, 10) * (1 + 0.03 * Math.sin((f - promoAt) / 5)) : 0})`, boxShadow: '0 0 36px rgba(34,158,217,0.55)'}}>
+									<svg width={46} height={46} viewBox="0 0 24 24">
+										<path d="M 2,11.5 L 21.5,3.5 L 18,20.5 L 12,15.5 L 9,19 L 8.6,14.2 L 17.5,7 L 7,13.2 Z" fill="#fff" />
+									</svg>
+									{promo}
+								</div>
+							</div>
+						)}
 						{note && <div style={{fontFamily: "'Inter', 'DejaVu Sans', sans-serif", fontWeight: 600, fontSize: 27, color: '#8a97b8', marginTop: 44, padding: '0 90px', lineHeight: 1.35}}>{note}</div>}
 					</div>
 				</AbsoluteFill>

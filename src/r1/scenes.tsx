@@ -22,47 +22,47 @@ const {YELLOW, RED} = G1;
 const {Finale} = G2;
 
 // ============================================================ people ======
-const IGOR: Colors = {top: '#2c3a66', topDark: '#222e52', pants: '#2c3a66', shoes: '#1a1a1e'};
-const IGOR_PJ: Colors = {top: '#a9bcd8', topDark: '#94a8c6'};
-const HAT = '#c8352c';
+export const IGOR: Colors = {top: '#2c3a66', topDark: '#222e52', pants: '#2c3a66', shoes: '#1a1a1e'};
+export const IGOR_PJ: Colors = {top: '#a9bcd8', topDark: '#94a8c6'};
+export const HAT = '#c8352c';
 // Сазон, 8 «Б»: big, dark hair, a mean grin; his two friends
-const SAZON: Colors = {top: '#3b4660', topDark: '#2c3549', pants: '#3b4660', shoes: '#151515', hair: '#2a1d16', skin: '#e8b48e'};
-const SAZ_FR: Colors[] = [
+export const SAZON: Colors = {top: '#3b4660', topDark: '#2c3549', pants: '#3b4660', shoes: '#151515', hair: '#2a1d16', skin: '#e8b48e'};
+export const SAZ_FR: Colors[] = [
 	{top: '#3b4660', topDark: '#2c3549', pants: '#3b4660', shoes: '#151515', hair: '#8a5a32', skin: '#f0c09a'},
 	{top: '#46506a', topDark: '#353d52', pants: '#46506a', shoes: '#151515', hair: '#d0a860', skin: '#f2c3a0'},
 ];
-const SAZ_FACE: Face = {eyes: 'narrow', mouth: 'grin', brows: 'angry', look: [0, 0], blush: false, glasses: false};
+export const SAZ_FACE: Face = {eyes: 'narrow', mouth: 'grin', brows: 'angry', look: [0, 0], blush: false, glasses: false};
 const MOM_COAT: Colors = {top: '#6a5866', topDark: '#55465a', shoes: '#3a2a2a'};
-const GVOZD: Colors = {top: '#24201d', topDark: '#151210', pants: '#2b2d33', shoes: '#111216', hair: '#1f1a1a', skin: '#e3b08a'};
-const GANG: Colors[] = [
+export const GVOZD: Colors = {top: '#24201d', topDark: '#151210', pants: '#2b2d33', shoes: '#111216', hair: '#1f1a1a', skin: '#e3b08a'};
+export const GANG: Colors[] = [
 	{top: '#3d4436', topDark: '#2c3127', pants: '#2b2d33', shoes: '#111216', hair: '#3a2a20'},
 	{top: '#4a4d52', topDark: '#36383c', pants: '#2b2d33', shoes: '#111216', hair: '#5a3a2a'},
 	{top: '#383f4a', topDark: '#282e36', pants: '#33302c', shoes: '#111216', hair: '#2a1a12'},
 	{top: '#4a3d33', topDark: '#362c24', pants: '#2b2d33', shoes: '#111216', hair: '#8a5a32'},
 ];
-const GANG_CAP = ['#3a3a3a', '#4a3a2a', '#2f3640', '#3b3226'];
-const KID_HAIR = ['#6a4a2a', '#d9b46a', '#2a1d16', '#8a5a32', '#4a3020', '#b8863a'];
-const WARY: Face = {eyes: 'open', mouth: 'flat', brows: 'worried', look: [0, 0.1], blush: false};
-const SCARED: Face = {eyes: 'wide', pupil: 0.5, mouth: 'o', brows: 'worried', look: [0, 0], blush: false};
-const GV_FACE: Face = {eyes: 'narrow', mouth: 'smile', brows: 'flat', look: [0, 0.1], blush: false};
-const LAUGH = (f: number, k = 0): Face => ({eyes: 'happy', mouth: Math.floor((f + k * 3) / 5) % 2 ? 'open' : 'grin', brows: 'raised', look: [0, 0], blush: false, glasses: false});
+export const GANG_CAP = ['#3a3a3a', '#4a3a2a', '#2f3640', '#3b3226'];
+export const KID_HAIR = ['#6a4a2a', '#d9b46a', '#2a1d16', '#8a5a32', '#4a3020', '#b8863a'];
+export const WARY: Face = {eyes: 'open', mouth: 'flat', brows: 'worried', look: [0, 0.1], blush: false};
+export const SCARED: Face = {eyes: 'wide', pupil: 0.5, mouth: 'o', brows: 'worried', look: [0, 0], blush: false};
+export const GV_FACE: Face = {eyes: 'narrow', mouth: 'smile', brows: 'flat', look: [0, 0.1], blush: false};
+export const LAUGH = (f: number, k = 0): Face => ({eyes: 'happy', mouth: Math.floor((f + k * 3) / 5) % 2 ? 'open' : 'grin', brows: 'raised', look: [0, 0], blush: false, glasses: false});
 
-type P = Omit<PersonProps, 'x' | 'y'>;
-const igor = (id: string, extra: Partial<P> = {}): P => ({kind: 'boy', id, scale: BOY_S, plain: true, pioneer: true, colors: IGOR, ...extra});
-const sazon = (id: string, extra: Partial<P> = {}): P => ({kind: 'teen', id, scale: 0.54, plain: true, colors: SAZON, face: SAZ_FACE, ...extra});
-const sazFriend = (id: string, k: number, extra: Partial<P> = {}): P => ({kind: 'teen', id, scale: 0.52, plain: true, colors: SAZ_FR[k % 2], face: {...SAZ_FACE, mouth: 'smile'}, ...extra});
-const man = (id: string, colors: Colors, extra: Partial<P> = {}): P => ({kind: 'dad', id, scale: MAN_S, plain: true, colors, ...extra});
-const gvozd = (id: string, extra: Partial<P> = {}): P => man(id, GVOZD, {cap: '#2a2a2a', face: GV_FACE, ...extra});
-const gang = (id: string, k: number, extra: Partial<P> = {}): P => man(id, GANG[k % 4], {quilt: true, cap: GANG_CAP[k % 4], face: {eyes: 'narrow', mouth: 'flat', brows: 'flat', look: [0, 0.1], blush: false}, ...extra});
+export type P = Omit<PersonProps, 'x' | 'y'>;
+export const igor = (id: string, extra: Partial<P> = {}): P => ({kind: 'boy', id, scale: BOY_S, plain: true, pioneer: true, colors: IGOR, ...extra});
+export const sazon = (id: string, extra: Partial<P> = {}): P => ({kind: 'teen', id, scale: 0.54, plain: true, colors: SAZON, face: SAZ_FACE, ...extra});
+export const sazFriend = (id: string, k: number, extra: Partial<P> = {}): P => ({kind: 'teen', id, scale: 0.52, plain: true, colors: SAZ_FR[k % 2], face: {...SAZ_FACE, mouth: 'smile'}, ...extra});
+export const man = (id: string, colors: Colors, extra: Partial<P> = {}): P => ({kind: 'dad', id, scale: MAN_S, plain: true, colors, ...extra});
+export const gvozd = (id: string, extra: Partial<P> = {}): P => man(id, GVOZD, {cap: '#2a2a2a', face: GV_FACE, ...extra});
+export const gang = (id: string, k: number, extra: Partial<P> = {}): P => man(id, GANG[k % 4], {quilt: true, cap: GANG_CAP[k % 4], face: {eyes: 'narrow', mouth: 'flat', brows: 'flat', look: [0, 0.1], blush: false}, ...extra});
 // schoolkids: boys in the uniform, girls in brown dresses with white aprons
-const kid = (id: string, k: number, extra: Partial<P> = {}): P =>
+export const kid = (id: string, k: number, extra: Partial<P> = {}): P =>
 	k % 3 === 2
 		? {kind: 'mom', id, scale: 0.43, colors: {top: '#6a4632', topDark: '#55382a', shoes: '#2a1a14', hair: KID_HAIR[k % 6]}, ...extra}
 		: {kind: 'boy', id, scale: 0.5, plain: true, pioneer: k % 2 === 0, colors: {...IGOR, hair: KID_HAIR[k % 6], skin: k % 4 === 1 ? '#f0c09a' : '#f6cba8'}, ...extra};
-const MOM_FACE = (talk: boolean, f: number, extra: Partial<Face> = {}): Face => ({eyes: 'open', mouth: talk ? (Math.floor(f / 5) % 2 ? 'open' : 'smile') : 'smile', brows: 'raised', look: [0.6, 0], ...extra});
+export const MOM_FACE = (talk: boolean, f: number, extra: Partial<Face> = {}): Face => ({eyes: 'open', mouth: talk ? (Math.floor(f / 5) % 2 ? 'open' : 'smile') : 'smile', brows: 'raised', look: [0.6, 0], ...extra});
 
 // ============================================================ close-up art (inside cards) ==========
-const Coin: React.FC<{x: number; y: number; s: number; rot?: number; flip?: number}> = ({x, y, s, rot = 0, flip = 1}) => (
+export const Coin: React.FC<{x: number; y: number; s: number; rot?: number; flip?: number}> = ({x, y, s, rot = 0, flip = 1}) => (
 	<g transform={`translate(${x},${y}) scale(${s * flip},${s}) rotate(${rot})`}>
 		<circle r={100} fill="#c9ccd2" />
 		<circle r={88} fill="#dfe2e6" stroke="#aeb2ba" strokeWidth={6} />
@@ -78,7 +78,7 @@ const Coin: React.FC<{x: number; y: number; s: number; rot?: number; flip?: numb
 	</g>
 );
 // your open palm, seen from above (navy sleeve, white cuff)
-const Palm: React.FC<{s: number; children?: React.ReactNode}> = ({s, children}) => (
+export const Palm: React.FC<{s: number; children?: React.ReactNode}> = ({s, children}) => (
 	<g transform={`scale(${s})`}>
 		<rect x={-130} y={170} width={260} height={500} rx={40} fill={IGOR.top} />
 		<rect x={-120} y={150} width={240} height={40} rx={12} fill="#e9e4d8" />
@@ -91,7 +91,7 @@ const Palm: React.FC<{s: number; children?: React.ReactNode}> = ({s, children}) 
 	</g>
 );
 // a fist with a sleeve, the knuckles pointing right (art centred on the knuckles)
-const Fist: React.FC<{sleeve: string}> = ({sleeve}) => (
+export const Fist: React.FC<{sleeve: string}> = ({sleeve}) => (
 	<g>
 		<rect x={-640} y={-70} width={560} height={140} rx={50} fill={sleeve} />
 		<rect x={-110} y={-76} width={40} height={152} rx={12} fill="#e9e4d8" />
@@ -102,7 +102,7 @@ const Fist: React.FC<{sleeve: string}> = ({sleeve}) => (
 	</g>
 );
 // Гвоздь close up: cap, a match between his teeth (art centred on his head)
-const GvozdHead: React.FC<{id: string; t: number; s: number; face?: Face; tilt?: number}> = ({id, t, s, face, tilt = 0}) => (
+export const GvozdHead: React.FC<{id: string; t: number; s: number; face?: Face; tilt?: number}> = ({id, t, s, face, tilt = 0}) => (
 	<g>
 		<Bust kind="dad" id={id} x={0} y={0} scale={s} tilt={tilt} colors={GVOZD} face={face ?? GV_FACE} />
 		<g transform={`scale(${s}) rotate(${tilt})`}>
@@ -116,7 +116,7 @@ const GvozdHead: React.FC<{id: string; t: number; s: number; face?: Face; tilt?:
 	</g>
 );
 // a yard street lamp (art 700 × 1900, the lamp head at (565, 204))
-const Lamp3D: React.FC<{x: number; z: number; on?: number; cone?: number}> = ({x, z, on = 1, cone = 0}) => (
+export const Lamp3D: React.FC<{x: number; z: number; on?: number; cone?: number}> = ({x, z, on = 1, cone = 0}) => (
 	<Card3D x={x} y={0} z={z} w={700} h={1900}>
 		{cone > 0 && <path d="M 545,210 L 585,210 L 900,1900 L 230,1900 Z" fill="#ffe7a0" opacity={0.14 * cone * on} />}
 		<rect x={330} y={260} width={40} height={1640} fill="#6d6a62" />
@@ -131,7 +131,7 @@ const Lamp3D: React.FC<{x: number; z: number; on?: number; cone?: number}> = ({x
 	</Card3D>
 );
 // a pool of lamp light on the ground
-const LightPool: React.FC<{x: number; z: number; on?: number}> = ({x, z, on = 1}) => (
+export const LightPool: React.FC<{x: number; z: number; on?: number}> = ({x, z, on = 1}) => (
 	<Floor3D y={-1} zNear={z + 500} depth={1000} w={1400} x={x} res={1}>
 		<defs>
 			<radialGradient id={`lp${x}${z}`} cx={0.5} cy={0.5} r={0.5}>
@@ -144,7 +144,7 @@ const LightPool: React.FC<{x: number; z: number; on?: number}> = ({x, z, on = 1}
 );
 
 // a close-up card in front of the blurred yard (palm, fist, faces)
-const CloseUp: React.FC<{cam: Cam3; f: number; time?: Time; children: React.ReactNode; blur?: number; far?: React.ReactNode; bg?: string}> = ({cam, f, time = 'day', children, blur = 9, far, bg}) => (
+export const CloseUp: React.FC<{cam: Cam3; f: number; time?: Time; children: React.ReactNode; blur?: number; far?: React.ReactNode; bg?: string}> = ({cam, f, time = 'day', children, blur = 9, far, bg}) => (
 	<Scene3D
 		cam={cam}
 		bg={bg ?? skyBg(time)}
@@ -162,12 +162,12 @@ const CloseUp: React.FC<{cam: Cam3; f: number; time?: Time; children: React.Reac
 	</Scene3D>
 );
 // the school yard: ground, the fence with the gate (z −1700), the school far behind
-const SchoolYardFar: React.FC<{f: number}> = ({f}) => (
+export const SchoolYardFar: React.FC<{f: number}> = ({f}) => (
 	<>
 		<SchoolFar f={f} />
 	</>
 );
-const SchoolYardNear: React.FC<{id: string; fence?: boolean}> = ({id, fence = true}) => (
+export const SchoolYardNear: React.FC<{id: string; fence?: boolean}> = ({id, fence = true}) => (
 	<>
 		<Ground3D id={`${id}g`} time="day" />
 		{fence && (
@@ -178,7 +178,7 @@ const SchoolYardNear: React.FC<{id: string; fence?: boolean}> = ({id, fence = tr
 	</>
 );
 // a comic «ХА!» popping over a laughing kid
-const Ha: React.FC<{x: number; y: number; at: number; rot?: number; size?: number}> = ({x, y, at, rot = 0, size = 64}) => {
+export const Ha: React.FC<{x: number; y: number; at: number; rot?: number; size?: number}> = ({x, y, at, rot = 0, size = 64}) => {
 	const f = useCurrentFrame();
 	if (f < at || f > at + 30) return null;
 	const p = pop(f, at, 8) * interpolate(f, [at + 22, at + 30], [1, 0], clamp);
@@ -189,7 +189,7 @@ const Ha: React.FC<{x: number; y: number; at: number; rot?: number; size?: numbe
 	);
 };
 // a static plaque in the style of the rule plaques (does not fly to the counter)
-const RulePlaque: React.FC<{title: string; label: string; from: number; to: number; y?: number}> = ({title, label, from, to, y = 430}) => {
+export const RulePlaque: React.FC<{title: string; label: string; from: number; to: number; y?: number}> = ({title, label, from, to, y = 430}) => {
 	const f = useCurrentFrame();
 	if (f < from || f > to) return null;
 	const p = pop(f, from, 10) * interpolate(f, [to - 8, to], [1, 0], clamp);
@@ -204,14 +204,14 @@ const RulePlaque: React.FC<{title: string; label: string; from: number; to: numb
 		</div>
 	);
 };
-const vignette = (a = 0.5) => <AbsoluteFill style={{background: `radial-gradient(circle at 50% 45%, transparent 48%, rgba(0,0,0,${a}) 100%)`}} />;
+export const vignette = (a = 0.5) => <AbsoluteFill style={{background: `radial-gradient(circle at 50% 45%, transparent 48%, rgba(0,0,0,${a}) 100%)`}} />;
 
 // ============================================================ the kitchen (S05 morning, S11 evening) ======
 const KW = 650; // half the width of the kitchen
 const KITCHEN_TILE = {background: '#d8e4dc', backgroundImage: 'linear-gradient(#b7cbc1 3px, transparent 3px), linear-gradient(90deg, #b7cbc1 3px, transparent 3px)', backgroundSize: '60px 60px'};
 // the back wall — its own pass behind the room (Chrome drops parts of a far layer when the near planes of the same
 // 3D context cross behind the camera during a push-in)
-const KitchenBack: React.FC<{id: string; f: number; morning?: boolean}> = ({id, f, morning = false}) => (
+export const KitchenBack: React.FC<{id: string; f: number; morning?: boolean}> = ({id, f, morning = false}) => (
 	<Card3D x={0} y={0} z={-1200} w={KW * 2} h={900}>
 		<Wallpaper id={`${id}wp`} x={0} y={0} w={KW * 2} h={900} base="#c9d8c0" line="#b0c4a6" />
 		<rect x={0} y={560} width={KW * 2} height={340} fill="#d8e4dc" />
@@ -256,7 +256,7 @@ const KitchenBack: React.FC<{id: string; f: number; morning?: boolean}> = ({id, 
 		</g>
 	</Card3D>
 );
-const Kitchen3D: React.FC<{id: string; lamp?: boolean}> = ({id, lamp = true}) => (
+export const Kitchen3D: React.FC<{id: string; lamp?: boolean}> = ({id, lamp = true}) => (
 	<>
 		<Floor3D y={0} zNear={700} depth={1900} w={KW * 2} res={1}>
 			<defs>
@@ -892,7 +892,7 @@ export const S14: React.FC = () => {
 };
 
 // a rubber stamp slammed onto the screen
-const Stamp: React.FC<{text: string; at: number; y?: number}> = ({text, at, y = 470}) => {
+export const Stamp: React.FC<{text: string; at: number; y?: number}> = ({text, at, y = 470}) => {
 	const f = useCurrentFrame();
 	if (f < at) return null;
 	const k = interpolate(f, [at, at + 6], [1.7, 1], {...clamp, easing: Easing.in(Easing.quad)});

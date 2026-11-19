@@ -18,6 +18,7 @@ import {CoverPapaFilm, CoverPapaFilmV} from './covers/PapaFilm';
 import {TgkOpros, RT1} from './t1/Main';
 import {Film2, RF2} from './f2/Main';
 import {Rayon1, Rayon1Audio, RR1} from './r1/Main';
+import {Rayon2, Rayon2Audio, RR2} from './r2/Main';
 import {FPS, H, SHOTS, W} from './timeline';
 import * as Scenes from './scenes';
 
@@ -40,6 +41,8 @@ export const RemotionRoot: React.FC = () => (
 		<Composition id="Film2" component={Film2} durationInFrames={RF2.total} fps={FPS} width={W} height={H} />
 		<Composition id="Rayon1" component={Rayon1} durationInFrames={RR1.total} fps={FPS} width={W} height={H} />
 		<Composition id="Rayon1Audio" component={Rayon1Audio} durationInFrames={RR1.total} fps={FPS} width={W} height={H} />
+		<Composition id="Rayon2" component={Rayon2} durationInFrames={RR2.total} fps={FPS} width={W} height={H} />
+		<Composition id="Rayon2Audio" component={Rayon2Audio} durationInFrames={RR2.total} fps={FPS} width={W} height={H} />
 		<Composition id="TgkOpros" component={TgkOpros} durationInFrames={RT1.total} fps={FPS} width={W} height={H} />
 		{/* covers for the long video (all parts as one film) */}
 		<Composition id="CoverPapaFilm" component={CoverPapaFilm} durationInFrames={1} fps={FPS} width={1280} height={720} />

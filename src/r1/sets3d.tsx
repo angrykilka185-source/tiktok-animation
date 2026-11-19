@@ -347,7 +347,7 @@ export const BedroomBack: React.FC<{f: number; doorLight?: number}> = ({f, doorL
 // ------------------------------------------------------------------ the gang's «качалка» (a basement gym) ----
 // the end wall of a building with the iron door of the basement gym (art w × h, the door centred at the bottom):
 // plaster with bare bricks, a drainpipe, «КАЧАЛКА» painted above the door with a barbell, light under the door.
-export const KachalkaArt: React.FC<{w: number; h: number; inside?: number}> = ({w, h, inside = 1}) => {
+export const KachalkaArt: React.FC<{w: number; h: number; inside?: number; open?: number}> = ({w, h, inside = 1, open = 0}) => {
 	const dx = w / 2;
 	const dw = 420;
 	const dh = 640;
@@ -405,6 +405,18 @@ export const KachalkaArt: React.FC<{w: number; h: number; inside?: number}> = ({
 					</g>
 				);
 			})}
+			{open > 0 && (
+				<g>
+					<defs>
+						<linearGradient id="kachLight" x1="0" y1="0" x2="0" y2="1">
+							<stop offset="0" stopColor="#ffe9b0" />
+							<stop offset="1" stopColor="#d99a4a" />
+						</linearGradient>
+					</defs>
+					<rect x={dx + 4} y={top} width={dw / 2 - 8} height={dh - 14} fill="url(#kachLight)" />
+					<path d={`M ${dx + dw / 2 - 4},${top} L ${dx + dw / 2 - 4 - (dw / 2 - 8) * (1 - open * 0.85)},${top + 30} L ${dx + dw / 2 - 4 - (dw / 2 - 8) * (1 - open * 0.85)},${top + dh - 40} L ${dx + dw / 2 - 4},${top + dh - 14} Z`} fill="#33493c" />
+				</g>
+			)}
 			<rect x={dx - 46} y={top + dh * 0.5} width={28} height={70} rx={8} fill="#9a9a9a" />
 			<rect x={dx + 18} y={top + dh * 0.5} width={28} height={70} rx={8} fill="#9a9a9a" />
 			<rect x={dx - dw / 2 + 6} y={h - 14} width={dw - 12} height={14} fill="#ffd98a" opacity={0.85 * inside} />
@@ -414,12 +426,12 @@ export const KachalkaArt: React.FC<{w: number; h: number; inside?: number}> = ({
 // the качалка: the end wall with the door (z −1300, door at x), the step, a caged bulb above the door, its light.
 // Drawn in its OWN pass (Scene3D `far`, farBlur 0) — in one 3D context with the ground (which crosses behind the camera)
 // Chrome drops half of this big wall. The ground goes to the near pass: <Ground3D id time="night" />.
-export const KachalkaFar: React.FC<{f: number; x?: number}> = ({f, x = 1700}) => {
+export const KachalkaFar: React.FC<{f: number; x?: number; open?: number}> = ({f, x = 1700, open = 0}) => {
 	const flick = 0.85 + 0.15 * Math.sin(f * 1.7) * Math.sin(f * 0.37);
 	return (
 		<>
 			<Card3D x={x} y={0} z={-1300} w={3200} h={2000} res={2}>
-				<KachalkaArt w={3200} h={2000} />
+				<KachalkaArt w={3200} h={2000} open={open} />
 			</Card3D>
 			<Card3D x={x} y={0} z={-1240} w={560} h={36}>
 				<rect width={560} height={36} fill="#a39d90" />
@@ -438,5 +450,90 @@ export const KachalkaFar: React.FC<{f: number; x?: number}> = ({f, x = 1700}) =>
 				<path d="M 380,10 L 520,10 L 900,700 L 0,700 Z" fill="#ffe7a0" opacity={0.1 * flick} />
 			</Card3D>
 		</>
+	);
+};
+
+// ------------------------------------------------------------------ inside the качалка (a basement gym) ----
+// a box: concrete floor, a low ceiling with pipes, peeling walls; the back wall goes to its own pass (KachalkaInsideBack)
+export const GW = 700; // half width
+export const KachalkaInside3D: React.FC<{id: string}> = ({id}) => (
+	<>
+		<Floor3D y={0} zNear={700} depth={2300} w={GW * 2} res={1}>
+			<rect width={GW * 2} height={2300} fill="#6e6a62" />
+			{[
+				[300, 500, 180],
+				[900, 1200, 240],
+				[500, 1800, 160],
+			].map(([x, y, r], k) => (
+				<ellipse key={k} cx={x} cy={y} rx={r} ry={r * 0.6} fill="#5d5a53" opacity={0.6} />
+			))}
+			<rect x={GW - 240} y={1500} width={480} height={300} fill="#4a3f36" opacity={0.7} />
+		</Floor3D>
+		<Floor3D y={-760} zNear={700} depth={2300} w={GW * 2} res={1}>
+			<rect width={GW * 2} height={2300} fill="#3c3a36" />
+			{[300, 760, 1100].map((x) => (
+				<rect key={x} x={x - 26} y={0} width={52} height={2300} fill="#55524c" />
+			))}
+		</Floor3D>
+		{[-1, 1].map((sd) => (
+			<Card3D key={sd} x={sd * (GW - 1150)} y={0} z={700} w={2300} h={760} ry={sd * -90} html>
+				<div style={{position: 'absolute', inset: 0, background: `linear-gradient(${sd < 0 ? 90 : 270}deg, #6f6658, #4f493f)`}} />
+				<div style={{position: 'absolute', left: 0, right: 0, top: 420, bottom: 0, background: '#3f4a42', opacity: 0.85}} />
+			</Card3D>
+		))}
+		{/* a barbell from a crowbar on a rack */}
+		<Card3D x={-420} y={0} z={-900} w={700} h={520}>
+			<rect x={80} y={160} width={30} height={360} fill="#4a4a4a" />
+			<rect x={590} y={160} width={30} height={360} fill="#4a4a4a" />
+			<rect x={20} y={150} width={660} height={16} rx={8} fill="#8a8a8a" />
+			{[40, 80, 580, 620].map((x) => (
+				<rect key={x} x={x} y={90} width={34} height={136} rx={8} fill="#2e2e30" />
+			))}
+		</Card3D>
+		{/* a bench of planks on bricks */}
+		<Card3D x={-380} y={0} z={-620} w={620} h={200}>
+			<rect x={0} y={40} width={620} height={46} fill="#7a5a3a" />
+			<rect x={40} y={86} width={90} height={114} fill="#8f4e3a" />
+			<rect x={490} y={86} width={90} height={114} fill="#8f4e3a" />
+		</Card3D>
+		{/* the sandbag hanging from a pipe */}
+		<Card3D x={460} y={-760} z={-760} w={300} h={760} anchor="bottom">
+			<line x1={150} y1={0} x2={150} y2={150} stroke="#2a2a2a" strokeWidth={8} />
+			<rect x={70} y={150} width={160} height={420} rx={60} fill="#6a3a2a" />
+			<rect x={70} y={210} width={160} height={14} fill="#4a2a1e" />
+			<rect x={70} y={500} width={160} height={14} fill="#4a2a1e" />
+		</Card3D>
+		{/* a kettlebell */}
+		<Card3D x={200} y={0} z={-500} w={140} h={150}>
+			<path d="M 40,40 Q 70,-10 100,40" stroke="#2a2a2a" strokeWidth={18} fill="none" />
+			<circle cx={70} cy={95} r={55} fill="#2a2a2a" />
+			<text x={70} y={108} textAnchor="middle" fontFamily={HEAVY} fontWeight={900} fontSize={32} fill="#6a6a6a">32</text>
+		</Card3D>
+	</>
+);
+// the back wall: brick and peeling plaster, a sports poster, a mirror shard, the bulb on a wire
+export const KachalkaInsideBack: React.FC<{f: number}> = ({f}) => {
+	const flick = 0.85 + 0.15 * Math.sin(f * 1.3) * Math.sin(f * 0.29);
+	return (
+		<Card3D x={0} y={0} z={-1600} w={GW * 2} h={760}>
+			<rect width={GW * 2} height={760} fill="#6f6658" />
+			<rect x={0} y={0} width={GW * 2} height={760} fill="#8f4e3a" opacity={0.55} />
+			{Array.from({length: 22}).map((_, r) => (
+				<rect key={r} x={0} y={r * 34 + 30} width={GW * 2} height={4} fill="#5a3a2a" opacity={0.5} />
+			))}
+			<path d="M 0,0 L 520,0 Q 560,160 470,260 Q 380,420 160,380 Q 40,420 0,520 Z" fill="#a39b88" opacity={0.9} />
+			<path d="M 1400,0 L 980,0 Q 940,120 1040,220 Q 1150,300 1400,260 Z" fill="#a39b88" opacity={0.9} />
+			<g transform="translate(560,110)">
+				<rect width={260} height={360} fill="#e9e1cc" />
+				<rect x={14} y={14} width={232} height={150} fill="#c0392b" />
+				<circle cx={130} cy={240} r={56} fill="#2a2a2a" opacity={0.85} />
+				<text x={130} y={110} textAnchor="middle" fontFamily={HEAVY} fontWeight={900} fontSize={46} fill="#f4efe0">СПОРТ</text>
+				<text x={130} y={340} textAnchor="middle" fontFamily={HEAVY} fontWeight={900} fontSize={26} fill="#2a2a2a">ЭТО СИЛА</text>
+			</g>
+			<path d="M 980,330 L 1150,300 L 1170,520 L 990,560 Z" fill="#9fb4c8" opacity={0.75} />
+			<line x1={700} y1={0} x2={700} y2={40} stroke="#2a2a2a" strokeWidth={5} />
+			<circle cx={700} cy={58} r={22} fill="#fff1c0" opacity={flick} />
+			<circle cx={700} cy={58} r={160} fill="#ffe7a0" opacity={0.16 * flick} />
+		</Card3D>
 	);
 };

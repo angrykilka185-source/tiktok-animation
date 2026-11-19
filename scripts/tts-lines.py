@@ -7,11 +7,15 @@ usage: python3 scripts/tts-lines.py <voice_id> src/r1/voice-lines.json assets/ra
        [--model eleven_v4] [--stability 0.5] [--similarity 0.75] [--pause 0.7] [--pitch -5]
 --pitch N lowers (or raises) the finished voice by N semitones with the formants kept (ffmpeg rubberband): a premade
 voice made deeper to come close to a library narrator the API key can't reach.
+--cache DIR keeps every voiced line as DIR/<hash of voice, model, settings, text>.mp3 and reuses it: after a script
+edit only the new or changed lines cost credits.
 The key is injected by the session proxy (header xi-api-key) — it is never in this file or the repository.
 Defaults = the settings of the author's last recording («Broken Future – Narrator», pvc, s50, sim75, v4).
 """
+import hashlib
 import json
 import os
+import shutil
 import re
 import subprocess
 import sys
@@ -28,6 +32,9 @@ stability = float(arg('--stability', '0.5'))
 similarity = float(arg('--similarity', '0.75'))
 pause = float(arg('--pause', '0.7'))
 pitch = float(arg('--pitch', '0'))
+cache = arg('--cache', '')
+if cache:
+    os.makedirs(cache, exist_ok=True)
 
 cfg = json.load(open(lines_file, encoding='utf-8'))
 texts = [re.sub(r'\*', '', l['text']) for l in cfg['lines'] if not l.get('reuse')]
@@ -44,6 +51,13 @@ for i, text in enumerate(texts):
     }
     body = {k: v for k, v in body.items() if v is not None}
     dst = os.path.join(tmp, f'{i:02d}.mp3')
+    key = hashlib.sha1(json.dumps([voice, model, stability, similarity, text], ensure_ascii=False).encode()).hexdigest()[:16]
+    cached = os.path.join(cache, key + '.mp3') if cache else ''
+    if cached and os.path.exists(cached):
+        shutil.copy(cached, dst)
+        parts.append(dst)
+        print(f'{i + 1:02d}/{len(texts)}  (cache) {text[:52]}')
+        continue
     for attempt in range(4):  # the API is sometimes slow: retry timeouts and 5xx
         code = subprocess.run(
             ['curl', '-sS', '-m', '240', '-o', dst, '-w', '%{http_code}', '-H', 'xi-api-key: proxy-injected', '-H', 'Content-Type: application/json', '-X', 'POST',
@@ -55,6 +69,8 @@ for i, text in enumerate(texts):
     if code != '200':
         sys.exit(f'line {i + 1}: HTTP {code}: {open(dst, encoding="utf-8", errors="replace").read()[:300]}')
     parts.append(dst)
+    if cached:
+        shutil.copy(dst, cached)
     print(f'{i + 1:02d}/{len(texts)}  {text[:60]}')
 
 # join: each line, then `pause` seconds of silence

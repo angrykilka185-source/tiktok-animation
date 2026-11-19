@@ -9,13 +9,14 @@ type Cue = {at: number; file: string; vol?: number; len?: number};
 const W = (shot: number, ...offs: number[]): Cue[] => offs.map((o) => ({at: s(shot) + o, file: 'whoosh', vol: 0.3}));
 
 const CUES: Cue[] = [
-	// 1 the hook: tomorrow 19:00 at the door of the качалка; the rewind
-	{at: 0, file: 'heart', vol: 0.5, len: 146},
+	// 1 the hook: you at the door of their качалка (you came yourself); the rewind
+	{at: 0, file: 'heart', vol: 0.5, len: 136},
 	{at: 2, file: 'flicker', vol: 0.4},
-	{at: 6, file: 'stamp', vol: 0.9},
-	{at: 114, file: 'swell', vol: 0.4},
-	{at: 134, file: 'rewind', vol: 0.8},
-	{at: 146, file: 'whoosh', vol: 0.7},
+	{at: 40, file: 'slam', vol: 0.2},
+	{at: 76, file: 'slam', vol: 0.2},
+	{at: 96, file: 'swell', vol: 0.4},
+	{at: 120, file: 'rewind', vol: 0.8},
+	{at: 132, file: 'whoosh', vol: 0.7},
 	// 2 the blackboard: «ИГОРЕЧЕК» in chalk
 	{at: s(2) + 26, file: 'typing', vol: 0.35, len: 38},
 	{at: s(2) + 70, file: 'laugh', vol: 0.4, len: 22},
@@ -73,44 +74,44 @@ const CUES: Cue[] = [
 	// 14 Гвоздь
 	{at: s(14) + 16, file: 'stamp', vol: 0.45},
 	{at: s(14) + 10, file: 'swell', vol: 0.3},
-	// 15 the garages: «Опять Сазон гоняет?»
-	{at: s(15), file: 'steps', vol: 0.4, len: 44},
-	{at: s(15) + 64, file: 'pop', vol: 0.35},
-	// 16 «Пришьёшься к нам…»
-	{at: s(16) + 4, file: 'pat', vol: 0.6},
-	{at: s(16) + 20, file: 'swell', vol: 0.35},
-	// 17 «Зашёл — значит, навсегда»
-	{at: s(17) + 88, file: 'stamp', vol: 0.9},
-	{at: s(17) + 90, file: 'heart_big', vol: 0.6},
-	// 18 alone under the lamp
-	{at: s(18) + 8, file: 'flicker', vol: 0.5},
-	{at: s(18) + 86, file: 'steps', vol: 0.3, len: 80},
-	{at: s(18) + 100, file: 'howl', vol: 0.25},
-	// 19 night: «Спи, Игоречек…»
-	{at: s(19) + 2, file: 'tick', vol: 0.25},
-	{at: s(19) + 84, file: 'whisper', vol: 0.35},
-	// 20 the morning: Сазон with the coin
-	...W(20, 0),
-	{at: s(20) + 20, file: 'tick', vol: 0.35},
-	{at: s(20) + 48, file: 'tick', vol: 0.35},
-	{at: s(20) + 76, file: 'tick', vol: 0.35},
-	// 21 19:00, the door of the качалка: you walk up; iron clanks inside
-	{at: s(21), file: 'steps', vol: 0.45, len: 70},
-	{at: s(21) + 20, file: 'slam', vol: 0.2},
-	{at: s(21) + 52, file: 'slam', vol: 0.2},
-	{at: s(21) + 66, file: 'slam', vol: 0.2},
-	// 22 your hand stops short of the handle
-	{at: s(22), file: 'heart_big', vol: 0.6},
-	{at: s(22) + 40, file: 'heart', vol: 0.5, len: 50},
-	// 23 finale: the choice on the door
-	{at: s(23), file: 'boom', vol: 1},
-	{at: s(23) + 10, file: 'pop', vol: 0.5},
-	{at: s(23) + 80, file: 'pop', vol: 0.5},
-	{at: s(23) + 150, file: 'beep', vol: 0.8},
-	{at: s(23) + 180, file: 'beep', vol: 0.8},
-	{at: s(23) + 210, file: 'beep', vol: 0.8},
-	{at: s(23) + 236, file: 'beep_final', vol: 0.9},
-	{at: s(23) + 252, file: 'whoosh', vol: 0.7},
+	// 15 the качалка behind the garages: two of them walk to the door, iron clanks inside
+	{at: s(15), file: 'steps', vol: 0.4, len: 110},
+	{at: s(15) + 70, file: 'pop', vol: 0.4},
+	{at: s(15) + 60, file: 'slam', vol: 0.2},
+	{at: s(15) + 96, file: 'slam', vol: 0.2},
+	// 16 «хватит» — ТЕРПЕНИЕ ЛОПНУЛО
+	{at: s(16) + 24, file: 'heart_big', vol: 0.6},
+	{at: s(16) + 34, file: 'boom', vol: 0.8},
+	{at: s(16) + 34, file: 'stamp', vol: 1},
+	// 17 the seniors whisper; «Зашёл — значит, навсегда»
+	{at: s(17) + 6, file: 'whisper', vol: 0.35},
+	{at: s(17) + 108, file: 'stamp', vol: 0.9},
+	{at: s(17) + 110, file: 'heart_big', vol: 0.5},
+	// 18 night: «Спи, Игоречек…»
+	{at: s(18) + 2, file: 'tick', vol: 0.25},
+	{at: s(18) + 84, file: 'whisper', vol: 0.35},
+	// 19 the morning: Сазон with the coin
+	...W(19, 0),
+	{at: s(19) + 20, file: 'tick', vol: 0.35},
+	{at: s(19) + 48, file: 'tick', vol: 0.35},
+	{at: s(19) + 76, file: 'tick', vol: 0.35},
+	// 20 19:00, the door of the качалка: you walk up; iron clanks inside
+	{at: s(20), file: 'steps', vol: 0.45, len: 70},
+	{at: s(20) + 20, file: 'slam', vol: 0.2},
+	{at: s(20) + 52, file: 'slam', vol: 0.2},
+	{at: s(20) + 66, file: 'slam', vol: 0.2},
+	// 21 your hand stops short of the handle
+	{at: s(21), file: 'heart_big', vol: 0.6},
+	{at: s(21) + 40, file: 'heart', vol: 0.5, len: 50},
+	// 22 finale: the choice on the door
+	{at: s(22), file: 'boom', vol: 1},
+	{at: s(22) + 10, file: 'pop', vol: 0.5},
+	{at: s(22) + 80, file: 'pop', vol: 0.5},
+	{at: s(22) + 150, file: 'beep', vol: 0.8},
+	{at: s(22) + 180, file: 'beep', vol: 0.8},
+	{at: s(22) + 210, file: 'beep', vol: 0.8},
+	{at: s(22) + 236, file: 'beep_final', vol: 0.9},
+	{at: s(22) + 252, file: 'whoosh', vol: 0.7},
 	// humiliation plaques
 	...SIGNS.flatMap((g) => [
 		{at: g.at, file: 'stamp', vol: 1},

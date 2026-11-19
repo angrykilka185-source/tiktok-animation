@@ -1,10 +1,10 @@
 // «Ты с какого района?» — серия 1 «Игоречек» (1976), версия 3: новый сюжет, ~1,5 минуты.
 // Ты — Игорь Лавров, 13 лет, слабый; мама зовёт тебя «Игоречек», а Сазон из 8 «Б» подхватил это прозвище и травит
 // тебя (шапка в луже, двадцать копеек, синяк — три «обиды» в счётчике «ТЕРПЕНИЕ»). В районе боятся только Тяп-ляп;
-// Гвоздь из твоего подъезда предлагает пришиться: «Зашёл — значит, навсегда. В семь — у нашей качалки». В конце ты
-// стоишь у двери их качалки — и выбор, как в других сериях: «1 ПРИШИТЬСЯ / 2 НЕ ПРИШИТЬСЯ» (пиши 1 или 2).
+// Никто тебя не зовёт — ты сам решаешь пойти к ним в качалку («Зашёл — значит, навсегда», говорят во дворе). В конце
+// ты стоишь у двери их качалки — и выбор, как в других сериях: «1 ПРИШИТЬСЯ / 2 НЕ ПРИШИТЬСЯ» (пиши 1 или 2).
 // Всё в «3D-камере» (2.5D): плоские 2D-слои на настоящей глубине (components/Scene3D.tsx), задний план размыт.
-// 23 shots on the timeline of src/r1/timeline.ts (= the voice, see scripts/fit-voiceover.py --part r1).
+// 22 shots on the timeline of src/r1/timeline.ts (= the voice, see scripts/fit-voiceover.py --part r1).
 import React from 'react';
 import {AbsoluteFill, Easing, interpolate, useCurrentFrame} from 'remotion';
 import {clamp, lerp, pop, seg} from '../anim';
@@ -15,7 +15,7 @@ import {Box3D, Cam3, Card3D, Floor3D, project, Scene3D} from '../components/Scen
 import * as G1 from '../g1/scenes';
 import * as G2 from '../g2/scenes';
 import {BOY_S, Figure3D, Ground3D, MAN_S, skyBg, Time, YardFar, YardNear} from './world3d';
-import {Avoska, Bedroom3D, BedroomBack, Briefcase, Cloakroom3D, CloakroomBack, HatArt, KachalkaFar, Puddle, SchoolFar, SchoolFenceArt} from './sets3d';
+import {Bedroom3D, BedroomBack, Briefcase, Cloakroom3D, CloakroomBack, HatArt, KachalkaFar, Puddle, SchoolFar, SchoolFenceArt} from './sets3d';
 import {SHOTS} from './timeline';
 
 const {YELLOW, RED} = G1;
@@ -333,30 +333,35 @@ const Kitchen3D: React.FC<{id: string; lamp?: boolean}> = ({id, lamp = true}) =>
 );
 
 // ============================================================== SHOTS =======
-// 1. THE HOOK (cold open): tomorrow, 19:00, the door of their «качалка» — Гвоздь waits for your answer under the bulb.
-// «Завтра в семь у дверей качалки ты сделаешь выбор, после которого назад дороги нет.» The camera rushes in on Гвоздь.
+// 1. THE HOOK (cold open): the door of the «качалка» of Тяп-ляп at night — and you came here yourself.
+// «Ты стоишь у двери самой опасной группировки района. И пришёл ты сюда сам.» Your POV walks up; your hand rises.
 export const S01: React.FC = () => {
 	const f = useCurrentFrame();
 	const D = SHOTS[0].duration;
 	const push = lerp(f, 0, D - 18, 0, 1, Easing.inOut(Easing.cubic));
-	const cam: Cam3 = {x: lerp(push, 0, 1, 1640, 1700), y: lerp(push, 0, 1, -470, -450), z: lerp(push, 0, 1, 520, 1760)};
+	const cam: Cam3 = {x: lerp(push, 0, 1, 1640, 1700), y: lerp(push, 0, 1, -450, -420), z: lerp(push, 0, 1, 380, 1500)};
 	const rw = interpolate(f, [D - 16, D], [0, 1], clamp); // the rewind into the past
+	const hand = lerp(f, D - 60, D - 22, 0, 1, Easing.out(Easing.cubic));
 	return (
 		<AbsoluteFill>
 			<AbsoluteFill style={{filter: rw > 0 ? `blur(${rw * 6}px) saturate(${1 - rw})` : undefined, transform: `skewX(${rw * -10}deg) scale(${1 + rw * 0.08})`}}>
 				<Scene3D cam={cam} bg={skyBg('night')} far={<KachalkaFar f={f} />} farBlur={0}>
 					<Ground3D id="r1hookg" time="night" />
-					<Figure3D x={1420} z={-1120} p={gang('r1s1g0', 0, {breathe: f + 9, silhouette: '#15131c'})} />
-					<Figure3D x={1990} z={-1140} p={gang('r1s1g1', 2, {breathe: f + 4, silhouette: '#15131c'})} />
-					<Figure3D x={1700} z={-1040} p={gvozd('r1s1gv', {breathe: f, face: {eyes: 'narrow', mouth: 'flat', brows: 'flat', look: [0, 0], blush: false}})} />
+					{hand > 0 && (
+						<Card3D x={1700} y={-430} z={-1000} w={900} h={700} anchor="center" view={[-450, -350, 900, 700]}>
+							<g transform={`translate(${lerp(hand, 0, 1, -620, -120)},${lerp(hand, 0, 1, 420, 20)}) rotate(-70)`}>
+								<rect x={-560} y={-60} width={520} height={120} rx={44} fill={IGOR.top} />
+								<rect x={-60} y={-64} width={40} height={128} rx={12} fill="#e9e4d8" />
+								<rect x={-20} y={-66} width={150} height={132} rx={52} fill="#f6cba8" />
+								{[-40, -13, 14, 41].map((y) => (
+									<rect key={y} x={100} y={y - 12} width={44} height={24} rx={12} fill="#e8b48e" />
+								))}
+							</g>
+						</Card3D>
+					)}
 				</Scene3D>
 				{vignette(0.65)}
 			</AbsoluteFill>
-			<div style={{position: 'absolute', top: 360, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, transform: `scale(${pop(f, 6, 9)}) rotate(-3deg)`, opacity: interpolate(f, [D - 24, D - 16], [1, 0], clamp)}}>
-				<div style={{display: 'inline-block', padding: '10px 34px', border: '8px solid #e0342b', borderRadius: 18, background: 'rgba(10,10,14,0.75)', fontSize: 92, color: '#fff', letterSpacing: 2}}>
-					ЗАВТРА · <span style={{color: '#ff5a4f'}}>19:00</span>
-				</div>
-			</div>
 			{rw > 0 &&
 				Array.from({length: 9}).map((_, k) => (
 					<div key={k} style={{position: 'absolute', left: 0, right: 0, top: (k * 233 + f * 61) % 1920, height: 10 + (k % 3) * 8, background: '#fff', opacity: 0.35 * rw}} />
@@ -886,87 +891,86 @@ export const S14: React.FC = () => {
 	);
 };
 
-// 15. The same evening he stops you at the garages: «Опять тебя Сазон гоняет?»
+// a rubber stamp slammed onto the screen
+const Stamp: React.FC<{text: string; at: number; y?: number}> = ({text, at, y = 470}) => {
+	const f = useCurrentFrame();
+	if (f < at) return null;
+	const k = interpolate(f, [at, at + 6], [1.7, 1], {...clamp, easing: Easing.in(Easing.quad)});
+	return (
+		<div style={{position: 'absolute', left: 540, top: y, transform: `translate(-50%,-50%) rotate(-8deg) scale(${k})`, opacity: interpolate(f, [at, at + 3], [0, 1], clamp)}}>
+			<div style={{border: '12px solid #e0342b', borderRadius: 22, padding: '14px 40px', fontFamily: HEAVY, fontWeight: 900, fontSize: 92, lineHeight: 1.02, color: '#e0342b', textAlign: 'center', background: 'rgba(12,10,12,0.55)', letterSpacing: 2, whiteSpace: 'pre'}}>{text}</div>
+		</div>
+	);
+};
+
+// 15. «Ты знаешь, где они собираются: в подвальной качалке за гаражами.» — from behind a garage corner you watch
+// two of them go to the iron door; light and the clank of iron behind it
 export const S15: React.FC = () => {
 	const f = useCurrentFrame();
-	const cam: Cam3 = {x: lerp(f, 0, 120, 1740, 1800), y: -450, z: lerp(f, 0, 120, 900, 1010)};
-	const gv = lerp(f, 14, 44, 0, 1, Easing.out(Easing.quad));
-	const g = project(cam, lerp(gv, 0, 1, 2350, 1980), -560, -860);
+	const cam: Cam3 = {x: lerp(f, 0, 120, 1380, 1460), y: -470, z: lerp(f, 0, 120, 380, 520)};
+	const d = project(cam, 1700, -1250, -1300);
 	return (
 		<AbsoluteFill>
-			<Scene3D cam={cam} bg={skyBg('dusk')} far={<YardFar f={f} time="dusk" />} farBlur={6}>
-				<YardNear id="r1s13" time="dusk" />
-				<Lamp3D x={1150} z={-1250} />
-				<Figure3D x={lerp(f, 0, 40, 1380, 1620)} z={-700} p={igor('r1s13you', {walk: f < 40 ? f * 0.45 : undefined, breathe: f, face: {...WARY, bruise: 1, look: [0.6, 0]}, armR: {target: [150, -260], bend: -1}, itemR: <Avoska />})} />
-				<Figure3D x={lerp(gv, 0, 1, 2350, 1980)} z={-860} p={gvozd('r1s13gv', {walk: gv < 1 ? f * 0.45 : undefined, breathe: f, face: {...GV_FACE, look: [-0.6, 0.2]}})} />
+			<Scene3D cam={cam} bg={skyBg('dusk')} far={<KachalkaFar f={f} />} farBlur={0}>
+				<Ground3D id="r1s15g" time="dusk" />
+				{[0, 1].map((k) => (
+					<Figure3D key={k} x={lerp(f, 0, 110, 1450 + k * 260, 1640 + k * 140)} z={lerp(f, 0, 110, -650 - k * 60, -1120)} p={gang(`r1s15g${k}`, k + 1, {back: true, walk: f * 0.42 + k})} />
+				))}
+				<Figure3D x={1170} z={-430} p={igor('r1s15you', {back: true, breathe: f})} />
+				<Card3D x={900} y={0} z={-360} w={500} h={1000}>
+					<rect width={500} height={1000} fill="#4a4f5a" />
+					<rect width={500} height={60} fill="#3a3f48" />
+					<rect x={440} y={60} width={60} height={940} fill="#3c414a" />
+					<rect x={60} y={120} width={340} height={880} fill="#5d5f52" />
+				</Card3D>
 			</Scene3D>
-			{vignette(0.45)}
-			<Bubble x={Math.min(700, Math.max(420, g.x - 60))} y={g.y - 70} text="ОПЯТЬ САЗОН ГОНЯЕТ?" from={64} to={112} tail="right" />
+			{vignette(0.55)}
+			{f >= 70 && <NameTag x={Math.min(760, Math.max(360, d.x))} y={Math.max(330, d.y - 60)} title="КАЧАЛКА" sub="ПОДВАЛ ЗА ГАРАЖАМИ" at={70} color={RED} />}
 		</AbsoluteFill>
 	);
 };
 
-// 16. «Пришьёшься к нам — никто тебя пальцем не тронет. Ни Сазон, ни кто другой» — Гвоздь's hand on your shoulder
-const TwoShot: React.FC<{t: number; id: string; time?: Time; youFace?: Face; hand?: boolean; gvTalk?: [number, number]}> = ({t, id, time = 'dusk', youFace, hand = true, gvTalk = [0, 120]}) => (
-	<CloseUp cam={{x: lerp(t, 0, 200, 1880, 1960), y: -540, z: 560}} f={t} time={time} blur={8}>
-		<Card3D x={1700} y={-640} z={-420} w={760} h={900} anchor="center" view={[-380, -450, 760, 900]}>
-			<GvozdHead id={`${id}gv`} t={t} s={1.6} tilt={-4} face={{...GV_FACE, mouth: Math.floor(t / 5) % 2 && t >= gvTalk[0] && t < gvTalk[1] ? 'open' : 'smile'}} />
-		</Card3D>
-		<Card3D x={2150} y={-470} z={-260} w={760} h={900} anchor="center" view={[-380, -450, 760, 900]}>
-			<Bust kind="boy" id={`${id}you`} x={0} y={0} scale={1.6} colors={IGOR} face={youFace ?? {eyes: 'wide', pupil: 0.6, mouth: 'flat', brows: 'raised', look: [-0.6, -0.2], blush: false, bruise: 1}} />
-			{hand && (
-				<g transform={`translate(${lerp(t, 0, 12, -420, -180)},${lerp(t, 0, 12, 600, 300)}) rotate(-50)`}>
-					<rect x={-50} y={0} width={100} height={420} rx={26} fill={GVOZD.top} />
-					<ellipse cx={0} cy={-8} rx={66} ry={54} fill="#e3b08a" />
-				</g>
-			)}
-		</Card3D>
-	</CloseUp>
-);
-export const S16: React.FC = () => <TwoShot t={useCurrentFrame()} id="r1s14" />;
-
-// 17. «Только запомни: у пацанов назад дороги нет. Зашёл — значит, навсегда» (low angle on Гвоздь)
-export const S17: React.FC = () => {
+// 16. «И ты решаешь: хватит быть Игоречком. Ты пойдёшь к ним сам.» — fear turns into resolve; «ТЕРПЕНИЕ ЛОПНУЛО»
+export const S16: React.FC = () => {
 	const f = useCurrentFrame();
+	const stamp = 34;
+	const sh = f >= stamp ? Math.sin((f - stamp) * 2) * 12 * Math.exp(-(f - stamp) / 8) : 0;
+	const hard = f >= 30;
 	return (
 		<AbsoluteFill>
-			<CloseUp cam={{x: lerp(f, 0, 138, 1060, 1000), y: lerp(f, 0, 138, -380, -420), z: lerp(f, 0, 138, 600, 760), rx: 4}} f={f} time="dusk" blur={9}>
-				<Card3D x={1000} y={-600} z={-300} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
-					<GvozdHead id="r1s15gv" t={f} s={1.9} face={{eyes: 'narrow', mouth: Math.floor(f / 5) % 2 && f < 110 ? 'open' : 'flat', brows: 'angry', look: [0, 0.2], blush: false}} />
+			<CloseUp cam={{x: 1700 + sh, y: -470, z: lerp(f, 0, 120, 640, 800)}} f={f} time="dusk" blur={9}>
+				<Card3D x={1700} y={-470} z={-200} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
+					<Bust kind="boy" id="r1s16you" x={0} y={0} scale={1.4} colors={IGOR} face={hard ? {eyes: 'narrow', mouth: 'flat', brows: 'angry', look: [0, 0], blush: false, bruise: 1} : {...SCARED, look: [0.5, 0], bruise: 1}} />
 				</Card3D>
 			</CloseUp>
 			{vignette(0.55)}
-			<RulePlaque label="У ПАЦАНОВ" title={'ЗАШЁЛ —\nЗНАЧИТ, НАВСЕГДА'} from={88} to={143} y={420} />
+			<Stamp text={'ТЕРПЕНИЕ\nЛОПНУЛО'} at={stamp} y={440} />
+			<AbsoluteFill style={{background: '#fff', opacity: interpolate(f, [stamp, stamp + 1, stamp + 6], [0, 0.4, 0], clamp)}} />
 		</AbsoluteFill>
 	);
 };
 
-// 18. «Думай до завтра. В семь — у гаражей». Гвоздь walks away; you stand alone under the lamp (the camera rises)
-const Alone: React.FC<{f: number; id: string; leave?: number}> = ({f, id, leave = 1}) => (
-	<>
-		<YardNear id={id} time="night" />
-		<Lamp3D x={1150} z={-1250} on={interpolate(f, [8, 10, 12, 14, 18], [0, 1, 0.2, 1, 1], clamp)} cone={1} />
-		<LightPool x={1700} z={-1000} on={interpolate(f, [8, 18], [0, 1], clamp)} />
-		<Figure3D x={1680} z={-1000} p={igor(`${id}you`, {breathe: f, face: {...WARY, bruise: 1, look: [0.5, 0.3]}, armR: {target: [150, -260], bend: -1}, itemR: <Avoska />})} />
-		{leave < 1 && <Figure3D x={lerp(leave, 0, 1, 1950, 3300)} z={lerp(leave, 0, 1, -1100, -1500)} p={gvozd(`${id}gv`, {back: true, walk: f * 0.42})} />}
-	</>
-);
-export const S18: React.FC = () => {
+// 17. «Только пацаны во дворе говорят: у Тяп-ляп назад дороги нет. Зашёл — значит, навсегда.» — two seniors whisper
+// by the bench at dusk; the rule comes up as a plaque
+export const S17: React.FC = () => {
 	const f = useCurrentFrame();
-	const up = lerp(f, 70, 160, 0, 1, Easing.inOut(Easing.cubic));
-	const cam: Cam3 = {x: lerp(up, 0, 1, 1700, 1650), y: lerp(up, 0, 1, -460, -1000), z: lerp(up, 0, 1, 760, 120), rx: lerp(up, 0, 1, 0, -8)};
+	const cam: Cam3 = {x: lerp(f, 0, 150, -1420, -1360), y: -470, z: lerp(f, 0, 150, 760, 940)};
+	const talk = (k: number) => (Math.floor((f + k * 7) / 5) % 2 && f % 60 < 40 ? 'open' : 'flat') as Face['mouth'];
 	return (
 		<AbsoluteFill>
-			<Scene3D cam={cam} bg={skyBg('night')} far={<YardFar f={f} time="night" />} farBlur={lerp(up, 0, 1, 6, 3)}>
-				<Alone f={f} id="r1s16" leave={lerp(f, 86, 166, 0, 1)} />
+			<Scene3D cam={cam} bg={skyBg('dusk')} far={<YardFar f={f} time="dusk" />} farBlur={6}>
+				<YardNear id="r1s17" time="dusk" garages={false} />
+				<Figure3D x={-1620} z={-760} p={sazFriend('r1s17a', 0, {breathe: f, headTurn: 0.6, face: {eyes: 'narrow', mouth: talk(0), brows: 'worried', look: [0.7, 0], blush: false, glasses: false}, colors: {...SAZ_FR[0], top: '#4a4038'}})} />
+				<Figure3D x={-1240} z={-800} p={sazFriend('r1s17b', 1, {breathe: f + 9, headTurn: -0.6, face: {eyes: 'wide', pupil: 0.7, mouth: talk(1), brows: 'worried', look: [-0.7, 0], blush: false, glasses: false}, colors: {...SAZ_FR[1], top: '#38424e'}})} />
 			</Scene3D>
-			{vignette(0.6)}
+			{vignette(0.55)}
+			<RulePlaque label="У ТЯП-ЛЯП" title={'ЗАШЁЛ —\nЗНАЧИТ, НАВСЕГДА'} from={108} to={168} y={420} />
 		</AbsoluteFill>
 	);
 };
 
-// 19. At night you can't sleep. Through the wall mom whispers: «Спи, Игоречек…»
-export const S19: React.FC = () => {
+// 18. At night you can't sleep. Through the wall mom whispers: «Спи, Игоречек…»
+export const S18: React.FC = () => {
 	const f = useCurrentFrame();
 	const cam: Cam3 = {x: lerp(f, 0, 123, -40, 70), y: -420, z: lerp(f, 0, 123, 640, 860)};
 	const d = project(cam, -500, -460, -1200);
@@ -979,7 +983,7 @@ export const S19: React.FC = () => {
 					<rect x={0} y={0} width={420} height={170} rx={60} fill="#e6e8ee" />
 				</Card3D>
 				<Card3D x={120} y={-470} z={-880} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
-					<Bust kind="boy" id="r1s17you" x={0} y={0} scale={1.0} colors={IGOR_PJ} face={{eyes: 'open', mouth: 'flat', brows: 'worried', look: [-0.8, -0.1], blush: false, bruise: 0.9}} />
+					<Bust kind="boy" id="r1s18you" x={0} y={0} scale={1.0} colors={IGOR_PJ} face={{eyes: 'open', mouth: 'flat', brows: 'worried', look: [-0.8, -0.1], blush: false, bruise: 0.9}} />
 				</Card3D>
 				<Card3D x={20} y={0} z={-820} w={1100} h={300}>
 					<rect x={0} y={150} width={1100} height={150} fill="#5a4030" />
@@ -997,8 +1001,8 @@ export const S19: React.FC = () => {
 	);
 };
 
-// 20. And in the morning Сазон will be waiting at the school again (tossing a coin)
-export const S20: React.FC = () => {
+// 19. And in the morning Сазон will be waiting at the school again (tossing a coin)
+export const S19: React.FC = () => {
 	const f = useCurrentFrame();
 	const cam: Cam3 = {x: lerp(f, 0, 105, -420, -360), y: -480, z: lerp(f, 0, 105, 1050, 1300)};
 	const toss = Math.abs(Math.sin(f / 9));
@@ -1020,8 +1024,8 @@ export const S20: React.FC = () => {
 	);
 };
 
-// 21. «В семь вечера ты стоишь у двери их качалки.» — you walk up to the iron door; light and the clank of iron inside
-export const S21: React.FC = () => {
+// 20. «В семь вечера ты стоишь у двери их качалки.» — you walk up to the iron door; light and the clank of iron inside
+export const S20: React.FC = () => {
 	const f = useCurrentFrame();
 	const cam: Cam3 = {x: 1700, y: -470, z: lerp(f, 0, 102, 420, 760)};
 	return (
@@ -1035,8 +1039,8 @@ export const S21: React.FC = () => {
 	);
 };
 
-// 22. «Шаг за эту дверь — и назад дороги нет.» — your hand stops short of the handle; your heart pounds
-export const S22: React.FC = () => {
+// 21. «Шаг за эту дверь — и назад дороги нет.» — your hand stops short of the handle; your heart pounds
+export const S21: React.FC = () => {
 	const f = useCurrentFrame();
 	const reach = lerp(f, 8, 50, 0, 1, Easing.out(Easing.cubic));
 	const shake = Math.sin(f * 0.9) * 4 * interpolate(f, [50, 60], [0, 1], clamp);
@@ -1062,9 +1066,9 @@ export const S22: React.FC = () => {
 	);
 };
 
-// 23. Finale (as in the other series): «Пришиться — и больше никогда не бояться? Или не пришиться — и остаться
+// 22. Finale (as in the other series): «Пришиться — и больше никогда не бояться? Или не пришиться — и остаться
 // Игоречком?» — the two choice cards over the darkened door of the качалка, 3-2-1, «пиши 1 или 2», next episode.
-export const S23: React.FC = () => {
+export const S22: React.FC = () => {
 	const f = useCurrentFrame();
 	return (
 		<Finale

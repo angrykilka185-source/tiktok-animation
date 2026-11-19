@@ -260,6 +260,8 @@ const QUOTE = '#ffd34a';
 const CapWords: React.FC<{words: CapWord[]}> = ({words}) => {
 	const f = useCurrentFrame();
 	const len = words.reduce((a, w) => a + w.w.length + 1, 0);
+	// a long single word («ТЕПЛОКОНТРОЛЬ», «ТЯП-ЛЯПОВСКИЙ») would run off the frame or break at its hyphen
+	const longest = Math.max(...words.map((w) => w.w.length));
 	return (
 		<div
 			style={{
@@ -270,7 +272,7 @@ const CapWords: React.FC<{words: CapWord[]}> = ({words}) => {
 				textAlign: 'center',
 				fontFamily: HEAVY,
 				fontWeight: 900,
-				fontSize: len > 18 ? 78 : 92,
+				fontSize: longest > 12 ? Math.min(78, Math.floor(880 / (longest * 0.74))) : len > 18 ? 78 : 92,
 				lineHeight: 1.05,
 				color: '#fff',
 				textTransform: 'uppercase',
@@ -293,7 +295,7 @@ const CapWords: React.FC<{words: CapWord[]}> = ({words}) => {
 								'0 6px 0 rgba(0,0,0,0.35), 0 0 18px rgba(0,0,0,0.55), 3px 3px 0 #22222a, -3px 3px 0 #22222a, 3px -3px 0 #22222a, -3px -3px 0 #22222a',
 						}}
 					>
-						{w.w}
+						{w.w.replace(/-/g, '\u2011')}
 					</span>
 				);
 			})}

@@ -427,7 +427,7 @@ export const KachalkaArt: React.FC<{w: number; h: number; inside?: number; open?
 // Drawn in its OWN pass (Scene3D `far`, farBlur 0) — in one 3D context with the ground (which crosses behind the camera)
 // Chrome drops half of this big wall. The ground goes to the near pass: <Ground3D id time="night" />.
 export const KachalkaFar: React.FC<{f: number; x?: number; open?: number}> = ({f, x = 1700, open = 0}) => {
-	const flick = 0.85 + 0.15 * Math.sin(f * 1.7) * Math.sin(f * 0.37);
+	const flick = 0.95 + 0.05 * Math.sin(f / 14); // a slow, soft glow — nothing blinks
 	return (
 		<>
 			<Card3D x={x} y={0} z={-1300} w={3200} h={2000} res={2}>
@@ -452,6 +452,11 @@ export const KachalkaFar: React.FC<{f: number; x?: number; open?: number}> = ({f
 		</>
 	);
 };
+
+// the asphalt in front of the качалка: it ends at the wall (z −1300). An endless ground drawn in the near pass covered
+// the lower half of the door (everything behind the wall's foot is nearer the horizon on screen), and the ground in
+// the wall's own pass made Chrome drop the wall — so the ground stops where the wall stands.
+export const KachalkaGround: React.FC<{id: string; time?: Time}> = ({id, time = 'night'}) => <Ground3D id={id} time={time} zNear={2500} depth={2500 + 1296} noFar />;
 
 // ------------------------------------------------------------------ inside the качалка (a basement gym) ----
 // a box: concrete floor, a low ceiling with pipes, peeling walls; the back wall goes to its own pass (KachalkaInsideBack)
@@ -511,9 +516,24 @@ export const KachalkaInside3D: React.FC<{id: string}> = ({id}) => (
 		</Card3D>
 	</>
 );
-// the back wall: brick and peeling plaster, a sports poster, a mirror shard, the bulb on a wire
+// a sheet of paper with the gym's rules, written by hand (art 230 × 290)
+export const RulesSheet: React.FC = () => (
+	<g>
+		<rect x={6} y={8} width={230} height={290} fill="#000" opacity={0.25} />
+		<rect width={230} height={290} fill="#ece4cc" />
+		<circle cx={115} cy={14} r={7} fill="#5a5a5a" />
+		<text x={115} y={62} textAnchor="middle" fontFamily="'DejaVu Serif', serif" fontStyle="italic" fontWeight={700} fontSize={34} fill="#23306a">Правила</text>
+		<line x1={50} y1={72} x2={180} y2={70} stroke="#23306a" strokeWidth={3} />
+		{['1. Не пить', '2. Не курить', '3. Своих', '    не бросать'].map((s, k) => (
+			<text key={k} x={22} y={122 + k * 40} fontFamily="'DejaVu Serif', serif" fontStyle="italic" fontSize={29} fill="#23306a">
+				{s}
+			</text>
+		))}
+	</g>
+);
+// the back wall: brick and peeling plaster, a sports poster, a mirror shard, Антип's rules, the bulb on a wire
 export const KachalkaInsideBack: React.FC<{f: number}> = ({f}) => {
-	const flick = 0.85 + 0.15 * Math.sin(f * 1.3) * Math.sin(f * 0.29);
+	const flick = 0.95 + 0.05 * Math.sin(f / 14);
 	return (
 		<Card3D x={0} y={0} z={-1600} w={GW * 2} h={760}>
 			<rect width={GW * 2} height={760} fill="#6f6658" />
@@ -531,6 +551,10 @@ export const KachalkaInsideBack: React.FC<{f: number}> = ({f}) => {
 				<text x={130} y={340} textAnchor="middle" fontFamily={HEAVY} fontWeight={900} fontSize={26} fill="#2a2a2a">ЭТО СИЛА</text>
 			</g>
 			<path d="M 980,330 L 1150,300 L 1170,520 L 990,560 Z" fill="#9fb4c8" opacity={0.75} />
+			{/* Антип's rules on a sheet of paper (the real rules of his basement gym: no drinking, no smoking, never leave your own) */}
+			<g transform="translate(250,150) rotate(-3)">
+				<RulesSheet />
+			</g>
 			<line x1={700} y1={0} x2={700} y2={40} stroke="#2a2a2a" strokeWidth={5} />
 			<circle cx={700} cy={58} r={22} fill="#fff1c0" opacity={flick} />
 			<circle cx={700} cy={58} r={160} fill="#ffe7a0" opacity={0.16 * flick} />

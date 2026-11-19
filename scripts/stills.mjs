@@ -10,7 +10,7 @@ const [out, ...frames] = process.argv.slice(2);
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const serveUrl = await bundle({entryPoint: path.join(root, 'src/index.ts'), enableCaching: true});
 const exe = '/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell';
-const browser = await openBrowser('chrome', {browserExecutable: fs.existsSync(exe) ? exe : null});
+const browser = await openBrowser('chrome', {browserExecutable: fs.existsSync(exe) ? exe : null, chromiumOptions: {flags: {'run-all-compositor-stages-before-draw': true}}});
 const composition = await selectComposition({serveUrl, id: process.env.COMP || 'PapaVakhta', puppeteerInstance: browser});
 fs.mkdirSync(path.join(root, 'out/frames'), {recursive: true});
 const files = [];

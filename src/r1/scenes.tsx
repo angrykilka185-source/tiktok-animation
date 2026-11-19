@@ -15,7 +15,7 @@ import {Box3D, Cam3, Card3D, Floor3D, project, Scene3D} from '../components/Scen
 import * as G1 from '../g1/scenes';
 import * as G2 from '../g2/scenes';
 import {BOY_S, Figure3D, Ground3D, MAN_S, skyBg, Time, YardFar, YardNear} from './world3d';
-import {Bedroom3D, BedroomBack, Briefcase, Cloakroom3D, CloakroomBack, HatArt, KachalkaFar, Puddle, SchoolFar, SchoolFenceArt} from './sets3d';
+import {Bedroom3D, BedroomBack, Briefcase, Cloakroom3D, CloakroomBack, HatArt, KachalkaFar, KachalkaGround, Puddle, SchoolFar, SchoolFenceArt} from './sets3d';
 import {SHOTS} from './timeline';
 
 const {YELLOW, RED} = G1;
@@ -115,6 +115,15 @@ export const GvozdHead: React.FC<{id: string; t: number; s: number; face?: Face;
 		</g>
 	</g>
 );
+// the small print under the HUD on the history shots
+export const RealStory: React.FC<{f: number}> = ({f}) => (
+	<div style={{position: 'absolute', top: 236, width: '100%', textAlign: 'center', opacity: interpolate(f, [4, 12], [0, 1], clamp)}}>
+		<span style={{display: 'inline-block', background: 'rgba(8,8,12,0.62)', borderRadius: 12, padding: '8px 22px', fontFamily: "'Inter', 'DejaVu Sans', sans-serif", fontWeight: 700, fontSize: 25, letterSpacing: 2, color: '#e9e2cf'}}>
+			ПО МОТИВАМ РЕАЛЬНОЙ ИСТОРИИ · ГЕРОИ ВЫМЫШЛЕНЫ
+		</span>
+	</div>
+);
+
 // a yard street lamp (art 700 × 1900, the lamp head at (565, 204))
 export const Lamp3D: React.FC<{x: number; z: number; on?: number; cone?: number}> = ({x, z, on = 1, cone = 0}) => (
 	<Card3D x={x} y={0} z={z} w={700} h={1900}>
@@ -346,7 +355,7 @@ export const S01: React.FC = () => {
 		<AbsoluteFill>
 			<AbsoluteFill style={{filter: rw > 0 ? `blur(${rw * 6}px) saturate(${1 - rw})` : undefined, transform: `skewX(${rw * -10}deg) scale(${1 + rw * 0.08})`}}>
 				<Scene3D cam={cam} bg={skyBg('night')} far={<KachalkaFar f={f} />} farBlur={0}>
-					<Ground3D id="r1hookg" time="night" />
+					<KachalkaGround id="r1hookg" />
 					{hand > 0 && (
 						<Card3D x={1700} y={-430} z={-1000} w={900} h={700} anchor="center" view={[-450, -350, 900, 700]}>
 							<g transform={`translate(${lerp(hand, 0, 1, -620, -120)},${lerp(hand, 0, 1, 420, 20)}) rotate(-70)`}>
@@ -429,10 +438,10 @@ export const S02: React.FC = () => {
 	);
 };
 
-// 3. (after the flashback) 1976. You are Igor Lavrov, thirteen — your yard. (close-up → crane up)
+// 3. (after the flashback) Казань, 1976. You are Igor Lavrov, thirteen — your yard. (close-up → crane up)
 export const S03: React.FC = () => {
 	const f = useCurrentFrame();
-	const out = lerp(f, 96, 129, 0, 1, Easing.inOut(Easing.cubic));
+	const out = lerp(f, 110, 137, 0, 1, Easing.inOut(Easing.cubic));
 	const cam: Cam3 = {x: lerp(out, 0, 1, 0, 300), y: lerp(out, 0, 1, -380, -1150), z: lerp(out, 0, 1, 950, -1500), rx: lerp(out, 0, 1, 0, 8)};
 	const tag = (x: number, y: number, z: number) => project(cam, x, y, z);
 	return (
@@ -441,11 +450,12 @@ export const S03: React.FC = () => {
 				<YardNear id="r1s1" />
 				<Figure3D x={0} z={0} p={igor('r1s1you', {breathe: f, face: WARY, armR: {target: [150, -260], bend: -1}, itemR: <Briefcase />})} />
 			</Scene3D>
-			<div style={{position: 'absolute', top: 380, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, opacity: interpolate(f, [2, 7, 30, 36], [0, 1, 1, 0], clamp)}}>
+			<div style={{position: 'absolute', top: 380, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, opacity: interpolate(f, [2, 7, 52, 58], [0, 1, 1, 0], clamp)}}>
 				<div style={{fontSize: 220, lineHeight: 1, color: '#fff', textShadow: '0 10px 0 rgba(0,0,0,0.45)', transform: `scale(${pop(f, 2, 10)})`}}>1976</div>
-				<div style={{fontSize: 46, letterSpacing: 12, color: YELLOW, textShadow: '0 4px 0 rgba(0,0,0,0.5)'}}>ОКТЯБРЬ</div>
+				<div style={{fontSize: 46, letterSpacing: 10, color: YELLOW, textShadow: '0 4px 0 rgba(0,0,0,0.5)'}}>КАЗАНЬ · ОКТЯБРЬ</div>
 			</div>
-			{f >= 50 && f < 98 && <NameTag x={540} y={tag(0, -470, 0).y - 110} title="ИГОРЬ ЛАВРОВ" sub="13 ЛЕТ" at={50} pin={60} color={YELLOW} to={98} />}
+			<RealStory f={f} />
+			{f >= 72 && f < 128 && <NameTag x={540} y={tag(0, -470, 0).y - 110} title="ИГОРЬ ЛАВРОВ" sub="13 ЛЕТ" at={72} pin={82} color={YELLOW} to={128} />}
 		</AbsoluteFill>
 	);
 };
@@ -801,11 +811,12 @@ export const S11: React.FC = () => {
 	);
 };
 
-// 12. But in your district there are those whom even Сазон fears. Тяп-ляп. (silhouettes walking at you at dusk)
+// 12. But in your district, by the plant «Теплоконтроль», there are those whom even Сазон fears. Тяп-ляп.
+// (silhouettes walking at you at dusk)
 export const S12: React.FC = () => {
 	const f = useCurrentFrame();
-	const cam: Cam3 = {x: 1200, y: -170, z: lerp(f, 0, 135, 1300, 1150), rx: 5};
-	const slam = 102;
+	const cam: Cam3 = {x: 1200, y: -170, z: lerp(f, 0, 172, 1300, 1150), rx: 5};
+	const slam = 148;
 	const tp = pop(f, slam, 8);
 	const sh = f >= slam ? Math.sin((f - slam) * 2) * 14 * Math.exp(-(f - slam) / 8) : 0;
 	return (
@@ -816,7 +827,7 @@ export const S12: React.FC = () => {
 					<Figure3D
 						key={k}
 						x={1200 + dx}
-						z={lerp(f, 0, 135, -1500, -820) - Math.abs(dx) * 0.4}
+						z={lerp(f, 0, 172, -1600, -820) - Math.abs(dx) * 0.4}
 						p={k === 2 ? gvozd('r1s10gv', {walk: f * 0.38, silhouette: '#15131c'}) : gang(`r1s10g${k}`, k, {walk: f * 0.38 + k, silhouette: '#15131c'})}
 					/>
 				))}
@@ -912,7 +923,7 @@ export const S15: React.FC = () => {
 	return (
 		<AbsoluteFill>
 			<Scene3D cam={cam} bg={skyBg('dusk')} far={<KachalkaFar f={f} />} farBlur={0}>
-				<Ground3D id="r1s15g" time="dusk" />
+				<KachalkaGround id="r1s15g" time="dusk" />
 				{[0, 1].map((k) => (
 					<Figure3D key={k} x={lerp(f, 0, 110, 1450 + k * 260, 1640 + k * 140)} z={lerp(f, 0, 110, -650 - k * 60, -1120)} p={gang(`r1s15g${k}`, k + 1, {back: true, walk: f * 0.42 + k})} />
 				))}
@@ -1031,7 +1042,7 @@ export const S20: React.FC = () => {
 	return (
 		<AbsoluteFill>
 			<Scene3D cam={cam} bg={skyBg('night')} far={<KachalkaFar f={f} />} farBlur={0}>
-				<Ground3D id="r1s21g" time="night" />
+				<KachalkaGround id="r1s21g" />
 				<Figure3D x={lerp(f, 0, 70, 1620, 1680)} z={lerp(f, 0, 70, -560, -980)} p={igor('r1s21you', {back: true, walk: f < 70 ? f * 0.42 : undefined, breathe: f})} />
 			</Scene3D>
 			{vignette(0.6)}
@@ -1048,7 +1059,7 @@ export const S21: React.FC = () => {
 	return (
 		<AbsoluteFill>
 			<Scene3D cam={cam} bg={skyBg('night')} far={<KachalkaFar f={f} />} farBlur={0}>
-				<Ground3D id="r1s22g" time="night" />
+				<KachalkaGround id="r1s22g" />
 				<Card3D x={1700} y={-330} z={-1160} w={900} h={700} anchor="center" view={[-450, -350, 900, 700]}>
 					<g transform={`translate(${lerp(reach, 0, 1, -760, -300) + shake},${lerp(reach, 0, 1, 360, 60)}) rotate(-20)`}>
 						<rect x={-560} y={-60} width={520} height={120} rx={44} fill={IGOR.top} />
@@ -1079,6 +1090,7 @@ export const S22: React.FC = () => {
 			boxMark="cross"
 			opt1={{text: 'ПРИШИТЬСЯ', sub: 'и больше не бояться'}}
 			opt2={{text: 'НЕ ПРИШИТЬСЯ', sub: 'и остаться Игоречком'}}
+			note="По мотивам истории группировки «Тяп-ляп» (Казань, 1970-е). Герои и события сериала вымышлены."
 			tallyLine={
 				<>
 					ОБИД: <span style={{color: '#ff6a5f'}}>3</span> · ДАЛЬШЕ — <span style={{color: YELLOW}}>ВЫБИРАЕШЬ ТЫ</span>
@@ -1087,7 +1099,7 @@ export const S22: React.FC = () => {
 			bg={
 				<AbsoluteFill>
 					<Scene3D cam={{x: 1700, y: -420, z: lerp(f, 0, 300, 900, 980)}} bg={skyBg('night')} far={<KachalkaFar f={f} />} farBlur={0}>
-						<Ground3D id="r1s23g" time="night" />
+						<KachalkaGround id="r1s23g" />
 					</Scene3D>
 					<AbsoluteFill style={{background: '#000', opacity: 0.55}} />
 				</AbsoluteFill>

@@ -151,14 +151,16 @@ export const FenceArt: React.FC<{w: number}> = ({w}) => (
 // the ground: asphalt with fallen leaves near the camera (a 53 × 30 m plane rasterised 5× smaller, see Floor3D) and a
 // plain far plane beyond it — a solid colour is free to draw, a huge pattern costs seconds per frame
 const GR = 5;
-export const Ground3D: React.FC<{id: string; time: Time; zNear?: number}> = ({id, time, zNear = 2500}) => {
+// `noFar` leaves out the endless plain plane (for a ground that ends at a wall, in the same pass as the wall: then the
+// wall hides what is behind it, and the near edge must stay in front of the camera — pass zNear = 1180 − cam.z)
+export const Ground3D: React.FC<{id: string; time: Time; zNear?: number; depth?: number; w?: number; x?: number; noFar?: boolean}> = ({id, time, zNear = 2500, depth = 9000, w = 16000, x = 1000, noFar = false}) => {
 	const base = time === 'day' ? '#77726a' : time === 'dusk' ? '#4a4646' : '#22222a';
 	const u = 6 / GR; // the leaves keep their world size
 	return (
 		<>
-			<Floor3D y={0} zNear={zNear} depth={9000} w={16000} x={1000} res={GR}>
+			<Floor3D y={0} zNear={zNear} depth={depth} w={w} x={x} res={GR}>
 				<defs>
-					<pattern id={`${id}gp`} width={150 * u} height={150 * u} patternUnits="userSpaceOnUse">
+					<pattern id={`${id}gp`} width={150 * u} height={150 * u} patternUnits="userSpaceOnUse" patternTransform={`translate(${(w / 2 - x) / GR} ${zNear / GR})`}>
 						<rect width={150 * u} height={150 * u} fill={base} />
 						<ellipse cx={34 * u} cy={50 * u} rx={30 * u} ry={15 * u} fill="#000" opacity={0.06} />
 						{[
@@ -171,9 +173,9 @@ export const Ground3D: React.FC<{id: string; time: Time; zNear?: number}> = ({id
 						))}
 					</pattern>
 				</defs>
-				<rect x={0} y={0} width={16000 / GR} height={9000 / GR} fill={`url(#${id}gp)`} />
+				<rect x={0} y={0} width={w / GR} height={depth / GR} fill={`url(#${id}gp)`} />
 			</Floor3D>
-			<div style={{position: 'absolute', left: 0, top: 0, width: 60000, height: 40000, background: base, transformOrigin: '50% 0%', transform: `translate3d(-30000px, 0px, ${zNear - 9000}px) rotateX(-90deg)`}} />
+			{!noFar && <div style={{position: 'absolute', left: 0, top: 0, width: 60000, height: 40000, background: base, transformOrigin: '50% 0%', transform: `translate3d(-30000px, 0px, ${zNear - depth}px) rotateX(-90deg)`}} />}
 		</>
 	);
 };

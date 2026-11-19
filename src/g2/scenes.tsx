@@ -736,12 +736,13 @@ export const S14: React.FC = () => <Finale />;
 // the finale card; `next` = what the end card announces, `boxes` = predictions (the last one «?»),
 // opt1/opt2 = the two choices, tally = «2 ИЗ 3» / «ТРЕТЬЕ», bg = the picture behind the cards
 type Opt = {text: string; sub: string};
-export const Finale: React.FC<{next?: string; boxes?: number; opt1?: Opt; opt2?: Opt; tally?: {done: string; rest: string}; bg?: React.ReactNode; series?: string; boxLabel?: string; tallyLine?: React.ReactNode; boxMark?: 'check' | 'cross'}> = ({
+export const Finale: React.FC<{next?: string; boxes?: number; opt1?: Opt; opt2?: Opt; tally?: {done: string; rest: string}; bg?: React.ReactNode; series?: string; boxLabel?: string; tallyLine?: React.ReactNode; boxMark?: 'check' | 'cross'; note?: string}> = ({
 	next = 'СЕРИЯ 3',
 	series = 'ГОЛОСОВЫЕ ИЗ ЗАВТРА',
 	boxLabel = 'СБЫЛОСЬ',
 	tallyLine,
 	boxMark = 'check',
+	note,
 	boxes = 3,
 	opt1 = {text: 'НЕ ВЫХОДИТЬ', sub: 'послушаться голосового'},
 	opt2 = {text: 'ВЫЙТИ', sub: 'и проверить, кто врёт'},
@@ -892,6 +893,7 @@ export const Finale: React.FC<{next?: string; boxes?: number; opt1?: Opt; opt2?:
 						<div style={{display: 'inline-block', marginTop: 46, background: '#ff2d3d', borderRadius: 60, padding: '22px 70px', fontSize: 52, color: '#fff', boxShadow: '0 0 40px rgba(255,45,61,0.6)', transform: `scale(${1 + Math.sin(f / 5) * 0.04})`}}>
 							ПОДПИШИСЬ
 						</div>
+						{note && <div style={{fontFamily: "'Inter', 'DejaVu Sans', sans-serif", fontWeight: 600, fontSize: 27, color: '#8a97b8', marginTop: 44, padding: '0 90px', lineHeight: 1.35}}>{note}</div>}
 					</div>
 				</AbsoluteFill>
 			)}

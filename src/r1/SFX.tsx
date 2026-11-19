@@ -22,8 +22,8 @@ const CUES: Cue[] = [
 	{at: s(2) + 70, file: 'laugh', vol: 0.4, len: 22},
 	// 3 1976: you, Igor Lavrov; the yard
 	{at: s(3) + 2, file: 'boom', vol: 0.5},
-	{at: s(3) + 50, file: 'pop', vol: 0.4},
-	...W(3, 96),
+	{at: s(3) + 72, file: 'pop', vol: 0.4},
+	...W(3, 110),
 				// 4 «бьют каждый день»: a shove
 	{at: s(4) + 24, file: 'whoosh', vol: 0.4},
 	{at: s(4) + 30, file: 'bump', vol: 0.8},
@@ -64,9 +64,9 @@ const CUES: Cue[] = [
 	{at: s(11) + 140, file: 'heart', vol: 0.4, len: 23},
 	// 12 Тяп-ляп
 	{at: s(12), file: 'howl', vol: 0.3},
-	{at: s(12), file: 'steps_slow', vol: 0.6, len: 135},
-	{at: s(12) + 102, file: 'boom', vol: 0.9},
-	{at: s(12) + 102, file: 'stamp', vol: 0.6},
+	{at: s(12), file: 'steps_slow', vol: 0.6, len: 172},
+	{at: s(12) + 148, file: 'boom', vol: 0.9},
+	{at: s(12) + 148, file: 'stamp', vol: 0.6},
 	// 13 they walk; Сазон looks down
 	{at: s(13), file: 'steps', vol: 0.5, len: 112},
 	...W(13, 112),

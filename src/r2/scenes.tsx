@@ -9,12 +9,12 @@ import {AbsoluteFill, Easing, interpolate, useCurrentFrame} from 'remotion';
 import {clamp, lerp, pop, seg} from '../anim';
 import {Bubble, HEAVY, NameTag} from '../components/Overlays';
 import {Bust, Colors, Face} from '../components/Person';
-import {Cam3, Card3D, project, Scene3D} from '../components/Scene3D';
+import {Cam3, Card3D, Floor3D, project, Scene3D} from '../components/Scene3D';
 import * as G1 from '../g1/scenes';
 import * as G2 from '../g2/scenes';
 import {FenceArt, Figure3D, Ground3D, skyBg} from '../r1/world3d';
-import {KachalkaFar, KachalkaGround, KachalkaInside3D, KachalkaInsideBack} from '../r1/sets3d';
-import {CloseUp, GANG, GANG_CAP, Lamp3D, LightPool, RealStory, GV_FACE, GVOZD, GvozdHead, IGOR, Kitchen3D, KitchenBack, LAUGH, P, RulePlaque, SAZ_FACE, SAZON, SchoolYardFar, SchoolYardNear, gang, gvozd, igor, sazFriend, sazon, vignette} from '../r1/scenes';
+import {Bedroom3D, BedroomBack, KachalkaFar, KachalkaGround, KachalkaInside3D, KachalkaInsideBack} from '../r1/sets3d';
+import {CloseUp, GANG, GANG_CAP, IGOR_PJ, Lamp3D, LightPool, RealStory, GV_FACE, GVOZD, GvozdHead, IGOR, LAUGH, P, RealEventsBanner, RulePlaque, SAZ_FACE, SAZON, SchoolYardFar, SchoolYardNear, gang, gvozd, igor, sazFriend, sazon, vignette} from '../r1/scenes';
 import {SHOTS} from './timeline';
 
 const {YELLOW, RED} = G1;
@@ -185,6 +185,7 @@ export const S01: React.FC = () => {
 			<div style={{position: 'absolute', top: 330, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, fontSize: 120, color: '#fff', textShadow: '0 10px 0 rgba(0,0,0,0.5)', transform: `scale(${pop(f, 6, 9)})`, opacity: interpolate(f, [D - 24, D - 16], [1, 0], clamp)}}>
 				ОДИН <span style={{color: RED}}>УДАР</span>
 			</div>
+			<RealEventsBanner f={f} />
 			{rw > 0 &&
 				Array.from({length: 9}).map((_, k) => (
 					<div key={k} style={{position: 'absolute', left: 0, right: 0, top: (k * 233 + f * 61) % 1920, height: 10 + (k % 3) * 8, background: '#fff', opacity: 0.35 * rw}} />
@@ -785,29 +786,201 @@ export const S21: React.FC = () => {
 	);
 };
 
-// 22. At home mom gasps: «Игоречек, опять упал?» — and for the first time you smile
+// ============================================================ the hospital (ward) ======
+// a Soviet ward: walls in two tones of oil paint, linoleum, an iron bed, the IV stand, the bedside cabinet with oranges
+const HW = 650;
+const HospitalBack: React.FC = () => (
+	<Card3D x={0} y={0} z={-1200} w={HW * 2} h={900}>
+		<rect width={HW * 2} height={900} fill="#e9e5d9" />
+		<rect y={430} width={HW * 2} height={470} fill="#9fc3b6" />
+		<rect y={424} width={HW * 2} height={8} fill="#7fa597" />
+		{/* the window: a grey October day, a bare branch */}
+		<rect x={760} y={120} width={330} height={290} fill="#f4f3ee" />
+		<rect x={776} y={136} width={298} height={258} fill="#c9d7e2" />
+		<path d="M 776,330 Q 860,300 930,250 Q 990,210 1074,200" stroke="#7d7a76" strokeWidth={9} fill="none" opacity={0.6} />
+		<path d="M 900,262 Q 920,220 960,196" stroke="#7d7a76" strokeWidth={6} fill="none" opacity={0.6} />
+		<rect x={918} y={136} width={14} height={258} fill="#f4f3ee" />
+		<rect x={776} y={258} width={298} height={12} fill="#f4f3ee" />
+		{/* the radiator */}
+		<g transform="translate(790,470)">
+			{Array.from({length: 11}).map((_, k) => (
+				<rect key={k} x={k * 25} y={0} width={19} height={150} rx={8} fill="#dcd8cc" />
+			))}
+		</g>
+		{/* the wall clock */}
+		<circle cx={330} cy={190} r={52} fill="#f7f6f0" stroke="#5a5a5a" strokeWidth={6} />
+		<path d="M 330,190 L 330,156 M 330,190 L 352,200" stroke="#2a2a2a" strokeWidth={6} strokeLinecap="round" />
+		{/* the next bed, empty, the blanket folded */}
+		<rect x={60} y={560} width={330} height={20} fill="#c9ccd2" />
+		<rect x={60} y={500} width={330} height={70} fill="#f2f2f0" />
+		<rect x={210} y={470} width={150} height={44} rx={10} fill="#8b97ad" />
+		<rect x={56} y={430} width={12} height={250} fill="#c9ccd2" />
+		<rect x={384} y={500} width={12} height={180} fill="#c9ccd2" />
+	</Card3D>
+);
+const Hospital3D: React.FC<{id: string}> = ({id}) => (
+	<>
+		<Floor3D y={0} zNear={700} depth={1900} w={HW * 2} res={1}>
+			<defs>
+				<pattern id={`${id}lin`} width={160} height={160} patternUnits="userSpaceOnUse">
+					<rect width={160} height={160} fill="#b08a63" />
+					<rect width={80} height={80} fill="#a17c57" />
+					<rect x={80} y={80} width={80} height={80} fill="#a17c57" />
+				</pattern>
+			</defs>
+			<rect width={HW * 2} height={1900} fill={`url(#${id}lin)`} />
+		</Floor3D>
+		<Floor3D y={-900} zNear={700} depth={1900} w={HW * 2} res={1}>
+			<rect width={HW * 2} height={1900} fill="#f1eee6" />
+		</Floor3D>
+		{[-1, 1].map((sd) => (
+			<Card3D key={sd} x={sd * (HW - 950)} y={0} z={700} w={1900} h={900} ry={sd * -90} html>
+				<div style={{position: 'absolute', inset: 0, background: 'linear-gradient(180deg, #e6e2d6 0%, #e6e2d6 48%, #7fa597 48%, #7fa597 49%, #98bdb0 49%, #98bdb0 100%)'}} />
+			</Card3D>
+		))}
+	</>
+);
+// a head bandage over the bust of the boy (bust coordinates: the head is centred on 0,0, about 168 × 188)
+const Bandage: React.FC = () => (
+	<g>
+		<path d="M -92,-58 Q 0,-84 92,-58 L 94,-24 Q 0,-48 -94,-24 Z" fill="#f6f6f2" />
+		<path d="M -92,-58 Q 0,-84 92,-58" stroke="#d9d9d2" strokeWidth={4} fill="none" />
+		<path d="M -60,-40 Q 0,-58 60,-40" stroke="#e1e1da" strokeWidth={3} fill="none" />
+		<ellipse cx={52} cy={-46} rx={13} ry={9} fill="#c96a5e" opacity={0.55} />
+	</g>
+);
+
+// 22. «Ночью тебе становится плохо. Скорая. Сотрясение мозга.» — night, your room: the head spins; the blue light of
+// the ambulance washes over the wall once (slowly — nothing blinks); the hospital card with the stamp
+// (плохо@40, Скорая@58, Сотрясение@83)
 export const S22: React.FC = () => {
 	const f = useCurrentFrame();
-	const push = lerp(f, 96, 150, 0, 1, Easing.inOut(Easing.cubic));
-	const cam: Cam3 = {x: lerp(push, 0, 1, 50, 170), y: lerp(push, 0, 1, -430, -400), z: lerp(push, 0, 1, 840, 1080)};
-	const m = project(cam, -60, -470, -760);
+	const D = SHOTS[21].duration;
+	const cam: Cam3 = {x: lerp(f, 0, D, -40, 60), y: -420, z: lerp(f, 0, D, 660, 860)};
+	const spin = interpolate(f, [6, 30, 76, 96], [0, 1, 1, 0.3], clamp);
+	const blue = interpolate(f, [52, 64, 96, 112], [0, 1, 1, 0.25], clamp);
+	const card = interpolate(f, [80, 92], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
+	const stamp = 96;
+	const sk = interpolate(f, [stamp, stamp + 6], [1.8, 1], {...clamp, easing: Easing.in(Easing.quad)});
+	const room = (
+		<Scene3D cam={cam} bg="#0b0f1e" far={<BedroomBack f={f} doorLight={0.4} />} farBlur={0}>
+			<Bedroom3D id="r2s22" />
+			<Card3D x={120} y={-250} z={-930} w={420} h={170}>
+				<rect x={0} y={0} width={420} height={170} rx={60} fill="#e6e8ee" />
+			</Card3D>
+			<Card3D x={120} y={-575} z={-880} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
+				<Bust kind="boy" id="r2s22you" x={0} y={0} scale={1.0} colors={IGOR_PJ} tilt={Math.sin(f / 10) * 6 * spin} face={{eyes: f > 30 && f < 70 ? 'closed' : 'narrow', mouth: 'o', brows: 'worried', look: [0, 0.2], blush: false, bruise: 1}} />
+			</Card3D>
+			<Card3D x={20} y={0} z={-820} w={1100} h={300}>
+				<rect x={0} y={150} width={1100} height={150} fill="#5a4030" />
+				<path d="M 0,40 Q 550,0 1100,40 L 1100,220 L 0,220 Z" fill="#e8ecf2" />
+				<path d="M 550,60 L 700,130 L 550,200 L 400,130 Z" fill="#7a8ab0" />
+				<rect x={0} y={0} width={40} height={300} fill="#4a3424" />
+				<rect x={1060} y={60} width={40} height={240} fill="#4a3424" />
+			</Card3D>
+		</Scene3D>
+	);
 	return (
 		<AbsoluteFill>
-			<Scene3D cam={cam} bg="#1a1520" far={<KitchenBack id="r2s17" f={f} />} farBlur={0}>
-				<Kitchen3D id="r2s17" />
-				<Figure3D x={-60} z={-760} p={{kind: 'mom', id: 'r2s17mom', scale: 0.48, breathe: f, face: {eyes: 'wide', pupil: 0.7, mouth: f > 46 && f < 90 && Math.floor(f / 5) % 2 ? 'open' : 'o', brows: 'worried', look: [0.8, 0]}, armL: {target: [-90, -560], bend: 1}, armR: {target: [90, -560], bend: -1}}} />
-				<Figure3D x={170} z={-640} p={igor('r2s17you', {breathe: f, face: {eyes: f > 104 ? 'happy' : 'open', mouth: f > 104 ? 'smile' : 'flat', brows: 'flat', look: [-0.4, 0], blush: false, bruise: 1}})} />
-			</Scene3D>
-			{vignette(0.5)}
-			<Bubble x={Math.max(360, m.x + 60)} y={m.y - 60} text="ИГОРЕЧЕК, ОПЯТЬ УПАЛ?" from={44} to={100} tail="left" />
+			<AbsoluteFill style={{transform: `rotate(${Math.sin(f / 12) * 3 * spin}deg) scale(1.06)`, filter: spin > 0.05 ? `blur(${1.5 * spin}px)` : undefined}}>
+				{room}
+				<AbsoluteFill style={{opacity: 0.3 * spin, transform: `translate(${22 * spin + Math.sin(f / 6) * 8}px, -8px)`}}>{room}</AbsoluteFill>
+			</AbsoluteFill>
+			<AbsoluteFill style={{background: `linear-gradient(${lerp(f, 52, 112, 250, 200, Easing.linear)}deg, rgba(70,120,255,${0.42 * blue}), rgba(70,120,255,0) 65%)`}} />
+			<AbsoluteFill style={{background: 'linear-gradient(200deg, rgba(120,150,255,0.15), rgba(0,0,30,0.3))'}} />
+			{vignette(0.6)}
+			{card > 0 && (
+				<div style={{position: 'absolute', left: 540, top: 470, transform: `translate(-50%, ${(1 - card) * 900 - 50}%) rotate(-4deg)`, width: 640, background: '#f3efe2', borderRadius: 10, padding: '30px 36px 40px', boxShadow: '0 24px 50px rgba(0,0,0,0.55)', fontFamily: "'DejaVu Serif', serif", color: '#2a3470'}}>
+					<div style={{fontFamily: MONO_FONT, fontWeight: 800, fontSize: 30, letterSpacing: 2, color: '#3a3a3a'}}>ИСТОРИЯ БОЛЕЗНИ</div>
+					<div style={{fontStyle: 'italic', fontSize: 36, marginTop: 18}}>Лавров Игорь, 13 лет</div>
+					<div style={{fontStyle: 'italic', fontSize: 36, marginTop: 8}}>Диагноз:</div>
+					{f >= stamp && (
+						<div style={{position: 'absolute', left: 60, top: 170, transform: `rotate(-8deg) scale(${sk})`, opacity: interpolate(f, [stamp, stamp + 3], [0, 1], clamp), border: `9px solid ${RED}`, borderRadius: 14, padding: '6px 22px', fontFamily: HEAVY, fontWeight: 900, fontSize: 58, lineHeight: 1.05, color: RED, whiteSpace: 'nowrap', background: 'rgba(243,239,226,0.6)'}}>
+							СОТРЯСЕНИЕ МОЗГА
+						</div>
+					)}
+				</div>
+			)}
 		</AbsoluteFill>
 	);
 };
 
-// 23. In the morning Сазон waits at the school again: «Гони двадцать копеек, Игоречек.»
+// 23. «В больнице мама плачет: «Игоречек, кто тебя так?» А ты отвечаешь: «Упал».» — the ward: you in bed with your
+// head bandaged, mom crying at the bed, oranges in an авоська (мама@23, «Игоречек@51, так?»@98, «Упал»@144)
 export const S23: React.FC = () => {
 	const f = useCurrentFrame();
-	const cam: Cam3 = {x: lerp(f, 0, 132, -260, -200), y: -470, z: lerp(f, 0, 132, 800, 960)};
+	const D = SHOTS[22].duration;
+	const cam: Cam3 = {x: lerp(f, 0, D, -70, 30), y: -470, z: lerp(f, 0, D, 830, 990)};
+	const m = project(cam, -300, -560, -640);
+	const y = project(cam, 120, -520, -880);
+	const momTalk = f > 50 && f < 104 && Math.floor(f / 5) % 2 === 1;
+	const youTalk = f > 142 && f < 160 && Math.floor(f / 5) % 2 === 1;
+	return (
+		<AbsoluteFill>
+			<Scene3D cam={cam} bg="#e9e5d9" far={<HospitalBack />} farBlur={0}>
+				<Hospital3D id="r2s23" />
+				{/* the IV stand */}
+				<Card3D x={480} y={0} z={-1040} w={200} h={760}>
+					<rect x={96} y={60} width={8} height={700} fill="#b9bcc4" />
+					<rect x={40} y={60} width={120} height={8} fill="#b9bcc4" />
+					<rect x={44} y={66} width={44} height={84} rx={10} fill="#eef3f6" stroke="#b9bcc4" strokeWidth={3} />
+					<rect x={48} y={100} width={36} height={46} rx={6} fill="#cfe3ee" />
+					<path d="M 66,150 Q 70,300 10,420" stroke="#d6dade" strokeWidth={4} fill="none" />
+					<path d="M 60,750 L 140,750 M 100,700 L 100,760" stroke="#9fa3ab" strokeWidth={10} />
+				</Card3D>
+				{/* the iron bed: headboard bars, the pillow, you (sitting up), the blanket */}
+				<Card3D x={120} y={0} z={-990} w={760} h={560}>
+					<rect x={0} y={60} width={20} height={500} fill="#e2e4e8" />
+					<rect x={740} y={60} width={20} height={500} fill="#e2e4e8" />
+					<rect x={0} y={60} width={760} height={18} fill="#e2e4e8" />
+					{Array.from({length: 8}).map((_, k) => (
+						<rect key={k} x={70 + k * 86} y={78} width={10} height={300} fill="#e2e4e8" />
+					))}
+				</Card3D>
+				<Card3D x={120} y={-200} z={-940} w={460} h={190}>
+					<rect x={0} y={0} width={460} height={190} rx={60} fill="#f7f7f4" />
+				</Card3D>
+				<Card3D x={120} y={-500} z={-890} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
+					<Bust kind="boy" id="r2s23you" x={0} y={0} scale={1.0} colors={IGOR_PJ} face={{eyes: f > 120 ? 'narrow' : 'open', mouth: youTalk ? 'open' : f > 150 ? 'tight' : 'flat', brows: f > 120 ? 'flat' : 'worried', look: [-0.7, 0], blush: false, bruise: 1}} />
+					<Bandage />
+				</Card3D>
+				<Card3D x={120} y={0} z={-830} w={900} h={330}>
+					<rect x={0} y={170} width={900} height={160} fill="#d2d5dc" />
+					<path d="M 0,40 Q 450,0 900,40 L 900,250 L 0,250 Z" fill="#8b97ad" />
+					<path d="M 0,40 Q 450,0 900,40 L 900,90 Q 450,52 0,90 Z" fill="#f7f7f4" />
+					<rect x={0} y={60} width={22} height={270} fill="#e2e4e8" />
+					<rect x={878} y={60} width={22} height={270} fill="#e2e4e8" />
+				</Card3D>
+				{/* the bedside cabinet with the oranges mom brought */}
+				<Card3D x={-470} y={0} z={-1000} w={300} h={560}>
+					<rect x={20} y={200} width={260} height={360} fill="#e6e2d8" />
+					<rect x={40} y={260} width={220} height={150} fill="#dcd8cc" />
+					<circle cx={150} cy={335} r={8} fill="#9a958a" />
+					<rect x={70} y={120} width={36} height={80} rx={6} fill="#dfeff6" opacity={0.85} />
+					{[
+						[170, 176],
+						[204, 168],
+						[188, 140],
+						[226, 182],
+					].map(([x, y], k) => (
+						<circle key={k} cx={x} cy={y} r={24} fill="#f39a2b" />
+					))}
+					<path d="M 150,190 L 230,190 L 246,120 L 140,120 Z" fill="none" stroke="#c9a46a" strokeWidth={3} />
+				</Card3D>
+				{/* mom at the bed, crying */}
+				<Figure3D x={-300} z={-640} p={{kind: 'mom', id: 'r2s23mom', scale: 0.48, breathe: f, face: {eyes: 'open', mouth: momTalk ? 'open' : 'wobble', brows: 'sad', look: [0.8, 0.1], tears: interpolate(f, [10, 60], [0.3, 1], clamp)}, armL: {target: [-60, -520], bend: 1}, armR: {target: [90, -560], bend: -1}}} />
+			</Scene3D>
+			{vignette(0.4)}
+			<Bubble x={540} y={Math.max(400, m.y - 90)} text="ИГОРЕЧЕК, КТО ТЕБЯ ТАК?" from={50} to={110} tail="left" />
+			<Bubble x={Math.min(760, y.x + 60)} y={Math.max(400, y.y - 170)} text="УПАЛ." from={142} to={162} tail="left" />
+		</AbsoluteFill>
+	);
+};
+
+// 24. «Через неделю тебя выписывают. А у школы снова ждёт Сазон: «Гони двадцать копеек, Игоречек».»
+export const S24: React.FC = () => {
+	const f = useCurrentFrame();
+	const cam: Cam3 = {x: lerp(f, 0, 169, -260, -200), y: -470, z: lerp(f, 0, 169, 800, 960)};
 	const sz = project(cam, -330, -540, -1150);
 	return (
 		<AbsoluteFill>
@@ -815,18 +988,18 @@ export const S23: React.FC = () => {
 				<SchoolYardNear id="r2s18" />
 				<Figure3D x={-560} z={-1300} p={sazFriend('r2s18f0', 0, {breathe: f + 5})} />
 				<Figure3D x={-60} z={-1340} p={sazFriend('r2s18f1', 1, {breathe: f + 11})} />
-				<Figure3D x={-330} z={-1150} p={sazon('r2s18saz', {breathe: f, face: {...SAZ_FACE, mouth: Math.floor(f / 5) % 2 && f > 72 && f < 112 ? 'open' : 'grin'}})} />
+				<Figure3D x={-330} z={-1150} p={sazon('r2s18saz', {breathe: f, face: {...SAZ_FACE, mouth: Math.floor(f / 5) % 2 && f > 114 && f < 162 ? 'open' : 'grin'}})} />
 				<Figure3D x={-140} z={-560} p={igor('r2s18you', {back: true, breathe: f})} />
 			</Scene3D>
 			<AbsoluteFill style={{background: 'linear-gradient(180deg, rgba(235,240,245,0.3), rgba(235,240,245,0.05) 60%)'}} />
 			{vignette(0.45)}
-			<Bubble x={Math.min(640, Math.max(440, sz.x + 60))} y={sz.y - 60} text="ГОНИ 20 КОПЕЕК, ИГОРЕЧЕК!" from={70} to={126} tail="left" dark />
+			<Bubble x={Math.min(640, Math.max(440, sz.x + 60))} y={sz.y - 60} text="ГОНИ 20 КОПЕЕК, ИГОРЕЧЕК!" from={113} to={168} tail="left" dark />
 		</AbsoluteFill>
 	);
 };
 
-// 24. «Я теперь тяп-ляповский.» — Сазон laughs: «Докажи.»
-export const S24: React.FC = () => {
+// 25. «Я теперь тяп-ляповский.» — Сазон laughs: «Докажи.»
+export const S25: React.FC = () => {
 	const f = useCurrentFrame();
 	return (
 		<AbsoluteFill>
@@ -845,8 +1018,8 @@ export const S24: React.FC = () => {
 	);
 };
 
-// 25. Finale: call the guys — let them deal with him? Or hit Сазон yourself?
-export const S25: React.FC = () => {
+// 26. Finale: call the guys — let them deal with him? Or hit Сазон yourself?
+export const S26: React.FC = () => {
 	const f = useCurrentFrame();
 	return (
 		<Finale

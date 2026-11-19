@@ -124,6 +124,20 @@ export const RealStory: React.FC<{f: number}> = ({f}) => (
 	</div>
 );
 
+// the opening disclaimer: the series is inspired by real events — the gang, the district, the founder are real; the
+// heroes and what happens to them are not
+export const RealEventsBanner: React.FC<{f: number; to?: number}> = ({f, to = 84}) => {
+	const o = interpolate(f, [2, 8, to, to + 8], [0, 1, 1, 0], clamp);
+	if (o <= 0) return null;
+	return (
+		<div style={{position: 'absolute', top: 218, width: '100%', textAlign: 'center', opacity: o}}>
+			<div style={{display: 'inline-block', background: 'rgba(8,8,12,0.8)', borderLeft: `10px solid ${YELLOW}`, borderRadius: 14, padding: '12px 28px 14px', textAlign: 'left'}}>
+				<div style={{fontFamily: HEAVY, fontWeight: 900, fontSize: 40, letterSpacing: 2, color: '#fff'}}>ПО МОТИВАМ РЕАЛЬНЫХ СОБЫТИЙ</div>
+				<div style={{fontFamily: "'Inter', 'DejaVu Sans', sans-serif", fontWeight: 600, fontSize: 24, color: '#d8d2c0', marginTop: 4}}>Казань, 1970-е · группировка «Тяп-ляп» · герои вымышлены</div>
+			</div>
+		</div>
+	);
+};
 // a yard street lamp (art 700 × 1900, the lamp head at (565, 204))
 export const Lamp3D: React.FC<{x: number; z: number; on?: number; cone?: number}> = ({x, z, on = 1, cone = 0}) => (
 	<Card3D x={x} y={0} z={z} w={700} h={1900}>
@@ -371,6 +385,7 @@ export const S01: React.FC = () => {
 				</Scene3D>
 				{vignette(0.65)}
 			</AbsoluteFill>
+			<RealEventsBanner f={f} />
 			{rw > 0 &&
 				Array.from({length: 9}).map((_, k) => (
 					<div key={k} style={{position: 'absolute', left: 0, right: 0, top: (k * 233 + f * 61) % 1920, height: 10 + (k % 3) * 8, background: '#fff', opacity: 0.35 * rw}} />

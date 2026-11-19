@@ -92,25 +92,32 @@ const CUES: Cue[] = [
 	{at: s(20) + 96, file: 'pat', vol: 0.6},
 	// 21 «правила Антипа: …своих не бросать»
 	{at: s(21) + 6, file: 'pat', vol: 0.7},
-	// 22 mom: «опять упал?»
-	{at: s(22) + 4, file: 'plate', vol: 0.3},
-	{at: s(22) + 44, file: 'pop', vol: 0.4},
-	// 23 the morning: Сазон
-	...W(23, 0),
-	{at: s(23) + 70, file: 'pop', vol: 0.4},
-	// 24 «Я теперь тяп-ляповский» — «Докажи»
-	{at: s(24) + 24, file: 'pop', vol: 0.4},
-	{at: s(24) + 82, file: 'laugh', vol: 0.4, len: 40},
-	{at: s(24) + 102, file: 'pop', vol: 0.45},
-	// 25 finale
-	{at: s(25), file: 'boom', vol: 1},
-	{at: s(25) + 8, file: 'pop', vol: 0.5},
-	{at: s(25) + 78, file: 'pop', vol: 0.5},
-	{at: s(25) + 150, file: 'beep', vol: 0.8},
-	{at: s(25) + 180, file: 'beep', vol: 0.8},
-	{at: s(25) + 210, file: 'beep', vol: 0.8},
-	{at: s(25) + 236, file: 'beep_final', vol: 0.9},
-	{at: s(25) + 252, file: 'whoosh', vol: 0.7},
+	// 22 the night: the head spins; the ambulance; «СОТРЯСЕНИЕ МОЗГА»
+	{at: s(22), file: 'heart', vol: 0.5, len: 50},
+	{at: s(22) + 10, file: 'slowdown', vol: 0.35},
+	{at: s(22) + 50, file: 'siren', vol: 0.3, len: 66},
+	{at: s(22) + 84, file: 'whoosh', vol: 0.5},
+	{at: s(22) + 96, file: 'stamp', vol: 1},
+	// 23 the ward: «Игоречек, кто тебя так?» — «Упал»
+	{at: s(23) + 4, file: 'tick', vol: 0.25, len: 150},
+	{at: s(23) + 50, file: 'pop', vol: 0.4},
+	{at: s(23) + 142, file: 'pop', vol: 0.4},
+	// 24 a week later: Сазон
+	...W(24, 0),
+	{at: s(24) + 113, file: 'pop', vol: 0.4},
+	// 25 «Я теперь тяп-ляповский» — «Докажи»
+	{at: s(25) + 24, file: 'pop', vol: 0.4},
+	{at: s(25) + 82, file: 'laugh', vol: 0.4, len: 40},
+	{at: s(25) + 102, file: 'pop', vol: 0.45},
+	// 26 finale
+	{at: s(26), file: 'boom', vol: 1},
+	{at: s(26) + 8, file: 'pop', vol: 0.5},
+	{at: s(26) + 78, file: 'pop', vol: 0.5},
+	{at: s(26) + 150, file: 'beep', vol: 0.8},
+	{at: s(26) + 180, file: 'beep', vol: 0.8},
+	{at: s(26) + 210, file: 'beep', vol: 0.8},
+	{at: s(26) + 236, file: 'beep_final', vol: 0.9},
+	{at: s(26) + 252, file: 'whoosh', vol: 0.7},
 	// rule plaques
 	...SIGNS.flatMap((g) => [
 		{at: g.at, file: 'stamp', vol: 1},
@@ -121,7 +128,7 @@ const CUES: Cue[] = [
 const SFX_GAIN = HAS_VOICE ? 0.55 : 1;
 const clampX = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 // a low drone all the way (no dead air between the words), stronger in the basement (night)
-const BEDS: {file: string; a: number; b: number; vol: (old: number) => number}[] = [{file: 'drone', a: 0, b: TOTAL, vol: (o) => (o < s(23) ? 0.3 : 0.2)}];
+const BEDS: {file: string; a: number; b: number; vol: (old: number) => number}[] = [{file: 'drone', a: 0, b: TOTAL, vol: (o) => (o < s(24) ? 0.3 : 0.2)}];
 
 export const SFXR2: React.FC<{r: Remap}> = ({r}) => (
 	<>

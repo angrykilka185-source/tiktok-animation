@@ -215,12 +215,12 @@ export const S03: React.FC = () => {
 		<AbsoluteFill>
 			<Scene3D cam={cam} bg={skyBg('night')} far={<KachalkaFar f={f} open={open} />} farBlur={0}>
 				<Ground3D id="r2s3g" time="night" />
-				{open > 0.4 && <Figure3D x={1720} z={-1180} p={gvozd('r2s3gv', {breathe: f, face: {...GV_FACE, eyes: 'open', brows: 'raised', mouth: Math.floor(f / 5) % 2 && f > 16 && f < 100 ? 'open' : 'smile', look: [0, 0.2]}})} />}
+				{open > 0.4 && <Figure3D x={1720} z={-1180} p={gvozd('r2s3gv', {breathe: f, face: {...GV_FACE, eyes: 'open', brows: 'raised', mouth: Math.floor(f / 5) % 2 && f > 42 && f < 110 ? 'open' : 'smile', look: [0, 0.2]}})} />}
 			</Scene3D>
 			<AbsoluteFill style={{background: 'radial-gradient(circle at 55% 55%, rgba(255,217,138,0.18) 0%, transparent 45%)', opacity: open}} />
 			{vignette(0.55)}
-			<Bubble x={Math.min(700, Math.max(380, g.x))} y={g.y - 120} text="ОПА. ИГОРЕЧЕК?" from={16} to={58} tail="left" />
-			<Bubble x={Math.min(700, Math.max(380, g.x))} y={g.y - 120} text="ТЫ ЧЕГО ТУТ ЗАБЫЛ?" from={60} to={108} tail="left" />
+			<Bubble x={Math.min(700, Math.max(380, g.x))} y={g.y - 120} text="ОПА. ИГОРЕЧЕК?" from={42} to={82} tail="left" />
+			<Bubble x={Math.min(700, Math.max(380, g.x))} y={g.y - 120} text="ТЫ ЧЕГО ТУТ ЗАБЫЛ?" from={84} to={115} tail="left" />
 		</AbsoluteFill>
 	);
 };
@@ -232,12 +232,12 @@ export const S04: React.FC = () => {
 		<AbsoluteFill>
 			<CloseUp cam={{x: 1700, y: -470, z: lerp(f, 0, 108, 640, 760)}} f={f} bg={skyBg('night')} blur={9} far={<><KachalkaFar f={f} open={1} /><Ground3D id="r2s4g" time="night" /></>}>
 				<Card3D x={1700} y={-470} z={-200} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
-					<Bust kind="boy" id="r2s4you" x={0} y={0} scale={1.4} colors={IGOR} face={{eyes: 'open', mouth: f > 14 && f < 44 && Math.floor(f / 5) % 2 ? 'open' : 'flat', brows: 'angry', look: [0, 0], blush: false, bruise: 0.6}} />
+					<Bust kind="boy" id="r2s4you" x={0} y={0} scale={1.4} colors={IGOR} face={{eyes: 'open', mouth: f > 32 && f < 56 && Math.floor(f / 5) % 2 ? 'open' : 'flat', brows: 'angry', look: [0, 0], blush: false, bruise: 0.6}} />
 				</Card3D>
 			</CloseUp>
 			<AbsoluteFill style={{background: 'linear-gradient(270deg, rgba(255,210,130,0.22), transparent 55%)'}} />
 			{vignette(0.55)}
-			<Bubble x={600} y={560} text="Я ХОЧУ К ВАМ." from={12} to={70} tail="right" />
+			<Bubble x={600} y={560} text="Я ХОЧУ К ВАМ." from={30} to={84} tail="right" />
 		</AbsoluteFill>
 	);
 };
@@ -245,7 +245,7 @@ export const S04: React.FC = () => {
 // 5. The basement: a crowbar barbell, a kettlebell, a sandbag — and ten guys in caps, who all turn to you
 export const S05: React.FC = () => {
 	const f = useCurrentFrame();
-	const look = interpolate(f, [50, 62], [0, 1], clamp);
+	const look = interpolate(f, [100, 112], [0, 1], clamp);
 	const cam: Cam3 = {x: lerp(f, 0, 138, -60, 40), y: -430, z: lerp(f, 0, 138, 260, 560), ry: lerp(f, 0, 138, 4, -2)};
 	return (
 		<AbsoluteFill>
@@ -283,7 +283,7 @@ export const S06: React.FC = () => {
 				</Card3D>
 			</Scene3D>
 			{vignette(0.6)}
-			{f >= 24 && <NameTag x={Math.min(760, Math.max(330, t.x))} y={Math.max(330, t.y - 120)} title="СИВЫЙ" sub="СТАРШИЙ У ТЯП-ЛЯП" at={24} color={RED} />}
+			{f >= 34 && <NameTag x={Math.min(760, Math.max(330, t.x))} y={Math.max(330, t.y - 120)} title="СИВЫЙ" sub="СТАРШИЙ У ТЯП-ЛЯП" at={34} color={RED} />}
 		</AbsoluteFill>
 	);
 };
@@ -291,8 +291,8 @@ export const S06: React.FC = () => {
 // 7. «Хочешь к нам? У нас так: один удар от меня. Устоишь — пришился. Упадёшь — дверь там.»
 export const S07: React.FC = () => {
 	const f = useCurrentFrame();
-	const door = interpolate(f, [150, 162], [0, 1], clamp);
-	const talk = Math.floor(f / 5) % 2 === 1 && f > 4 && f < 172;
+	const door = interpolate(f, [158, 170], [0, 1], clamp);
+	const talk = Math.floor(f / 5) % 2 === 1 && f > 4 && f < 180;
 	return (
 		<AbsoluteFill>
 			<GymCU cam={{x: lerp(f, 0, 180, 40, -20), y: -540, z: lerp(f, 0, 180, 560, 680), rx: 3}} f={f}>
@@ -309,16 +309,16 @@ export const S07: React.FC = () => {
 // 8. The guys form a ring. Сивый slowly rolls up his sleeve.
 export const S08: React.FC = () => {
 	const f = useCurrentFrame();
-	const {i, t} = seg(f, [54]);
+	const {i, t} = seg(f, [44]);
 	if (i === 0) {
 		return (
 			<AbsoluteFill>
-				<GymRing cam={{x: 0, y: lerp(t, 0, 54, -640, -760), z: lerp(t, 0, 54, 360, 440), rx: -6}} f={t} />
+				<GymRing cam={{x: 0, y: lerp(t, 0, 44, -640, -760), z: lerp(t, 0, 44, 360, 440), rx: -6}} f={t} />
 				{vignette(0.6)}
 			</AbsoluteFill>
 		);
 	}
-	const roll = lerp(t, 4, 40, 0, 1, Easing.inOut(Easing.cubic));
+	const roll = lerp(t, 8, 52, 0, 1, Easing.inOut(Easing.cubic));
 	return (
 		<AbsoluteFill>
 			<GymCU cam={{x: 0, y: -460, z: lerp(t, 0, 50, 700, 760)}} f={t} blur={10}>
@@ -365,7 +365,7 @@ export const S09: React.FC = () => {
 // 10. «Удар.» — his fist flies at you; the hit: a flash, the world jolts
 export const S10: React.FC = () => {
 	const f = useCurrentFrame();
-	const at = 32;
+	const at = 8;
 	const fly = lerp(f, 0, at, 0, 1, Easing.in(Easing.cubic));
 	const shake = f >= at ? Math.sin((f - at) * 2.4) * 40 * Math.exp(-(f - at) / 8) : 0;
 	return (
@@ -394,8 +394,8 @@ export const S10: React.FC = () => {
 // 11. Your ears ring. The floor slips away. You step back… (double vision, the frame sways, then you steady)
 export const S11: React.FC = () => {
 	const f = useCurrentFrame();
-	const daze = interpolate(f, [0, 70, 110, 120], [1, 1, 0.35, 0.2], clamp);
-	const back = lerp(f, 72, 96, 0, 1, Easing.out(Easing.cubic));
+	const daze = interpolate(f, [0, 86, 116, 124], [1, 1, 0.35, 0.2], clamp);
+	const back = lerp(f, 88, 110, 0, 1, Easing.out(Easing.cubic));
 	const rot = Math.sin(f / 9) * 10 * daze - back * 4 * (1 - back);
 	const cam: Cam3 = {x: Math.sin(f / 13) * 40 * daze, y: -480 + back * 30, z: 520 - back * 160, rx: Math.sin(f / 11) * 3 * daze};
 	return (
@@ -436,11 +436,11 @@ export const S13: React.FC = () => {
 		<AbsoluteFill>
 			<GymCU cam={{x: 0, y: -560, z: lerp(f, 0, 102, 560, 660)}} f={f}>
 				<Card3D x={0} y={-580} z={-320} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
-					<SivyHead id="r2s13sv" s={1.9} face={{eyes: 'narrow', mouth: Math.floor(f / 5) % 2 && f > 30 && f < 90 ? 'open' : 'smile', brows: 'flat', look: [0, 0.1], blush: false}} />
+					<SivyHead id="r2s13sv" s={1.9} face={{eyes: 'narrow', mouth: Math.floor(f / 5) % 2 && f > 44 && f < 100 ? 'open' : 'smile', brows: 'flat', look: [0, 0.1], blush: false}} />
 				</Card3D>
 			</GymCU>
 			{vignette(0.6)}
-			<Bubble x={540} y={470} text="УСТОЯЛ. ТЕПЕРЬ ТЫ НАШ." from={26} to={102} tail="left" />
+			<Bubble x={540} y={470} text="УСТОЯЛ. ТЕПЕРЬ ТЫ НАШ." from={42} to={105} tail="left" />
 		</AbsoluteFill>
 	);
 };
@@ -448,8 +448,8 @@ export const S13: React.FC = () => {
 // 14. «И забудь про Игоречка. Здесь ты — Лавр.» — «ИГОРЕЧЕК» crossed out, «ЛАВР» stamped
 export const S14: React.FC = () => {
 	const f = useCurrentFrame();
-	const strike = lerp(f, 30, 44, 0, 1, Easing.out(Easing.cubic));
-	const at = 60;
+	const strike = lerp(f, 20, 34, 0, 1, Easing.out(Easing.cubic));
+	const at = 72;
 	const k = interpolate(f, [at, at + 6], [1.8, 1], {...clamp, easing: Easing.in(Easing.quad)});
 	return (
 		<AbsoluteFill>
@@ -527,18 +527,18 @@ export const S16: React.FC = () => {
 // 17. At home mom gasps: «Игоречек, опять упал?» — and for the first time you smile
 export const S17: React.FC = () => {
 	const f = useCurrentFrame();
-	const push = lerp(f, 70, 130, 0, 1, Easing.inOut(Easing.cubic));
+	const push = lerp(f, 96, 150, 0, 1, Easing.inOut(Easing.cubic));
 	const cam: Cam3 = {x: lerp(push, 0, 1, 50, 170), y: lerp(push, 0, 1, -430, -400), z: lerp(push, 0, 1, 840, 1080)};
 	const m = project(cam, -60, -470, -760);
 	return (
 		<AbsoluteFill>
 			<Scene3D cam={cam} bg="#1a1520" far={<KitchenBack id="r2s17" f={f} />} farBlur={0}>
 				<Kitchen3D id="r2s17" />
-				<Figure3D x={-60} z={-760} p={{kind: 'mom', id: 'r2s17mom', scale: 0.48, breathe: f, face: {eyes: 'wide', pupil: 0.7, mouth: f > 20 && f < 70 && Math.floor(f / 5) % 2 ? 'open' : 'o', brows: 'worried', look: [0.8, 0]}, armL: {target: [-90, -560], bend: 1}, armR: {target: [90, -560], bend: -1}}} />
-				<Figure3D x={170} z={-640} p={igor('r2s17you', {breathe: f, face: {eyes: f > 80 ? 'happy' : 'open', mouth: f > 80 ? 'smile' : 'flat', brows: 'flat', look: [-0.4, 0], blush: false, bruise: 1}})} />
+				<Figure3D x={-60} z={-760} p={{kind: 'mom', id: 'r2s17mom', scale: 0.48, breathe: f, face: {eyes: 'wide', pupil: 0.7, mouth: f > 46 && f < 90 && Math.floor(f / 5) % 2 ? 'open' : 'o', brows: 'worried', look: [0.8, 0]}, armL: {target: [-90, -560], bend: 1}, armR: {target: [90, -560], bend: -1}}} />
+				<Figure3D x={170} z={-640} p={igor('r2s17you', {breathe: f, face: {eyes: f > 104 ? 'happy' : 'open', mouth: f > 104 ? 'smile' : 'flat', brows: 'flat', look: [-0.4, 0], blush: false, bruise: 1}})} />
 			</Scene3D>
 			{vignette(0.5)}
-			<Bubble x={Math.max(360, m.x + 60)} y={m.y - 60} text="ИГОРЕЧЕК, ОПЯТЬ УПАЛ?" from={16} to={80} tail="left" />
+			<Bubble x={Math.max(360, m.x + 60)} y={m.y - 60} text="ИГОРЕЧЕК, ОПЯТЬ УПАЛ?" from={44} to={100} tail="left" />
 		</AbsoluteFill>
 	);
 };
@@ -554,12 +554,12 @@ export const S18: React.FC = () => {
 				<SchoolYardNear id="r2s18" />
 				<Figure3D x={-560} z={-1300} p={sazFriend('r2s18f0', 0, {breathe: f + 5})} />
 				<Figure3D x={-60} z={-1340} p={sazFriend('r2s18f1', 1, {breathe: f + 11})} />
-				<Figure3D x={-330} z={-1150} p={sazon('r2s18saz', {breathe: f, face: {...SAZ_FACE, mouth: Math.floor(f / 5) % 2 && f > 40 && f < 110 ? 'open' : 'grin'}})} />
+				<Figure3D x={-330} z={-1150} p={sazon('r2s18saz', {breathe: f, face: {...SAZ_FACE, mouth: Math.floor(f / 5) % 2 && f > 72 && f < 112 ? 'open' : 'grin'}})} />
 				<Figure3D x={-140} z={-560} p={igor('r2s18you', {back: true, breathe: f})} />
 			</Scene3D>
 			<AbsoluteFill style={{background: 'linear-gradient(180deg, rgba(235,240,245,0.3), rgba(235,240,245,0.05) 60%)'}} />
 			{vignette(0.45)}
-			<Bubble x={Math.min(640, Math.max(440, sz.x + 60))} y={sz.y - 60} text="ГОНИ 20 КОПЕЕК, ИГОРЕЧЕК!" from={44} to={132} tail="left" dark />
+			<Bubble x={Math.min(640, Math.max(440, sz.x + 60))} y={sz.y - 60} text="ГОНИ 20 КОПЕЕК, ИГОРЕЧЕК!" from={70} to={126} tail="left" dark />
 		</AbsoluteFill>
 	);
 };
@@ -571,15 +571,15 @@ export const S19: React.FC = () => {
 		<AbsoluteFill>
 			<CloseUp cam={{x: lerp(f, 0, 132, -20, 20), y: -520, z: 560}} f={f} far={<><SchoolYardFar f={f} /><SchoolYardNear id="r2s19cu" /></>} blur={9}>
 				<Card3D x={-230} y={-470} z={-260} w={760} h={900} anchor="center" view={[-380, -450, 760, 900]}>
-					<Bust kind="boy" id="r2s19you" x={0} y={0} scale={1.6} colors={IGOR} face={{eyes: 'narrow', mouth: f > 8 && f < 60 && Math.floor(f / 5) % 2 ? 'open' : 'flat', brows: 'angry', look: [0.6, -0.1], blush: false, bruise: 1}} />
+					<Bust kind="boy" id="r2s19you" x={0} y={0} scale={1.6} colors={IGOR} face={{eyes: 'narrow', mouth: f > 26 && f < 60 && Math.floor(f / 5) % 2 ? 'open' : 'flat', brows: 'angry', look: [0.6, -0.1], blush: false, bruise: 1}} />
 				</Card3D>
 				<Card3D x={260} y={-640} z={-420} w={760} h={900} anchor="center" view={[-380, -450, 760, 900]}>
 					<Bust kind="teen" id="r2s19saz" x={0} y={0} scale={1.6} colors={SAZON} plain face={f > 72 ? LAUGH(f, 0) : {...SAZ_FACE, look: [-0.6, 0.1]}} tilt={f > 72 ? Math.sin(f / 4) * 3 : 0} />
 				</Card3D>
 			</CloseUp>
 			{vignette(0.5)}
-			<Bubble x={430} y={520} text="Я ТЕПЕРЬ С ТЯП-ЛЯП." from={8} to={70} tail="left" />
-			<Bubble x={700} y={420} text="ДОКАЖИ!" from={84} to={132} tail="right" dark />
+			<Bubble x={430} y={520} text="Я ТЕПЕРЬ С ТЯП-ЛЯП." from={24} to={74} tail="left" />
+			<Bubble x={700} y={420} text="ДОКАЖИ!" from={100} to={124} tail="right" dark />
 		</AbsoluteFill>
 	);
 };

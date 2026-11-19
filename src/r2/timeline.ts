@@ -2,7 +2,7 @@
 // Authoring timeline = the voice (scripts/fit-voiceover.py --part r2).
 import {FPS, makeShots, Sign} from '../timeline';
 
-export const SHOT_SECONDS = [4.0, 3.2, 3.6, 3.6, 4.6, 5.0, 6.0, 3.4, 2.8, 1.6, 4.0, 2.6, 3.4, 3.4, 4.4, 4.6, 4.6, 4.4, 4.4, 11.2];
+export const SHOT_SECONDS = [4.167, 2.633, 3.833, 3.567, 5.2, 5.333, 6.2, 3.6, 2.967, 1.6, 4.133, 2.4, 3.5, 3.1, 4.233, 5.0, 5.233, 4.2, 4.133, 10.567];
 const built = makeShots(SHOT_SECONDS);
 export const SHOTS = built.shots;
 export const TOTAL = built.total;
@@ -13,8 +13,8 @@ const s = shotStart;
 
 // the rules — plaques that fly into the «ПОНЯТИЯ» counter; the third is still «?»
 export const SIGNS: Sign[] = [
-	{n: 1, title: 'УДАР ДЕРЖАТ\nСТОЯ', at: s(12) + 30, hold: 40, y: 430},
-	{n: 2, title: 'СВОИХ\nНЕ СДАЮТ', at: s(16) + 70, hold: 40, y: 430},
+	{n: 1, title: 'УДАР ДЕРЖАТ\nСТОЯ', at: s(12) + 20, hold: 40, y: 430},
+	{n: 2, title: 'СВОИХ\nНЕ СДАЮТ', at: s(16) + 86, hold: 40, y: 430},
 ];
 
 export const CLOCK: {from: number; text: string}[] = [

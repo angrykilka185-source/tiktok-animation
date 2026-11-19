@@ -21,42 +21,42 @@ const CUES: Cue[] = [
 	{at: s(2) + 60, file: 'slam', vol: 0.2},
 	// 3 the door opens: Гвоздь
 	{at: s(3), file: 'creak', vol: 0.7},
-	{at: s(3) + 18, file: 'pop', vol: 0.4},
-	{at: s(3) + 60, file: 'pop', vol: 0.4},
+	{at: s(3) + 42, file: 'pop', vol: 0.4},
+	{at: s(3) + 84, file: 'pop', vol: 0.4},
 	// 4 «Я хочу к вам» — silence
-	{at: s(4) + 8, file: 'pop', vol: 0.4},
-	{at: s(4) + 60, file: 'heart', vol: 0.4, len: 48},
+	{at: s(4) + 30, file: 'pop', vol: 0.4},
+	{at: s(4) + 64, file: 'heart', vol: 0.4, len: 43},
 	// 5 the gym
 	...W(5, 0),
 	{at: s(5) + 20, file: 'slam', vol: 0.25},
 	{at: s(5) + 70, file: 'slam', vol: 0.25},
 	// 6 Сивый rises
 	{at: s(6) + 10, file: 'steps_slow', vol: 0.6, len: 60},
-	{at: s(6) + 40, file: 'stamp', vol: 0.5},
+	{at: s(6) + 34, file: 'stamp', vol: 0.5},
 	// 7 «один удар»
 	{at: s(7) + 60, file: 'stamp', vol: 0.8},
 	{at: s(7) + 62, file: 'heart_big', vol: 0.5},
 	// 8 the circle; the sleeve
 	{at: s(8), file: 'steps', vol: 0.45, len: 50},
-	{at: s(8) + 54, file: 'cloth', vol: 0.7},
+	{at: s(8) + 50, file: 'cloth', vol: 0.7},
 	// 9 fists
 	{at: s(9), file: 'heart', vol: 0.6, len: 84},
 	// 10 the blow
-	{at: s(10) + 18, file: 'whoosh', vol: 0.7},
-	{at: s(10) + 32, file: 'slam', vol: 1},
-	{at: s(10) + 32, file: 'boom', vol: 0.8},
+	{at: s(10), file: 'whoosh', vol: 0.7},
+	{at: s(10) + 8, file: 'slam', vol: 1},
+	{at: s(10) + 8, file: 'boom', vol: 0.8},
 	// 11 ringing in the ears; a step back
 	{at: s(11), file: 'slowdown', vol: 0.6},
-	{at: s(11) + 80, file: 'floorcreak', vol: 0.5},
+	{at: s(11) + 92, file: 'floorcreak', vol: 0.5},
 	// 12 …and you stand
 	{at: s(12) + 20, file: 'heart_big', vol: 0.6},
 	// 13 «Устоял. Теперь ты наш»
-	{at: s(13) + 6, file: 'pop', vol: 0.4},
+	{at: s(13) + 42, file: 'pop', vol: 0.4},
 	{at: s(13) + 30, file: 'swell', vol: 0.4},
 	// 14 «Здесь ты — Лавр»
-	{at: s(14) + 40, file: 'tear', vol: 0.6},
-	{at: s(14) + 62, file: 'stamp', vol: 1},
-	{at: s(14) + 62, file: 'boom', vol: 0.6},
+	{at: s(14) + 22, file: 'tear', vol: 0.6},
+	{at: s(14) + 72, file: 'stamp', vol: 1},
+	{at: s(14) + 72, file: 'boom', vol: 0.6},
 	// 15 handshakes
 	{at: s(15) + 10, file: 'pat', vol: 0.6},
 	{at: s(15) + 54, file: 'pat', vol: 0.6},
@@ -65,14 +65,14 @@ const CUES: Cue[] = [
 	{at: s(16) + 6, file: 'pat', vol: 0.7},
 	// 17 mom: «опять упал?»
 	{at: s(17) + 4, file: 'plate', vol: 0.3},
-	{at: s(17) + 30, file: 'pop', vol: 0.4},
+	{at: s(17) + 44, file: 'pop', vol: 0.4},
 	// 18 the morning: Сазон
 	...W(18, 0),
-	{at: s(18) + 50, file: 'pop', vol: 0.4},
+	{at: s(18) + 70, file: 'pop', vol: 0.4},
 	// 19 «Я теперь с Тяп-ляп» — «Докажи»
-	{at: s(19) + 10, file: 'pop', vol: 0.4},
+	{at: s(19) + 24, file: 'pop', vol: 0.4},
 	{at: s(19) + 76, file: 'laugh', vol: 0.4, len: 40},
-	{at: s(19) + 88, file: 'pop', vol: 0.45},
+	{at: s(19) + 100, file: 'pop', vol: 0.45},
 	// 20 finale
 	{at: s(20), file: 'boom', vol: 1},
 	{at: s(20) + 8, file: 'pop', vol: 0.5},

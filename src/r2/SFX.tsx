@@ -56,44 +56,61 @@ const CUES: Cue[] = [
 	{at: s(12), file: 'whoosh', vol: 0.7},
 	{at: s(12) + 8, file: 'slam', vol: 1},
 	{at: s(12) + 8, file: 'boom', vol: 0.8},
-	// 13 ringing in the ears; a step back
+	// 13 ringing in the ears — and you fall
 	{at: s(13), file: 'slowdown', vol: 0.6},
-	{at: s(13) + 92, file: 'floorcreak', vol: 0.5},
-	// 14 …and you stand
-	{at: s(14) + 20, file: 'heart_big', vol: 0.6},
-	// 15 «Устоял. Теперь ты наш»
-	{at: s(15) + 42, file: 'pop', vol: 0.4},
-	{at: s(15) + 30, file: 'swell', vol: 0.4},
-	// 16 «Здесь ты — Лавр. Тяп-ляповский»
-	{at: s(16) + 22, file: 'tear', vol: 0.6},
-	{at: s(16) + 75, file: 'stamp', vol: 1},
-	{at: s(16) + 75, file: 'boom', vol: 0.6},
-	{at: s(16) + 95, file: 'stamp', vol: 0.9},
-	// 17 handshakes
-	{at: s(17) + 10, file: 'pat', vol: 0.6},
-	{at: s(17) + 54, file: 'pat', vol: 0.6},
-	{at: s(17) + 96, file: 'pat', vol: 0.6},
-	// 18 «правила Антипа: …своих не бросать»
-	{at: s(18) + 6, file: 'pat', vol: 0.7},
-	// 19 mom: «опять упал?»
-	{at: s(19) + 4, file: 'plate', vol: 0.3},
-	{at: s(19) + 44, file: 'pop', vol: 0.4},
-	// 20 the morning: Сазон
-	...W(20, 0),
-	{at: s(20) + 70, file: 'pop', vol: 0.4},
-	// 21 «Я теперь тяп-ляповский» — «Докажи»
-	{at: s(21) + 24, file: 'pop', vol: 0.4},
-	{at: s(21) + 82, file: 'laugh', vol: 0.4, len: 40},
-	{at: s(21) + 102, file: 'pop', vol: 0.45},
-	// 22 finale
-	{at: s(22), file: 'boom', vol: 1},
-	{at: s(22) + 8, file: 'pop', vol: 0.5},
-	{at: s(22) + 78, file: 'pop', vol: 0.5},
-	{at: s(22) + 150, file: 'beep', vol: 0.8},
-	{at: s(22) + 180, file: 'beep', vol: 0.8},
-	{at: s(22) + 210, file: 'beep', vol: 0.8},
-	{at: s(22) + 236, file: 'beep_final', vol: 0.9},
-	{at: s(22) + 252, file: 'whoosh', vol: 0.7},
+	{at: s(13) + 84, file: 'whoosh', vol: 0.5},
+	{at: s(13) + 98, file: 'bump', vol: 1},
+	{at: s(13) + 98, file: 'boom', vol: 0.5},
+	// 14 on the floor: they laugh; «Упал — свободен»
+	{at: s(14), file: 'laugh', vol: 0.55, len: 70},
+	{at: s(14) + 46, file: 'cloth', vol: 0.4},
+	{at: s(14) + 78, file: 'pop', vol: 0.4},
+	// 15 you get up; «Бей ещё»
+	{at: s(15) + 6, file: 'cloth', vol: 0.6},
+	{at: s(15) + 10, file: 'breath', vol: 0.5},
+	{at: s(15) + 30, file: 'heart', vol: 0.5, len: 60},
+	{at: s(15) + 96, file: 'pop', vol: 0.45},
+	// 16 silence; the second blow (impact at 58 + 28)
+	{at: s(16) + 20, file: 'heart_big', vol: 0.5},
+	{at: s(16) + 76, file: 'whoosh', vol: 0.7},
+	{at: s(16) + 86, file: 'slam', vol: 1},
+	{at: s(16) + 86, file: 'boom', vol: 0.8},
+	// 17 …and you stand
+	{at: s(17) + 20, file: 'heart_big', vol: 0.6},
+	// 18 «Упал — и встал. Теперь ты наш»
+	{at: s(18) + 42, file: 'pop', vol: 0.4},
+	{at: s(18) + 86, file: 'pop', vol: 0.4},
+	{at: s(18) + 30, file: 'swell', vol: 0.4},
+	// 19 «Здесь ты — Лавр. Тяп-ляповский»
+	{at: s(19) + 22, file: 'tear', vol: 0.6},
+	{at: s(19) + 75, file: 'stamp', vol: 1},
+	{at: s(19) + 75, file: 'boom', vol: 0.6},
+	{at: s(19) + 95, file: 'stamp', vol: 0.9},
+	// 20 handshakes
+	{at: s(20) + 10, file: 'pat', vol: 0.6},
+	{at: s(20) + 54, file: 'pat', vol: 0.6},
+	{at: s(20) + 96, file: 'pat', vol: 0.6},
+	// 21 «правила Антипа: …своих не бросать»
+	{at: s(21) + 6, file: 'pat', vol: 0.7},
+	// 22 mom: «опять упал?»
+	{at: s(22) + 4, file: 'plate', vol: 0.3},
+	{at: s(22) + 44, file: 'pop', vol: 0.4},
+	// 23 the morning: Сазон
+	...W(23, 0),
+	{at: s(23) + 70, file: 'pop', vol: 0.4},
+	// 24 «Я теперь тяп-ляповский» — «Докажи»
+	{at: s(24) + 24, file: 'pop', vol: 0.4},
+	{at: s(24) + 82, file: 'laugh', vol: 0.4, len: 40},
+	{at: s(24) + 102, file: 'pop', vol: 0.45},
+	// 25 finale
+	{at: s(25), file: 'boom', vol: 1},
+	{at: s(25) + 8, file: 'pop', vol: 0.5},
+	{at: s(25) + 78, file: 'pop', vol: 0.5},
+	{at: s(25) + 150, file: 'beep', vol: 0.8},
+	{at: s(25) + 180, file: 'beep', vol: 0.8},
+	{at: s(25) + 210, file: 'beep', vol: 0.8},
+	{at: s(25) + 236, file: 'beep_final', vol: 0.9},
+	{at: s(25) + 252, file: 'whoosh', vol: 0.7},
 	// rule plaques
 	...SIGNS.flatMap((g) => [
 		{at: g.at, file: 'stamp', vol: 1},
@@ -104,7 +121,7 @@ const CUES: Cue[] = [
 const SFX_GAIN = HAS_VOICE ? 0.55 : 1;
 const clampX = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 // a low drone all the way (no dead air between the words), stronger in the basement (night)
-const BEDS: {file: string; a: number; b: number; vol: (old: number) => number}[] = [{file: 'drone', a: 0, b: TOTAL, vol: (o) => (o < s(20) ? 0.3 : 0.2)}];
+const BEDS: {file: string; a: number; b: number; vol: (old: number) => number}[] = [{file: 'drone', a: 0, b: TOTAL, vol: (o) => (o < s(23) ? 0.3 : 0.2)}];
 
 export const SFXR2: React.FC<{r: Remap}> = ({r}) => (
 	<>

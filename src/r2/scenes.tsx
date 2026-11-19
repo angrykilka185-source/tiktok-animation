@@ -140,14 +140,22 @@ const RING: [number, number, number][] = [
 	[-250, -1380, 1],
 	[250, -1380, 0],
 ];
-const GymRing: React.FC<{cam: Cam3; f: number; you?: boolean; youFace?: Face; youBack?: boolean; sway?: number}> = ({cam, f, you = true, youFace, youBack = true, sway = 0}) => (
+// the ring's mood: 'flat' (watching), 'laugh' (you fell), 'shock' (you got up); `point` 0…1 — Сивый points at the door
+type Mood = 'flat' | 'laugh' | 'shock';
+const ringFace = (mood: Mood, f: number, i: number, x: number): Face =>
+	mood === 'laugh'
+		? LAUGH(f, i)
+		: mood === 'shock'
+			? {eyes: 'wide', pupil: 0.7, mouth: 'flat', brows: 'raised', look: [x > 0 ? -0.6 : 0.6, 0.3], blush: false}
+			: {eyes: 'narrow', mouth: 'flat', brows: 'flat', look: [x > 0 ? -0.6 : 0.6, 0.1], blush: false};
+const GymRing: React.FC<{cam: Cam3; f: number; you?: boolean; youFace?: Face; youBack?: boolean; sway?: number; mood?: Mood; point?: number; sivyFace?: Face}> = ({cam, f, you = true, youFace, youBack = true, sway = 0, mood = 'flat', point = 0, sivyFace}) => (
 	<Scene3D cam={cam} bg="#141210" far={GYM_FAR(f)} farBlur={0}>
 		<KachalkaInside3D id="r2ring" />
 		{RING.map(([x, z, k], i) => (
-			<Figure3D key={i} x={x} z={z} p={guy(`r2rg${i}`, k, i % 2 === 0, {breathe: f + i * 7, face: {eyes: 'narrow', mouth: 'flat', brows: 'flat', look: [x > 0 ? -0.6 : 0.6, 0.1], blush: false}})} />
+			<Figure3D key={i} x={x} z={z} p={guy(`r2rg${i}`, k, i % 2 === 0, {breathe: f + i * 7, face: ringFace(mood, f, i, x)})} />
 		))}
-		<Figure3D x={40} z={-1080} p={gvozd('r2rgv', {breathe: f, face: {...GV_FACE, mouth: 'flat', look: [-0.3, 0.1]}})} />
-		<Figure3D x={-60} z={-1000} p={sivy('r2rsv', {breathe: f})} />
+		<Figure3D x={40} z={-1080} p={gvozd('r2rgv', {breathe: f, face: mood === 'laugh' ? {...GV_FACE, mouth: 'grin', look: [-0.3, 0.3]} : mood === 'shock' ? {...GV_FACE, eyes: 'open', brows: 'raised', mouth: 'flat', look: [-0.3, 0.3]} : {...GV_FACE, mouth: 'flat', look: [-0.3, 0.1]}})} />
+		<Figure3D x={-60} z={-1000} p={sivy('r2rsv', {breathe: f, face: sivyFace, armL: point > 0 ? {target: [lerp(point, 0, 1, -60, -330), lerp(point, 0, 1, -200, -480)], bend: 1} : undefined})} />
 		{you && <Figure3D x={20} z={-720} p={igor('r2ryou', {back: youBack, breathe: f, headTilt: sway, face: youFace})} />}
 	</Scene3D>
 );
@@ -538,15 +546,14 @@ export const S11: React.FC = () => {
 };
 
 // 12. «Удар.» — his fist flies at you; the hit: a flash, the world jolts
-export const S12: React.FC = () => {
-	const f = useCurrentFrame();
-	const at = 8;
+export const S12: React.FC = () => <Punch f={useCurrentFrame()} at={8} />;
+const Punch: React.FC<{f: number; at: number}> = ({f, at}) => {
 	const fly = lerp(f, 0, at, 0, 1, Easing.in(Easing.cubic));
 	const shake = f >= at ? Math.sin((f - at) * 2.4) * 40 * Math.exp(-(f - at) / 8) : 0;
 	return (
 		<AbsoluteFill>
 			<AbsoluteFill style={{transform: `rotate(${f >= at ? lerp(f, at, at + 10, 0, 9) : 0}deg)`}}>
-				<GymCU cam={{x: shake, y: -540 + shake * 0.5, z: 560}} f={f} blur={10}>
+				<GymCU cam={{x: shake, y: -540 + shake * 0.5, z: 560 + lerp(f, 0, at, -40, 0)}} f={f} blur={10}>
 					<Card3D x={0} y={-600} z={-460} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
 						<SivyHead id="r2s10sv" s={1.5} face={{eyes: 'narrow', mouth: 'grin', brows: 'angry', look: [0, 0], blush: false}} />
 					</Card3D>
@@ -561,33 +568,103 @@ export const S12: React.FC = () => {
 			</AbsoluteFill>
 			{vignette(0.65)}
 			<AbsoluteFill style={{background: '#fff', opacity: interpolate(f, [at, at + 1, at + 10], [0, 1, 0], clamp)}} />
-			<AbsoluteFill style={{background: '#7a0000', opacity: interpolate(f, [at + 2, at + 6, 48], [0, 0.35, 0.15], clamp)}} />
+			<AbsoluteFill style={{background: '#7a0000', opacity: interpolate(f, [at + 2, at + 6, at + 40], [0, 0.35, 0.15], clamp)}} />
 		</AbsoluteFill>
 	);
 };
 
-// 13. Your ears ring. The floor slips away. You step back… (double vision, the frame sways, then you steady)
+// 13. Your ears ring. The floor slips away — and you fall. (double vision, the frame sways, then the floor rushes up)
 export const S13: React.FC = () => {
 	const f = useCurrentFrame();
-	const daze = interpolate(f, [0, 86, 116, 124], [1, 1, 0.35, 0.2], clamp);
-	const back = lerp(f, 88, 110, 0, 1, Easing.out(Easing.cubic));
-	const rot = Math.sin(f / 9) * 10 * daze - back * 4 * (1 - back);
-	const cam: Cam3 = {x: Math.sin(f / 13) * 40 * daze, y: -480 + back * 30, z: 520 - back * 160, rx: Math.sin(f / 11) * 3 * daze};
+	const daze = 1;
+	const hit = 98; // you hit the floor
+	const fall = interpolate(f, [80, hit], [0, 1], {...clamp, easing: Easing.in(Easing.quad)});
+	const thud = f >= hit ? Math.sin((f - hit) * 2.2) * 26 * Math.exp(-(f - hit) / 5) : 0;
+	const rot = Math.sin(f / 9) * 10 * (1 - fall) + fall * 64;
+	const cam: Cam3 = {x: Math.sin(f / 13) * 40 * (1 - fall), y: -480 + fall * 400, z: 520 + fall * 80, rx: Math.sin(f / 11) * 3 * (1 - fall)};
 	return (
 		<AbsoluteFill>
-			<AbsoluteFill style={{transform: `rotate(${rot}deg) scale(1.12)`, filter: `blur(${(2 + 3 * Math.abs(Math.sin(f / 7))) * daze}px)`}}>
+			<AbsoluteFill style={{transform: `translateY(${thud}px) rotate(${rot}deg) scale(${1.12 + fall * 0.25})`, filter: `blur(${(2 + 3 * Math.abs(Math.sin(f / 7))) * (1 - fall) + fall * 6}px)`}}>
 				<GymRing cam={cam} f={f} you={false} />
 				<AbsoluteFill style={{opacity: 0.38 * daze, transform: `translate(${30 + Math.sin(f / 5) * 16}px, ${-12}px)`}}>
 					<GymRing cam={cam} f={f} you={false} />
 				</AbsoluteFill>
 			</AbsoluteFill>
 			<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 50%, transparent 30%, rgba(60,0,0,0.75) 100%)', opacity: daze}} />
+			<AbsoluteFill style={{background: '#000', opacity: interpolate(f, [hit - 2, hit, hit + 5, hit + 13], [0, 0.85, 0.85, 0.35], clamp)}} />
 		</AbsoluteFill>
 	);
 };
 
-// 14. …and you stand. Silence. (you on your feet in the middle of the ring)
+// 14. «Пацаны ржут. Сивый кивает на дверь: «Упал — свободен».» — you lie on the floor: the ring from below, the horizon
+// tilted, everybody laughs; Сивый points at the door (Сивый@38, кивает@48, «Упал@80)
 export const S14: React.FC = () => {
+	const f = useCurrentFrame();
+	const cam: Cam3 = {x: lerp(f, 0, 122, -40, 20), y: -150, z: lerp(f, 0, 122, 760, 820), rx: 4};
+	const point = lerp(f, 46, 62, 0, 1, Easing.out(Easing.cubic));
+	const s = project(cam, -60, -560, -1000);
+	return (
+		<AbsoluteFill>
+			<AbsoluteFill style={{transform: `rotate(${-14 + Math.sin(f / 20) * 1.5}deg) scale(1.22)`}}>
+				<GymRing cam={cam} f={f} you={false} mood="laugh" point={point} sivyFace={{eyes: 'narrow', mouth: f > 78 && f < 112 && Math.floor(f / 5) % 2 ? 'open' : 'smile', brows: 'flat', look: [0.2, 0.4], blush: false}} />
+			</AbsoluteFill>
+			<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 50%, transparent 35%, rgba(40,0,0,0.6) 100%)'}} />
+			{vignette(0.6)}
+			<Bubble x={Math.min(700, Math.max(380, s.x + 80))} y={Math.max(380, s.y - 40)} text="УПАЛ — СВОБОДЕН." from={78} to={120} tail="left" dark />
+		</AbsoluteFill>
+	);
+};
+
+// 15. «Но ты встаёшь. Ноги дрожат. И ты говоришь: «Бей ещё».» — you get up (the view rises from the floor, the laughter
+// stops), then your face: «БЕЙ ЕЩЁ.» (встаёшь@14, дрожат@49, «Бей@98)
+export const S15: React.FC = () => {
+	const f = useCurrentFrame();
+	const {i, t} = seg(f, [64]);
+	if (i === 0) {
+		const up = lerp(t, 4, 44, 0, 1, Easing.inOut(Easing.cubic));
+		const wob = Math.sin(t / 3.5) * 5 * up;
+		const cam: Cam3 = {x: wob * 3, y: lerp(up, 0, 1, -150, -480), z: lerp(up, 0, 1, 820, 600), rx: lerp(up, 0, 1, 4, 0)};
+		return (
+			<AbsoluteFill>
+				<AbsoluteFill style={{transform: `rotate(${lerp(up, 0, 1, -14, 0) + wob * 0.6}deg) scale(${lerp(up, 0, 1, 1.22, 1.1)})`, filter: `blur(${lerp(up, 0, 1, 3, 0.5)}px)`}}>
+					<GymRing cam={cam} f={t} you={false} mood={t < 18 ? 'laugh' : 'shock'} />
+				</AbsoluteFill>
+				{vignette(0.6)}
+			</AbsoluteFill>
+		);
+	}
+	const talk = f > 96 && f < 118 && Math.floor(f / 5) % 2 === 1;
+	return (
+		<AbsoluteFill>
+			<GymCU cam={{x: 20 + Math.sin(t / 4) * 4, y: -470, z: lerp(t, 0, 66, 620, 720)}} f={t}>
+				<Card3D x={20} y={-470} z={-200} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
+					<Bust kind="boy" id="r2s15you" x={0} y={0} scale={1.4} colors={IGOR} tilt={Math.sin(t / 5) * 2} face={{eyes: 'narrow', mouth: talk ? 'open' : 'flat', brows: 'angry', look: [0, 0], blush: false, bruise: 1}} />
+				</Card3D>
+			</GymCU>
+			{vignette(0.6)}
+			<Bubble x={600} y={540} text="БЕЙ ЕЩЁ." from={96} to={128} tail="right" />
+		</AbsoluteFill>
+	);
+};
+
+// 16. «В подвале становится тихо. Сивый бьёт второй раз.» — the silent ring, Сивый steps in; the second blow
+// (Сивый@53, бьёт@65, второй@74, раз@88)
+export const S16: React.FC = () => {
+	const f = useCurrentFrame();
+	const {i, t} = seg(f, [58]);
+	if (i === 0) {
+		return (
+			<AbsoluteFill>
+				<GymRing cam={{x: lerp(t, 0, 58, -20, 10), y: -480, z: lerp(t, 0, 58, 560, 640)}} f={t} you={false} mood="shock" sivyFace={{eyes: 'narrow', mouth: 'flat', brows: 'angry', look: [0, 0.1], blush: false}} />
+				{vignette(0.65)}
+			</AbsoluteFill>
+		);
+	}
+	return <Punch f={t} at={28} />;
+};
+
+// 17. …and you stand. Silence. (you on your feet in the middle of the ring)
+export const S17: React.FC = () => {
 	const f = useCurrentFrame();
 	const sway = Math.sin(f / 6) * 6 * Math.exp(-f / 30);
 	return (
@@ -604,25 +681,26 @@ export const S14: React.FC = () => {
 	);
 };
 
-// 15. Сивый smirks: «Устоял. Теперь ты наш.»
-export const S15: React.FC = () => {
+// 18. Сивый smirks: «Упал — и встал. Теперь ты наш.»
+export const S18: React.FC = () => {
 	const f = useCurrentFrame();
 	return (
 		<AbsoluteFill>
 			<GymCU cam={{x: 0, y: -560, z: lerp(f, 0, 102, 560, 660)}} f={f}>
 				<Card3D x={0} y={-580} z={-320} w={900} h={1000} anchor="center" view={[-450, -500, 900, 1000]}>
-					<SivyHead id="r2s13sv" s={1.9} face={{eyes: 'narrow', mouth: Math.floor(f / 5) % 2 && f > 44 && f < 100 ? 'open' : 'smile', brows: 'flat', look: [0, 0.1], blush: false}} />
+					<SivyHead id="r2s13sv" s={1.9} face={{eyes: 'narrow', mouth: Math.floor(f / 5) % 2 && f > 44 && f < 114 ? 'open' : 'smile', brows: 'flat', look: [0, 0.1], blush: false}} />
 				</Card3D>
 			</GymCU>
 			{vignette(0.6)}
-			<Bubble x={540} y={470} text="УСТОЯЛ. ТЕПЕРЬ ТЫ НАШ." from={42} to={105} tail="left" />
+			<Bubble x={540} y={470} text="УПАЛ — И ВСТАЛ." from={42} to={84} tail="left" />
+			<Bubble x={540} y={470} text="ТЕПЕРЬ ТЫ НАШ." from={86} to={117} tail="left" />
 		</AbsoluteFill>
 	);
 };
 
-// 16. «И забудь про Игоречка. Здесь ты — Лавр. Тяп-ляповский.» — «ИГОРЕЧЕК» crossed out, «ЛАВР» stamped, then
+// 19. «И забудь про Игоречка. Здесь ты — Лавр. Тяп-ляповский.» — «ИГОРЕЧЕК» crossed out, «ЛАВР» stamped, then
 // «ТЯП-ЛЯПОВСКИЙ» under it
-export const S16: React.FC = () => {
+export const S19: React.FC = () => {
 	const f = useCurrentFrame();
 	const strike = lerp(f, 20, 34, 0, 1, Easing.out(Easing.cubic));
 	const at = 75;
@@ -657,8 +735,8 @@ export const S16: React.FC = () => {
 	);
 };
 
-// 17. The guys shake your hand one by one. For the first time they look at you as an equal.
-export const S17: React.FC = () => {
+// 20. The guys shake your hand one by one. For the first time they look at you as an equal.
+export const S20: React.FC = () => {
 	const f = useCurrentFrame();
 	const {i, t} = seg(f, [44, 88]);
 	if (i < 2) {
@@ -685,8 +763,8 @@ export const S17: React.FC = () => {
 	);
 };
 
-// 18. Гвоздь slaps your shoulder: «У нас правила Антипа: не пить, не курить. И своих не бросать.»
-export const S18: React.FC = () => {
+// 21. Гвоздь slaps your shoulder: «У нас правила Антипа: не пить, не курить. И своих не бросать.»
+export const S21: React.FC = () => {
 	const f = useCurrentFrame();
 	return (
 		<AbsoluteFill>
@@ -707,8 +785,8 @@ export const S18: React.FC = () => {
 	);
 };
 
-// 19. At home mom gasps: «Игоречек, опять упал?» — and for the first time you smile
-export const S19: React.FC = () => {
+// 22. At home mom gasps: «Игоречек, опять упал?» — and for the first time you smile
+export const S22: React.FC = () => {
 	const f = useCurrentFrame();
 	const push = lerp(f, 96, 150, 0, 1, Easing.inOut(Easing.cubic));
 	const cam: Cam3 = {x: lerp(push, 0, 1, 50, 170), y: lerp(push, 0, 1, -430, -400), z: lerp(push, 0, 1, 840, 1080)};
@@ -726,8 +804,8 @@ export const S19: React.FC = () => {
 	);
 };
 
-// 20. In the morning Сазон waits at the school again: «Гони двадцать копеек, Игоречек.»
-export const S20: React.FC = () => {
+// 23. In the morning Сазон waits at the school again: «Гони двадцать копеек, Игоречек.»
+export const S23: React.FC = () => {
 	const f = useCurrentFrame();
 	const cam: Cam3 = {x: lerp(f, 0, 132, -260, -200), y: -470, z: lerp(f, 0, 132, 800, 960)};
 	const sz = project(cam, -330, -540, -1150);
@@ -747,8 +825,8 @@ export const S20: React.FC = () => {
 	);
 };
 
-// 21. «Я теперь тяп-ляповский.» — Сазон laughs: «Докажи.»
-export const S21: React.FC = () => {
+// 24. «Я теперь тяп-ляповский.» — Сазон laughs: «Докажи.»
+export const S24: React.FC = () => {
 	const f = useCurrentFrame();
 	return (
 		<AbsoluteFill>
@@ -767,8 +845,8 @@ export const S21: React.FC = () => {
 	);
 };
 
-// 22. Finale: call the guys — let them deal with him? Or hit Сазон yourself?
-export const S22: React.FC = () => {
+// 25. Finale: call the guys — let them deal with him? Or hit Сазон yourself?
+export const S25: React.FC = () => {
 	const f = useCurrentFrame();
 	return (
 		<Finale

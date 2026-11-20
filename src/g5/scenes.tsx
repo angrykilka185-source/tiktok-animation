@@ -14,7 +14,8 @@ import {AbsoluteFill, Easing, Freeze, interpolate, useCurrentFrame} from 'remoti
 import {clamp, kick, lerp, pop, seg} from '../anim';
 import {Bubble, HEAVY} from '../components/Overlays';
 import {Bust, Face, Person} from '../components/Person';
-import {Cam3, Card3D, PERSP, Scene3D} from '../components/Scene3D';
+import {Cam3, Scene3D} from '../components/Scene3D';
+import {Box, Far, Lay, personBox, Set3D} from '../components/Layers3D';
 import {Stage} from '../components/Stage';
 import {vignette} from '../r1/scenes';
 import * as G1 from '../g1/scenes';
@@ -47,34 +48,7 @@ const GHOST = 0.55;
 // them — near layers slide faster than far ones, the background is soft (depth of field). A layer is drawn in the flat
 // 1080×1920 picture coordinates of the 2D scenes and placed so that the resting camera sees it exactly where the flat
 // picture had it; any camera move then gives parallax.
-type Box = [number, number, number, number];
-const kz = (z: number) => PERSP / (PERSP - z);
-const Lay: React.FC<{z: number; box: Box; res?: number; blur?: number; children: React.ReactNode}> = ({z, box, res, blur, children}) => {
-	const k = kz(z);
-	const [bx, by, bw, bh] = box;
-	return (
-		<Card3D x={(bx + bw / 2 - 540) / k} y={(by + bh / 2 - 960) / k} z={z} w={bw / k} h={bh / k} anchor="center" view={box} res={res ?? Math.max(1, Math.round(1 / k))} blur={blur}>
-			{children}
-		</Card3D>
-	);
-};
-// a person's layer: a box around a figure standing at (x, y) with scale s
-const personBox = (x: number, y: number, s: number, wide = 520): Box => [x - wide * s, y - 1260 * s, 2 * wide * s, 1320 * s];
-// the stage: far pass (blurred) + near layers + the lens vignette
-const Set3D: React.FC<{cam: Cam3; bg: string; far: React.ReactNode; blur?: number; vig?: number; children?: React.ReactNode}> = ({cam, bg, far, blur = 3, vig = 0.55, children}) => (
-	<AbsoluteFill>
-		<Scene3D cam={cam} bg={bg} far={far} farBlur={blur}>
-			{children}
-		</Scene3D>
-		{vignette(vig)}
-	</AbsoluteFill>
-);
-// a far set layer (the whole flat background, rasterised a bit smaller: it is blurred anyway)
-const Far: React.FC<{z?: number; box?: Box; children: React.ReactNode}> = ({z = -1400, box = [-460, -300, 2000, 2600], children}) => (
-	<Lay z={z} box={box} res={Math.round(1 / kz(z)) + 1}>
-		{children}
-	</Lay>
-);
+// (Lay / Set3D / Far live in src/components/Layers3D.tsx — shared with the other 3D-camera videos)
 
 // ======================================================= scene pieces =====
 // the corridor of part 4, a little brighter

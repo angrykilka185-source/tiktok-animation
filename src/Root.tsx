@@ -12,6 +12,7 @@ import {Golosovye2, RG2} from './g2/Main';
 import {Golosovye2b, RG2B} from './g2b/Main';
 import {Golosovye3, RG3} from './g3/Main';
 import {Golosovye4, RG4} from './g4/Main';
+import {Golosovye5, Golosovye5Audio, RG5} from './g5/Main';
 import {Knopka1, RK1} from './k1/Main';
 import {Film1, RF1} from './f1/Main';
 import {CoverPapaFilm, CoverPapaFilmV} from './covers/PapaFilm';
@@ -36,6 +37,8 @@ export const RemotionRoot: React.FC = () => (
 		<Composition id="Golosovye2b" component={Golosovye2b} durationInFrames={RG2B.total} fps={FPS} width={W} height={H} />
 		<Composition id="Golosovye3" component={Golosovye3} durationInFrames={RG3.total} fps={FPS} width={W} height={H} />
 		<Composition id="Golosovye4" component={Golosovye4} durationInFrames={RG4.total} fps={FPS} width={W} height={H} />
+		<Composition id="Golosovye5" component={Golosovye5} durationInFrames={RG5.total} fps={FPS} width={W} height={H} />
+		<Composition id="Golosovye5Audio" component={Golosovye5Audio} durationInFrames={RG5.total} fps={FPS} width={W} height={H} />
 		<Composition id="Knopka1" component={Knopka1} durationInFrames={RK1.total} fps={FPS} width={W} height={H} />
 		<Composition id="Film1" component={Film1} durationInFrames={RF1.total} fps={FPS} width={W} height={H} />
 		<Composition id="Film2" component={Film2} durationInFrames={RF2.total} fps={FPS} width={W} height={H} />

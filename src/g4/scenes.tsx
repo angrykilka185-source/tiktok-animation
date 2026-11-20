@@ -29,14 +29,14 @@ const level = (k: string, i: number) => {
 };
 
 const TEACH: Colors = {top: '#6a4a8a', topDark: '#55396f', hair: '#5a3a2a', pants: '#e8b48e', shoes: '#3a2a2a', skin: '#f2c3a0'};
-const KID_COLS: Colors[] = [
+export const KID_COLS: Colors[] = [
 	{top: '#3b6fd6', topDark: '#2f5bb0', hair: '#2a1a12'},
 	{top: '#e0a526', topDark: '#c08a18', hair: '#8a5a32'},
 	{top: '#8a5ab8', topDark: '#6f4896', hair: '#1f1a1a'},
 	{top: '#2a9a9a', topDark: '#207a7a', hair: '#c27b3a'},
 ];
-const SMILE: Face = {...DOUBLE_FACE, mouth: 'smile'};
-const GRIN: Face = {eyes: 'stare', pupil: 0.45, brows: 'flat', mouth: 'grin', look: [0, 0], blush: false};
+export const SMILE: Face = {...DOUBLE_FACE, mouth: 'smile'};
+export const GRIN: Face = {eyes: 'stare', pupil: 0.45, brows: 'flat', mouth: 'grin', look: [0, 0], blush: false};
 
 // ======================================================= scene pieces =====
 // «slide to power off» with the knob sliding across (p = pop of the bar, k = 0..1 slide)
@@ -54,7 +54,7 @@ const SlideOff: React.FC<{p: number; k: number}> = ({p, k}) =>
 	) : null;
 
 // your face reflected in the dark phone screen (phone-screen content). blink = the reflection's eyes shut, grin = it smiles
-const Reflection: React.FC<{blink?: boolean; grin?: boolean; ring?: number}> = ({blink = false, grin = false, ring = 0}) => (
+export const Reflection: React.FC<{blink?: boolean; grin?: boolean; ring?: number}> = ({blink = false, grin = false, ring = 0}) => (
 	<div style={{position: 'absolute', inset: 0, background: '#040507', overflow: 'hidden'}}>
 		<svg width="100%" height="100%" viewBox="0 0 1080 1920" preserveAspectRatio="xMidYMid slice" style={{position: 'absolute', inset: 0}}>
 			<g opacity={0.5} transform="translate(1080,0) scale(-1,1)">
@@ -257,7 +257,7 @@ const SchoolFront: React.FC = () => (
 );
 
 // the school corridor: classroom doors on the left, windows on the right, ceiling lamps
-const Corridor: React.FC = () => (
+export const Corridor: React.FC = () => (
 	<g>
 		<rect x={-500} y={-500} width={2100} height={3000} fill="#e9e3d2" />
 		<path d="M -500,1500 L 380,1050 L 700,1050 L 1580,1500 L 1580,2500 L -500,2500 Z" fill="#c9b48a" />
@@ -280,7 +280,7 @@ const Corridor: React.FC = () => (
 );
 
 // a hand held out for a handshake, seen from the side: fingers towards the left, thumb up; (x, y) = the grip
-const ProfileHand: React.FC<{x: number; y: number; s: number}> = ({x, y, s}) => (
+export const ProfileHand: React.FC<{x: number; y: number; s: number}> = ({x, y, s}) => (
 	<g transform={`translate(${x},${y}) scale(${s})`}>
 		{[3, 2, 1, 0].map((k) => (
 			<rect key={k} x={-150 + k * 6} y={-30 + k * 15} width={112} height={20} rx={10} fill={k === 0 ? '#e8b48e' : '#dda57d'} />

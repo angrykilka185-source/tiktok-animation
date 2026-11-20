@@ -46,42 +46,47 @@ const CUES: Cue[] = [
 	// 13 the see-through hand
 	{at: s(13) + 36, file: 'swell', vol: 0.5},
 	{at: s(13) + 44, file: 'glitch', vol: 0.35},
-	// 14 «мама… исчезнешь совсем… беги домой»
-	{at: s(14), file: 'heart', vol: 0.45, len: 141},
-	{at: s(14) + 90, file: 'pop', vol: 0.5}, // «?» in the counter
-	{at: s(14) + 118, file: 'stamp', vol: 0.7},
-	// 15 running home, past the lift
-	{at: s(15), file: 'steps', vol: 0.7, len: 72},
-	{at: s(15) + 40, file: 'lift_ding', vol: 0.4},
-	{at: s(15) + 84, file: 'whisper', vol: 0.35},
-	// 16 the 7th floor; the doorbell
-	{at: s(16), file: 'steps', vol: 0.5, len: 30},
-	...W(16, 32),
-	{at: s(16) + 40, file: 'ringtone_door', vol: 0.6, len: 40},
-	{at: s(16) + 70, file: 'swell', vol: 0.4},
-	// 17 mom opens the door
-	{at: s(17), file: 'creak', vol: 0.6},
-	{at: s(17) + 44, file: 'heart', vol: 0.45, len: 54},
-	// 18 HE comes out of the kitchen
-	{at: s(18) + 4, file: 'steps_slow', vol: 0.5, len: 46},
-	{at: s(18) + 48, file: 'heart_big', vol: 0.6},
-	{at: s(18) + 100, file: 'pop', vol: 0.4},
-	// 19 two sons, one face
-	{at: s(19), file: 'heart', vol: 0.5, len: 72},
-	...W(19, 70),
-	{at: s(19) + 102, file: 'boom', vol: 0.7},
-	// 20 «Кто из вас… мой?»
-	{at: s(20), file: 'swell', vol: 0.5},
-	// 21 finale
-	{at: s(21), file: 'boom', vol: 1},
-	{at: s(21) + 8, file: 'pop', vol: 0.5},
-	{at: s(21) + 78, file: 'pop', vol: 0.5},
-	{at: s(21) + 150, file: 'beep', vol: 0.8},
-	{at: s(21) + 180, file: 'beep', vol: 0.8},
-	{at: s(21) + 210, file: 'beep', vol: 0.8},
-	{at: s(21) + 236, file: 'beep_final', vol: 0.9},
-	{at: s(21) + 252, file: 'whoosh', vol: 0.7},
-	{at: s(21) + 285, file: 'pop', vol: 0.5},
+	// 14 PAUSE: early access in the Telegram channel
+	{at: s(14), file: 'slowdown', vol: 0.7},
+	{at: s(14) + 12, file: 'pop', vol: 0.5},
+	{at: s(14) + 24, file: 'message', vol: 0.4},
+	{at: s(15) - 14, file: 'rewind', vol: 0.35},
+	// 15 «мама… исчезнешь совсем… беги домой»
+	{at: s(15), file: 'heart', vol: 0.45, len: 141},
+	{at: s(15) + 90, file: 'pop', vol: 0.5}, // «?» in the counter
+	{at: s(15) + 118, file: 'stamp', vol: 0.7},
+	// 16 running home, past the lift
+	{at: s(16), file: 'steps', vol: 0.7, len: 72},
+	{at: s(16) + 40, file: 'lift_ding', vol: 0.4},
+	{at: s(16) + 84, file: 'whisper', vol: 0.35},
+	// 17 the 7th floor; the doorbell
+	{at: s(17), file: 'steps', vol: 0.5, len: 30},
+	...W(17, 32),
+	{at: s(17) + 40, file: 'ringtone_door', vol: 0.6, len: 40},
+	{at: s(17) + 70, file: 'swell', vol: 0.4},
+	// 18 mom opens the door
+	{at: s(18), file: 'creak', vol: 0.6},
+	{at: s(18) + 44, file: 'heart', vol: 0.45, len: 54},
+	// 19 HE comes out of the kitchen
+	{at: s(19) + 4, file: 'steps_slow', vol: 0.5, len: 46},
+	{at: s(19) + 48, file: 'heart_big', vol: 0.6},
+	{at: s(19) + 100, file: 'pop', vol: 0.4},
+	// 20 two sons, one face
+	{at: s(20), file: 'heart', vol: 0.5, len: 72},
+	...W(20, 70),
+	{at: s(20) + 102, file: 'boom', vol: 0.7},
+	// 21 «Кто из вас… мой?»
+	{at: s(21), file: 'swell', vol: 0.5},
+	// 22 finale
+	{at: s(22), file: 'boom', vol: 1},
+	{at: s(22) + 8, file: 'pop', vol: 0.5},
+	{at: s(22) + 78, file: 'pop', vol: 0.5},
+	{at: s(22) + 150, file: 'beep', vol: 0.8},
+	{at: s(22) + 180, file: 'beep', vol: 0.8},
+	{at: s(22) + 210, file: 'beep', vol: 0.8},
+	{at: s(22) + 236, file: 'beep_final', vol: 0.9},
+	{at: s(22) + 252, file: 'whoosh', vol: 0.7},
+	{at: s(22) + 285, file: 'pop', vol: 0.5},
 	// plaques
 	...SIGNS.flatMap((g) => [
 		{at: g.at, file: 'stamp', vol: 1},
@@ -90,12 +95,12 @@ const CUES: Cue[] = [
 ];
 
 const SFX_GAIN = HAS_VOICE ? 0.55 : 1;
-const BED_END = s(21) + 252;
+const BED_END = s(22) + 252;
 
 export const SFXG5: React.FC<{r: Remap}> = ({r}) => (
 	<>
 		<Sequence from={0} durationInFrames={Math.round(r.fwd(BED_END)) + 30} name="sfx drone bed">
-			<Audio src={staticFile('sfx/drone.wav')} volume={(f) => 0.3 * interpolate(f, [0, 60, r.fwd(BED_END) - 10, r.fwd(BED_END) + 20], [0, 1, 1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'})} />
+			<Audio src={staticFile('sfx/drone.wav')} volume={(f) => 0.3 * interpolate(f, [0, 60, r.fwd(BED_END) - 10, r.fwd(BED_END) + 20], [0, 1, 1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}) * interpolate(r.inv(f), [s(14), s(14) + 10, s(15) - 12, s(15)], [1, 0.3, 0.3, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'})} />
 		</Sequence>
 		{CUES.map((c, i) => {
 			const at = Math.round(r.fwd(c.at));

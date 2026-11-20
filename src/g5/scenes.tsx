@@ -23,6 +23,7 @@ import * as G2B from '../g2b/scenes';
 import * as G3 from '../g3/scenes';
 import * as G4 from '../g4/scenes';
 import envJson from './env.json';
+import {SHOTS} from './timeline';
 
 const {YELLOW, RED, PHONE_BG, Phone, ChatScreen, VoiceBubble, LiftLanding, rnd, focus} = G1;
 const {Recap, MOM, Finale, Hall} = G2;
@@ -546,8 +547,55 @@ export const S13: React.FC = () => {
 	);
 };
 
-// 14. «Если тебя не узнает мама — ты исчезнешь совсем. Беги домой. Сейчас». (мама@42, совсем@79, Сейчас@119)
+// 14. PAUSE (mid-video): the picture freezes on your see-through hand and goes grey, the tape stops; early access to
+// the new parts is already in the Telegram channel, the link is in the profile header; «А теперь — дальше» → colour back
+const PauseIcon: React.FC<{p: number}> = ({p}) => (
+	<div style={{position: 'absolute', top: 330, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', transform: `scale(${p})`}}>
+		<div style={{width: 190, height: 190, borderRadius: 95, background: 'rgba(14,14,16,0.82)', border: '6px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 26, boxSizing: 'border-box'}}>
+			<div style={{width: 30, height: 86, borderRadius: 8, background: '#fff'}} />
+			<div style={{width: 30, height: 86, borderRadius: 8, background: '#fff'}} />
+		</div>
+		<div style={{marginTop: 16, fontFamily: HEAVY, fontWeight: 900, fontSize: 64, letterSpacing: 8, color: '#fff', textShadow: '0 6px 0 rgba(0,0,0,0.5)'}}>ПАУЗА</div>
+	</div>
+);
+const TgCard: React.FC<{p: number; f: number}> = ({p, f}) => (
+	<div style={{position: 'absolute', top: 690, width: '100%', display: 'flex', justifyContent: 'center', transform: `scale(${p}) rotate(-2deg)`}}>
+		<div style={{background: '#229ed9', borderRadius: 34, padding: '26px 40px 30px', boxShadow: '0 0 50px rgba(34,158,217,0.6), 0 16px 40px rgba(0,0,0,0.45)', fontFamily: HEAVY, fontWeight: 900, color: '#fff', textAlign: 'center'}}>
+			<div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 18}}>
+				<svg width={70} height={70} viewBox="0 0 24 24">
+					<path d="M 2,11.5 L 21.5,3.5 L 18,20.5 L 12,15.5 L 9,19 L 8.6,14.2 L 17.5,7 L 7,13.2 Z" fill="#fff" />
+				</svg>
+				<div style={{fontSize: 70, lineHeight: 1}}>РАННИЙ ДОСТУП</div>
+			</div>
+			<div style={{fontSize: 40, marginTop: 10, color: '#e6f6ff'}}>НОВЫЕ ЧАСТИ — УЖЕ В ТГК</div>
+			<div style={{display: 'inline-block', marginTop: 18, background: YELLOW, color: '#111', borderRadius: 18, padding: '10px 28px', fontSize: 38, transform: `scale(${1 + 0.035 * Math.sin(f / 5)})`}}>ССЫЛКА — В ШАПКЕ ПРОФИЛЯ</div>
+		</div>
+	</div>
+);
 export const S14: React.FC = () => {
+	const f = useCurrentFrame();
+	const D = SHOTS[13].duration;
+	const stop = interpolate(f, [0, 8], [0, 1], clamp);
+	const back = interpolate(f, [D - 14, D - 2], [0, 1], clamp);
+	const grey = stop * (1 - back);
+	const out = 1 - back;
+	return (
+		<AbsoluteFill>
+			<AbsoluteFill style={{filter: `grayscale(${0.9 * grey}) brightness(${1 - 0.4 * grey})`}}>
+				<Freeze frame={SHOTS[12].duration - 1}>
+					<S13 />
+				</Freeze>
+			</AbsoluteFill>
+			<AbsoluteFill style={{opacity: out}}>
+				<PauseIcon p={pop(f, 2, 10)} />
+				<TgCard p={pop(f, 12, 11)} f={f} />
+			</AbsoluteFill>
+		</AbsoluteFill>
+	);
+};
+
+// 15. «Если тебя не узнает мама — ты исчезнешь совсем. Беги домой. Сейчас». (мама@42, совсем@79, Сейчас@119)
+export const S15: React.FC = () => {
 	const f = useCurrentFrame();
 	const s = lerp(f, 0, 141, 1.45, 1.6) * kick(f, 0.04);
 	const p = focus(680, 304, 560, 540, 760, s);
@@ -558,7 +606,7 @@ export const S14: React.FC = () => {
 				<Phone x={p.x} y={p.y} w={680} scale={s}>
 					<ChatScreen time="09:49">
 						<VoiceBubble top={250} f={f} progress={1} sent="09:36" />
-						<VoiceBubble top={470} f={f} progress={interpolate(f, [6, 136], [0.03, 0.98], clamp)} lvl={level('g14', f - 6)} sent="09:48" redTail={interpolate(f, [100, 130], [0, 1], clamp)} />
+						<VoiceBubble top={470} f={f} progress={interpolate(f, [6, 136], [0.03, 0.98], clamp)} lvl={level('g15', f - 6)} sent="09:48" redTail={interpolate(f, [100, 130], [0, 1], clamp)} />
 					</ChatScreen>
 				</Phone>
 			</Phone3D>
@@ -573,8 +621,8 @@ export const S14: React.FC = () => {
 	);
 };
 
-// 15. You run home. Past the lift: you remember the first voice message. (домой@19, Лифт@37, первое голосовое@87)
-export const S15: React.FC = () => {
+// 16. You run home. Past the lift: you remember the first voice message. (домой@19, Лифт@37, первое голосовое@87)
+export const S16: React.FC = () => {
 	const f = useCurrentFrame();
 	const run = lerp(f, 0, 100, 0, 1, Easing.linear);
 	const mem = pop(f, 84, 10);
@@ -601,8 +649,8 @@ export const S15: React.FC = () => {
 	);
 };
 
-// 16. The seventh floor. You press the doorbell. Your finger — almost see-through. (этаж@20, звонок@51, прозрачный@100)
-export const S16: React.FC = () => {
+// 17. The seventh floor. You press the doorbell. Your finger — almost see-through. (этаж@20, звонок@51, прозрачный@100)
+export const S17: React.FC = () => {
 	const f = useCurrentFrame();
 	const {i, t} = seg(f, [34]);
 	if (i === 0) {
@@ -622,8 +670,8 @@ export const S16: React.FC = () => {
 	);
 };
 
-// 17. Mom opens the door. And looks at you as if at a stranger. (открывает@12, смотрит@44, чужого@81)
-export const S17: React.FC = () => {
+// 18. Mom opens the door. And looks at you as if at a stranger. (открывает@12, смотрит@44, чужого@81)
+export const S18: React.FC = () => {
 	const f = useCurrentFrame();
 	const open = lerp(f, 0, 10, 0, 1, Easing.out(Easing.cubic));
 	const frown = f > 50;
@@ -634,8 +682,8 @@ export const S17: React.FC = () => {
 	);
 };
 
-// 18. And out of the kitchen comes HIM. Already home. With your mug: «Мам, кто там?» (он@36, дома@55, кружкой@83, «Мам@101)
-export const S18: React.FC = () => {
+// 19. And out of the kitchen comes HIM. Already home. With your mug: «Мам, кто там?» (он@36, дома@55, кружкой@83, «Мам@101)
+export const S19: React.FC = () => {
 	const f = useCurrentFrame();
 	const him = lerp(f, 4, 48, 0, 1);
 	const talk = f >= 100 && f < 126 && Math.floor(f / 4) % 2 === 0;
@@ -650,8 +698,8 @@ export const S18: React.FC = () => {
 	);
 };
 
-// 19. Mom looks at him. Then at you. Two sons. One face. (него@29, тебя@59, сына@84, лицо@115)
-export const S19: React.FC = () => {
+// 20. Mom looks at him. Then at you. Two sons. One face. (него@29, тебя@59, сына@84, лицо@115)
+export const S20: React.FC = () => {
 	const f = useCurrentFrame();
 	const {i, t} = seg(f, [72]);
 	if (i === 0) {
@@ -696,8 +744,8 @@ export const S19: React.FC = () => {
 	);
 };
 
-// 20. «Кто из вас… мой?» (mom, close) (вас@21, мой@37)
-export const S20: React.FC = () => {
+// 21. «Кто из вас… мой?» (mom, close) (вас@21, мой@37)
+export const S21: React.FC = () => {
 	const f = useCurrentFrame();
 	const talk = f >= 3 && f < 46 && Math.floor(f / 4) % 2 === 0;
 	return (
@@ -719,8 +767,8 @@ export const S20: React.FC = () => {
 	);
 };
 
-// 21. Finale: tell mom a secret only you two know — or play her the voice messages? Countdown, end card, the channel.
-export const S21: React.FC = () => {
+// 22. Finale: tell mom a secret only you two know — or play her the voice messages? Countdown, end card, the channel.
+export const S22: React.FC = () => {
 	const f = useCurrentFrame();
 	return (
 		<Finale
@@ -729,7 +777,8 @@ export const S21: React.FC = () => {
 			opt1={{text: 'СКАЗАТЬ СЕКРЕТ', sub: 'который знаете только вы'}}
 			opt2={{text: 'ВКЛЮЧИТЬ ГОЛОСОВЫЕ', sub: 'пусть мама послушает'}}
 			tally={{done: '5 ИЗ 6', rest: 'ШЕСТОЕ'}}
-			promo="700 ПОДПИСЧИКОВ — ОТКРЫВАЮ ТГК"
+			promo="РАННИЙ ДОСТУП — В ТГК"
+			promoSub="ссылка в шапке профиля"
 			promoAt={285}
 			bg={
 				<AbsoluteFill>

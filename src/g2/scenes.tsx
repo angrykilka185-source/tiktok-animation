@@ -736,7 +736,7 @@ export const S14: React.FC = () => <Finale />;
 // the finale card; `next` = what the end card announces, `boxes` = predictions (the last one «?»),
 // opt1/opt2 = the two choices, tally = «2 ИЗ 3» / «ТРЕТЬЕ», bg = the picture behind the cards
 type Opt = {text: string; sub: string};
-export const Finale: React.FC<{next?: string; boxes?: number; opt1?: Opt; opt2?: Opt; tally?: {done: string; rest: string}; bg?: React.ReactNode; series?: string; boxLabel?: string; tallyLine?: React.ReactNode; boxMark?: 'check' | 'cross'; note?: string; promo?: string; promoAt?: number}> = ({
+export const Finale: React.FC<{next?: string; boxes?: number; opt1?: Opt; opt2?: Opt; tally?: {done: string; rest: string}; bg?: React.ReactNode; series?: string; boxLabel?: string; tallyLine?: React.ReactNode; boxMark?: 'check' | 'cross'; note?: string; promo?: string; promoSub?: string; promoAt?: number}> = ({
 	next = 'СЕРИЯ 3',
 	series = 'ГОЛОСОВЫЕ ИЗ ЗАВТРА',
 	boxLabel = 'СБЫЛОСЬ',
@@ -744,6 +744,7 @@ export const Finale: React.FC<{next?: string; boxes?: number; opt1?: Opt; opt2?:
 	boxMark = 'check',
 	note,
 	promo,
+	promoSub,
 	promoAt = 270,
 	boxes = 3,
 	opt1 = {text: 'НЕ ВЫХОДИТЬ', sub: 'послушаться голосового'},
@@ -903,6 +904,7 @@ export const Finale: React.FC<{next?: string; boxes?: number; opt1?: Opt; opt2?:
 									</svg>
 									{promo}
 								</div>
+								{promoSub && <div style={{fontSize: 30, color: '#9fd8f5', marginTop: 10, opacity: f >= promoAt ? 1 : 0}}>{promoSub}</div>}
 							</div>
 						)}
 						{note && <div style={{fontFamily: "'Inter', 'DejaVu Sans', sans-serif", fontWeight: 600, fontSize: 27, color: '#8a97b8', marginTop: 44, padding: '0 90px', lineHeight: 1.35}}>{note}</div>}

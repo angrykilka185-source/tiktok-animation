@@ -6,14 +6,17 @@
 // Run home.» Past the lift (the first voice message), the 7th floor, the doorbell under a see-through finger. Mom opens
 // the door and looks at you like at a stranger — and HE comes out of the kitchen with your mug: «Мам, кто там?» Two sons,
 // one face. «Кто из вас… мой?» Finale: tell mom a secret only you two know, or play her the voice messages.
-// Phone UI from part 1, recap / mom / finale from part 2, Max from 2b, the landing / front door / warm close-ups from 3,
-// the corridor / the double's grin from 4.
+// Phone UI from part 1, recap / mom / finale from part 2, Max from 2b, the landing / front door from 3, the corridor /
+// the double's grin from 4. Shot in the «3D camera» of «Ты с какого района?»: flat layers at real depths (Scene3D), the
+// camera moves between them, the background is soft (depth of field).
 import React from 'react';
 import {AbsoluteFill, Easing, Freeze, interpolate, useCurrentFrame} from 'remotion';
 import {clamp, kick, lerp, pop, seg} from '../anim';
 import {Bubble, HEAVY} from '../components/Overlays';
 import {Bust, Face, Person} from '../components/Person';
+import {Cam3, Card3D, PERSP, Scene3D} from '../components/Scene3D';
 import {Stage} from '../components/Stage';
+import {vignette} from '../r1/scenes';
 import * as G1 from '../g1/scenes';
 import * as G2 from '../g2/scenes';
 import * as G2B from '../g2b/scenes';
@@ -24,7 +27,7 @@ import envJson from './env.json';
 const {YELLOW, RED, PHONE_BG, Phone, ChatScreen, VoiceBubble, LiftLanding, rnd, focus} = G1;
 const {Recap, MOM, Finale, Hall} = G2;
 const {Max} = G2B;
-const {FrontDoor, WarmClose, DOUBLE_FACE} = G3;
+const {FrontDoor, DOUBLE_FACE} = G3;
 const {Corridor, ProfileHand, GRIN, SMILE, KID_COLS} = G4;
 
 const ENV = envJson as Record<string, number[]>;
@@ -38,34 +41,50 @@ const SCARED: Face = {eyes: 'wide', pupil: 0.5, brows: 'worried', mouth: 'o', lo
 // how much of you is left (1 = all of you; you fade as people take him for you)
 const GHOST = 0.55;
 
-// ======================================================= scene pieces =====
-// the double in the corridor with his hand held out (you: the back of your head, bottom left).
-// `back` 0…1 = you step back from his hand, `face` = his face
-const OfferBack: React.FC<{f: number; back: number; face: Face; reach?: number; mine?: number}> = ({f, back, face, reach = 1, mine = -1}) => {
-	const X = 700;
-	const Y = 1900;
-	const S = 1.5;
-	const tgt: [number, number] = [-110 - 290 * reach, -380 - 220 * reach];
+// ======================================================= the 3D camera =====
+// Like «Ты с какого района?»: every flat layer of a set stands at its own depth in CSS 3D and the camera moves between
+// them — near layers slide faster than far ones, the background is soft (depth of field). A layer is drawn in the flat
+// 1080×1920 picture coordinates of the 2D scenes and placed so that the resting camera sees it exactly where the flat
+// picture had it; any camera move then gives parallax.
+type Box = [number, number, number, number];
+const kz = (z: number) => PERSP / (PERSP - z);
+const Lay: React.FC<{z: number; box: Box; res?: number; blur?: number; children: React.ReactNode}> = ({z, box, res, blur, children}) => {
+	const k = kz(z);
+	const [bx, by, bw, bh] = box;
 	return (
-		<g>
-			<Corridor />
-			<rect x={-500} y={-500} width={2200} height={3000} fill="#e9e3d2" opacity={0.35} />
-			<Person kind="teen" id="g5offer" x={X} y={Y} scale={S} breathe={f} headTurn={-0.45} face={face} armL={{target: tgt, bend: -1}} armR={{target: [110, -380], bend: -1}} />
-			{reach > 0.35 && <ProfileHand x={X + tgt[0] * S} y={Y + tgt[1] * S} s={S * 0.9} />}
-			{mine >= 0 && mine < 1 && (
-				<g transform={`translate(${X + tgt[0] * S - 105 - 620 * mine},${Y + tgt[1] * S + 20 + 420 * mine})`}>
-					<rect x={-980} y={-50} width={900} height={100} rx={44} fill="#cf4a3c" />
-					<g transform="scale(-1,1)">
-						<ProfileHand x={0} y={0} s={S * 0.9} />
-					</g>
-				</g>
-			)}
-			<Person kind="teen" id="g5you" back x={40 - 160 * back} y={2780 + 260 * back} scale={2.0 + 0.3 * back} />
-		</g>
+		<Card3D x={(bx + bw / 2 - 540) / k} y={(by + bh / 2 - 960) / k} z={z} w={bw / k} h={bh / k} anchor="center" view={box} res={res ?? Math.max(1, Math.round(1 / k))} blur={blur}>
+			{children}
+		</Card3D>
 	);
 };
+// a person's layer: a box around a figure standing at (x, y) with scale s
+const personBox = (x: number, y: number, s: number, wide = 520): Box => [x - wide * s, y - 1260 * s, 2 * wide * s, 1320 * s];
+// the stage: far pass (blurred) + near layers + the lens vignette
+const Set3D: React.FC<{cam: Cam3; bg: string; far: React.ReactNode; blur?: number; vig?: number; children?: React.ReactNode}> = ({cam, bg, far, blur = 3, vig = 0.55, children}) => (
+	<AbsoluteFill>
+		<Scene3D cam={cam} bg={bg} far={far} farBlur={blur}>
+			{children}
+		</Scene3D>
+		{vignette(vig)}
+	</AbsoluteFill>
+);
+// a far set layer (the whole flat background, rasterised a bit smaller: it is blurred anyway)
+const Far: React.FC<{z?: number; box?: Box; children: React.ReactNode}> = ({z = -1400, box = [-460, -300, 2000, 2600], children}) => (
+	<Lay z={z} box={box} res={Math.round(1 / kz(z)) + 1}>
+		{children}
+	</Lay>
+);
 
-// the school cloakroom: a long rail of hooks with jackets, a bench with bags, a window
+// ======================================================= scene pieces =====
+// the corridor of part 4, a little brighter
+const CorridorLit: React.FC = () => (
+	<g>
+		<Corridor />
+		<rect x={-500} y={-500} width={2200} height={3000} fill="#e9e3d2" opacity={0.35} />
+	</g>
+);
+
+// the school cloakroom: a long rail of hooks with jackets, a bench with bags, a window (the back layer)
 const JACKETS = ['#3b5f8a', '#7a3b3b', '#2f6e47', '#8a7a3b', '#4a4a58', '#a85a2a', '#3b3b6e', '#6e3b5f', '#2a6e6e'];
 const Jacket: React.FC<{x: number; c: string; w?: number; h?: number}> = ({x, c, w = 190, h = 470}) => (
 	<g transform={`translate(${x},430)`}>
@@ -75,42 +94,31 @@ const Jacket: React.FC<{x: number; c: string; w?: number; h?: number}> = ({x, c,
 		<rect x={-w / 2 - 14} y={h - 26} width={w + 28} height={26} fill="#000" opacity={0.12} />
 	</g>
 );
-const Cloakroom: React.FC<{f: number; you?: number; youFace?: Face; gap?: number}> = ({f, you = 0, youFace = SCARED, gap = 0}) => (
+const CloakBack: React.FC = () => (
 	<g>
 		<rect x={-500} y={-500} width={2200} height={3000} fill="#eadfc3" />
 		<rect x={-500} y={1180} width={2200} height={1400} fill="#a98a62" />
 		<rect x={-500} y={1170} width={2200} height={12} fill="#8f7350" />
-		{/* the window, high up */}
 		<rect x={760} y={-120} width={300} height={260} fill="#f4f1ea" />
 		<rect x={776} y={-104} width={268} height={228} fill="#bfe0f5" />
 		<ellipse cx={910} cy={420} rx={360} ry={240} fill="#fff7d6" opacity={0.25} />
-		{/* the rail and the hooks */}
 		<rect x={-500} y={392} width={2200} height={18} fill="#8f969e" />
 		{Array.from({length: 12}).map((_, k) => (
 			<path key={k} d={`M ${-430 + k * 200},402 q 0,40 22,40`} stroke="#6d747c" strokeWidth={8} fill="none" />
 		))}
-		{/* jackets; the gap in the middle opens for you */}
-		{JACKETS.map((c, k) => {
-			const x = -380 + k * 200;
-			const off = k === 4 ? -gap * 70 : k === 5 ? gap * 70 : 0;
-			return k === 4 || k === 5 ? null : <Jacket key={k} x={x + off} c={c} />;
-		})}
-		{you > 0 && (
-			<g opacity={you}>
-				<Bust kind="teen" id="g5cloakyou" x={540} y={700} scale={1.25} face={youFace} />
-			</g>
-		)}
-		<Jacket x={420 - gap * 70} c={JACKETS[4]} />
-		<Jacket x={660 + gap * 70} c={JACKETS[5]} />
-		{/* the bench and the bags */}
+		{JACKETS.map((c, k) => (k === 4 || k === 5 ? null : <Jacket key={k} x={-380 + k * 200} c={c} />))}
 		<rect x={-500} y={1000} width={2200} height={34} rx={8} fill="#b8864e" />
 		{[-300, 120, 860].map((x, k) => (
 			<rect key={k} x={x} y={890} width={150} height={110} rx={20} fill={['#2d6cdf', '#e0a526', '#8a5ab8'][k]} />
 		))}
 		<rect x={-500} y={1034} width={2200} height={10} fill="#8f6a3e" />
-		<g opacity={0.35 + 0.1 * Math.sin(f / 20)}>
-			<rect x={-500} y={-500} width={2200} height={3000} fill="#3a2a10" opacity={0.08} />
-		</g>
+	</g>
+);
+// the two jackets in front of you; `gap` 0…1 = you push them apart
+const CloakFront: React.FC<{gap: number}> = ({gap}) => (
+	<g>
+		<Jacket x={420 - gap * 70} c={JACKETS[4]} />
+		<Jacket x={660 + gap * 70} c={JACKETS[5]} />
 	</g>
 );
 
@@ -125,6 +133,20 @@ const Palm: React.FC<{x: number; y: number; s: number; rot?: number}> = ({x, y, 
 		))}
 		<rect x={-130} y={-30} width={44} height={110} rx={22} fill="#e8b48e" transform="rotate(-38 -108 25)" />
 		<path d="M -50,40 q 40,26 90,4" stroke="#c98a6a" strokeWidth={6} fill="none" opacity={0.5} />
+	</g>
+);
+// close-ups are drawn zoomed into the flat picture around (cx, cy)
+const zoomT = (s: number, cx: number, cy: number) => `translate(540,960) scale(${s}) translate(${-cx},${-cy})`;
+// the coat hooks, close (for the see-through hand)
+const HookWall: React.FC = () => (
+	<g>
+		<rect x={-500} y={-500} width={2200} height={3000} fill="#eadfc3" />
+		<rect x={-500} y={392} width={2200} height={18} fill="#8f969e" />
+		<path d="M 520,402 q 0,52 30,52" stroke="#6d747c" strokeWidth={10} fill="none" strokeLinecap="round" />
+		<path d="M 580,454 q 18,0 18,-22" stroke="#6d747c" strokeWidth={10} fill="none" strokeLinecap="round" />
+		<path d="M 760,402 q 0,52 30,52" stroke="#6d747c" strokeWidth={10} fill="none" strokeLinecap="round" />
+		<Jacket x={330} c={JACKETS[2]} w={150} h={360} />
+		<Jacket x={830} c={JACKETS[6]} w={150} h={360} />
 	</g>
 );
 
@@ -158,30 +180,85 @@ const Mug: React.FC = () => (
 	</g>
 );
 
-// the doorbell next to your door, close up; `press` 0…1; your see-through finger
-const Doorbell: React.FC<{press: number; ghost: number}> = ({press, ghost}) => (
+// the wall by your door with the doorbell (`press` 0…1), and your see-through finger (separate layer)
+const DoorWall: React.FC<{press: number}> = ({press}) => (
 	<g>
 		<rect x={-500} y={-500} width={2200} height={3000} fill="#d9d6c6" />
 		<rect x={-500} y={1240} width={2200} height={1400} fill="#5f8f74" />
 		<rect x={-500} y={1232} width={2200} height={12} fill="#4a7560" />
-		{/* the edge of your door: quilted leatherette */}
 		<rect x={-500} y={-500} width={600} height={3000} fill="#4a2e22" />
 		<rect x={-500} y={-500} width={580} height={3000} fill="#7a4a36" />
 		{Array.from({length: 2}).flatMap((_, cx) => Array.from({length: 12}).map((__, cy) => <circle key={`${cx}-${cy}`} cx={-60 + cx * 100} cy={-280 + cy * 180} r={9} fill="#5a3426" />))}
 		<rect x={130} y={-500} width={40} height={3000} fill="#3a2a20" />
-		{/* the bell */}
 		<rect x={440} y={760} width={200} height={240} rx={18} fill="#efe9d6" stroke="#bcb39a" strokeWidth={6} />
 		<circle cx={540} cy={880} r={56} fill="#2a2b30" />
 		<circle cx={540} cy={880 + 6 * press} r={40} fill={press > 0.5 ? '#ffb347' : '#e9e6dc'} />
 		{press > 0.5 && <circle cx={540} cy={880} r={90} fill="#ffb347" opacity={0.25} />}
-		<g opacity={ghost}>
-			<g transform={`translate(${560 + 30 * (1 - press)},${960 + 160 * (1 - press)}) rotate(-12)`}>
-				<rect x={-46} y={-60} width={92} height={420} rx={46} fill="#e8b48e" />
-				<ellipse cx={0} cy={-56} rx={40} ry={30} fill="#f0c6a2" />
-				<rect x={-110} y={300} width={220} height={500} rx={70} fill="#cf4a3c" />
-			</g>
+	</g>
+);
+const Finger: React.FC<{press: number; ghost: number}> = ({press, ghost}) => (
+	<g opacity={ghost}>
+		<g transform={`translate(${560 + 30 * (1 - press)},${960 + 160 * (1 - press)}) rotate(-12)`}>
+			<rect x={-46} y={-60} width={92} height={420} rx={46} fill="#e8b48e" />
+			<ellipse cx={0} cy={-56} rx={40} ry={30} fill="#f0c6a2" />
+			<rect x={-110} y={300} width={220} height={500} rx={70} fill="#cf4a3c" />
 		</g>
 	</g>
+);
+
+// the hall from inside (far layer): the open front door and you outside on the landing — pale, with a glow (fading)
+const HallBack: React.FC<{f: number; id: string; open: number; you?: number}> = ({f, id, open, you = GHOST}) => (
+	<g>
+		<Hall id={id} noBag />
+		<FrontDoor id={`${id}d`} open={open} light={1}>
+			<g opacity={0.45}>
+				<ellipse cx={575} cy={1060} rx={170} ry={420} fill="#9fe8ff" opacity={0.35} />
+			</g>
+			<g opacity={Math.min(1, you + 0.2)}>
+				<Person kind="teen" id={`${id}you`} x={575} y={1450} scale={0.86} breathe={f} face={{eyes: 'open', brows: 'worried', mouth: 'flat', look: [0.5, 0], blush: false}} />
+			</g>
+		</FrontDoor>
+	</g>
+);
+const MOM_X = 800;
+const MOM_Y = 1720;
+const MomLay: React.FC<{f: number; id: string; look: number; face: Face}> = ({f, id, look, face}) => (
+	<Lay z={-430} box={personBox(MOM_X, MOM_Y, 1.0)}>
+		<Person kind="mom" id={id} colors={MOM} x={MOM_X} y={MOM_Y} scale={1.0} breathe={f} headTurn={look} face={face} armL={{target: [-150, -560], bend: 1}} />
+	</Lay>
+);
+const HimLay: React.FC<{f: number; id: string; p: number; talk?: boolean}> = ({f, id, p, talk = false}) => {
+	const x = lerp(p, 0, 1, 1280, 900, Easing.out(Easing.cubic));
+	return (
+		<Lay z={-380} box={personBox(x, 1760, 1.02)}>
+			<Person kind="teen" id={id} x={x} y={1760} scale={1.02} breathe={f} walk={p < 1 ? f * 0.3 : undefined} headTurn={-0.5} face={{...SMILE, mouth: talk ? 'o' : 'smile', look: [-0.7, 0.05]}} armR={{target: [110, -440], bend: -1}} itemR={<Mug />} />
+		</Lay>
+	);
+};
+const HallFar: React.FC<{f: number; id: string; open: number}> = ({f, id, open}) => (
+	<Far z={-1400} box={[-420, -60, 1900, 2300]}>
+		<HallBack f={f} id={id} open={open} />
+	</Far>
+);
+
+// a close-up in 3D: a face near the lens, the place far behind it, blurred
+const Close3D: React.FC<{f: number; len: number; far: React.ReactNode; bg: string; push?: [number, number]; children: React.ReactNode; box?: Box}> = ({f, len, far, bg, push = [0, 120], children, box = [-60, 140, 1200, 1780]}) => (
+	<Set3D cam={{x: lerp(f, 0, len, -30, 30), y: 0, z: lerp(f, 0, len, push[0], push[1])}} bg={bg} far={far} blur={7} vig={0.65}>
+		<Lay z={-160} box={box}>
+			{children}
+		</Lay>
+	</Set3D>
+);
+
+// the phone in your hand, turned in 3D in front of the blurred cloakroom
+const Phone3D: React.FC<{f: number; len: number; children: React.ReactNode}> = ({f, len, children}) => (
+	<AbsoluteFill>
+		<Scene3D cam={{x: lerp(f, 0, len, -40, 40), y: 300, z: lerp(f, 0, len, 0, 90)}} bg="#eadfc3" far={<Far z={-1200}>{<CloakBack />}</Far>} farBlur={12} />
+		<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 55%, rgba(12,16,30,0.55) 0%, rgba(4,6,12,0.85) 75%)'}} />
+		<AbsoluteFill style={{perspective: '1300px', perspectiveOrigin: '540px 960px'}}>
+			<AbsoluteFill style={{transform: `rotateY(${lerp(f, 0, len, -9, -3)}deg) rotateX(${lerp(f, 0, len, 5, 2)}deg)`, transformOrigin: '540px 1000px'}}>{children}</AbsoluteFill>
+		</AbsoluteFill>
+	</AbsoluteFill>
 );
 
 // ============================================================== SHOTS =======
@@ -262,10 +339,31 @@ export const S05: React.FC = () => {
 	const back = lerp(f, 6, 26, 0, 1, Easing.out(Easing.cubic));
 	const fade = interpolate(f, [60, 92], [0, 1], clamp);
 	const face: Face = fade < 0.35 ? {...GRIN, look: [-0.8, 0.05]} : fade < 0.75 ? {...SMILE, look: [-0.8, 0.05]} : {...DOUBLE_FACE, look: [-0.8, 0.05]};
+	const reach = 1 - 0.6 * fade;
+	const mine = lerp(f, 8, 24, 0, 1, Easing.in(Easing.cubic));
+	const X = 700;
+	const Y = 1900;
+	const S = 1.5;
+	const tgt: [number, number] = [-110 - 290 * reach, -380 - 220 * reach];
+	const cam: Cam3 = {x: lerp(f, 0, 107, -230, -20), y: 40, z: lerp(f, 0, 107, 0, 170) + 40 * (kick(f, 0.04) - 1) * 25};
 	return (
-		<Stage cam={{s: lerp(f, 0, 107, 1.04, 1.14) * kick(f, 0.04), cx: lerp(f, 0, 30, 380, 560), cy: 1000}} light={{glow: 0.2, vignette: 0.6 + 0.2 * fade}} bg="#e9e3d2">
-			<OfferBack f={f} back={back} face={face} reach={1 - 0.6 * fade} mine={lerp(f, 8, 24, 0, 1, Easing.in(Easing.cubic))} />
-		</Stage>
+		<Set3D cam={cam} bg="#e9e3d2" far={<Far><CorridorLit /></Far>} vig={0.6 + 0.2 * fade}>
+			<Lay z={-480} box={[-420, 120, 1700, 1880]}>
+				<Person kind="teen" id="g5offer" x={X} y={Y} scale={S} breathe={f} headTurn={-0.45} face={face} armL={{target: tgt, bend: -1}} armR={{target: [110, -380], bend: -1}} />
+				{reach > 0.35 && <ProfileHand x={X + tgt[0] * S} y={Y + tgt[1] * S} s={S * 0.9} />}
+				{mine < 1 && (
+					<g transform={`translate(${X + tgt[0] * S - 105 - 620 * mine},${Y + tgt[1] * S + 20 + 420 * mine})`}>
+						<rect x={-980} y={-50} width={900} height={100} rx={44} fill="#cf4a3c" />
+						<g transform="scale(-1,1)">
+							<ProfileHand x={0} y={0} s={S * 0.9} />
+						</g>
+					</g>
+				)}
+			</Lay>
+			<Lay z={200} box={[-760, 1240, 1500, 2000]}>
+				<Person kind="teen" id="g5you" back x={40 - 160 * back} y={2780 + 260 * back} scale={2.0 + 0.3 * back} />
+			</Lay>
+		</Set3D>
 	);
 };
 
@@ -275,21 +373,17 @@ export const S06: React.FC = () => {
 	const talk = f >= 3 && f < 14 && Math.floor(f / 4) % 2 === 0;
 	const glitch = f >= 52;
 	const jit = glitch ? (rnd(f * 3) - 0.5) * 14 : 0;
-	const head = (
-		<Stage cam={{s: lerp(f, 0, 82, 1.0, 1.08), cx: 540, cy: 960}} light={{glow: 0.1, vignette: 0.75}} bg="#e9e3d2">
-			<g transform="translate(-60,-200) scale(1.6)">
-				<Corridor />
-			</g>
-			<rect x={-500} y={-500} width={2200} height={3000} fill="#e9e3d2" opacity={0.55} />
+	const shot = (
+		<Close3D f={f} len={82} bg="#e9e3d2" far={<Far z={-1600}><g transform="translate(-60,-200) scale(1.6)"><CorridorLit /></g></Far>}>
 			<Bust kind="teen" id="g5s6d" x={540} y={1060} scale={5.2} face={{...DOUBLE_FACE, mouth: talk ? 'o' : 'flat', look: [0, 0.05]}} />
-		</Stage>
+		</Close3D>
 	);
 	return (
 		<AbsoluteFill>
-			<AbsoluteFill style={{transform: `translateX(${jit}px)`}}>{head}</AbsoluteFill>
+			<AbsoluteFill style={{transform: `translateX(${jit}px)`}}>{shot}</AbsoluteFill>
 			{glitch && (
 				<>
-					<AbsoluteFill style={{opacity: 0.35, mixBlendMode: 'screen', transform: `translateX(${-14 + jit}px)`, filter: 'hue-rotate(160deg)'}}>{head}</AbsoluteFill>
+					<AbsoluteFill style={{opacity: 0.35, mixBlendMode: 'screen', transform: `translateX(${-14 + jit}px)`, filter: 'hue-rotate(160deg)'}}>{shot}</AbsoluteFill>
 					<AbsoluteFill style={{background: '#ff0030', mixBlendMode: 'multiply', opacity: 0.18}} />
 				</>
 			)}
@@ -303,27 +397,32 @@ export const S07: React.FC = () => {
 	const f = useCurrentFrame();
 	const come = lerp(f, 0, 102, 0, 1, Easing.in(Easing.quad));
 	const bob = Math.abs(Math.sin(f * 0.45)) * 18;
+	const ys = 0.5 + 1.25 * come;
+	const yx = 540 + Math.sin(f * 0.45) * 30;
+	const yy = 1400 + 900 * come - bob;
 	return (
-		<Stage cam={{s: 1.0 + 0.03 * Math.sin(f * 0.9), cx: 540 + Math.sin(f * 0.45) * 10, cy: 1000 + bob * 0.4}} light={{glow: 0.2, vignette: 0.6}} bg="#e9e3d2">
-			<Corridor />
-			<Person kind="son" id="g5s7k1" colors={KID_COLS[2]} x={300} y={1260} scale={0.33} breathe={f} face={{eyes: 'open', mouth: 'o', brows: 'raised', look: [0.6, 0]}} />
-			<Person kind="girl" id="g5s7k2" colors={KID_COLS[1]} x={800} y={1270} scale={0.34} breathe={f + 7} face={{eyes: 'open', mouth: 'o', brows: 'raised', look: [-0.6, 0]}} />
-			<Person kind="teen" id="g5s7d" x={540} y={1150} scale={0.26} walk={f * 0.25} face={{...SMILE, look: [0, 0]}} />
-			<Person kind="teen" id="g5s7you" x={540 + Math.sin(f * 0.45) * 30} y={1400 + 900 * come - bob} scale={0.5 + 1.25 * come} walk={f * 0.9} face={SCARED} />
-		</Stage>
+		<Set3D cam={{x: Math.sin(f * 0.45) * 16, y: bob * 0.6, z: lerp(f, 0, 102, 0, 110)}} bg="#e9e3d2" far={<Far><CorridorLit /></Far>}>
+			<Lay z={-1150} box={personBox(540, 1150, 0.26)}>
+				<Person kind="teen" id="g5s7d" x={540} y={1150} scale={0.26} walk={f * 0.25} face={{...SMILE, look: [0, 0]}} />
+			</Lay>
+			<Lay z={-1000} box={[60, 780, 960, 560]}>
+				<Person kind="son" id="g5s7k1" colors={KID_COLS[2]} x={300} y={1260} scale={0.33} breathe={f} face={{eyes: 'open', mouth: 'o', brows: 'raised', look: [0.6, 0]}} />
+				<Person kind="girl" id="g5s7k2" colors={KID_COLS[1]} x={800} y={1270} scale={0.34} breathe={f + 7} face={{eyes: 'open', mouth: 'o', brows: 'raised', look: [-0.6, 0]}} />
+			</Lay>
+			<Lay z={-260} box={personBox(yx, yy, ys)}>
+				<Person kind="teen" id="g5s7you" x={yx} y={yy} scale={ys} walk={f * 0.9} face={SCARED} />
+			</Lay>
+		</Set3D>
 	);
 };
 
 // 8. He doesn't run. He just walks. And somehow doesn't fall behind. (бежит@12, идёт@49, отстаёт@87)
-// the corridor runs away from the camera (you keep running) — and he stays exactly the same size
+// the camera pulls back through the corridor (you keep running) — and he stays exactly the same size
 export const S08: React.FC = () => {
 	const f = useCurrentFrame();
-	const zoom = lerp(f, 0, 105, 1.5, 0.92, Easing.linear);
 	return (
 		<AbsoluteFill>
-			<Stage cam={{s: zoom, cx: 540, cy: 1000}} light={{glow: 0.2, vignette: 0.55}} bg="#e9e3d2">
-				<Corridor />
-			</Stage>
+			<Set3D cam={{x: 0, y: 30, z: lerp(f, 0, 105, 420, -380, Easing.linear)}} bg="#e9e3d2" far={<Far><CorridorLit /></Far>} blur={2.5} />
 			<AbsoluteFill>
 				<Stage cam={{s: 1, cx: 540, cy: 960}} light={{glow: 0, vignette: 0.45}} bg="transparent">
 					<Person kind="teen" id="g5s8d" x={540} y={1560} scale={0.78} walk={f * 0.22} breathe={f} face={{...DOUBLE_FACE, look: [0, 0.05]}} />
@@ -341,19 +440,20 @@ export const S09: React.FC = () => {
 	const tug = f >= 44 ? Math.sin((f - 44) * 0.8) * 10 * Math.exp(-(f - 44) / 20) : 0;
 	return (
 		<AbsoluteFill>
-		<Stage cam={{s: lerp(f, 0, 121, 1.0, 1.08) * kick(f), cx: 560, cy: 1080}} light={{glow: 0.25, vignette: 0.6}} bg="#e9e3d2">
-			<SchoolStairs />
-			<Person kind="teen" id="g5s9you" x={400 + tug} y={1780} scale={1.1} breathe={f} headTurn={0.5} face={{...SCARED, look: [0.7, 0]}} armR={{target: [190 + 40 * grab, -470], bend: -1}} />
-			<Max
-				id="g5s9max"
-				x={760}
-				y={1800}
-				s={1.12}
-				f={f}
-				face={{eyes: 'open', brows: 'raised', mouth: talk ? 'open' : 'o', look: [-0.8, 0]}}
-				arms={{armL: {target: [lerp(grab, 0, 1, -60, -250), lerp(grab, 0, 1, -330, -470)], bend: 1}, armR: {target: [80, -360], bend: -1}}}
-			/>
-		</Stage>
+			<Set3D cam={{x: lerp(f, 0, 121, -40, 80), y: 150, z: lerp(f, 0, 121, 0, 150)}} bg="#e9e3d2" far={<Far z={-1300}><SchoolStairs /></Far>} vig={0.6}>
+				<Lay z={-440} box={[-220, 420, 1580, 1460]}>
+					<Person kind="teen" id="g5s9you" x={400 + tug} y={1780} scale={1.1} breathe={f} headTurn={0.5} face={{...SCARED, look: [0.7, 0]}} armR={{target: [190 + 40 * grab, -470], bend: -1}} />
+					<Max
+						id="g5s9max"
+						x={760}
+						y={1800}
+						s={1.12}
+						f={f}
+						face={{eyes: 'open', brows: 'raised', mouth: talk ? 'open' : 'o', look: [-0.8, 0]}}
+						arms={{armL: {target: [lerp(grab, 0, 1, -60, -250), lerp(grab, 0, 1, -330, -470)], bend: 1}, armR: {target: [80, -360], bend: -1}}}
+					/>
+				</Lay>
+			</Set3D>
 			<Bubble x={700} y={640} text="ТЫ ЧЕГО?" from={56} to={78} tail="right" />
 			<Bubble x={600} y={640} text="ТЫ ЖЕ ТОЛЬКО ЧТО" from={80} to={101} tail="right" />
 			<Bubble x={640} y={640} text="БЫЛ В КЛАССЕ!" from={101} to={121} tail="right" />
@@ -367,9 +467,18 @@ export const S10: React.FC = () => {
 	const gap = interpolate(f, [30, 46, 70, 84], [0, 1, 1, 0.35], clamp);
 	const you = interpolate(f, [36, 46], [0, 1], clamp);
 	return (
-		<Stage cam={{s: lerp(f, 0, 105, 1.0, 1.12) * kick(f), cx: 540, cy: 760}} light={{glow: 0.3, vignette: 0.6}} bg="#eadfc3">
-			<Cloakroom f={f} you={you} gap={gap} youFace={{...SCARED, mouth: 'tight', look: [0.6, 0]}} />
-		</Stage>
+		<Set3D cam={{x: lerp(f, 0, 105, -50, 50), y: 300, z: lerp(f, 0, 105, 0, 190)}} bg="#eadfc3" far={<Far z={-1200}><CloakBack /></Far>} blur={2.5} vig={0.6}>
+			{you > 0 && (
+				<Lay z={-760} box={[250, 260, 580, 900]}>
+					<g opacity={you}>
+						<Bust kind="teen" id="g5cloakyou" x={540} y={700} scale={1.25} face={{...SCARED, mouth: 'tight', look: [0.6, 0]}} />
+					</g>
+				</Lay>
+			)}
+			<Lay z={-600} box={[180, 380, 720, 560]}>
+				<CloakFront gap={gap} />
+			</Lay>
+		</Set3D>
 	);
 };
 
@@ -380,7 +489,7 @@ export const S11: React.FC = () => {
 	const s = lerp(f, 0, 96, 1.25, 1.4) * kick(f);
 	const p = focus(680, 304, 330, 540, 760, s);
 	return (
-		<AbsoluteFill style={{background: PHONE_BG}}>
+		<Phone3D f={f} len={96}>
 			<Phone x={p.x + buzz} y={p.y} w={680} scale={s}>
 				<ChatScreen time="09:48">
 					<VoiceBubble top={250} f={f} progress={1} sent="09:36" />
@@ -391,7 +500,7 @@ export const S11: React.FC = () => {
 					)}
 				</ChatScreen>
 			</Phone>
-		</AbsoluteFill>
+		</Phone3D>
 	);
 };
 
@@ -401,14 +510,14 @@ export const S12: React.FC = () => {
 	const s = lerp(f, 0, 170, 1.4, 1.55);
 	const p = focus(680, 304, 560, 540, 760, s);
 	return (
-		<AbsoluteFill style={{background: PHONE_BG}}>
+		<Phone3D f={f} len={170}>
 			<Phone x={p.x} y={p.y} w={680} scale={s}>
 				<ChatScreen time="09:48">
 					<VoiceBubble top={250} f={f} progress={1} sent="09:36" />
 					<VoiceBubble top={470} f={f} progress={interpolate(f, [6, 166], [0.03, 0.98], clamp)} lvl={level('g12', f - 6)} sent="09:48" />
 				</ChatScreen>
 			</Phone>
-		</AbsoluteFill>
+		</Phone3D>
 	);
 };
 
@@ -418,24 +527,22 @@ export const S13: React.FC = () => {
 	const up = lerp(f, 2, 30, 0, 1, Easing.out(Easing.cubic));
 	const ghost = interpolate(f, [36, 62], [1, 0.38], clamp);
 	const shimmer = 0.04 * Math.sin(f / 5);
+	const Z = zoomT(2.3, 540, 520);
 	return (
-		<Stage cam={{s: lerp(f, 0, 108, 2.2, 2.45), cx: 540, cy: 520}} light={{glow: 0.3, vignette: 0.65}} bg="#eadfc3">
-			<rect x={-500} y={-500} width={2200} height={3000} fill="#eadfc3" />
-			<rect x={-500} y={392} width={2200} height={18} fill="#8f969e" />
-			<path d="M 520,402 q 0,52 30,52" stroke="#6d747c" strokeWidth={10} fill="none" strokeLinecap="round" />
-			<path d="M 580,454 q 18,0 18,-22" stroke="#6d747c" strokeWidth={10} fill="none" strokeLinecap="round" />
-			<path d="M 760,402 q 0,52 30,52" stroke="#6d747c" strokeWidth={10} fill="none" strokeLinecap="round" />
-			<Jacket x={330} c={JACKETS[2]} w={150} h={360} />
-			<Jacket x={830} c={JACKETS[6]} w={150} h={360} />
-			<g opacity={ghost + shimmer}>
-				<Palm x={548} y={lerp(up, 0, 1, 980, 520)} s={0.62} rot={-6} />
-			</g>
-			{ghost < 0.9 && (
-				<g opacity={(1 - ghost) * 0.5}>
-					<ellipse cx={548} cy={520} rx={110} ry={140} fill="none" stroke="#9fe8ff" strokeWidth={4} />
+		<Set3D cam={{x: lerp(f, 0, 108, -40, 40), y: lerp(f, 0, 108, 50, -20), z: lerp(f, 0, 108, 0, 130)}} bg="#eadfc3" far={<Far z={-900} box={[-300, -300, 1680, 2520]}><g transform={Z}><HookWall /></g></Far>} blur={2} vig={0.6}>
+			<Lay z={-140} box={[60, 160, 960, 1900]}>
+				<g transform={Z}>
+					<g opacity={ghost + shimmer}>
+						<Palm x={548} y={lerp(up, 0, 1, 980, 520)} s={0.62} rot={-6} />
+					</g>
+					{ghost < 0.9 && (
+						<g opacity={(1 - ghost) * 0.5}>
+							<ellipse cx={548} cy={520} rx={110} ry={140} fill="none" stroke="#9fe8ff" strokeWidth={4} />
+						</g>
+					)}
 				</g>
-			)}
-		</Stage>
+			</Lay>
+		</Set3D>
 	);
 };
 
@@ -446,13 +553,15 @@ export const S14: React.FC = () => {
 	const p = focus(680, 304, 560, 540, 760, s);
 	const now = pop(f, 118, 9);
 	return (
-		<AbsoluteFill style={{background: PHONE_BG}}>
-			<Phone x={p.x} y={p.y} w={680} scale={s}>
-				<ChatScreen time="09:49">
-					<VoiceBubble top={250} f={f} progress={1} sent="09:36" />
-					<VoiceBubble top={470} f={f} progress={interpolate(f, [6, 136], [0.03, 0.98], clamp)} lvl={level('g14', f - 6)} sent="09:48" redTail={interpolate(f, [100, 130], [0, 1], clamp)} />
-				</ChatScreen>
-			</Phone>
+		<AbsoluteFill>
+			<Phone3D f={f} len={141}>
+				<Phone x={p.x} y={p.y} w={680} scale={s}>
+					<ChatScreen time="09:49">
+						<VoiceBubble top={250} f={f} progress={1} sent="09:36" />
+						<VoiceBubble top={470} f={f} progress={interpolate(f, [6, 136], [0.03, 0.98], clamp)} lvl={level('g14', f - 6)} sent="09:48" redTail={interpolate(f, [100, 130], [0, 1], clamp)} />
+					</ChatScreen>
+				</Phone>
+			</Phone3D>
 			{now > 0.01 && (
 				<div style={{position: 'absolute', top: 1040, width: '100%', display: 'flex', justifyContent: 'center', transform: `scale(${now}) rotate(-3deg)`}}>
 					<div style={{background: 'rgba(14,14,16,0.94)', border: `6px solid ${RED}`, borderRadius: 22, padding: '12px 34px', fontFamily: HEAVY, fontWeight: 900, fontSize: 56, color: '#fff'}}>
@@ -470,14 +579,16 @@ export const S15: React.FC = () => {
 	const run = lerp(f, 0, 100, 0, 1, Easing.linear);
 	const mem = pop(f, 84, 10);
 	const ghostly = interpolate(f, [0, 118], [0.75, 0.62], clamp);
+	const x = lerp(run, 0, 1, -160, 1260);
 	return (
 		<AbsoluteFill>
-			<Stage cam={{s: lerp(f, 0, 118, 1.0, 1.08) * kick(f), cx: 600, cy: 1080}} light={{glow: 0.25, vignette: 0.6}} bg="#e6e9dd">
-				<LiftLanding f={f} id="g5s15" floor="1" stencil="1" btn={f > 40 && f < 70} />
-				<g opacity={ghostly}>
-					<Person kind="teen" id="g5s15you" x={lerp(run, 0, 1, -160, 1260)} y={1700} scale={0.95} walk={f * 0.85} face={{...SCARED, look: [0.6, 0]}} />
-				</g>
-			</Stage>
+			<Set3D cam={{x: lerp(f, 0, 118, -260, 300), y: 120, z: lerp(f, 0, 118, 0, 110)}} bg="#e6e9dd" far={<Far z={-1300} box={[-420, -120, 1920, 2400]}><LiftLanding f={f} id="g5s15" floor="1" stencil="1" btn={f > 40 && f < 70} /></Far>} blur={2.5} vig={0.6}>
+				<Lay z={-440} box={personBox(x, 1700, 0.95)}>
+					<g opacity={ghostly}>
+						<Person kind="teen" id="g5s15you" x={x} y={1700} scale={0.95} walk={f * 0.85} face={{...SCARED, look: [0.6, 0]}} />
+					</g>
+				</Lay>
+			</Set3D>
 			{mem > 0.01 && (
 				<div style={{position: 'absolute', top: 470, width: '100%', display: 'flex', justifyContent: 'center', transform: `scale(${mem}) rotate(-4deg)`}}>
 					<div style={{background: 'rgba(14,14,16,0.92)', border: `6px solid ${YELLOW}`, borderRadius: 22, padding: '10px 30px 14px', fontFamily: HEAVY, fontWeight: 900, textAlign: 'center'}}>
@@ -495,52 +606,19 @@ export const S16: React.FC = () => {
 	const f = useCurrentFrame();
 	const {i, t} = seg(f, [34]);
 	if (i === 0) {
-		return (
-			<Stage cam={{s: lerp(t, 0, 34, 1.0, 1.06) * kick(t), cx: 360, cy: 900}} light={{glow: 0.25, vignette: 0.6}} bg="#e6e9dd">
-				<LiftLanding f={t} id="g5s16" floor="7" stencil="7" />
-			</Stage>
-		);
+		return <Set3D cam={{x: lerp(t, 0, 34, -380, -320), y: -40, z: lerp(t, 0, 34, 0, 260)}} bg="#e6e9dd" far={<Far z={-1300} box={[-420, -120, 1920, 2400]}><LiftLanding f={t} id="g5s16" floor="7" stencil="7" /></Far>} blur={1.5} vig={0.6} />;
 	}
 	const press = interpolate(t, [6, 14, 30, 38], [0, 1, 1, 0.2], clamp);
 	const ghost = interpolate(t, [20, 70], [0.7, 0.4], clamp);
+	const Z = zoomT(1.3, 540, 900);
 	return (
-		<Stage cam={{s: lerp(t, 0, 89, 1.25, 1.4), cx: 540, cy: 900}} light={{glow: 0.25, vignette: 0.65}} bg="#d9d6c6">
-			<Doorbell press={press} ghost={ghost} />
-		</Stage>
-	);
-};
-
-// the hall from inside: mom at the open front door, you outside on the landing (see-through), HIM coming from the kitchen
-const HallScene: React.FC<{f: number; id: string; open: number; momLook: number; momFace: Face; him?: number; himTalk?: boolean; you?: number}> = ({f, id, open, momLook, momFace, him = -1, himTalk = false, you = GHOST}) => {
-	const hx = him < 0 ? 0 : lerp(him, 0, 1, 1280, 900, Easing.out(Easing.cubic));
-	return (
-		<g>
-			<Hall id={id} noBag />
-			<FrontDoor id={`${id}d`} open={open} light={1}>
-				<g opacity={0.45}>
-					<ellipse cx={575} cy={1060} rx={170} ry={420} fill="#9fe8ff" opacity={0.35} />
+		<Set3D cam={{x: lerp(t, 0, 89, -40, 40), y: 0, z: lerp(t, 0, 89, 0, 140)}} bg="#d9d6c6" far={<Far z={-800} box={[-300, -300, 1680, 2520]}><g transform={Z}><DoorWall press={press} /></g></Far>} blur={1.2} vig={0.65}>
+			<Lay z={-150} box={[300, 760, 700, 1200]}>
+				<g transform={Z}>
+					<Finger press={press} ghost={ghost} />
 				</g>
-				<g opacity={Math.min(1, you + 0.2)}>
-					<Person kind="teen" id={`${id}you`} x={575} y={1450} scale={0.86} breathe={f} face={{eyes: 'open', brows: 'worried', mouth: 'flat', look: [0.5, 0], blush: false}} />
-				</g>
-			</FrontDoor>
-			<Person kind="mom" id={`${id}mom`} colors={MOM} x={800} y={1720} scale={1.0} breathe={f} headTurn={momLook} face={momFace} armL={{target: [-150, -560], bend: 1}} />
-			{him >= 0 && (
-				<Person
-					kind="teen"
-					id={`${id}him`}
-					x={hx}
-					y={1760}
-					scale={1.02}
-					breathe={f}
-					walk={him < 1 ? f * 0.3 : undefined}
-					headTurn={-0.5}
-					face={{...SMILE, mouth: himTalk ? 'o' : 'smile', look: [-0.7, 0.05]}}
-					armR={{target: [110, -440], bend: -1}}
-					itemR={<Mug />}
-				/>
-			)}
-		</g>
+			</Lay>
+		</Set3D>
 	);
 };
 
@@ -550,9 +628,9 @@ export const S17: React.FC = () => {
 	const open = lerp(f, 0, 10, 0, 1, Easing.out(Easing.cubic));
 	const frown = f > 50;
 	return (
-		<Stage cam={{s: lerp(f, 0, 98, 1.0, 1.1) * kick(f), cx: 640, cy: 1060}} light={{glow: 0.3, vignette: 0.6}} bg="#cdb88f">
-			<HallScene f={f} id="g5s17" open={open} momLook={-0.5} momFace={{eyes: 'open', brows: frown ? 'worried' : 'raised', mouth: frown ? 'flat' : 'o', look: [-0.8, 0.1], blush: false}} />
-		</Stage>
+		<Set3D cam={{x: lerp(f, 0, 98, 60, 200), y: 140, z: lerp(f, 0, 98, 0, 160)}} bg="#cdb88f" far={<HallFar f={f} id="g5s17" open={open} />} blur={2.5} vig={0.6}>
+			<MomLay f={f} id="g5s17mom" look={-0.5} face={{eyes: 'open', brows: frown ? 'worried' : 'raised', mouth: frown ? 'flat' : 'o', look: [-0.8, 0.1], blush: false}} />
+		</Set3D>
 	);
 };
 
@@ -563,9 +641,10 @@ export const S18: React.FC = () => {
 	const talk = f >= 100 && f < 126 && Math.floor(f / 4) % 2 === 0;
 	return (
 		<AbsoluteFill>
-			<Stage cam={{s: lerp(f, 0, 131, 1.0, 1.06), cx: 760, cy: 1060}} light={{glow: 0.3, vignette: 0.6}} bg="#cdb88f">
-				<HallScene f={f} id="g5s18" open={1} momLook={f > 30 ? 0.45 : -0.5} momFace={{eyes: 'open', brows: 'raised', mouth: 'flat', look: [f > 30 ? 0.8 : -0.8, 0.1], blush: false}} him={him} himTalk={talk} />
-			</Stage>
+			<Set3D cam={{x: lerp(f, 0, 131, 240, 340), y: 140, z: lerp(f, 0, 131, 0, 110)}} bg="#cdb88f" far={<HallFar f={f} id="g5s18" open={1} />} blur={2.5} vig={0.6}>
+				<MomLay f={f} id="g5s18mom" look={f > 30 ? 0.45 : -0.5} face={{eyes: 'open', brows: 'raised', mouth: 'flat', look: [f > 30 ? 0.8 : -0.8, 0.1], blush: false}} />
+				<HimLay f={f} id="g5s18him" p={him} talk={talk} />
+			</Set3D>
 			<Bubble x={720} y={760} text="МАМ, КТО ТАМ?" from={100} to={131} tail="right" />
 		</AbsoluteFill>
 	);
@@ -578,26 +657,34 @@ export const S19: React.FC = () => {
 	if (i === 0) {
 		const look = f < 40 ? 0.45 : -0.5;
 		return (
-			<Stage cam={{s: lerp(f, 0, 72, 1.0, 1.05), cx: 700, cy: 1060}} light={{glow: 0.3, vignette: 0.6}} bg="#cdb88f">
-				<HallScene f={f} id="g5s19" open={1} momLook={look} momFace={{eyes: 'open', brows: 'worried', mouth: 'flat', look: [f < 40 ? 0.8 : -0.8, 0.1], blush: false}} him={1} />
-			</Stage>
+			<Set3D cam={{x: lerp(f, 0, 72, 300, 120), y: 140, z: lerp(f, 0, 72, 60, 160)}} bg="#cdb88f" far={<HallFar f={f} id="g5s19" open={1} />} blur={2.5} vig={0.6}>
+				<MomLay f={f} id="g5s19mom" look={look} face={{eyes: 'open', brows: 'worried', mouth: 'flat', look: [f < 40 ? 0.8 : -0.8, 0.1], blush: false}} />
+				<HimLay f={f} id="g5s19him" p={1} />
+			</Set3D>
 		);
 	}
-	// two faces side by side: yours (fading) and his
+	// two faces side by side: yours (fading) and his — each a 3D close-up in the hall
 	const one = pop(t, 30, 10);
+	const hall = (id: string) => (
+		<Far z={-1600}>
+			<g transform="translate(-200,-300) scale(1.5)">
+				<HallBack f={t} id={id} open={1} />
+			</g>
+		</Far>
+	);
 	return (
 		<AbsoluteFill style={{background: '#cdb88f'}}>
 			<AbsoluteFill style={{clipPath: 'inset(0 50% 0 0)'}}>
-				<WarmClose id="g5s19l" t={t} len={59} zoom={[1, 1.06]}>
+				<Close3D f={t} len={59} bg="#cdb88f" far={hall('g5s19hl')}>
 					<g opacity={GHOST}>
 						<Bust kind="teen" id="g5s19you" x={520} y={1000} scale={5.2} face={{eyes: 'open', brows: 'worried', mouth: 'flat', look: [0.3, 0.05], blush: false}} />
 					</g>
-				</WarmClose>
+				</Close3D>
 			</AbsoluteFill>
 			<AbsoluteFill style={{clipPath: 'inset(0 0 0 50%)'}}>
-				<WarmClose id="g5s19r" t={t} len={59} zoom={[1, 1.06]}>
+				<Close3D f={t} len={59} bg="#cdb88f" far={hall('g5s19hr')}>
 					<Bust kind="teen" id="g5s19him" x={560} y={1000} scale={5.2} face={{...SMILE, look: [-0.3, 0.05]}} />
-				</WarmClose>
+				</Close3D>
 			</AbsoluteFill>
 			<div style={{position: 'absolute', left: 536, top: 0, width: 8, height: 1920, background: '#111'}} />
 			{one > 0.01 && (
@@ -614,9 +701,21 @@ export const S20: React.FC = () => {
 	const f = useCurrentFrame();
 	const talk = f >= 3 && f < 46 && Math.floor(f / 4) % 2 === 0;
 	return (
-		<WarmClose id="g5s20" t={f} len={52} zoom={[1.02, 1.12]}>
+		<Close3D
+			f={f}
+			len={52}
+			bg="#cdb88f"
+			push={[20, 150]}
+			far={
+				<Far z={-1600}>
+					<g transform="translate(-200,-300) scale(1.5)">
+						<HallBack f={f} id="g5s20h" open={1} />
+					</g>
+				</Far>
+			}
+		>
 			<Bust kind="mom" id="g5s20b" colors={MOM} x={540} y={1000} scale={5.6} tilt={-4} face={{eyes: 'open', brows: 'worried', mouth: talk ? 'o' : 'flat', look: [0, 0.1], blush: false, tears: interpolate(f, [10, 50], [0, 0.7], clamp)}} />
-		</WarmClose>
+		</Close3D>
 	);
 };
 
@@ -634,9 +733,10 @@ export const S21: React.FC = () => {
 			promoAt={285}
 			bg={
 				<AbsoluteFill>
-					<Stage cam={{s: lerp(f, 0, 422, 1.0, 1.06), cx: 700, cy: 1060}} light={{glow: 0.3, vignette: 0.6}} bg="#cdb88f">
-						<HallScene f={f} id="g5s21" open={1} momLook={0} momFace={{eyes: 'open', brows: 'worried', mouth: 'flat', look: [0, 0.1], blush: false}} him={1} />
-					</Stage>
+					<Set3D cam={{x: lerp(f, 0, 422, 140, 260), y: 140, z: lerp(f, 0, 422, 40, 120)}} bg="#cdb88f" far={<HallFar f={f} id="g5s21" open={1} />} blur={2.5} vig={0.6}>
+						<MomLay f={f} id="g5s21mom" look={0} face={{eyes: 'open', brows: 'worried', mouth: 'flat', look: [0, 0.1], blush: false}} />
+						<HimLay f={f} id="g5s21him" p={1} />
+					</Set3D>
 					<AbsoluteFill style={{background: '#000', opacity: 0.6}} />
 				</AbsoluteFill>
 			}

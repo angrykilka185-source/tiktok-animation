@@ -463,7 +463,7 @@ export const S09: React.FC = () => {
 
 // 10. You tear free and hide in the cloakroom, between other people's jackets. (прячешься@30, раздевалке@49, курток@89)
 // you squeeze in behind the hanging jackets (a whole boy, your size): they swing, only your face peeks out between them,
-// your trainers show under the hems
+// your trainers show under the hems (four steps, timed to end with the feet together — no jump into the stance)
 export const S10: React.FC = () => {
 	const f = useCurrentFrame();
 	const step = lerp(f, 22, 46, 0, 1, Easing.out(Easing.cubic));
@@ -473,7 +473,7 @@ export const S10: React.FC = () => {
 	return (
 		<Set3D cam={{x: lerp(f, 0, 105, -50, 50), y: 270, z: lerp(f, 0, 105, 110, 320)}} bg="#eadfc3" far={<Far z={-1200}><CloakBack /></Far>} blur={2.5} vig={0.6}>
 			<Lay z={-720} box={personBox(x, 1180, 0.66)}>
-				<Person kind="teen" id="g5cloakyou" x={x} y={1180} scale={0.66} breathe={f} walk={step < 1 ? f * 0.5 : undefined} face={{...SCARED, mouth: 'tight', look: [step < 1 ? 0.6 : 0.4, 0]}} />
+				<Person kind="teen" id="g5cloakyou" x={x} y={1180} scale={0.66} breathe={f} walk={step > 0 && step < 1 ? step * 4 * Math.PI : undefined} face={{...SCARED, mouth: 'tight', look: [step < 1 ? 0.6 : 0.4, 0]}} />
 			</Lay>
 			<Lay z={-600} box={[150, 360, 760, 600]}>
 				<CloakFront gap={gap} sway={sway} />

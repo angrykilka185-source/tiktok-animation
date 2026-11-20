@@ -1,6 +1,6 @@
 // «ТГК открыт» — 700 subscribers: the promise from the poll «Открывать ТГК?» (src/t1) is kept, the Telegram channel is
-// open. 6 shots on the timeline of src/t2/timeline.ts (= the voice). Three heroes («Голосовые из завтра», «Вахта», «Ты с
-// какого района?») stand in the «3D camera»
+// open. 6 shots on the timeline of src/t2/timeline.ts (= the voice). Three heroes («Голосовые из завтра», «Вахта», «Игоречек»)
+// stand in the «3D camera»
 // of «Ты с какого района?» (src/components/Layers3D.tsx).
 import React from 'react';
 import {AbsoluteFill, Easing, Freeze, interpolate, useCurrentFrame} from 'remotion';
@@ -80,7 +80,7 @@ const FEET = 1720;
 const HEROES: Hero[] = [
 	{key: 'teen', x: 250, z: -480, s: 0.84, tag: 'ГОЛОСОВЫЕ', sub: 'ИЗ ЗАВТРА', color: '#cf4a3c', draw: (f, face, hop) => <Person kind="teen" id="t2teen" x={250} y={FEET + 30 - hop} scale={0.84} breathe={f} face={face} armL={{target: [-130, -980], bend: 1}} />},
 	{key: 'son', x: 540, z: -720, s: 0.8, tag: 'ВАХТА', color: '#f0a032', draw: (f, face, hop) => <Person kind="son" id="t2son" x={540} y={FEET - hop} scale={0.8} breathe={f + 9} face={face} armR={{target: [140, -900], bend: -1}} />},
-	{key: 'boy', x: 830, z: -480, s: 0.88, tag: 'ТЫ С КАКОГО', sub: 'РАЙОНА?', color: '#e0342b', draw: (f, face, hop) => <Person kind="boy" id="t2boy" x={830} y={FEET + 30 - hop} scale={0.88} plain pioneer colors={IGOR} breathe={f + 13} face={face} armL={{target: [-150, -820], bend: 1}} />},
+	{key: 'boy', x: 830, z: -480, s: 0.88, tag: 'ИГОРЕЧЕК', color: '#e0342b', draw: (f, face, hop) => <Person kind="boy" id="t2boy" x={830} y={FEET + 30 - hop} scale={0.88} plain pioneer colors={IGOR} breathe={f + 13} face={face} armL={{target: [-150, -820], bend: 1}} />},
 ];
 const JOY: Face = {eyes: 'happy', mouth: 'open', brows: 'raised', look: [0, 0], blush: true};
 const WAIT: Face = {eyes: 'open', mouth: 'smile', brows: 'raised', look: [0, 0.1], blush: false};

@@ -86,8 +86,8 @@ const CorridorLit: React.FC = () => (
 
 // the school cloakroom: a long rail of hooks with jackets, a bench with bags, a window (the back layer)
 const JACKETS = ['#3b5f8a', '#7a3b3b', '#2f6e47', '#8a7a3b', '#4a4a58', '#a85a2a', '#3b3b6e', '#6e3b5f', '#2a6e6e'];
-const Jacket: React.FC<{x: number; c: string; w?: number; h?: number}> = ({x, c, w = 190, h = 470}) => (
-	<g transform={`translate(${x},430)`}>
+const Jacket: React.FC<{x: number; c: string; w?: number; h?: number; rot?: number}> = ({x, c, w = 190, h = 470, rot = 0}) => (
+	<g transform={`translate(${x},430) rotate(${rot})`}>
 		<path d={`M ${-w * 0.32},0 Q 0,-34 ${w * 0.32},0 L ${w / 2},${h * 0.18} L ${w / 2 + 14},${h} L ${-w / 2 - 14},${h} L ${-w / 2},${h * 0.18} Z`} fill={c} />
 		<path d={`M ${-w * 0.32},0 Q 0,-34 ${w * 0.32},0 L ${w * 0.22},${h * 0.16} Q 0,${h * 0.05} ${-w * 0.22},${h * 0.16} Z`} fill="#000" opacity={0.18} />
 		<line x1={0} y1={h * 0.12} x2={0} y2={h} stroke="#000" strokeWidth={5} opacity={0.2} />
@@ -114,11 +114,11 @@ const CloakBack: React.FC = () => (
 		<rect x={-500} y={1034} width={2200} height={10} fill="#8f6a3e" />
 	</g>
 );
-// the two jackets in front of you; `gap` 0…1 = you push them apart
-const CloakFront: React.FC<{gap: number}> = ({gap}) => (
+// the two jackets in front of you; `gap` 0…1 = you push them apart, `sway` = they swing on their hooks
+const CloakFront: React.FC<{gap: number; sway?: number}> = ({gap, sway = 0}) => (
 	<g>
-		<Jacket x={420 - gap * 70} c={JACKETS[4]} />
-		<Jacket x={660 + gap * 70} c={JACKETS[5]} />
+		<Jacket x={430 - gap * 55} c={JACKETS[4]} rot={sway} />
+		<Jacket x={650 + gap * 55} c={JACKETS[5]} rot={-sway * 0.8} />
 	</g>
 );
 
@@ -461,22 +461,22 @@ export const S09: React.FC = () => {
 	);
 };
 
-// 10. You tear free and hide in the cloakroom, between other people's jackets. (раздевалке@49, курток@89)
+// 10. You tear free and hide in the cloakroom, between other people's jackets. (прячешься@30, раздевалке@49, курток@89)
+// you squeeze in behind the hanging jackets (a whole boy, your size): they swing, only your face peeks out between them,
+// your trainers show under the hems
 export const S10: React.FC = () => {
 	const f = useCurrentFrame();
-	const gap = interpolate(f, [30, 46, 70, 84], [0, 1, 1, 0.35], clamp);
-	const you = interpolate(f, [36, 46], [0, 1], clamp);
+	const step = lerp(f, 22, 46, 0, 1, Easing.out(Easing.cubic));
+	const x = lerp(step, 0, 1, 1180, 540);
+	const gap = interpolate(f, [40, 52, 74, 90], [0, 0.5, 0.5, 0.32], clamp);
+	const sway = f >= 40 ? Math.sin((f - 40) / 3.2) * 7 * Math.exp(-(f - 40) / 26) : 0;
 	return (
-		<Set3D cam={{x: lerp(f, 0, 105, -50, 50), y: 300, z: lerp(f, 0, 105, 0, 190)}} bg="#eadfc3" far={<Far z={-1200}><CloakBack /></Far>} blur={2.5} vig={0.6}>
-			{you > 0 && (
-				<Lay z={-760} box={[250, 260, 580, 900]}>
-					<g opacity={you}>
-						<Bust kind="teen" id="g5cloakyou" x={540} y={700} scale={1.25} face={{...SCARED, mouth: 'tight', look: [0.6, 0]}} />
-					</g>
-				</Lay>
-			)}
-			<Lay z={-600} box={[180, 380, 720, 560]}>
-				<CloakFront gap={gap} />
+		<Set3D cam={{x: lerp(f, 0, 105, -50, 50), y: 270, z: lerp(f, 0, 105, 110, 320)}} bg="#eadfc3" far={<Far z={-1200}><CloakBack /></Far>} blur={2.5} vig={0.6}>
+			<Lay z={-720} box={personBox(x, 1180, 0.66)}>
+				<Person kind="teen" id="g5cloakyou" x={x} y={1180} scale={0.66} breathe={f} walk={step < 1 ? f * 0.5 : undefined} face={{...SCARED, mouth: 'tight', look: [step < 1 ? 0.6 : 0.4, 0]}} />
+			</Lay>
+			<Lay z={-600} box={[150, 360, 760, 600]}>
+				<CloakFront gap={gap} sway={sway} />
 			</Lay>
 		</Set3D>
 	);

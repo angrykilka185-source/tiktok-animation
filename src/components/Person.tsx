@@ -64,6 +64,14 @@ export type PersonProps = {
 	knit?: string; // a knitted «петушок» hat of this colour (white stripe, pompom)
 	quilt?: boolean; // a quilted jacket (телогрейка): stitched bands across the torso
 	pioneer?: boolean; // a white shirt collar and a red pioneer tie (school uniform)
+	// period looks («Что будет, если ты попадёшь в XX век»)
+	hat?: {type: 'peak' | 'pilotka' | 'bowler' | 'scarf' | 'kepi'; color: string; band?: string}; // фуражка / пилотка / котелок / платок / кепи
+	beard?: string; // a full beard (with a moustache) of this colour
+	moustache?: string; // just a moustache
+	hem?: number; // mom kind: how much of the legs the dress covers (default 0.55; 0.95 = to the ankles)
+	apron?: string; // a long apron over the clothes (the baker, the shop assistant)
+	boots?: string; // tall boots (сапоги) of this colour over the trousers
+	kneePatch?: boolean; // dad kind: the dark knee band of work trousers (default true; false for suits and uniforms)
 };
 
 export const PALETTE = {
@@ -504,6 +512,95 @@ export const Cap: React.FC<{hw: number; hh: number; color: string; back?: boolea
 	);
 };
 
+// a beard / a moustache (head coords; drawn over the face, the mouth stays visible between them)
+export const Whiskers: React.FC<{hw: number; hh: number; color: string; full: boolean; turn?: number}> = ({hw, hh, color, full, turn = 0}) => {
+	const tx = turn * hw * 0.12;
+	return (
+		<g>
+			{full && (
+				<path
+					d={`M ${-hw * 0.94},${hh * 0.1} C ${-hw * 0.98},${hh * 1.25} ${-hw * 0.35},${hh * 1.55} 0,${hh * 1.55} C ${hw * 0.35},${hh * 1.55} ${hw * 0.98},${hh * 1.25} ${hw * 0.94},${hh * 0.1} C ${hw * 0.8},${hh * 0.62} ${hw * 0.5},${hh * 0.76} ${tx},${hh * 0.76} C ${-hw * 0.5},${hh * 0.76} ${-hw * 0.8},${hh * 0.62} ${-hw * 0.94},${hh * 0.1} Z`}
+					fill={color}
+				/>
+			)}
+			<path
+				d={`M ${tx - hw * 0.5},${hh * 0.54} Q ${tx - hw * 0.22},${hh * 0.34} ${tx},${hh * 0.44} Q ${tx + hw * 0.22},${hh * 0.34} ${tx + hw * 0.5},${hh * 0.54} Q ${tx + hw * 0.22},${hh * 0.5} ${tx},${hh * 0.52} Q ${tx - hw * 0.22},${hh * 0.5} ${tx - hw * 0.5},${hh * 0.54} Z`}
+				fill={color}
+			/>
+		</g>
+	);
+};
+
+// period hats: фуражка (a peaked cap with a band), пилотка (a side cap with a star), котелок (a bowler), платок (a
+// headscarf tied under the chin), кепи (a tall peaked cap of the gendarmes / the city police of 1901)
+export const PeriodHat: React.FC<{hw: number; hh: number; type: 'peak' | 'pilotka' | 'bowler' | 'scarf' | 'kepi'; color: string; band?: string; back?: boolean; turn?: number}> = ({hw, hh, type, color, band, back, turn = 0}) => {
+	const tx = turn * hw * 0.12;
+	if (type === 'scarf') {
+		const outer = `M ${-hw * 1.2},${hh * 0.45} C ${-hw * 1.34},${-hh * 1.42} ${hw * 1.34},${-hh * 1.42} ${hw * 1.2},${hh * 0.45} C ${hw * 1.0},${hh * 0.95} ${hw * 0.5},${hh * 1.16} 0,${hh * 1.18} C ${-hw * 0.5},${hh * 1.16} ${-hw * 1.0},${hh * 0.95} ${-hw * 1.2},${hh * 0.45} Z`;
+		const inner = `M ${-hw * 0.96},${hh * 0.12} C ${-hw * 0.98},${-hh * 0.78} ${hw * 0.98},${-hh * 0.78} ${hw * 0.96},${hh * 0.12} C ${hw * 0.95},${hh * 0.6} ${hw * 0.5},${hh * 1.0} 0,${hh * 1.0} C ${-hw * 0.5},${hh * 1.0} ${-hw * 0.95},${hh * 0.6} ${-hw * 0.96},${hh * 0.12} Z`;
+		return (
+			<g>
+				<path d={back ? `M ${-hw * 1.2},${hh * 0.6} C ${-hw * 1.34},${-hh * 1.42} ${hw * 1.34},${-hh * 1.42} ${hw * 1.2},${hh * 0.6} L 0,${hh * 1.3} Z` : `${outer} ${inner}`} fill={color} fillRule="evenodd" />
+				{band && !back && (
+					<path d={`M ${-hw * 0.98},${-hh * 0.22} C ${-hw * 0.9},${-hh * 0.95} ${hw * 0.9},${-hh * 0.95} ${hw * 0.98},${-hh * 0.22}`} stroke={band} strokeWidth={hw * 0.1} fill="none" strokeDasharray={`${hw * 0.12} ${hw * 0.14}`} />
+				)}
+				{!back && (
+					<g>
+						<ellipse cx={0} cy={hh * 1.16} rx={hw * 0.18} ry={hh * 0.1} fill={color} />
+						<path d={`M ${-hw * 0.06},${hh * 1.2} L ${-hw * 0.28},${hh * 1.55} L ${-hw * 0.06},${hh * 1.5} Z M ${hw * 0.06},${hh * 1.2} L ${hw * 0.3},${hh * 1.52} L ${hw * 0.08},${hh * 1.5} Z`} fill={color} />
+						<path d={`M ${-hw * 0.96},${hh * 0.12} C ${-hw * 0.98},${-hh * 0.78} ${hw * 0.98},${-hh * 0.78} ${hw * 0.96},${hh * 0.12}`} stroke="rgba(0,0,0,0.25)" strokeWidth={hw * 0.05} fill="none" />
+					</g>
+				)}
+			</g>
+		);
+	}
+	if (type === 'pilotka') {
+		return (
+			<g>
+				<path d={`M ${-hw * 0.95},${-hh * 0.58} L ${-hw * 0.72},${-hh * 1.16} Q 0,${-hh * 1.36} ${hw * 0.72},${-hh * 1.16} L ${hw * 0.95},${-hh * 0.58} Q 0,${-hh * 0.74} ${-hw * 0.95},${-hh * 0.58} Z`} fill={color} />
+				<path d={`M ${-hw * 0.95},${-hh * 0.58} Q 0,${-hh * 0.74} ${hw * 0.95},${-hh * 0.58} L ${hw * 0.9},${-hh * 0.76} Q 0,${-hh * 0.9} ${-hw * 0.9},${-hh * 0.76} Z`} fill="#000" opacity={0.18} />
+				{!back && <path d={starPath(tx, -hh * 0.86, hw * 0.13)} fill={band ?? '#d8261e'} />}
+			</g>
+		);
+	}
+	if (type === 'bowler') {
+		return (
+			<g>
+				<ellipse cx={0} cy={-hh * 0.62} rx={hw * 1.3} ry={hh * 0.13} fill={color} />
+				<path d={`M ${-hw * 0.92},${-hh * 0.64} C ${-hw * 1.0},${-hh * 1.62} ${hw * 1.0},${-hh * 1.62} ${hw * 0.92},${-hh * 0.64} Z`} fill={color} />
+				<path d={`M ${-hw * 0.93},${-hh * 0.72} Q 0,${-hh * 0.82} ${hw * 0.93},${-hh * 0.72} L ${hw * 0.93},${-hh * 0.84} Q 0,${-hh * 0.94} ${-hw * 0.93},${-hh * 0.84} Z`} fill={band ?? '#000'} opacity={band ? 1 : 0.35} />
+				<path d={`M ${-hw * 0.5},${-hh * 1.3} Q ${-hw * 0.2},${-hh * 1.42} ${hw * 0.1},${-hh * 1.38}`} stroke="#fff" strokeOpacity={0.18} strokeWidth={hw * 0.08} fill="none" strokeLinecap="round" />
+			</g>
+		);
+	}
+	// peak / kepi: a crown, a coloured band and (from the front) a black visor and a badge
+	const tall = type === 'kepi' ? 1.2 : 1;
+	return (
+		<g>
+			{type === 'peak' ? (
+				<path d={`M ${-hw * 1.02},${-hh * 0.56} L ${-hw * 1.2},${-hh * 1.02} Q 0,${-hh * 1.36} ${hw * 1.2},${-hh * 1.02} L ${hw * 1.02},${-hh * 0.56} Z`} fill={color} />
+			) : (
+				<path d={`M ${-hw * 0.98},${-hh * 0.5} L ${-hw * 0.9},${-hh * 1.18 * tall} Q 0,${-hh * 1.3 * tall} ${hw * 0.9},${-hh * 1.18 * tall} L ${hw * 0.98},${-hh * 0.5} Z`} fill={color} />
+			)}
+			<path d={`M ${-hw * 1.02},${-hh * 0.48} L ${hw * 1.02},${-hh * 0.48} L ${hw * 1.0},${-hh * 0.72} L ${-hw * 1.0},${-hh * 0.72} Z`} fill={band ?? '#b8202a'} />
+			{!back && (
+				<>
+					<path d={`M ${tx - hw * 0.95},${-hh * 0.5} Q ${tx},${-hh * 0.28} ${tx + hw * 0.95},${-hh * 0.5} Q ${tx},${-hh * 0.38} ${tx - hw * 0.95},${-hh * 0.5} Z`} fill="#15161a" />
+					<ellipse cx={tx} cy={-hh * 0.62} rx={hw * 0.13} ry={hh * 0.1} fill="#e8c24a" />
+				</>
+			)}
+		</g>
+	);
+};
+const starPath = (cx: number, cy: number, r: number) =>
+	Array.from({length: 10})
+		.map((_, k) => {
+			const a = -Math.PI / 2 + (k * Math.PI) / 5;
+			const rr = k % 2 === 0 ? r : r * 0.42;
+			return `${k === 0 ? 'M' : 'L'} ${cx + Math.cos(a) * rr},${cy + Math.sin(a) * rr}`;
+		})
+		.join(' ') + ' Z';
+
 // a knitted «петушок» hat (the 70s): a pointed dome with a white stripe, a ribbed cuff and a pompom (head coords)
 export const KnitHat: React.FC<{hw: number; hh: number; color: string}> = ({hw, hh, color}) => (
 	<g>
@@ -627,8 +724,9 @@ export const Person: React.FC<PersonProps> = (p) => {
 						) : (
 							<rect x={-sp.legW / 2} y={0} width={sp.legW} height={sp.leg - 20} fill={pants} />
 						)}
-						{p.kind === 'dad' && !sil && <rect x={-sp.legW / 2} y={sp.leg * 0.48} width={sp.legW} height={50} rx={10} fill="#3a3d42" />}
-						<rect x={-sp.legW / 2 - (p.back ? 4 : 10)} y={sp.leg - 34} width={sp.legW + 20} height={36} rx={14} fill={shoes} />
+						{p.kind === 'dad' && !sil && !p.boots && p.kneePatch !== false && <rect x={-sp.legW / 2} y={sp.leg * 0.48} width={sp.legW} height={50} rx={10} fill="#3a3d42" />}
+						{p.boots && p.kind !== 'mom' && <path d={`M ${-sp.legW / 2 - 4},${sp.leg * 0.5} L ${sp.legW / 2 + 4},${sp.leg * 0.5} L ${sp.legW / 2 + 1},${sp.leg - 20} L ${-sp.legW / 2 - 1},${sp.leg - 20} Z`} fill={sil ?? p.boots} />}
+						<rect x={-sp.legW / 2 - (p.back ? 4 : 10)} y={sp.leg - 34} width={sp.legW + 20} height={36} rx={14} fill={p.boots && p.kind !== 'mom' ? sil ?? p.boots : shoes} />
 					</g>
 				);
 			})}
@@ -641,7 +739,7 @@ export const Person: React.FC<PersonProps> = (p) => {
 	let torso: React.ReactNode;
 	if (p.kind === 'mom') {
 		// dress to below knees
-		const hem = hipY + sp.leg * 0.55;
+		const hem = hipY + sp.leg * (p.hem ?? 0.55);
 		torso = (
 			<g>
 				<path d={`M ${-sw},${shY + 18} Q ${-sw},${shY} ${-sw + 20},${shY} L ${sw - 20},${shY} Q ${sw},${shY} ${sw},${shY + 18} L ${sw + 30},${hem} L ${-sw - 30},${hem} Z`} fill={top} />
@@ -743,10 +841,16 @@ export const Person: React.FC<PersonProps> = (p) => {
 	const head = (
 		<g transform={`translate(0,${headCY}) rotate(${p.headTilt ?? 0})`}>
 			<Head kind={p.kind} face={p.face} back={p.back} turn={p.headTurn} silhouette={sil} uid={p.id} colors={p.colors} />
+			{!p.back && !sil && (p.beard || p.moustache) && <Whiskers hw={sp.hw} hh={sp.hh} color={(p.beard ?? p.moustache) as string} full={!!p.beard} turn={p.headTurn ?? 0} />}
 			{p.cap && <Cap hw={sp.hw} hh={sp.hh} color={sil ?? p.cap} back={p.back} turn={p.headTurn ?? 0} />}
 			{p.knit && <KnitHat hw={sp.hw} hh={sp.hh} color={sil ?? p.knit} />}
+			{p.hat && <PeriodHat hw={sp.hw} hh={sp.hh} type={p.hat.type} color={sil ?? p.hat.color} band={sil ?? p.hat.band} back={p.back} turn={p.headTurn ?? 0} />}
 		</g>
 	);
+	const apron =
+		p.apron && !p.back ? (
+			<path d={`M ${-sw * 0.62},${shY + 70} Q 0,${shY + 50} ${sw * 0.62},${shY + 70} L ${hwid + 4},${hipY + sp.leg * 0.5} L ${-hwid - 4},${hipY + sp.leg * 0.5} Z`} fill={sil ?? p.apron} />
+		) : null;
 
 	const pioneerTie =
 		p.pioneer && !sil && !p.back ? (
@@ -770,6 +874,7 @@ export const Person: React.FC<PersonProps> = (p) => {
 			{backpackStraps}
 			{p.kind === 'girl' && !sil && !p.plain && <GirlNeck y0={shY} front={!p.back} />}
 			{pioneerTie}
+			{apron}
 			{head}
 			{p.armsBehind ? null : arms}
 		</g>

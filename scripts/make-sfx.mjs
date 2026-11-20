@@ -915,3 +915,284 @@ write('lift_ding', room(add(ping([1318.5, 2637], 1.2, 0.35), ping([1046.5, 2093]
 	}
 	write('laugh', room(bandpass(x, 200, 4500), 0.4, 1.6), 0.5);
 }
+
+// ---------- «Что будет, если ты попадёшь в XX век» ----------
+const hz = (m) => 440 * Math.pow(2, (m - 69) / 12);
+// horse hooves on cobblestones: a trot (two clops close together, twice a second) over a soft cart rumble; loops at 4 s
+{
+	const dur = 4;
+	const x = buf(dur);
+	for (let k = 0; k < 8; k++) {
+		for (const off of [0, 0.11]) {
+			const c = buf(0.09);
+			for (let i = 0; i < c.length; i++) c[i] = noise() * Math.exp(-i / SR / 0.012);
+			add(x, reso(c, 1300 + rnd() * 500, 5), k * 0.5 + off + rnd() * 0.02, 0.9 - off * 2);
+			add(x, thump(150, 0.12, 0.02, 0.2), k * 0.5 + off, 0.5);
+		}
+	}
+	const r = buf(dur);
+	for (let i = 0; i < r.length; i++) r[i] = noise() * (0.6 + 0.4 * Math.sin((2 * Math.PI * 7 * i) / SR));
+	add(x, lowpass(lowpass(r, 260), 260), 0, 0.5);
+	write('hooves', room(x, 0.2, 1.2), 0.7);
+}
+// a street crowd murmuring (many voices, no words); loops at 6 s
+{
+	const dur = 6;
+	const x = buf(dur);
+	for (let v = 0; v < 26; v++) {
+		const f0 = 110 + rnd() * 140;
+		let t = rnd() * 0.5;
+		while (t < dur - 0.3) {
+			const len = 0.18 + rnd() * 0.5;
+			const y = buf(len);
+			let ph = 0;
+			const fa = 500 + rnd() * 500;
+			const fb = 1000 + rnd() * 900;
+			for (let i = 0; i < y.length; i++) {
+				const tt = i / SR;
+				ph += (f0 * (1 + 0.08 * Math.sin(tt * 9 + v))) / SR;
+				y[i] = ((2 * (ph % 1) - 1) * 0.6 + noise() * 0.3) * Math.sin(Math.PI * Math.min(1, tt / len));
+			}
+			add(x, reso(reso(y, fa, 4), fb, 3), t, 0.3 + 0.4 * rnd());
+			t += len + 0.05 + rnd() * 0.4;
+		}
+	}
+	write('crowd', room(lowpass(bandpass(x, 150, 3000), 2200), 0.35, 1.6), 0.5);
+}
+// the tram bell: two strikes of a small bell (inharmonic partials)
+{
+	const x = buf(1.6);
+	const bell = () => {
+		const y = buf(1.2);
+		for (let i = 0; i < y.length; i++) {
+			const t = i / SR;
+			y[i] = [1, 2.76, 5.4, 8.9].reduce((a, r, k) => a + Math.sin(2 * Math.PI * 1480 * r * t) * Math.exp(-t / (0.5 / (1 + k))) / (1 + k), 0) * Math.min(1, t / 0.001);
+		}
+		return y;
+	};
+	add(x, bell(), 0, 1);
+	add(x, bell(), 0.22, 0.8);
+	write('tram_bell', room(x, 0.25, 1.2), 0.6);
+}
+// the cinema piano player: a little ragtime (original, procedural): oom-pah bass + chords + a melody; loops at 8 s
+{
+	const bpm = 120;
+	const q = 60 / bpm;
+	const dur = 16 * q;
+	const x = buf(dur + 0.6);
+	const key = (m, len, vol) => {
+		const y = buf(len);
+		const f = hz(m);
+		for (let i = 0; i < y.length; i++) {
+			const t = i / SR;
+			let v = 0;
+			for (let h = 1; h <= 6; h++) v += Math.sin(2 * Math.PI * f * h * t * (1 + 0.0015 * (h % 2 ? 1 : -1))) * Math.exp(-t * (1.5 + h * 1.2)) / h;
+			v += 0.5 * Math.sin(2 * Math.PI * f * 1.004 * t) * Math.exp(-t * 2);
+			y[i] = v * vol * Math.min(1, t / 0.003);
+		}
+		return y;
+	};
+	const bars = [
+		[48, [52, 55, 60]],
+		[43, [52, 55, 60]],
+		[53, [57, 60, 65]],
+		[48, [52, 55, 60]],
+		[50, [53, 57, 62]],
+		[43, [53, 55, 59]],
+		[48, [52, 55, 60]],
+		[43, [50, 55, 59]],
+	];
+	bars.forEach(([b, ch], k) => {
+		const t0 = k * 2 * q;
+		add(x, key(b, q, 0.5), t0);
+		ch.forEach((m) => add(x, key(m, q * 0.8, 0.22), t0 + q));
+		add(x, key(b - 5, q, 0.45), t0 + q * 1.0 - q + q);
+	});
+	const mel = [72, 0, 76, 79, 81, 79, 76, 72, 74, 0, 77, 81, 79, 77, 74, 71, 72, 76, 79, 84, 83, 81, 79, 77, 76, 74, 72, 71, 72, 0, 0, 0];
+	mel.forEach((m, k) => m && add(x, key(m, q * 0.6, 0.32), k * (q / 2)));
+	write('piano', room(lowpass(x, 5000), 0.3, 1.5), 0.55);
+}
+// a loudspeaker on the wall: a muffled voice (no words) through hiss and crackle; loops at 4 s
+{
+	const dur = 4;
+	const x = buf(dur);
+	let t = 0.1;
+	while (t < dur - 0.3) {
+		const len = 0.12 + rnd() * 0.22;
+		const y = buf(len);
+		let ph = 0;
+		const f0 = 120 + rnd() * 40;
+		for (let i = 0; i < y.length; i++) {
+			const tt = i / SR;
+			ph += (f0 * (1 + 0.1 * Math.sin(tt * 14))) / SR;
+			y[i] = (2 * (ph % 1) - 1) * Math.sin(Math.PI * Math.min(1, tt / len));
+		}
+		add(x, reso(reso(y, 700 + rnd() * 300, 5), 1300 + rnd() * 400, 4), t, 0.8);
+		t += len + 0.03 + (rnd() < 0.15 ? 0.3 : 0.05);
+	}
+	for (let i = 0; i < x.length; i++) x[i] += noise() * 0.06;
+	for (let k = 0; k < 30; k++) add(x, click(0.004, 2500, 2), rnd() * dur, 0.3 * rnd());
+	write('radio', bandpass(x, 350, 2800), 0.5);
+}
+// fireworks: launches whistling up, bursts and crackle
+{
+	const dur = 4.5;
+	const x = buf(dur);
+	for (let k = 0; k < 5; k++) {
+		const t0 = k * 0.8 + rnd() * 0.2;
+		const w = buf(0.6);
+		let ph = 0;
+		for (let i = 0; i < w.length; i++) {
+			const tt = i / SR;
+			ph += (2 * Math.PI * (900 + 1600 * tt)) / SR;
+			w[i] = Math.sin(ph) * 0.25 * Math.min(1, tt / 0.05) * (1 - tt / 0.6);
+		}
+		add(x, w, t0, 0.6);
+		add(x, thump(60, 0.6, 0.12, 0.8), t0 + 0.6, 1);
+		for (let j = 0; j < 30; j++) add(x, click(0.006, 2000 + rnd() * 4000, 2), t0 + 0.7 + rnd() * 0.9, 0.25 * rnd());
+	}
+	write('fireworks', room(x, 0.4, 2.2), 0.8);
+}
+// an old motor car: a slow putt-putt engine; and its rubber bulb horn
+{
+	const dur = 3;
+	const x = buf(dur);
+	for (let k = 0; k < dur * 11; k++) add(x, thump(70, 0.12, 0.03, 0.5), k / 11 + rnd() * 0.01, 0.7 + 0.3 * rnd());
+	const n = buf(dur);
+	for (let i = 0; i < n.length; i++) n[i] = noise() * 0.15;
+	add(x, bandpass(n, 300, 1500), 0, 1);
+	write('engine', room(lowpass(x, 1800), 0.2, 1.2), 0.6);
+	const h = buf(0.7);
+	let ph = 0;
+	for (let i = 0; i < h.length; i++) {
+		const t = i / SR;
+		const f = t < 0.3 ? 420 + 60 * Math.sin(t * 30) : 380;
+		ph += f / SR;
+		h[i] = (2 * (ph % 1) - 1) * Math.min(1, t / 0.02) * Math.min(1, (0.7 - t) / 0.1) * (t > 0.32 && t < 0.38 ? 0.2 : 1);
+	}
+	write('horn', room(reso(h, 900, 2), 0.25, 1.2), 0.5);
+}
+// a biplane passing: a propeller drone with a little doppler
+{
+	const dur = 4;
+	const x = buf(dur);
+	let ph = 0;
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		const f = 95 * (1 + 0.08 * Math.cos((Math.PI * t) / dur));
+		ph += f / SR;
+		const e = Math.sin((Math.PI * t) / dur);
+		x[i] = ((2 * (ph % 1) - 1) * (0.6 + 0.4 * Math.sin(2 * Math.PI * 26 * t)) + noise() * 0.2) * e;
+	}
+	write('plane', room(lowpass(x, 1400), 0.2, 1.4), 0.5);
+}
+// a camera shutter (with the flash)
+{
+	const x = buf(0.5);
+	add(x, click(0.02, 3500, 3), 0, 1);
+	add(x, click(0.02, 2500, 3), 0.06, 0.8);
+	const w = buf(0.4);
+	for (let i = 0; i < w.length; i++) w[i] = Math.sin((2 * Math.PI * (3000 + 4000 * (i / w.length)) * i) / SR) * 0.1 * (1 - i / w.length);
+	add(x, w, 0.08, 0.6);
+	write('shutter', room(x, 0.15, 0.8), 0.7);
+}
+// abacus beads clicking fast
+{
+	const x = buf(2.2);
+	let t = 0.02;
+	while (t < 2.1) {
+		add(x, reso(click(0.03, 1800, 2), 2200 + rnd() * 800, 8), t, 0.5 + 0.5 * rnd());
+		t += 0.05 + rnd() * 0.08;
+	}
+	write('abacus', room(x, 0.2, 0.9), 0.6);
+}
+// a coin dropping into the payphone
+{
+	const x = buf(1.2);
+	add(x, ping([2400, 3900, 6100], 0.6, 0.18, 0.8), 0, 1);
+	for (let k = 0; k < 5; k++) add(x, ping([1800 + rnd() * 600, 3000], 0.2, 0.05, 0.4), 0.18 + k * 0.07 + rnd() * 0.02, 0.6 - k * 0.1);
+	add(x, thump(200, 0.1, 0.02, 0.4), 0.6, 0.4);
+	write('coin', room(x, 0.3, 1.0), 0.6);
+}
+// a tape recorder running: motor hum and tape hiss; loops at 2 s
+{
+	const dur = 2;
+	const x = buf(dur);
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		x[i] = 0.25 * Math.sin(2 * Math.PI * 50 * t) + 0.1 * Math.sin(2 * Math.PI * 100 * t) + noise() * 0.12;
+	}
+	write('tape', bandpass(x, 40, 9000), 0.35);
+}
+// winding a cassette with a pencil: soft plastic ratchet clicks
+{
+	const x = buf(1.6);
+	for (let k = 0; k < 24; k++) add(x, reso(click(0.015, 2500, 3), 3200, 6), k * 0.065, 0.5 + 0.2 * rnd());
+	write('wind', room(x, 0.15, 0.7), 0.5);
+}
+// a crowd cheering: hundreds of «a-a-a» voices swelling, with applause
+{
+	const dur = 4;
+	const x = buf(dur);
+	for (let v = 0; v < 40; v++) {
+		const f0 = 160 + rnd() * 240;
+		const y = buf(dur);
+		let ph = 0;
+		const s0 = rnd() * 0.6;
+		for (let i = 0; i < y.length; i++) {
+			const t = i / SR;
+			ph += (f0 * (1 + 0.06 * Math.sin(t * 5 + v) + 0.04 * t)) / SR;
+			const e = Math.min(1, Math.max(0, (t - s0) / 0.4)) * Math.min(1, (dur - t) / 1.2);
+			y[i] = ((2 * (ph % 1) - 1) * 0.6 + noise() * 0.4) * e;
+		}
+		add(x, reso(reso(y, 700 + rnd() * 200, 3), 1100 + rnd() * 300, 3), 0, 0.15);
+	}
+	write('cheer', room(bandpass(x, 200, 5000), 0.45, 2.0), 0.6);
+}
+// the time warp: a riser (noise sweeping up + a rising tone) that ends in a soft burst
+{
+	const dur = 1.8;
+	const x = buf(dur);
+	let ph = 0;
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		const u = t / dur;
+		ph += (2 * Math.PI * (200 + 1600 * u * u)) / SR;
+		x[i] = (Math.sin(ph) * 0.4 + noise() * 0.5 * u) * u * u;
+	}
+	const y = buf(dur);
+	let lp = 0;
+	for (let i = 0; i < y.length; i++) {
+		const u = i / y.length;
+		const a = Math.exp((-2 * Math.PI * (300 + 6000 * u)) / SR);
+		lp = (1 - a) * x[i] + a * lp;
+		y[i] = lp;
+	}
+	write('warp', room(y, 0.3, 1.6), 0.6);
+}
+// winter wind; loops at 6 s
+{
+	const dur = 6;
+	const x = buf(dur);
+	for (let i = 0; i < x.length; i++) x[i] = noise();
+	const y = reso(x, 500, 1.5);
+	for (let i = 0; i < y.length; i++) {
+		const t = i / SR;
+		y[i] *= 0.5 + 0.5 * Math.sin((2 * Math.PI * t) / dur) ** 2 + 0.2 * Math.sin(2 * Math.PI * 0.7 * t);
+	}
+	write('wind_cold', lowpass(y, 1200), 0.4);
+}
+// the phone's low-battery warning: two short falling tones
+{
+	const x = buf(0.6);
+	add(x, ping([1200, 2400], 0.18, 0.08, 0.6), 0, 1);
+	add(x, ping([900, 1800], 0.25, 0.1, 0.6), 0.2, 1);
+	write('lowbat', x, 0.5);
+}
+// hammers on a building site, far away; loops at 4 s
+{
+	const dur = 4;
+	const x = buf(dur);
+	for (let k = 0; k < 14; k++) add(x, ping([1900 + rnd() * 400, 3200], 0.2, 0.04, 0.6), rnd() * (dur - 0.2), 0.3 + 0.4 * rnd());
+	write('hammers', room(lowpass(x, 3000), 0.5, 2.2), 0.4);
+}

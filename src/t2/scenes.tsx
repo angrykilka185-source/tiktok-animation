@@ -1,5 +1,6 @@
 // «ТГК открыт» — 700 subscribers: the promise from the poll «Открывать ТГК?» (src/t1) is kept, the Telegram channel is
-// open. 6 shots on the timeline of src/t2/timeline.ts (= the voice). The heroes of the series stand in the «3D camera»
+// open. 6 shots on the timeline of src/t2/timeline.ts (= the voice). Three heroes («Голосовые из завтра», «Вахта», «Ты с
+// какого района?») stand in the «3D camera»
 // of «Ты с какого района?» (src/components/Layers3D.tsx).
 import React from 'react';
 import {AbsoluteFill, Easing, Freeze, interpolate, useCurrentFrame} from 'remotion';
@@ -77,10 +78,9 @@ const Room: React.FC = () => (
 type Hero = {key: string; x: number; z: number; s: number; tag: string; sub?: string; color: string; draw: (f: number, face: Face, hop: number) => React.ReactNode};
 const FEET = 1720;
 const HEROES: Hero[] = [
-	{key: 'teen', x: 400, z: -720, s: 0.78, tag: 'ГОЛОСОВЫЕ', sub: 'ИЗ ЗАВТРА', color: '#cf4a3c', draw: (f, face, hop) => <Person kind="teen" id="t2teen" x={400} y={FEET - hop} scale={0.78} breathe={f} face={face} armL={{target: [-130, -980], bend: 1}} />},
-	{key: 'son', x: 690, z: -720, s: 0.78, tag: 'ВАХТА', color: '#f0a032', draw: (f, face, hop) => <Person kind="son" id="t2son" x={690} y={FEET - hop} scale={0.78} breathe={f + 9} face={face} armR={{target: [140, -900], bend: -1}} />},
-	{key: 'girl', x: 175, z: -420, s: 0.84, tag: 'КНОПКА 13', color: '#1a827c', draw: (f, face, hop) => <Person kind="girl" id="t2girl" x={175} y={FEET + 60 - hop} scale={0.84} breathe={f + 4} face={face} armR={{target: [150, -880], bend: -1}} />},
-	{key: 'boy', x: 915, z: -420, s: 0.84, tag: 'ТЫ С КАКОГО', sub: 'РАЙОНА?', color: '#e0342b', draw: (f, face, hop) => <Person kind="boy" id="t2boy" x={915} y={FEET + 60 - hop} scale={0.84} plain pioneer colors={IGOR} breathe={f + 13} face={face} armL={{target: [-150, -820], bend: 1}} />},
+	{key: 'teen', x: 250, z: -480, s: 0.84, tag: 'ГОЛОСОВЫЕ', sub: 'ИЗ ЗАВТРА', color: '#cf4a3c', draw: (f, face, hop) => <Person kind="teen" id="t2teen" x={250} y={FEET + 30 - hop} scale={0.84} breathe={f} face={face} armL={{target: [-130, -980], bend: 1}} />},
+	{key: 'son', x: 540, z: -720, s: 0.8, tag: 'ВАХТА', color: '#f0a032', draw: (f, face, hop) => <Person kind="son" id="t2son" x={540} y={FEET - hop} scale={0.8} breathe={f + 9} face={face} armR={{target: [140, -900], bend: -1}} />},
+	{key: 'boy', x: 830, z: -480, s: 0.88, tag: 'ТЫ С КАКОГО', sub: 'РАЙОНА?', color: '#e0342b', draw: (f, face, hop) => <Person kind="boy" id="t2boy" x={830} y={FEET + 30 - hop} scale={0.88} plain pioneer colors={IGOR} breathe={f + 13} face={face} armL={{target: [-150, -820], bend: 1}} />},
 ];
 const JOY: Face = {eyes: 'happy', mouth: 'open', brows: 'raised', look: [0, 0], blush: true};
 const WAIT: Face = {eyes: 'open', mouth: 'smile', brows: 'raised', look: [0, 0.1], blush: false};
@@ -102,14 +102,14 @@ const HeroesShot: React.FC<{f: number; cam: Cam3; face: Face; jump: number; tags
 			{HEROES.map((h, i) => {
 				const hop = jump > 0 ? Math.abs(Math.sin(f / 4 + i * 0.9)) * 90 * jump : 0;
 				return (
-					<Lay key={h.key} z={h.z} box={personBox(h.x, FEET + 60, h.s, 620)}>
+					<Lay key={h.key} z={h.z} box={personBox(h.x, FEET + 30, h.s, 620)}>
 						{h.draw(f, face, hop)}
 					</Lay>
 				);
 			})}
 		</Set3D>
 		{HEROES.map((h, i) => {
-			const top = scr(cam, h.x, FEET + (h.z > -500 ? 60 : 0) - 1030 * h.s, h.z);
+			const top = scr(cam, h.x, FEET + (h.z > -500 ? 30 : 0) - 1030 * h.s, h.z);
 			return <Tag key={h.key} x={top.x} y={top.y - 20} text={h.tag} sub={h.sub} color={h.color} p={tags * pop(f, 6 + i * 6, 11)} />;
 		})}
 	</AbsoluteFill>

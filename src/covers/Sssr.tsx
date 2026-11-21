@@ -1,11 +1,11 @@
 // Cover (YouTube thumbnail, 1280×720, white background) for «Что будет, если ты попадёшь в СССР»:
 // the title on the left («В СССР» big and red), on the right — you in the Soviet school uniform with the pioneer tie,
-// shocked, showing the viewer your phone: «НЕТ СЕТИ» (it is 1981). A 2-kopeck coin and the pioneer badge as stickers.
+// shocked, the phone up beside the head: «НЕТ СЕТИ» (it is 1981). A 2-kopeck coin and the pioneer badge as stickers.
 // Render: npx remotion still CoverSssr out/cover/sssr.png --scale=1.5  (→ 1920×1080)
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
 import {HEAVY} from '../components/Overlays';
-import {SPECS} from '../components/Person';
+import {SPECS, type ArmPose} from '../components/Person';
 import {You} from '../u1/kit';
 import {Kopeck2, PioneerBadge} from '../u1/town';
 import {starD} from '../w1/old';
@@ -15,17 +15,28 @@ const RED_D = '#8f1416';
 const INK = '#16161c';
 
 // the hero: feet at (HX, HY), scale HS (the head top lands at y ≈ 95)
-const HX = 1000;
+const HX = 990;
 const HY = 1182;
 const HS = 1.15;
 const toLocal = (sx: number, sy: number): [number, number] => [(sx - HX) / HS, (sy - HY) / HS];
 
-// the phone in screen space: centre, tilt; GRIP = where your hand holds it (phone-local)
-const PH = {x: 808, y: 292, rot: -8};
-const GRIP: [number, number] = [-60, 98];
-const gripScreen = (): [number, number] => {
+// an arm of the hero (screen coords): bends at `elbow`, the hand ends at `hand` (the upper arm and the forearm are
+// foreshortened to fit, ku / kf), so the elbow stays close to the body
+const armTo = (side: -1 | 1, elbow: [number, number], hand: [number, number]): ArmPose => {
+	const sp = SPECS.teen;
+	const sx = HX + side * (sp.shoulderW / 2 - sp.armW / 2 + 4) * HS;
+	const sy = HY + (-sp.leg - sp.torso + sp.armW / 2) * HS;
+	const l1 = Math.hypot(elbow[0] - sx, elbow[1] - sy) / HS;
+	const l2 = Math.hypot(hand[0] - elbow[0], hand[1] - elbow[1]) / HS;
+	const cross = (hand[0] - sx) * (elbow[1] - sy) - (hand[1] - sy) * (elbow[0] - sx);
+	return {target: toLocal(hand[0], hand[1]), bend: cross > 0 ? 1 : -1, ku: l1 / sp.upper, kf: (l2 - sp.armW * 0.56 * 0.8) / sp.fore};
+};
+
+// the phone in screen space (beside your head, on the right): centre and tilt; phone-local → screen
+const PH = {x: 1170, y: 268, rot: 7};
+const phonePt = (lx: number, ly: number): [number, number] => {
 	const a = (PH.rot * Math.PI) / 180;
-	return [PH.x + GRIP[0] * Math.cos(a) - GRIP[1] * Math.sin(a), PH.y + GRIP[0] * Math.sin(a) + GRIP[1] * Math.cos(a)];
+	return [PH.x + lx * Math.cos(a) - ly * Math.sin(a), PH.y + lx * Math.sin(a) + ly * Math.cos(a)];
 };
 
 const NoSignalPhone: React.FC = () => (
@@ -39,25 +50,23 @@ const NoSignalPhone: React.FC = () => (
 		<rect x={14} y={-99} width={26} height={12} rx={3} fill="none" stroke={INK} strokeWidth={2} />
 		<rect x={40} y={-96} width={3} height={6} rx={1} fill={INK} />
 		<rect x={16} y={-97} width={22} height={8} rx={1.5} fill="#3fbf5a" />
-		{/* the big crossed-out antenna */}
-		<g transform="translate(0,-42)">
+		{/* the big crossed-out antenna, then «НЕТ СЕТИ» — all in the upper part of the screen (the hand holds the bottom) */}
+		<g transform="translate(0,-50)">
 			{[0, 1, 2, 3].map((k) => (
 				<rect key={k} x={-30 + k * 16} y={14 - k * 12} width={11} height={16 + k * 12} rx={2} fill="#9aa1ae" />
 			))}
 			<line x1={-36} y1={-30} x2={36} y2={34} stroke={RED} strokeWidth={9} strokeLinecap="round" />
 		</g>
-		<text x={0} y={30} textAnchor="middle" fontFamily={HEAVY} fontWeight={900} fontSize={29} fill={INK}>
+		<text x={0} y={14} textAnchor="middle" fontFamily={HEAVY} fontWeight={900} fontSize={30} fill={INK}>
 			НЕТ
 		</text>
-		<text x={0} y={62} textAnchor="middle" fontFamily={HEAVY} fontWeight={900} fontSize={29} fill={INK}>
+		<text x={0} y={47} textAnchor="middle" fontFamily={HEAVY} fontWeight={900} fontSize={30} fill={INK}>
 			СЕТИ
 		</text>
 	</g>
 );
 
 export const CoverSssr: React.FC = () => {
-	const [gx, gy] = gripScreen();
-	const r = SPECS.teen.armW * 0.56 * HS; // the hand oval, as Person draws it
 	return (
 		<AbsoluteFill style={{background: '#ffffff', overflow: 'hidden'}}>
 			<svg width={1280} height={720} viewBox="0 0 1280 720" style={{position: 'absolute', inset: 0}}>
@@ -100,40 +109,38 @@ export const CoverSssr: React.FC = () => {
 					})}
 					<path d={starD(HX, 300, 330)} fill={RED} opacity={0.06} />
 				</g>
-				{/* you: the school uniform and the pioneer tie; shocked, showing the phone */}
+				{/* you: the school uniform and the pioneer tie; shocked; the phone up beside your head, the elbow at your side */}
 				<g filter="url(#cv-stk)">
+					<NoSignalPhone />
 					<You
 						id="cvyou"
 						x={HX}
 						y={HY}
 						scale={HS}
 						face={{eyes: 'wide', pupil: 0.5, brows: 'raised', mouth: 'o', blush: true, look: [-0.15, 0.05]}}
-						armL={{target: toLocal(gx, gy), bend: -1}}
+						armR={armTo(1, [1152, 572], phonePt(-4, 100))}
 					/>
-					<NoSignalPhone />
-					{/* your fingers over the edge of the phone */}
-					<ellipse cx={gx} cy={gy} rx={r * 0.98} ry={r * 1.1} fill={SPECS.teen.skin} transform={`rotate(${PH.rot} ${gx} ${gy})`} />
 				</g>
 				{/* the stickers: the 2-kopeck coin (the soda water, the payphone) and the pioneer badge */}
 				<g filter="url(#cv-stk)">
-					<g transform="translate(1196,548) rotate(-12) scale(0.55)">
+					<g transform="translate(640,652) rotate(-14) scale(0.5)">
 						<Kopeck2 />
 					</g>
 				</g>
 				<g filter="url(#cv-stk)">
-					<g transform="translate(1196,150) rotate(12) scale(0.36)">
+					<g transform="translate(772,612) rotate(-10) scale(0.34)">
 						<PioneerBadge />
 					</g>
 				</g>
 			</svg>
-			{/* the title */}
-			<div style={{position: 'absolute', left: 46, top: 0, bottom: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', fontFamily: HEAVY, fontWeight: 900, color: INK, lineHeight: 1.04, whiteSpace: 'nowrap'}}>
-				<div style={{fontSize: 52}}>ЧТО БУДЕТ,</div>
-				<div style={{fontSize: 52}}>ЕСЛИ ТЫ ПОПАДЁШЬ</div>
-				<div style={{fontSize: 166, color: RED, marginTop: 10, marginLeft: -6, letterSpacing: -2, lineHeight: 0.95, textShadow: `0 8px 0 ${RED_D}`}}>В СССР</div>
-				<div style={{display: 'flex', gap: 14, marginTop: 30}}>
+			{/* the title — at the top */}
+			<div style={{position: 'absolute', left: 46, top: 34, fontFamily: HEAVY, fontWeight: 900, color: INK, lineHeight: 1.14, whiteSpace: 'nowrap'}}>
+				<div style={{fontSize: 70}}>ЧТО БУДЕТ, ЕСЛИ</div>
+				<div style={{fontSize: 70}}>ТЫ ПОПАДЁШЬ</div>
+				<div style={{fontSize: 205, color: RED, marginTop: 6, marginLeft: -8, letterSpacing: -3, lineHeight: 0.95, textShadow: `0 9px 0 ${RED_D}`}}>В СССР</div>
+				<div style={{display: 'flex', gap: 16, marginTop: 34}}>
 					{['1981', '1 ДЕНЬ', '1 ЗАРЯД'].map((t, k) => (
-						<div key={t} style={{background: k === 0 ? RED : INK, color: '#fff', fontSize: 36, padding: '8px 20px 10px', borderRadius: 14}}>
+						<div key={t} style={{background: k === 0 ? RED : INK, color: '#fff', fontSize: 42, padding: '9px 24px 11px', borderRadius: 16}}>
 							{t}
 						</div>
 					))}

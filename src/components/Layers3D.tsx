@@ -3,17 +3,18 @@
 // A layer is drawn in the flat 1080×1920 picture coordinates (like a 2D Stage at rest) and placed so that the resting
 // camera sees it exactly where the flat picture had it; any camera move then gives parallax.
 import React from 'react';
-import {AbsoluteFill} from 'remotion';
+import {AbsoluteFill, useVideoConfig} from 'remotion';
 import {Cam3, Card3D, PERSP, Scene3D} from './Scene3D';
 
 export type Box = [number, number, number, number];
 export const kz = (z: number) => PERSP / (PERSP - z);
 
 export const Lay: React.FC<{z: number; box: Box; res?: number; blur?: number; children: React.ReactNode}> = ({z, box, res, blur, children}) => {
+	const {width, height} = useVideoConfig();
 	const k = kz(z);
 	const [bx, by, bw, bh] = box;
 	return (
-		<Card3D x={(bx + bw / 2 - 540) / k} y={(by + bh / 2 - 960) / k} z={z} w={bw / k} h={bh / k} anchor="center" view={box} res={res ?? Math.max(1, Math.round(1 / k))} blur={blur}>
+		<Card3D x={(bx + bw / 2 - width / 2) / k} y={(by + bh / 2 - height / 2) / k} z={z} w={bw / k} h={bh / k} anchor="center" view={box} res={res ?? Math.max(1, Math.round(1 / k))} blur={blur}>
 			{children}
 		</Card3D>
 	);

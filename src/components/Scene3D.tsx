@@ -11,11 +11,11 @@ import {AbsoluteFill} from 'remotion';
 export type Cam3 = {x: number; y: number; z: number; ry?: number; rx?: number; focus?: number; dof?: number};
 export const PERSP = 1300;
 
-// where a world point lands on the screen (ignoring the small camera turns)
-export const project = (cam: Cam3, x: number, y: number, z: number) => {
+// where a world point lands on the screen (ignoring the small camera turns); (cx, cy) = the frame centre
+export const project = (cam: Cam3, x: number, y: number, z: number, cx = 540, cy = 960) => {
 	const zz = z + cam.z;
 	const k = PERSP / Math.max(1, PERSP - zz);
-	return {x: 540 + (x - cam.x) * k, y: 960 + (y - cam.y) * k, k};
+	return {x: cx + (x - cam.x) * k, y: cy + (y - cam.y) * k, k};
 };
 
 // how blurred a layer at depth z is: 0 at the focus depth, more the farther it is from it
@@ -26,13 +26,14 @@ export const blurAt = (cam: Cam3, z: number) => {
 
 const CamCtx = React.createContext<Cam3>({x: 0, y: 0, z: 0});
 
+// the world is centred on the frame (540, 960 in the vertical films; 960, 540 in 16:9)
 const World: React.FC<{cam: Cam3; children: React.ReactNode}> = ({cam, children}) => (
-	<AbsoluteFill style={{perspective: `${PERSP}px`, perspectiveOrigin: '540px 960px'}}>
+	<AbsoluteFill style={{perspective: `${PERSP}px`, perspectiveOrigin: '50% 50%'}}>
 		<div
 			style={{
 				position: 'absolute',
-				left: 540,
-				top: 960,
+				left: '50%',
+				top: '50%',
 				width: 0,
 				height: 0,
 				transformStyle: 'preserve-3d',

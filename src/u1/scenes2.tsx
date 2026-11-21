@@ -40,6 +40,8 @@ const GastronomW: React.FC<{dusk?: number}> = ({dusk = 0}) => (
 	</g>
 );
 const kids = (k: number) => (['k', 'k', 'f', 'k', 'm'] as const)[k % 5];
+// kids' hair (varied: dark, brown, fair)
+const KH = ['#5a3a28', '#2a2220', '#7a4a2c', '#d6a24a', '#3a2a20', '#8a5a32'];
 
 // ===================================================== the queue ===========
 // 41. A queue outside the «Гастроном». «What are they giving?» — «They've thrown out sausage!» (очередь, выбросили)
@@ -130,7 +132,7 @@ export const S43: React.FC = () => {
 					))}
 				</Lay>
 			</Shot>
-			<Fact f={f} at={w(43, 'моют', -2)} text="ПАКЕТ — ВЕЩЬ МНОГОРАЗОВАЯ" y={900} />
+			<Fact x={960} f={f} at={w(43, 'моют', -2)} text="ПАКЕТ — ВЕЩЬ МНОГОРАЗОВАЯ" y={170} />
 		</AbsoluteFill>
 	);
 };
@@ -158,7 +160,7 @@ export const S44: React.FC = () => {
 					))}
 				</Lay>
 				<At z={-280} x={520} y={1160} s={0.86}>
-					<Person kind="boy" id="u1bottles" colors={{top: '#c8402a', topDark: '#a83a2a', pants: '#2c3a66'}} x={520} y={1160} scale={0.86} breathe={f} headTurn={0.4} face={LAUGH} armR={{target: [220, -560], bend: -1}} itemR={<g><rect x={-14} y={-130} width={28} height={130} rx={8} fill="#e8f0f4" /><rect x={-10} y={-166} width={20} height={36} fill="#e8f0f4" /></g>} />
+					<Person kind="boy" id="u1bottles" colors={{top: '#c8402a', topDark: '#a83a2a', pants: '#2c3a66', hair: '#d6a24a'}} x={520} y={1160} scale={0.86} breathe={f} headTurn={0.4} face={LAUGH} armR={{target: [220, -560], bend: -1}} itemR={<g><rect x={-14} y={-130} width={28} height={130} rx={8} fill="#e8f0f4" /><rect x={-10} y={-166} width={20} height={36} fill="#e8f0f4" /></g>} />
 				</At>
 			</Shot>
 			<Price f={f} at={w(44, 'пятнадцать', -2)} x={1460} y={260} what="БУТЫЛКА" price="15 коп." />
@@ -178,10 +180,10 @@ export const S45: React.FC = () => {
 					<Person kind="mom" id="u1aunt" plain hem={0.6} colors={{top: '#5a4a6a', topDark: '#5a4a6a', hair: '#7a6a5a'}} hat={{type: 'scarf', color: '#b8402e'}} x={1320} y={1100} scale={0.9} breathe={f} headTurn={-0.6 * turn} face={{eyes: 'narrow', brows: 'angry', mouth: turn > 0.5 ? 'tight' : 'flat', blush: false, look: [-0.9 * turn, 0]}} armL={turn > 0.5 ? {target: [-300, -700], bend: 1} : undefined} />
 				</At>
 				<At z={-260} x={520} y={1200} s={1.0}>
-					<You id="u1s45" x={520} y={1200} scale={1.0} breathe={f} headTurn={0.4} face={{...(turn > 0.5 ? {eyes: 'wide', brows: 'worried', mouth: 'o'} : SMILE), look: [0.7, -0.1], blush: false} as Face} armR={{target: [280, -940], bend: -1}} itemR={<HandPhone s={1.2} />} />
+					<You id="u1s45" x={520} y={1200} scale={1.0} breathe={f} headTurn={0.4} face={{...(turn > 0.5 ? {eyes: 'wide', brows: 'worried', mouth: 'o'} : SMILE), look: [0.7, -0.1], blush: false} as Face} armR={{target: [280, -760], bend: -1}} itemR={<HandPhone s={1.2} />} />
 				</At>
 			</Shot>
-			<Bubble x={1240} y={300} text="Ты из какой газеты?" from={w(45, 'ты', -2)} to={len} tail="right" />
+			<Bubble x={1240} y={300} text="Ты из какой газеты?" from={w(45, 'спрашивает', 12)} to={len} tail="right" />
 		</AbsoluteFill>
 	);
 };
@@ -194,12 +196,12 @@ export const S46: React.FC = () => {
 	return (
 		<AbsoluteFill>
 			<Shot f={f} len={len} far={<Street81 f={f} />} bg="#8fb4d8" m={{x: [-40, 40], z: [120, 200]}} blur={7}>
-				<At z={-300} x={1100} y={1180} s={1.05}>
-					<P81 n={3} who="m" id="u1farc" x={1100} y={1180} scale={1.05} breathe={f} headTurn={-0.5} face={{eyes: Math.floor(f / 20) % 3 === 2 ? 'closed' : 'narrow', brows: 'raised', mouth: 'smile', blush: false, look: [-0.8, 0]}} armL={{target: [-330 - 120 * open, -880], bend: 1}} />
+				<At z={-300} x={1100} y={1100} s={0.86}>
+					<P81 n={3} who="m" id="u1farc" x={1100} y={1100} scale={0.86} breathe={f} headTurn={-0.5} face={{eyes: Math.floor(f / 20) % 3 === 2 ? 'closed' : 'narrow', brows: 'raised', mouth: 'smile', blush: false, look: [-0.8, 0]}} armL={{target: [-330 - 120 * open, -880], bend: 1}} />
 					{open > 0 && (
-						<g opacity={open}>
-							<path d={`M ${1100 - 150},${1180 - 1210} L ${1100 - 150 - 220 * open},${1180 - 1130} L ${1100 - 150 - 240 * open},${1180 - 560} L ${1100 - 130},${1180 - 600} Z`} fill="#5a3a2a" />
-							<Jeans x={1100 - 150 - 130 * open} y={1180 - 1060} s={1.15} />
+						<g opacity={open} transform="translate(1100,1100) scale(0.86)">
+							<path d={`M -150,-1210 L ${-150 - 220 * open},-1130 L ${-150 - 240 * open},-560 L -130,-600 Z`} fill="#5a3a2a" />
+							<Jeans x={-150 - 130 * open} y={-1060} s={1.15} />
 						</g>
 					)}
 				</At>
@@ -250,7 +252,7 @@ export const S48: React.FC = () => {
 				</Lay>
 			</Shot>
 			<Price f={f} at={w(48, 'пять', -2)} x={1500} y={230} what="БИЛЕТ" price="5 коп." />
-			<Fact f={f} at={w(48, 'контролёр', -2)} text="КОНТРОЛЁР — В ЛЮБОЙ МОМЕНТ" y={940} color={RED} />
+			<Fact x={960} f={f} at={w(48, 'контролёр', -2)} text="КОНТРОЛЁР — В ЛЮБОЙ МОМЕНТ" y={170} color={RED} />
 		</AbsoluteFill>
 	);
 };
@@ -280,7 +282,7 @@ export const S49: React.FC = () => {
 					</g>
 				</Lay>
 			</Shot>
-			<Fact f={f} at={w(49, 'домашний', -2)} text="ТЕЛЕФОН ДОМА — НЕ У ВСЕХ" y={170} />
+			<Fact x={960} f={f} at={w(49, 'домашний', -2)} text="ТЕЛЕФОН ДОМА — НЕ У ВСЕХ" y={170} />
 			<Stamp f={f} at={w(49, 'годы', -4)} x={1520} y={560} text="ОЧЕРЕДЬ" sub="НА ГОДЫ" rot={-8} size={84} />
 		</AbsoluteFill>
 	);
@@ -369,12 +371,12 @@ export const S53: React.FC = () => {
 			<Shot f={f} len={len} far={<Yard81 f={f} dusk={0.3} />} bg="#8fb4d8" m={{x: [-120, 120], z: [0, 90]}}>
 				<Lay z={-420} box={[-200, 300, 1300, 800]}>
 					{[0, 1, 2].map((k) => (
-						<Person key={k} kind="boy" id={`u1fb${k}`} colors={{top: ['#c8402a', '#2a6aa8', '#e8e4d8'][k], topDark: ['#a8362a', '#2a5a98', '#c8c4b8'][k], pants: '#2c3a66', hair: ['#5a3a28', '#b4542a', '#2a2220'][k]}} x={360 + k * 320 + Math.sin(f / 9 + k) * 60} y={1040} scale={0.68} walk={f * 0.4 + k} face={LAUGH} />
+						<Person key={k} kind="boy" id={`u1fb${k}`} colors={{top: ['#c8402a', '#2a6aa8', '#e8e4d8'][k], topDark: ['#a8362a', '#2a5a98', '#c8c4b8'][k], pants: '#2c3a66', hair: KH[k]}} x={360 + k * 320 + Math.sin(f / 9 + k) * 60} y={1040} scale={0.68} walk={f * 0.4 + k} face={LAUGH} />
 					))}
 					<circle cx={ball.x} cy={ball.y} r={26} fill="#f4f4f0" stroke="#2a2c30" strokeWidth={4} />
 				</Lay>
 				<Lay z={-420} box={[1100, 300, 1100, 800]}>
-					<Person kind="girl" id="u1rb1" plain colors={{top: '#e07a3a', topDark: '#c86a2a', pants: '#2a2226', hair: '#3a2a20'}} x={1300} y={1040} scale={0.66} breathe={f} headTurn={0.4} face={SMILE} />
+					<Person kind="girl" id="u1rb1" plain colors={{top: '#e07a3a', topDark: '#c86a2a', pants: '#2a2226', hair: KH[4]}} x={1300} y={1040} scale={0.66} breathe={f} headTurn={0.4} face={SMILE} />
 					<Person kind="girl" id="u1rb2" plain colors={{top: '#5aa08a', topDark: '#4a907a', pants: '#2a2226', hair: '#7a4a2c'}} x={1820} y={1040} scale={0.66} breathe={f + 5} headTurn={-0.4} face={SMILE} />
 					<path d="M 1320,1000 L 1800,1000 M 1320,1020 L 1800,1020" stroke="#f4f0e8" strokeWidth={5} />
 					<g transform={`translate(0,${-jump})`}>
@@ -400,7 +402,7 @@ export const S54: React.FC = () => {
 						const who = kids(k);
 						const pose = freeze ? {armL: {target: [-200 - k * 20, -700 - (k % 3) * 120], bend: 1}, armR: {target: [180 + k * 10, -500 - (k % 2) * 300], bend: -1}} : {};
 						return (
-							<Person key={k} kind={who === 'f' ? 'girl' : 'boy'} id={`u1sea${k}`} plain={who === 'f'} colors={{top: ['#c8402a', '#2a6aa8', '#e07a3a', '#5aa08a', '#e8e4d8', '#a83a5a'][k], topDark: ['#a8362a', '#2a5a98', '#c86a2a', '#4a907a', '#c8c4b8', '#983050'][k], pants: '#2c3a66'}} x={160 + k * 330} y={1050} scale={0.66} walk={freeze ? undefined : f * 0.45 + k} breathe={f} headTilt={freeze ? (k % 2 ? 12 : -12) : 0} face={freeze ? {eyes: 'closed', mouth: 'tight', brows: 'raised', blush: true} : LAUGH} {...(pose as object)} />
+							<Person key={k} kind={who === 'f' ? 'girl' : 'boy'} id={`u1sea${k}`} plain={who === 'f'} colors={{top: ['#c8402a', '#2a6aa8', '#e07a3a', '#5aa08a', '#e8e4d8', '#a83a5a'][k], topDark: ['#a8362a', '#2a5a98', '#c86a2a', '#4a907a', '#c8c4b8', '#983050'][k], pants: '#2c3a66', hair: KH[k % 6]}} x={160 + k * 330} y={1050} scale={0.66} walk={freeze ? undefined : f * 0.45 + k} breathe={f} headTilt={freeze ? (k % 2 ? 12 : -12) : 0} face={freeze ? {eyes: 'closed', mouth: 'tight', brows: 'raised', blush: true} : LAUGH} {...(pose as object)} />
 						);
 					})}
 				</Lay>
@@ -454,11 +456,11 @@ export const S56: React.FC = () => {
 				<Lay z={-420} box={[-500, 300, 2900, 800]}>
 					{ring.map((r, k) => {
 						const x = lerp(gather(k), 0, 1, r.x0, r.x, Easing.linear);
-						return <Person key={k} kind={k % 2 ? 'girl' : 'boy'} id={`u1ring${k}`} plain={k % 2 === 1} colors={{top: ['#c8402a', '#2a6aa8', '#e07a3a', '#5aa08a', '#e8e4d8', '#a83a5a'][k], topDark: ['#a8362a', '#2a5a98', '#c86a2a', '#4a907a', '#c8c4b8', '#983050'][k], pants: '#2c3a66'}} x={x} y={r.y} scale={r.s} walk={gather(k) < 1 ? f * 0.45 : undefined} breathe={f} headTurn={x < 960 ? 0.5 : -0.5} face={{...WIDE, look: [x < 960 ? 0.7 : -0.7, 0.5]}} />;
+						return <Person key={k} kind={k % 2 ? 'girl' : 'boy'} id={`u1ring${k}`} plain={k % 2 === 1} colors={{top: ['#c8402a', '#2a6aa8', '#e07a3a', '#5aa08a', '#e8e4d8', '#a83a5a'][k], topDark: ['#a8362a', '#2a5a98', '#c86a2a', '#4a907a', '#c8c4b8', '#983050'][k], pants: '#2c3a66', hair: KH[k % 6]}} x={x} y={r.y} scale={r.s} walk={gather(k) < 1 ? f * 0.45 : undefined} breathe={f} headTurn={x < 960 ? 0.5 : -0.5} face={{...WIDE, look: [x < 960 ? 0.7 : -0.7, 0.5]}} />;
 					})}
 				</Lay>
 				<At z={-280} x={960} y={1220} s={1.0}>
-					<You id="u1s56" x={960} y={1220} scale={1.0} breathe={f} face={{...LAUGH, look: [0, 0.6]}} armR={{target: [120, -700], bend: -1}} itemR={<HandPhone s={1.4} screen="#3ac569" />} />
+					<You id="u1s56" x={960} y={1220} scale={1.0} breathe={f} face={{...LAUGH, look: [0, 0.6]}} armR={{target: [150, -560], bend: -1}} itemR={<HandPhone s={1.4} screen="#3ac569" />} />
 				</At>
 			</Shot>
 		</AbsoluteFill>
@@ -518,7 +520,7 @@ export const S59: React.FC = () => {
 			<Shot f={f} len={len} far={<Yard81 f={f} dusk={0.8} />} bg="#2e3060" m={{x: [0, 0], y: [-120, 0], z: [60, 120]}}>
 				<Lay z={-420} box={[-500, 300, 2900, 800]}>
 					{Array.from({length: 5}).map((_, k) => (
-						<Person key={k} kind="boy" id={`u1home${k}`} colors={{top: ['#c8402a', '#2a6aa8', '#e07a3a', '#5aa08a', '#e8e4d8'][k], pants: '#2c3a66'}} x={300 + k * 330 + (k % 2 ? 1 : -1) * run * 1400} y={1040} scale={0.66} walk={f * 0.5 + k} face={SMILE} />
+						<Person key={k} kind="boy" id={`u1home${k}`} colors={{top: ['#c8402a', '#2a6aa8', '#e07a3a', '#5aa08a', '#e8e4d8'][k], pants: '#2c3a66', hair: KH[(k + 2) % 6]}} x={300 + k * 330 + (k % 2 ? 1 : -1) * run * 1400} y={1040} scale={0.66} walk={f * 0.5 + k} face={SMILE} />
 					))}
 				</Lay>
 			</Shot>
@@ -537,9 +539,9 @@ const TVShot: React.FC<{f: number; len: number; warm: number; show: 'night' | 'n
 		{family && (
 			<Lay z={-320} box={[-300, 300, 1300, 900]}>
 				{[
-					{who: 'm' as const, n: 1, x: 80, leg: 470},
-					{who: 'f' as const, n: 0, x: 320, leg: 400},
-					{who: 'k' as const, n: 2, x: 540, leg: 336},
+					{who: 'm' as const, n: 1, x: 340, leg: 470},
+					{who: 'f' as const, n: 0, x: 580, leg: 400},
+					{who: 'k' as const, n: 2, x: 800, leg: 336},
 				].map((p, k) => {
 					const sc = p.who === 'k' ? 0.62 : 0.76;
 					return <P81 key={k} n={p.n} who={p.who} id={`u1tv${k}`} x={p.x} y={730 + p.leg * sc} scale={sc} breathe={f + k * 8} hideLegs headTurn={0.6} face={{eyes: 'open', mouth: 'flat', brows: 'neutral', blush: false, look: [0.9, 0]}} />;
@@ -568,7 +570,7 @@ export const S61: React.FC = () => {
 	return (
 		<AbsoluteFill>
 			<TVShot f={f} len={len} warm={1} show={ch === 1 ? 'film' : 'cartoon'} channel={ch} family={false} close />
-			<Fact f={f} at={w(61, 'две', -2)} text="2 ПРОГРАММЫ" y={170} color={YEL} />
+			<Fact x={960} f={f} at={w(61, 'две', -2)} text="2 ПРОГРАММЫ" y={170} color={YEL} />
 		</AbsoluteFill>
 	);
 };
@@ -581,7 +583,7 @@ export const S62: React.FC = () => {
 	return (
 		<AbsoluteFill>
 			<TVShot f={f} len={len} warm={1} show={news ? 'news' : 'night'} />
-			{news && <Fact f={f} at={w(62, 'девять', -4)} text="21:00 · ПРОГРАММА «ВРЕМЯ»" y={170} />}
+			{news && <Fact x={960} f={f} at={w(62, 'девять', -4)} text="21:00 · ПРОГРАММА «ВРЕМЯ»" y={170} />}
 		</AbsoluteFill>
 	);
 };
@@ -613,7 +615,7 @@ export const S64: React.FC = () => {
 			<Shot f={f} len={len} far={<Cinema81 />} bg="#8fb4d8" m={{x: [-80, 80], z: [0, 100]}}>
 				<Lay z={-400} box={[-200, 300, 1600, 800]}>
 					{Array.from({length: 6}).map((_, k) => (
-						<Person key={k} kind={k % 2 ? 'girl' : 'boy'} id={`u1cin${k}`} plain={k % 2 === 1} colors={{top: ['#c8402a', '#2a6aa8', '#e07a3a', '#5aa08a', '#e8e4d8', '#a83a5a'][k], topDark: ['#a8362a', '#2a5a98', '#c86a2a', '#4a907a', '#c8c4b8', '#983050'][k], pants: '#2c3a66'}} x={160 + k * 200} y={1040} scale={0.62} breathe={f + k * 5} headTurn={0.6} face={{...SMILE, look: [0.7, 0]}} />
+						<Person key={k} kind={k % 2 ? 'girl' : 'boy'} id={`u1cin${k}`} plain={k % 2 === 1} colors={{top: ['#c8402a', '#2a6aa8', '#e07a3a', '#5aa08a', '#e8e4d8', '#a83a5a'][k], topDark: ['#a8362a', '#2a5a98', '#c86a2a', '#4a907a', '#c8c4b8', '#983050'][k], pants: '#2c3a66', hair: KH[k % 6]}} x={160 + k * 200} y={1040} scale={0.62} breathe={f + k * 5} headTurn={0.6} face={{...SMILE, look: [0.7, 0]}} />
 					))}
 				</Lay>
 			</Shot>
@@ -637,7 +639,7 @@ export const S65: React.FC = () => {
 					</g>
 				</Lay>
 			</Shot>
-			<Fact f={f} at={w(65, 'беречь', -4)} text="БАТАРЕЙКИ — БЕРЕЧЬ!" y={940} color={YEL} />
+			<Fact x={960} f={f} at={w(65, 'беречь', -4)} text="БАТАРЕЙКИ — БЕРЕЧЬ!" y={170} color={YEL} />
 		</AbsoluteFill>
 	);
 };
@@ -661,7 +663,7 @@ export const S66: React.FC = () => {
 export const S67: React.FC = () => {
 	const f = useCurrentFrame();
 	const len = L(67);
-	const n = Math.min(4, Math.max(0, Math.floor(interpolate(f, [w(67, 'несколько', -10), w(67, 'зарплат', 4)], [0, 4.99], clamp))));
+	const n = Math.min(4, Math.max(0, Math.floor(interpolate(f, [w(67, 'несколько', -10), w(67, 'несколько', 24)], [0, 4.99], clamp))));
 	return (
 		<AbsoluteFill>
 			<Shot f={f} len={len} far={<Living81 night={0.2} />} bg="#c9b890" m={{x: [-30, 30], z: [120, 180]}} blur={9} vig={0.6}>
@@ -691,7 +693,7 @@ export const S68: React.FC = () => {
 					</g>
 				</Lay>
 			</Shot>
-			<Stamp f={f} at={w(68, 'бесплатно', -2)} x={360} y={300} text="БЕСПЛАТНО" rot={-8} color={GREEN} size={60} />
+			<Stamp f={f} at={w(68, 'бесплатно', -2)} x={300} y={560} text="БЕСПЛАТНО" rot={-8} color={GREEN} size={60} />
 			<Stamp f={f} at={w(68, 'десять', -2)} x={1580} y={760} text="~10 ЛЕТ" rot={6} size={80} />
 		</AbsoluteFill>
 	);
@@ -712,20 +714,20 @@ export const S69: React.FC = () => {
 								<Fire f={f} s={1.0} />
 							</g>
 							{[560, 760, 1160, 1360].map((px, k) => (
-								<Person key={k} kind={k % 2 ? 'girl' : 'boy'} id={`u1fire${k}`} plain={k % 2 === 1} colors={{top: '#e8e4d8', topDark: '#c8c4b8', pants: '#2c3a66'}} pioneer x={px} y={1040} scale={0.62} breathe={f + k * 6} headTurn={px < 960 ? 0.5 : -0.5} face={{...SMILE, look: [px < 960 ? 0.6 : -0.6, 0.3]}} />
+								<Person key={k} kind={k % 2 ? 'girl' : 'boy'} id={`u1fire${k}`} plain={k % 2 === 1} colors={{top: '#e8e4d8', topDark: '#c8c4b8', pants: '#2c3a66', hair: KH[k % 6]}} pioneer x={px} y={1040} scale={0.62} breathe={f + k * 6} headTurn={px < 960 ? 0.5 : -0.5} face={{...SMILE, look: [px < 960 ? 0.6 : -0.6, 0.3]}} />
 							))}
 						</g>
 					) : (
 						<g>
 							{[300, 480, 660, 1260, 1440, 1620].map((px, k) => (
-								<Person key={k} kind={k % 2 ? 'girl' : 'boy'} id={`u1line${k}`} plain={k % 2 === 1} colors={{top: '#e8e4d8', topDark: '#c8c4b8', pants: '#2c3a66'}} pioneer x={px} y={1040} scale={0.6} breathe={f + k * 6} face={SMILE} />
+								<Person key={k} kind={k % 2 ? 'girl' : 'boy'} id={`u1line${k}`} plain={k % 2 === 1} colors={{top: '#e8e4d8', topDark: '#c8c4b8', pants: '#2c3a66', hair: KH[k % 6]}} pioneer x={px} y={1040} scale={0.6} breathe={f + k * 6} face={SMILE} />
 							))}
-							<Person kind="boy" id="u1bugle" colors={{top: '#e8e4d8', topDark: '#c8c4b8', pants: '#2c3a66'}} pioneer x={960} y={1060} scale={0.66} breathe={f} face={{eyes: 'closed', mouth: 'o', brows: 'neutral', blush: true}} armR={{target: [40, -620], bend: -1}} itemR={<g transform="rotate(200)"><Bugle /></g>} />
+							<Person kind="boy" id="u1bugle" colors={{top: '#e8e4d8', topDark: '#c8c4b8', pants: '#2c3a66', hair: KH[1]}} pioneer x={960} y={1060} scale={0.66} breathe={f} face={{eyes: 'closed', mouth: 'o', brows: 'neutral', blush: true}} armR={{target: [40, -620], bend: -1}} itemR={<g transform="rotate(200)"><Bugle /></g>} />
 						</g>
 					)}
 				</Lay>
 			</Shot>
-			<Tag f={f} at={w(69, 'горн', -2)} x={1000} y={560} tx={1300} ty={200} text="ГОРН" />
+			<Tag f={f} at={w(69, 'горн', -2)} to={w(69, 'вечерний', -6)} x={1000} y={560} tx={1300} ty={200} text="ГОРН" />
 		</AbsoluteFill>
 	);
 };
@@ -774,7 +776,7 @@ export const S71: React.FC = () => {
 					<rect x={620} y={910} width={20} height={130} fill="#2a2c34" />
 					<rect x={1260} y={910} width={20} height={130} fill="#2a2c34" />
 					<P81 n={2} who="m" id="u1guitar" hideLegs x={900} y={880 + 470 * 0.74} scale={0.74} breathe={f} headTilt={8} face={{eyes: 'closed', mouth: 'smile', brows: 'neutral', blush: false}} armR={{target: [120 + strum, -500], bend: -1}} armL={{target: [-200, -560], bend: 1}} />
-					<g transform="translate(900,540) rotate(-14) scale(0.8)">
+					<g transform="translate(870,800) rotate(-12) scale(0.8)">
 						<Guitar />
 					</g>
 					{f > 10 &&
@@ -870,7 +872,7 @@ export const S74: React.FC = () => {
 					</g>
 				</Lay>
 			</Set3D>
-			<Fact f={f} at={w(74, 'две', -2)} text="2026" y={170} color={GREEN} />
+			<Fact x={960} f={f} at={w(74, 'две', -2)} text="2026" y={170} color={GREEN} />
 		</AbsoluteFill>
 	);
 };
@@ -929,11 +931,11 @@ export const S77: React.FC = () => {
 	return (
 		<AbsoluteFill style={{background: 'radial-gradient(circle at 50% 45%, #3a2a1a 0%, #120a06 70%)'}}>
 			<svg width={W} height={H} style={{position: 'absolute', inset: 0}}>
-				<g transform="translate(960,470)">
-					<Kopeck2 s={2.2} spin={f / 14} />
+				<g transform="translate(960,520)">
+					<Kopeck2 s={2.0} spin={f / 14} />
 				</g>
 			</svg>
-			<div style={{position: 'absolute', top: 820, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, fontSize: 60, color: '#fff', opacity: interpolate(f, [w(77, 'ровно', -4), w(77, 'ровно', 8)], [0, 1], clamp)}}>
+			<div style={{position: 'absolute', top: 120, width: '100%', textAlign: 'center', fontFamily: HEAVY, fontWeight: 900, fontSize: 60, color: '#fff', opacity: interpolate(f, [w(77, 'ровно', -4), w(77, 'ровно', 8)], [0, 1], clamp)}}>
 				2 КОПЕЙКИ = <span style={{color: YEL}}>ЗВОНОК ДОМОЙ</span>
 			</div>
 		</AbsoluteFill>

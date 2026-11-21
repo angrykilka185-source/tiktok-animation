@@ -1196,3 +1196,157 @@ const hz = (m) => 440 * Math.pow(2, (m - 69) / 12);
 	for (let k = 0; k < 14; k++) add(x, ping([1900 + rnd() * 400, 3200], 0.2, 0.04, 0.6), rnd() * (dur - 0.2), 0.3 + 0.4 * rnd());
 	write('hammers', room(lowpass(x, 3000), 0.5, 2.2), 0.4);
 }
+
+// ---------- «Что будет, если ты попадёшь в СССР» ----------
+// the iron alarm clock: a hammer rattling between two bells
+{
+	const dur = 3;
+	const x = buf(dur);
+	for (let k = 0; k < dur * 18; k++) {
+		const f0 = k % 2 ? 2350 : 2600;
+		add(x, ping([f0, f0 * 2.7, f0 * 4.1], 0.12, 0.05, 0.7), k / 18, 0.6 + 0.2 * rnd());
+	}
+	write('alarm_bell', room(x, 0.2, 0.9), 0.6);
+}
+// the electric school bell
+{
+	const dur = 2.2;
+	const x = buf(dur);
+	for (let k = 0; k < dur * 30; k++) add(x, ping([1900, 1900 * 2.6], 0.05, 0.02, 0.8), k / 30, 0.7);
+	write('school_bell', room(x, 0.35, 1.6), 0.55);
+}
+// soda water: the pour and the fizz
+{
+	const dur = 2.4;
+	const x = buf(dur);
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		x[i] = noise() * 0.5 * Math.min(1, t / 0.1) * Math.min(1, (dur - t) / 0.5);
+	}
+	const y = bandpass(x, 600, 5000);
+	for (let k = 0; k < 160; k++) add(y, ping([3000 + rnd() * 5000], 0.03, 0.006, 0.4), rnd() * dur, 0.3 * rnd());
+	write('soda', room(y, 0.15, 0.8), 0.5);
+}
+// a rotary dial: the pulses of a digit and the spring returning
+{
+	const x = buf(1.4);
+	for (let k = 0; k < 6; k++) add(x, click(0.01, 1800, 3), 0.1 + k * 0.1, 0.7);
+	const w = buf(0.6);
+	let ph = 0;
+	for (let i = 0; i < w.length; i++) {
+		ph += (2 * Math.PI * (300 + 100 * Math.sin(i / SR * 40))) / SR;
+		w[i] = Math.sin(ph) * 0.12 * Math.sin((Math.PI * i) / w.length);
+	}
+	add(x, bandpass(w, 200, 2000), 0.75, 1);
+	write('dial', room(x, 0.2, 0.8), 0.55);
+}
+// the dial tone heard in the receiver (425 Hz): two long beeps
+{
+	const x = buf(3.4);
+	for (const t0 of [0.1, 1.9]) {
+		const y = buf(1.0);
+		for (let i = 0; i < y.length; i++) y[i] = Math.sin((2 * Math.PI * 425 * i) / SR) * Math.min(1, i / SR / 0.02) * Math.min(1, (y.length - i) / SR / 0.02);
+		add(x, y, t0, 0.8);
+	}
+	write('gudki', bandpass(x, 300, 3400), 0.45);
+}
+// a yard guitar: strummed chords (Karplus–Strong strings), an original little progression; loops at 8 s
+{
+	const dur = 8;
+	const x = buf(dur + 1);
+	const pluck = (f, len, amp) => {
+		const n = Math.floor(SR / f);
+		const line = new Float32Array(n).map(() => noise());
+		const y = buf(len);
+		let p = 0;
+		for (let i = 0; i < y.length; i++) {
+			const a = line[p];
+			const b = line[(p + 1) % n];
+			line[p] = 0.996 * 0.5 * (a + b);
+			y[i] = a * amp;
+			p = (p + 1) % n;
+		}
+		return y;
+	};
+	const chords = [
+		[57, 64, 69, 72, 76],
+		[50, 57, 62, 65, 69],
+		[52, 59, 64, 68, 71],
+		[57, 64, 69, 72, 76],
+	];
+	chords.forEach((ch, c) => {
+		for (let s = 0; s < 4; s++) {
+			const t0 = c * 2 + s * 0.5;
+			const down = s % 2 === 0;
+			ch.forEach((m, j) => add(x, pluck(hz(m), 1.6, 0.18), t0 + (down ? j : ch.length - j) * 0.012, down ? 1 : 0.7));
+		}
+	});
+	write('guitar', room(lowpass(x, 4500), 0.3, 1.4), 0.5);
+}
+// night: crickets; loops at 6 s
+{
+	const dur = 6;
+	const x = buf(dur);
+	for (let c = 0; c < 4; c++) {
+		const f0 = 4200 + c * 500;
+		let t = rnd() * 0.5;
+		while (t < dur - 0.3) {
+			for (let k = 0; k < 3; k++) add(x, ping([f0], 0.03, 0.01, 0.5), t + k * 0.045, 0.4);
+			t += 0.5 + rnd() * 0.6;
+		}
+	}
+	write('crickets', room(x, 0.3, 1.5), 0.3);
+}
+// a bugle call (an original little fanfare)
+{
+	const notes = [[67, 0.25], [72, 0.25], [76, 0.25], [79, 0.6], [76, 0.25], [79, 0.9]];
+	let t = 0.05;
+	const x = buf(3.2);
+	for (const [m, len] of notes) {
+		const y = buf(len + 0.1);
+		let ph = 0;
+		for (let i = 0; i < y.length; i++) {
+			const tt = i / SR;
+			ph += hz(m) / SR;
+			const saw = 2 * (ph % 1) - 1;
+			y[i] = saw * Math.min(1, tt / 0.03) * Math.min(1, (len + 0.1 - tt) / 0.08) * (1 + 0.04 * Math.sin(tt * 30));
+		}
+		add(x, lowpass(y, 3000), t, 0.6);
+		t += len;
+	}
+	write('bugle', room(x, 0.35, 2.0), 0.5);
+}
+// a bus: a low diesel rumble with a little gear whine; loops at 4 s
+{
+	const dur = 4;
+	const x = buf(dur);
+	let ph = 0;
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		ph += (2 * Math.PI * (42 + 3 * Math.sin(t * 1.3))) / SR;
+		x[i] = Math.sin(ph) * 0.5 + Math.sin(ph * 2) * 0.25 + noise() * 0.15 + Math.sin(2 * Math.PI * 620 * t) * 0.02;
+	}
+	write('bus', lowpass(x, 1200), 0.45);
+}
+// kids playing in a yard: high voices, shouts and laughs (no words); loops at 5 s
+{
+	const dur = 5;
+	const x = buf(dur);
+	for (let v = 0; v < 10; v++) {
+		const f0 = 280 + rnd() * 160;
+		let t = rnd() * 0.8;
+		while (t < dur - 0.4) {
+			const len = 0.12 + rnd() * 0.35;
+			const y = buf(len);
+			let ph = 0;
+			for (let i = 0; i < y.length; i++) {
+				const tt = i / SR;
+				ph += (f0 * (1 + 0.15 * Math.sin(tt * 12 + v) - 0.1 * tt / len)) / SR;
+				y[i] = ((2 * (ph % 1) - 1) * 0.6 + noise() * 0.3) * Math.sin(Math.PI * Math.min(1, tt / len));
+			}
+			add(x, reso(reso(y, 900 + rnd() * 300, 5), 1600 + rnd() * 500, 4), t, 0.3 + 0.4 * rnd());
+			t += len + 0.15 + rnd() * 0.7;
+		}
+	}
+	write('kids', room(bandpass(x, 250, 5000), 0.4, 1.8), 0.5);
+}

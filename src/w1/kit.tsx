@@ -226,12 +226,12 @@ export const Stamp: React.FC<{f: number; at: number; x: number; y: number; text:
 };
 
 // a fact card: a short line of history at the top of the picture
-export const Fact: React.FC<{f: number; at: number; to?: number; text: string; y?: number; color?: string}> = ({f, at, to = 99999, text, y = 300, color = YEL}) => {
+export const Fact: React.FC<{f: number; at: number; to?: number; text: string; y?: number; x?: number; color?: string}> = ({f, at, to = 99999, text, y = 300, x = 540, color = YEL}) => {
 	const p = pop(f, at, 13);
 	const o = interpolate(f, [to - 8, to], [1, 0], clamp);
 	if (f < at || o <= 0) return null;
 	return (
-		<div style={{position: 'absolute', left: 540, top: y, transform: `translate(-50%,-50%) scale(${p})`, opacity: o, background: 'rgba(14,14,18,0.9)', borderLeft: `10px solid ${color}`, color: '#fff', fontFamily: HEAVY, fontWeight: 900, fontSize: 40, padding: '14px 30px', borderRadius: 14, whiteSpace: 'nowrap', boxShadow: '0 10px 30px rgba(0,0,0,0.4)'}}>
+		<div style={{position: 'absolute', left: x, top: y, transform: `translate(-50%,-50%) scale(${p})`, opacity: o, background: 'rgba(14,14,18,0.9)', borderLeft: `10px solid ${color}`, color: '#fff', fontFamily: HEAVY, fontWeight: 900, fontSize: 40, padding: '14px 30px', borderRadius: 14, whiteSpace: 'nowrap', boxShadow: '0 10px 30px rgba(0,0,0,0.4)'}}>
 			{text}
 		</div>
 	);

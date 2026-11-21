@@ -94,12 +94,7 @@ export const S02: React.FC = () => {
 			<At z={-300} x={560} y={1180} s={1.0}>
 				<You id="u1s2" uniform={false} x={560} y={1180} scale={1.0} breathe={f} headTurn={look} face={{...WIDE, look: [look, -0.1]}} />
 			</At>
-			<Lay z={-240} box={[-200, 800, 1600, 400]}>
-				<path d="M 0,1000 Q 560,940 1200,1000 L 1200,1200 L 0,1200 Z" fill="#c9a227" />
-				{Array.from({length: 6}).map((_, k) => (
-					<rect key={k} x={20 + k * 190} y={980} width={180} height={220} fill={['#a8402e', '#4a6a8a', '#7a8a4a'][k % 3]} opacity={0.85} />
-				))}
-			</Lay>
+
 		</Shot>
 	);
 };
@@ -266,7 +261,7 @@ export const S09: React.FC = () => {
 				const t = ((f / 18 + k / 3) % 1);
 				return <div key={k} style={{position: 'absolute', left: 240 - 120 - t * 120, top: 260 - 120 - t * 120, width: 240 + t * 240, height: 240 + t * 240, border: '6px solid #fff', borderRadius: '50%', opacity: (1 - t) * 0.5}} />;
 			})}
-			<Fact f={f} at={w(9, 'гимнастика', -2)} text="«НА ЗАРЯДКУ СТАНОВИСЬ!»" y={170} />
+			<Fact x={1360} f={f} at={w(9, 'гимнастика', -2)} text="«НА ЗАРЯДКУ СТАНОВИСЬ!»" y={300} />
 		</AbsoluteFill>
 	);
 };
@@ -440,9 +435,9 @@ export const S16: React.FC = () => {
 	const sw = Math.sin(f / 10) * 8;
 	return (
 		<AbsoluteFill>
-			<Shot f={f} len={len} far={<Room81 />} bg="#d8c89a" m={{x: [-40, 40], y: [40, 0], z: [260, 330]}} blur={8}>
+			<Shot f={f} len={len} far={<Room81 />} bg="#d8c89a" m={{x: [-40, 40], y: [60, 30], z: [100, 160]}} blur={8}>
 				<Lay z={-220} box={[400, 60, 1120, 1020]}>
-					<g transform="translate(960,260)">
+					<g transform="translate(960,300)">
 						<Bust kind="teen" id="u1key" colors={{top: '#2c3a66', topDark: '#243056', hair: YOU.hair}} plain scale={1.9} face={{...SMILE, glasses: false, look: [0, 0.6]}} />
 					</g>
 					<path d={`M 860,560 Q 960,${820 + sw} 1060,560`} stroke="#d8c8a0" strokeWidth={6} fill="none" />
@@ -454,7 +449,7 @@ export const S16: React.FC = () => {
 					</g>
 				</Lay>
 			</Shot>
-			<Fact f={f} at={w(16, 'родители', -2)} text="РОДИТЕЛИ — НА РАБОТЕ ДО ВЕЧЕРА" y={170} />
+			<Fact x={960} f={f} at={w(16, 'родители', -2)} text="РОДИТЕЛИ — НА РАБОТЕ ДО ВЕЧЕРА" y={170} />
 		</AbsoluteFill>
 	);
 };
@@ -463,12 +458,12 @@ export const S16: React.FC = () => {
 export const S17: React.FC = () => {
 	const f = useCurrentFrame();
 	const len = L(17);
-	const on = interpolate(f, [w(17, 'фонарик', -8), w(17, 'фонарик', -2)], [0, 1], clamp);
-	const bx = lerp(f, w(17, 'фонарик'), len, 900, 1300);
+	const on = interpolate(f, [w(17, 'хорошо', -4), w(17, 'хорошо', 4)], [0, 1], clamp);
+	const bx = lerp(f, w(17, 'хорошо'), len, 860, 1300);
 	return (
 		<AbsoluteFill style={{background: '#000'}}>
 			<Shot f={f} len={len} far={<Stairwell />} bg="#3a4444" m={{x: [-40, 60], z: [0, 80]}} blur={2} vig={0.7} />
-			<AbsoluteFill style={{background: `radial-gradient(circle at ${bx}px 560px, rgba(0,0,0,${0.05 + 0.85 * (1 - on)}) 0px, rgba(0,0,0,${0.05 + 0.85 * (1 - on)}) ${120 + 260 * on}px, rgba(0,0,0,0.93) ${180 + 380 * on}px)`}} />
+			<AbsoluteFill style={{background: `radial-gradient(circle at ${bx}px 560px, rgba(0,0,0,${0.05 + 0.65 * (1 - on)}) 0px, rgba(0,0,0,${0.05 + 0.65 * (1 - on)}) ${120 + 260 * on}px, rgba(0,0,0,0.78) ${180 + 380 * on}px)`}} />
 			<Tag f={f} at={w(17, 'лампочку')} x={1000} y={110} tx={700} ty={200} text="ЛАМПОЧКИ НЕТ" color={RED} />
 		</AbsoluteFill>
 	);
@@ -512,7 +507,7 @@ export const S19: React.FC = () => {
 		<AbsoluteFill>
 			<Shot f={f} len={len} far={<Yard81 f={f} />} bg="#8fb4d8" m={{x: [60, -60], z: [80, 180]}}>
 				<Lay z={-380} box={[200, 500, 1500, 600]}>
-					<g transform="translate(900,1060) scale(1.15)">
+					<g transform="translate(860,990) scale(1.0)">
 						<Car81 kind="sedan" color="#2a5aa8" />
 					</g>
 				</Lay>
@@ -556,8 +551,8 @@ export const S21: React.FC = () => {
 	const len = L(21);
 	return (
 		<AbsoluteFill>
-			<Shot f={f} len={len} far={<Yard81 f={f} />} bg="#8fb4d8" m={{x: [200, 260], y: [140, -380], z: [0, 200]}} />
-			<Fact f={f} at={w(21, 'рекламы', -2)} to={w(21, 'зато')} text="НИ ОДНОЙ РЕКЛАМЫ" y={900} color="#9aa3b2" />
+			<Shot f={f} len={len} far={<Yard81 f={f} />} bg="#8fb4d8" m={{x: [200, 300], y: [100, -560], z: [0, 220]}} />
+			<Fact x={960} f={f} at={w(21, 'рекламы', -2)} to={w(21, 'зато')} text="НИ ОДНОЙ РЕКЛАМЫ" y={170} color="#9aa3b2" />
 		</AbsoluteFill>
 	);
 };
@@ -631,7 +626,7 @@ export const S23: React.FC = () => {
 					</g>
 				</Lay>
 			</Shot>
-			<div style={{position: 'absolute', left: 1210, top: 330, transform: `rotate(-6deg) scale(${pop(f, w(23, 'дневник', -4), 12)})`, fontFamily: "'DejaVu Serif', serif", fontStyle: 'italic', fontSize: 40, color: '#c8282a', width: 380, lineHeight: 1.2}}>
+			<div style={{position: 'absolute', left: 1010, top: 470, transform: `rotate(-6deg) scale(${pop(f, w(23, 'дневник', -4), 12)})`, fontFamily: "'DejaVu Serif', serif", fontStyle: 'italic', fontSize: 40, color: '#c8282a', width: 380, lineHeight: 1.2}}>
 				Забыл сменную обувь!
 			</div>
 		</AbsoluteFill>
@@ -717,7 +712,7 @@ export const S27: React.FC = () => {
 					);
 				})}
 			</div>
-			<Fact f={f} at={w(27, 'шесть', -2)} text="ШЕСТИДНЕВКА" y={780} color={YEL} />
+			<Fact x={960} f={f} at={w(27, 'шесть', -2)} text="ШЕСТИДНЕВКА" y={780} color={YEL} />
 		</AbsoluteFill>
 	);
 };
@@ -731,16 +726,16 @@ export const S28: React.FC = () => {
 		<AbsoluteFill>
 			<Shot f={f} len={len} far={<Workshop81 />} bg="#c8c0a8" m={{x: [-160, 160], z: [40, 110]}}>
 				<Lay z={-380} box={[-200, 400, 1500, 700]}>
-					<g transform="translate(560,620)">
+					<g transform="translate(720,560)">
 						<Stool done={interpolate(f, [0, len], [0.3, 1], clamp)} />
 					</g>
-					<Pupil3 x={560 + plane * 0.4} y={1060} s={0.74} girl={false} n={1} f={f} armR={{target: [140 + plane, -480], bend: -1}} face={{eyes: 'narrow', mouth: 'tight', brows: 'angry', blush: true}} />
+					<Pupil3 x={420 + plane * 0.3} y={1060} s={0.74} girl={false} n={1} f={f} armR={{target: [260 + plane, -500], bend: -1}} face={{eyes: 'narrow', mouth: 'tight', brows: 'angry', blush: true, look: [0.8, 0.4]}} />
 				</Lay>
 				<Lay z={-380} box={[1100, 400, 900, 700]}>
 					<Pupil3 x={1500} y={1060} s={0.74} girl n={0} f={f} face={{eyes: 'open', mouth: 'smile', brows: 'neutral', look: [0, 0.8], blush: true}} armR={{target: [120, -470 + Math.sin(f / 3) * 10], bend: -1}} />
 				</Lay>
 			</Shot>
-			<Tag f={f} at={w(28, 'табуретки')} x={560} y={420} tx={480} ty={170} text="ТАБУРЕТКА" />
+			<Tag f={f} at={w(28, 'табуретки')} x={720} y={380} tx={620} ty={170} text="ТАБУРЕТКА" />
 			<Tag f={f} at={w(28, 'фартуки')} x={1520} y={420} tx={1520} ty={170} text="ФАРТУК" />
 		</AbsoluteFill>
 	);
@@ -954,7 +949,7 @@ export const S36: React.FC = () => {
 					))}
 				</Lay>
 			</Shot>
-			<Fact f={f} at={w(36, 'один', -2)} text="ОДИН СТАКАН НА ВСЕХ" y={170} />
+			<Fact x={960} f={f} at={w(36, 'один', -2)} text="ОДИН СТАКАН НА ВСЕХ" y={170} />
 		</AbsoluteFill>
 	);
 };
@@ -988,7 +983,7 @@ export const S38: React.FC = () => {
 					<Kiosk81 x={1460} y={1000} s={0.9} kind="ice" />
 				</Lay>
 				<At z={-260} x={620} y={1200} s={1.02}>
-					<You id="u1s38" x={620} y={1200} scale={1.02} breathe={f} headTurn={0.2} face={{eyes: 'happy', mouth: 'smile', brows: 'raised', blush: true}} armR={{target: [200, -900], bend: -1}} itemR={<IceCream s={1.6} />} />
+					<You id="u1s38" x={620} y={1200} scale={1.02} breathe={f} headTurn={0.2} face={{eyes: 'happy', mouth: 'smile', brows: 'raised', blush: true}} armR={{target: [230, -700], bend: -1}} itemR={<IceCream s={1.6} />} />
 				</At>
 			</Shot>
 			<Price f={f} at={w(38, 'двадцати', -2)} x={1300} y={230} what="ПЛОМБИР" price="≈ 20 коп." />

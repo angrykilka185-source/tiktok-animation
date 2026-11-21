@@ -371,6 +371,15 @@ BASE_TEMPO=1.05 python3 scripts/fit-voiceover.py assets/sssr-1.mp3 --part u1
 scripts/render-parallel.sh Sssr1 Sssr1Audio out/sssr-1.mp4
 ```
 
+Обложка — `src/covers/Sssr.tsx` (композиция `CoverSssr`, белый фон): слева «ЧТО БУДЕТ, ЕСЛИ ТЫ ПОПАДЁШЬ» и большое
+красное «В СССР», плашки «1981 · 1 ДЕНЬ · 1 ЗАРЯД»; справа ты в школьной форме с пионерским галстуком показываешь
+телефон «НЕТ СЕТИ», рядом наклейки — пионерский значок и 2 копейки.
+
+```bash
+npx remotion still CoverSssr out/cover/sssr.png --scale=1.5   # 1920×1080
+ffmpeg -i out/cover/sssr.png -q:v 2 deliverables/oblozhka-sssr-16x9.jpg
+```
+
 ## Фильм «Что будет, если ты попадёшь в XX век» (≈5:30, отдельное длинное видео)
 
 Код: `src/w1/` (композиции `Vek20`, `Vek20Audio`). Ты просыпаешься в 1901 году; на телефоне 100 % и сообщение

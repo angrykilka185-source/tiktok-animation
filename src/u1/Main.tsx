@@ -37,24 +37,34 @@ const TICKS: Tick[] = [
 const NIGHT = new Set([70, 71, 72, 73]);
 const NO_GRADE = new Set([5, 6, 7, 14, 73, 77, 78]);
 
+// the clock/battery HUD on the output timeline
+export const HUD_TICKS = TICKS.map((t) => ({...t, at: Math.round(RU1.fwd(t.at))}));
+export const HUD_SHOW: [number, number] = [Math.round(RU1.fwd(s(8))), Math.round(RU1.fwd(s(73)))];
+
+// the picture alone (all the shots with their grade and the punch-ins on the red words) — the film and the
+// vertical shorts (src/u1/shorts.tsx) draw it
+export const Sssr1Picture: React.FC = () => (
+	<KickLayer times={KICKS}>
+		{SHOTS.map((sh) => {
+			const C = (Scenes as unknown as Record<string, React.FC>)[`S${String(sh.index).padStart(2, '0')}`];
+			const from = Math.round(RU1.fwd(sh.from));
+			const to = Math.round(RU1.fwd(sh.from + sh.duration));
+			return (
+				<Sequence key={sh.index} from={from} durationInFrames={Math.max(1, to - from)} name={`Кадр ${sh.index}`}>
+					<Retimed r={RU1} newFrom={from} oldFrom={sh.from} oldDur={sh.duration}>
+						{C ? <C /> : <AbsoluteFill style={{background: '#333'}} />}
+						{!NO_GRADE.has(sh.index) && sh.index < 74 && <Grade81 night={NIGHT.has(sh.index) ? 1 : 0} />}
+					</Retimed>
+				</Sequence>
+			);
+		})}
+	</KickLayer>
+);
+
 export const Sssr1: React.FC = () => (
 	<AbsoluteFill style={{background: '#000'}}>
-		<KickLayer times={KICKS}>
-			{SHOTS.map((sh) => {
-				const C = (Scenes as unknown as Record<string, React.FC>)[`S${String(sh.index).padStart(2, '0')}`];
-				const from = Math.round(RU1.fwd(sh.from));
-				const to = Math.round(RU1.fwd(sh.from + sh.duration));
-				return (
-					<Sequence key={sh.index} from={from} durationInFrames={Math.max(1, to - from)} name={`Кадр ${sh.index}`}>
-						<Retimed r={RU1} newFrom={from} oldFrom={sh.from} oldDur={sh.duration}>
-							{C ? <C /> : <AbsoluteFill style={{background: '#333'}} />}
-							{!NO_GRADE.has(sh.index) && sh.index < 74 && <Grade81 night={NIGHT.has(sh.index) ? 1 : 0} />}
-						</Retimed>
-					</Sequence>
-				);
-			})}
-		</KickLayer>
-		<HUD81 ticks={TICKS.map((t) => ({...t, at: Math.round(RU1.fwd(t.at))}))} show={[Math.round(RU1.fwd(s(8))), Math.round(RU1.fwd(s(73)))]} />
+		<Sssr1Picture />
+		<HUD81 ticks={HUD_TICKS} show={HUD_SHOW} />
 		<Captions captions={VOICE_CAPTIONS} wide />
 		<SFXU1 r={RU1} />
 	</AbsoluteFill>

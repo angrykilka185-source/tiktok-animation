@@ -16,7 +16,7 @@ fs.mkdirSync(path.join(root, 'out/frames'), {recursive: true});
 const files = [];
 for (const fr of frames) {
 	const file = path.join(root, `out/frames/${fr}.jpeg`);
-	await renderStill({composition, serveUrl, output: file, frame: Number(fr), scale: 0.4, imageFormat: 'jpeg', puppeteerInstance: browser, overwrite: true});
+	await renderStill({composition, serveUrl, output: file, frame: Number(fr), scale: Number(process.env.SCALE || 0.4), imageFormat: 'jpeg', puppeteerInstance: browser, overwrite: true});
 	files.push(file);
 }
 await browser.close({silent: true});

@@ -200,7 +200,7 @@ export const SodaMachine: React.FC<{x: number; y: number; s?: number; glass?: nu
 		<rect x={-150} y={-740} width={300} height={190} rx={12} fill="#f4f0e8" />
 		{label && (
 			<>
-				<text x={0} y={-670} textAnchor="middle" fontFamily={SANSB} fontWeight={900} fontSize={34} fill="#c8282a">
+				<text x={0} y={-670} textAnchor="middle" fontFamily={SANSB} fontWeight={900} fontSize={30} fill="#c8282a">
 					ГАЗИРОВАННАЯ
 				</text>
 				<text x={0} y={-620} textAnchor="middle" fontFamily={SANSB} fontWeight={900} fontSize={42} fill="#c8282a">

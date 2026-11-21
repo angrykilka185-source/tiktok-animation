@@ -24,6 +24,7 @@ import {Rayon1, Rayon1Audio, RR1} from './r1/Main';
 import {Rayon2, Rayon2Audio, RR2} from './r2/Main';
 import {RW1, Vek20, Vek20Audio} from './w1/Main';
 import {RU1, Sssr1, Sssr1Audio} from './u1/Main';
+import {SHORTS, shortDuration, SssrShort, SssrShortAudio} from './u1/shorts';
 import {FPS, H, SHOTS, W} from './timeline';
 import * as Scenes from './scenes';
 
@@ -56,6 +57,12 @@ export const RemotionRoot: React.FC = () => (
 		<Composition id="Vek20Audio" component={Vek20Audio} durationInFrames={RW1.total} fps={FPS} width={W} height={H} />
 		<Composition id="Sssr1" component={Sssr1} durationInFrames={RU1.total} fps={FPS} width={1920} height={1080} />
 		<Composition id="Sssr1Audio" component={Sssr1Audio} durationInFrames={RU1.total} fps={FPS} width={1920} height={1080} />
+		{SHORTS.map((_, i) => (
+			<React.Fragment key={i}>
+				<Composition id={`SssrShort${i + 1}`} component={SssrShort} defaultProps={{n: i + 1}} durationInFrames={shortDuration(i + 1)} fps={FPS} width={1080} height={1920} />
+				<Composition id={`SssrShort${i + 1}Audio`} component={SssrShortAudio} defaultProps={{n: i + 1}} durationInFrames={shortDuration(i + 1)} fps={FPS} width={1080} height={1920} />
+			</React.Fragment>
+		))}
 		<Composition id="TgkOpros" component={TgkOpros} durationInFrames={RT1.total} fps={FPS} width={W} height={H} />
 		{/* covers for the long video (all parts as one film) */}
 		<Composition id="CoverPapaFilm" component={CoverPapaFilm} durationInFrames={1} fps={FPS} width={1280} height={720} />

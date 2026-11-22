@@ -1350,3 +1350,246 @@ const hz = (m) => 440 * Math.pow(2, (m - 69) / 12);
 	}
 	write('kids', room(bandpass(x, 250, 5000), 0.4, 1.8), 0.5);
 }
+
+// ===================================================== «Каково это — замёрзнуть насмерть» =====
+// beds that loop without a seam: the tail is cross-faded into the head, and no fade on the ends
+const loopify = (x, xf) => {
+	const n = Math.floor(xf * SR);
+	const out = x.slice(0, x.length - n);
+	for (let i = 0; i < n; i++) {
+		const a = i / n;
+		out[i] = out[i] * a + x[x.length - n + i] * (1 - a);
+	}
+	return out;
+};
+const writeLoop = (name, x, peak = 0.9) => {
+	x = normalize(x, peak);
+	const n = x.length;
+	const b = Buffer.alloc(44 + n * 2);
+	b.write('RIFF', 0); b.writeUInt32LE(36 + n * 2, 4); b.write('WAVE', 8);
+	b.write('fmt ', 12); b.writeUInt32LE(16, 16); b.writeUInt16LE(1, 20); b.writeUInt16LE(1, 22);
+	b.writeUInt32LE(SR, 24); b.writeUInt32LE(SR * 2, 28); b.writeUInt16LE(2, 32); b.writeUInt16LE(16, 34);
+	b.write('data', 36); b.writeUInt32LE(n * 2, 40);
+	for (let i = 0; i < n; i++) b.writeInt16LE(Math.max(-32767, Math.min(32767, Math.round(x[i] * 32767))), 44 + i * 2);
+	fs.writeFileSync(path.join(OUT, name + '.wav'), b);
+	console.log('sfx', name, (n / SR).toFixed(2) + 's (loop)');
+};
+const noiseBuf = (n) => Float32Array.from({length: n}, () => noise());
+const chirp = (f, len, rise, d) => {
+	const b = buf(len);
+	let ph = 0;
+	for (let i = 0; i < b.length; i++) {
+		ph += (2 * Math.PI * f * (1 + (rise * i) / b.length)) / SR;
+		b[i] = Math.sin(ph) * Math.exp(-i / SR / d);
+	}
+	return b;
+};
+// the open sea at night: a deep swell every 4 s and the wash of the crests; loops at 8 s
+{
+	const dur = 9;
+	const x = buf(dur);
+	const lo = lowpass(lowpass(noiseBuf(x.length), 350), 350);
+	const hi = bandpass(noiseBuf(x.length), 700, 3500);
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		const sw = 0.5 + 0.5 * Math.sin((2 * Math.PI * t) / 4);
+		const sw2 = 0.5 + 0.5 * Math.sin((2 * Math.PI * t) / (8 / 3) + 1.3);
+		x[i] = lo[i] * (0.6 + 0.4 * sw) * 3 + hi[i] * (sw * sw2) ** 2 * 0.35;
+	}
+	writeLoop('sea', loopify(room(lowpass(x, 2200), 0.2, 1.4), 1), 0.5);
+}
+// a body falls into the water: the slap, the spray, the bubbles
+{
+	const dur = 1.5;
+	const x = buf(dur);
+	add(x, thump(55, 0.5, 0.12, 0.6), 0, 1.0);
+	const spray = bandpass(noiseBuf(x.length), 900, 7000);
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		x[i] += spray[i] * (t < 0.01 ? t / 0.01 : Math.exp(-(t - 0.01) / 0.18)) * 0.9;
+	}
+	for (let k = 0; k < 26; k++) add(x, chirp(250 + rnd() * 700, 0.06, 1.2, 0.015), 0.12 + rnd() ** 1.5 * 1.2, 0.35 * (1 - k / 30));
+	write('splash', room(lowpass(x, 6000), 0.3, 1.2), 0.85);
+}
+// ice cracks: sharp snaps, the falling «ping» of a frozen lake, a low boom
+{
+	const dur = 1.4;
+	const x = buf(dur);
+	let t = 0;
+	for (let k = 0; k < 9; k++) {
+		add(x, click(0.04, 2200 + rnd() * 2600, 3), t, 0.9 - k * 0.07);
+		add(x, lowpass(click(0.06, 600 + rnd() * 300, 2), 1500), t, 0.5);
+		t += 0.015 + rnd() * (k < 4 ? 0.03 : 0.09);
+	}
+	const p = buf(0.9);
+	let ph = 0;
+	for (let i = 0; i < p.length; i++) {
+		const tt = i / SR;
+		ph += (2 * Math.PI * (700 + 1600 * Math.exp(-tt / 0.08))) / SR;
+		p[i] = Math.sin(ph) * Math.exp(-tt / 0.25) * 0.35;
+	}
+	add(x, p, 0.02);
+	add(x, thump(42, 1.0, 0.3, 0.2), 0, 0.8);
+	write('ice_crack', room(x, 0.35, 1.6), 0.85);
+}
+// the hull of a sinking ship groans: a low buzzing moan going down, creaks on top
+{
+	const dur = 3.6;
+	const x = buf(dur);
+	let ph = 0;
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		ph += (2 * Math.PI * (52 - 14 * (t / dur) + 3 * Math.sin(2 * Math.PI * 0.7 * t))) / SR;
+		const saw = ((ph / (2 * Math.PI)) % 1) * 2 - 1;
+		const a = Math.sin(Math.PI * Math.min(1, t / dur)) ** 0.7 * (0.7 + 0.3 * Math.sin(2 * Math.PI * 1.3 * t));
+		x[i] = (saw * 0.6 + noise() * 0.25) * a;
+	}
+	const y = add(reso(x, 180, 3), reso(x, 420, 5), 0, 0.7);
+	add(y, reso(x, 900, 8), 0, 0.25);
+	for (let k = 0; k < 5; k++) add(y, lowpass(click(0.12, 500 + rnd() * 400, 6), 2000), 0.3 + rnd() * 2.8, 0.4);
+	write('groan', room(lowpass(y, 1400), 0.45, 2.2), 0.8);
+}
+// teeth chattering
+{
+	const dur = 1.6;
+	const x = buf(dur);
+	let t = 0.02;
+	while (t < dur - 0.05) {
+		add(x, click(0.012, 2600 + rnd() * 1200, 4), t, 0.5 + rnd() * 0.5);
+		t += 0.055 + rnd() * 0.03;
+	}
+	write('chatter', bandpass(x, 1200, 6000), 0.5);
+}
+// the iceberg scrapes along the hull somewhere below: a muffled grinding
+{
+	const dur = 2.8;
+	const x = buf(dur);
+	const g = bandpass(noiseBuf(x.length), 150, 1400);
+	let ph = 0;
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		const a = Math.sin((Math.PI * t) / dur) ** 0.6;
+		const jit = 0.55 + 0.45 * Math.abs(Math.sin(2 * Math.PI * 7 * t + Math.sin(2 * Math.PI * 1.7 * t) * 3));
+		ph += (2 * Math.PI * (1100 + 250 * Math.sin(2 * Math.PI * 0.9 * t))) / SR;
+		x[i] = g[i] * a * jit * 1.4 + Math.sin(ph) * a * 0.08 * jit;
+	}
+	add(x, thump(40, 1.2, 0.4, 0.1), 0.05, 0.6);
+	write('scrape', room(lowpass(x, 2200), 0.4, 1.8), 0.7);
+}
+// one slow heartbeat (lub-dub)
+write('heart_one', lowpass(beat(1), 400), 0.95);
+// a heart monitor: one beep, and the flat line
+{
+	const x = buf(0.16);
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		x[i] = Math.sin(2 * Math.PI * 980 * t) * Math.min(1, t / 0.004) * Math.min(1, (0.16 - t) / 0.03);
+	}
+	write('ecg', x, 0.35);
+	const dur = 2.8;
+	const y = buf(dur);
+	for (let i = 0; i < y.length; i++) {
+		const t = i / SR;
+		y[i] = Math.sin(2 * Math.PI * 980 * t) * Math.min(1, t / 0.01) * Math.min(1, (dur - t) / 0.3);
+	}
+	write('flat', y, 0.3);
+}
+// bubbles going up
+{
+	const dur = 1.6;
+	const x = buf(dur);
+	for (let k = 0; k < 34; k++) add(x, chirp(220 + rnd() * 600, 0.07, 1.4, 0.018), rnd() * (dur - 0.1), 0.3 + rnd() * 0.3);
+	write('bubbles', room(lowpass(x, 2500), 0.3, 1.3), 0.6);
+}
+// a steamship's whistle far away (the «Carpathia»)
+{
+	const dur = 3.2;
+	const x = buf(dur);
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		const a = Math.min(1, t / 0.25) * Math.min(1, (dur - t) / 0.6);
+		const vib = 1 + 0.002 * Math.sin(2 * Math.PI * 5 * t);
+		const v = [110, 138.6, 165].reduce((s, f, k) => s + Math.sin(2 * Math.PI * f * t * vib) / (k + 1), 0);
+		x[i] = (v * 0.5 + noise() * 0.12) * a;
+	}
+	write('steam_horn', room(lowpass(x, 1200), 0.5, 2.6), 0.55);
+}
+// fast shallow breathing after the cold shock
+{
+	const dur = 3.2;
+	const x = buf(dur);
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		const c = (t % 0.4) / 0.4;
+		const a = c < 0.4 ? Math.sin((Math.PI * c) / 0.4) : c < 0.85 ? Math.sin((Math.PI * (c - 0.4)) / 0.45) * 0.7 : 0;
+		x[i] = noise() * a;
+	}
+	const y = add(reso(x, 600, 1.6), reso(x, 1500, 2), 0, 0.6);
+	write('pant', room(lowpass(y, 2600), 0.25), 0.55);
+}
+// a rescue helicopter: the rotor beat; loops at 4 s
+{
+	const dur = 5;
+	const x = buf(dur);
+	const n = lowpass(noiseBuf(x.length), 600);
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		const p = (t * 5.5) % 1;
+		x[i] = n[i] * (0.25 + Math.exp(-p / 0.06) * 1.2) + Math.sin(2 * Math.PI * 38 * t) * 0.15;
+	}
+	writeLoop('heli', loopify(room(x, 0.2, 1.4), 1), 0.55);
+}
+// a phone keypad: 1-1-2
+{
+	const x = buf(1.0);
+	[[697, 1209], [697, 1209], [697, 1336]].forEach(([a, b], k) => {
+		const tone = buf(0.16);
+		for (let i = 0; i < tone.length; i++) {
+			const t = i / SR;
+			tone[i] = (Math.sin(2 * Math.PI * a * t) + Math.sin(2 * Math.PI * b * t)) * 0.5 * Math.min(1, t / 0.004) * Math.min(1, (0.16 - t) / 0.01);
+		}
+		add(x, tone, 0.05 + k * 0.28);
+	});
+	write('dtmf112', x, 0.4);
+}
+// a spoon stirring tea in a cup
+{
+	const x = buf(1.3);
+	for (let k = 0; k < 4; k++) add(x, ping([2900 + rnd() * 300, 4100, 6300], 0.4, 0.07, 0.5), 0.05 + k * 0.27 + rnd() * 0.04);
+	write('spoon', room(x, 0.2, 0.7), 0.45);
+}
+// a gust of icy wind with a faint howl
+{
+	const dur = 3;
+	const x = noiseBuf(Math.ceil(dur * SR));
+	const y = reso(x, 700, 1.2);
+	const h = reso(x, 420, 12);
+	for (let i = 0; i < y.length; i++) {
+		const t = i / SR;
+		y[i] = y[i] * Math.sin((Math.PI * t) / dur) ** 1.5 + h[i] * Math.sin((Math.PI * t) / dur) ** 2 * 0.6;
+	}
+	write('gust', room(lowpass(y, 2500), 0.3, 1.5), 0.6);
+}
+// far voices calling in the dark over the water (no words); loops at 6 s
+{
+	const dur = 7;
+	const x = buf(dur);
+	for (let k = 0; k < 14; k++) {
+		const male = rnd() < 0.5;
+		const f0 = male ? 150 + rnd() * 60 : 280 + rnd() * 90;
+		const L = 0.6 + rnd() * 0.9;
+		const v = buf(L);
+		let ph = 0;
+		for (let i = 0; i < v.length; i++) {
+			const t = i / SR;
+			const u = t / L;
+			ph += (2 * Math.PI * f0 * (1 + 0.25 * Math.sin(Math.PI * u) - 0.15 * u) * (1 + 0.01 * Math.sin(2 * Math.PI * 6 * t))) / SR;
+			const saw = ((ph / (2 * Math.PI)) % 1) * 2 - 1;
+			v[i] = (saw + noise() * 0.3) * Math.sin(Math.PI * u) ** 0.8;
+		}
+		const fa = rnd() < 0.5 ? [800, 1200] : [550, 950];
+		const y = add(reso(v, fa[0], 5), reso(v, fa[1], 6), 0, 0.6);
+		add(x, y, rnd() * (dur - L - 1), 0.4 + rnd() * 0.6);
+	}
+	writeLoop('cries', loopify(room(lowpass(x, 1800), 0.55, 2.6), 1), 0.4);
+}

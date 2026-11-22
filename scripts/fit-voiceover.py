@@ -56,7 +56,11 @@ PATHS = {
 }[PART]
 SHOT = [float(x) for x in re.search(r'SHOT_SECONDS = \[([^\]]+)\]', open(os.path.join(ROOT, PATHS['timeline']), encoding='utf-8').read()).group(1).split(',')]
 TOTAL = round(sum(SHOT) * FPS)
-MAX_INNER_GAP = 0.22  # longest pause kept inside a line (s)
+MAX_INNER_GAP = float(os.environ.get('INNER_GAP', '0.22'))  # longest pause kept inside a line (s)
+# a recording made by a person (not by ElevenLabs) may hold a re-read paragraph, a false start, a cough:
+# with --retakes they are left out before matching (scripts/retakes.py; the last take of a paragraph is kept)
+RETAKES = '--retakes' in sys.argv
+DRY = '--dry' in sys.argv  # print how the recording matches the script, write nothing
 LEAD = 0.5  # a line may start this much before its planned moment (s)
 LATE = 1.0  # ...and end this much after the next line's planned moment (s)
 GAP = 0.12  # minimal pause between lines (s)
@@ -120,6 +124,11 @@ def main(src):
         t = e
     if total - t > 0.05:
         segs.append([t, total])
+    if RETAKES:
+        from retakes import clean_segments
+        segs, left = clean_segments(audio, SR, segs)
+        for a_, b_, why in left:
+            print(f'  left out {a_:7.2f}-{b_:7.2f}s  {why}')
     gaps = [segs[k + 1][0] - segs[k][1] for k in range(len(segs) - 1)]
 
     # --- match phrases to lines -------------------------------------------------
@@ -131,9 +140,6 @@ def main(src):
     n, m = len(segs), len(lines)
     rate = sum(e - s for s, e in segs) / sum(C)
     INF = 1e18
-    dp = [[INF] * (n + 1) for _ in range(m + 1)]
-    bk = [[-1] * (n + 1) for _ in range(m + 1)]
-    dp[0][0] = 0
 
     def cost(i, k, j):
         sp = sum(segs[q][1] - segs[q][0] for q in range(k, j))
@@ -144,25 +150,43 @@ def main(src):
             c += max(0, 0.45 - gaps[j - 1]) * 3
         return c
 
-    for i in range(m):
-        for k in range(n):
-            if dp[i][k] >= INF:
-                continue
-            for j in range(k + 1, min(n, k + 8) + 1):
-                if n - j < m - i - 1:
-                    break
-                v = dp[i][k] + cost(i, k, j)
-                if v < dp[i + 1][j]:
-                    dp[i + 1][j] = v
-                    bk[i + 1][j] = k
-    if dp[m][n] >= INF:
-        sys.exit('could not match the recording to the script: is it the same text?')
-    groups, j = [], n
-    for i in range(m, 0, -1):
-        k = bk[i][j]
-        groups.append((k, j))
-        j = k
-    groups.reverse()
+    def match():
+        dp = [[INF] * (n + 1) for _ in range(m + 1)]
+        bk = [[-1] * (n + 1) for _ in range(m + 1)]
+        dp[0][0] = 0
+        for i in range(m):
+            for k in range(n):
+                if dp[i][k] >= INF:
+                    continue
+                for j in range(k + 1, min(n, k + 8) + 1):
+                    if n - j < m - i - 1:
+                        break
+                    v = dp[i][k] + cost(i, k, j)
+                    if v < dp[i + 1][j]:
+                        dp[i + 1][j] = v
+                        bk[i + 1][j] = k
+        if dp[m][n] >= INF:
+            sys.exit('could not match the recording to the script: is it the same text?')
+        groups, j = [], n
+        for i in range(m, 0, -1):
+            k = bk[i][j]
+            groups.append((k, j))
+            j = k
+        groups.reverse()
+        return groups
+
+    groups = match()
+    odd = []
+    for i, (k, j) in enumerate(groups):
+        sp = sum(segs[q][1] - segs[q][0] for q in range(k, j))
+        r = sp / (rate * C[i])
+        if abs(math.log(r)) > 0.35:
+            odd.append(i)
+        if DRY or abs(math.log(r)) > 0.35:
+            print(f'  {lines[i]["id"]:>5} {segs[k][0]:7.2f}-{segs[j - 1][1]:7.2f}s  x{r:4.2f}{"  <- check" if abs(math.log(r)) > 0.35 else ""}  {lines[i]["text"][:60]}')
+    print(f'matched {m} lines to {n} phrases, {len(odd)} lines with an unusual length')
+    if DRY:
+        return
 
     # --- build one clip per line (long inner pauses shortened) -------------------
     # The phrase borders come from a -38 dB silence gate, but soft word endings

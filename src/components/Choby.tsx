@@ -5,7 +5,7 @@
 //   jaw   0…1  the mouth opens (talking: drive it from the voice envelope)
 //   look  [-1…1, -1…1] where the pupils look;  blink 0…1;  tilt — the head tilt in degrees
 //   armR  'pointer' | 'wave' | 'point' (a finger up: «запомни») | 'down' | 'hip';   armL  'hip' | 'down' | 'wave' | 'point'
-//   bust  draw only from the pelvis up;  shiver 0…1 (with f) — trembling from the cold
+//   bust  draw only from the pelvis up;  shiver 0…1 (with f) — trembling from the cold;  capTilt — the mortarboard's own tilt
 import React from 'react';
 
 export const BONE = '#f3eee2';
@@ -67,7 +67,8 @@ export const Choby: React.FC<{
 	blush?: boolean;
 	shiver?: number;
 	f?: number;
-}> = ({x, y, s = 1, jaw = 0.15, look = [0, 0], blink = 0, tilt = 0, armR = 'pointer', armL = 'hip', bust = false, blush = true, shiver = 0, f = 0}) => {
+	capTilt?: number;
+}> = ({x, y, s = 1, jaw = 0.15, look = [0, 0], blink = 0, tilt = 0, armR = 'pointer', armL = 'hip', bust = false, blush = true, shiver = 0, f = 0, capTilt = 0}) => {
 	const sx = shiver ? Math.sin(f * 2.1) * 3 * shiver : 0;
 	const jo = Math.max(0, Math.min(1, jaw)) * 22;
 	const arm = (side: 1 | -1, pose: ArmR | ArmL) => {
@@ -196,7 +197,7 @@ export const Choby: React.FC<{
 					<path d="M -116,-572 L -144,-586 M 116,-572 L 144,-586" />
 				</g>
 				{/* the oversized mortarboard with its tassel */}
-				<g transform="rotate(-5 0 -690)">
+				<g transform={`rotate(${capTilt} 0 -690)`}>
 					<path d="M -176,-690 L 0,-748 L 176,-690 L 0,-636 Z" fill="#1d1d24" />
 					<path d="M 0,-748 L 176,-690 L 0,-636 Z" fill="#15151b" />
 					<path d="M -96,-688 L 96,-688 L 92,-652 Q 0,-636 -92,-652 Z" fill="#26262e" />

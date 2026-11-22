@@ -171,6 +171,7 @@ if __name__ == '__main__':
         't2': ('public/voice-t2', 'src/t2/voice-timings.json'),
         'w1': ('public/voice-w1', 'src/w1/voice-timings.json'),
         'u1': ('public/voice-u1', 'src/u1/voice-timings.json'),
+        'c1': ('public/voice-c1', 'src/c1/voice-timings.json'),
     }[part]
     tpath = os.path.join(root, tfile)
     data = json.load(open(tpath, encoding='utf-8'))

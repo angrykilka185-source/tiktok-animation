@@ -22,7 +22,7 @@ export type Face = {
 	sweat?: number; // 0..1
 	stubble?: boolean;
 	blush?: boolean;
-	glasses?: boolean; // the «Голосовые» teen wears glasses unless false
+	glasses?: boolean; // the «Голосовые» teen wears glasses unless false; any other kind wears them when true
 	bruise?: number; // 0..1 a purple bruise under the viewer-right eye
 };
 
@@ -65,7 +65,7 @@ export type PersonProps = {
 	quilt?: boolean; // a quilted jacket (телогрейка): stitched bands across the torso
 	pioneer?: boolean; // a white shirt collar and a red pioneer tie (school uniform)
 	// period looks («Что будет, если ты попадёшь в XX век»)
-	hat?: {type: 'peak' | 'pilotka' | 'bowler' | 'scarf' | 'kepi'; color: string; band?: string}; // фуражка / пилотка / котелок / платок / кепи
+	hat?: {type: 'peak' | 'pilotka' | 'bowler' | 'scarf' | 'kepi' | 'top' | 'chef'; color: string; band?: string}; // фуражка / пилотка / котелок / платок / кепи
 	beard?: string; // a full beard (with a moustache) of this colour
 	moustache?: string; // just a moustache
 	hem?: number; // mom kind: how much of the legs the dress covers (default 0.55; 0.95 = to the ankles)
@@ -454,7 +454,7 @@ export const Head: React.FC<{
 				)}
 				{eye(-ex)}
 				{eye(ex)}
-				{kind === 'teen' && face.glasses !== false && (
+				{((kind === 'teen' && face.glasses !== false) || (kind !== 'teen' && face.glasses === true)) && (
 					<g stroke="#1d1d22" strokeWidth={hw * 0.065} fill="none" strokeLinecap="round">
 						<circle cx={-ex} cy={ey} r={hw * 0.33} fill="#ffffff" fillOpacity={0.08} />
 						<circle cx={ex} cy={ey} r={hw * 0.33} fill="#ffffff" fillOpacity={0.08} />
@@ -533,7 +533,7 @@ export const Whiskers: React.FC<{hw: number; hh: number; color: string; full: bo
 
 // period hats: фуражка (a peaked cap with a band), пилотка (a side cap with a star), котелок (a bowler), платок (a
 // headscarf tied under the chin), кепи (a tall peaked cap of the gendarmes / the city police of 1901)
-export const PeriodHat: React.FC<{hw: number; hh: number; type: 'peak' | 'pilotka' | 'bowler' | 'scarf' | 'kepi'; color: string; band?: string; back?: boolean; turn?: number}> = ({hw, hh, type, color, band, back, turn = 0}) => {
+export const PeriodHat: React.FC<{hw: number; hh: number; type: 'peak' | 'pilotka' | 'bowler' | 'scarf' | 'kepi' | 'top' | 'chef'; color: string; band?: string; back?: boolean; turn?: number}> = ({hw, hh, type, color, band, back, turn = 0}) => {
 	const tx = turn * hw * 0.12;
 	if (type === 'scarf') {
 		const outer = `M ${-hw * 1.2},${hh * 0.45} C ${-hw * 1.34},${-hh * 1.42} ${hw * 1.34},${-hh * 1.42} ${hw * 1.2},${hh * 0.45} C ${hw * 1.0},${hh * 0.95} ${hw * 0.5},${hh * 1.16} 0,${hh * 1.18} C ${-hw * 0.5},${hh * 1.16} ${-hw * 1.0},${hh * 0.95} ${-hw * 1.2},${hh * 0.45} Z`;
@@ -560,6 +560,32 @@ export const PeriodHat: React.FC<{hw: number; hh: number; type: 'peak' | 'pilotk
 				<path d={`M ${-hw * 0.95},${-hh * 0.58} L ${-hw * 0.72},${-hh * 1.16} Q 0,${-hh * 1.36} ${hw * 0.72},${-hh * 1.16} L ${hw * 0.95},${-hh * 0.58} Q 0,${-hh * 0.74} ${-hw * 0.95},${-hh * 0.58} Z`} fill={color} />
 				<path d={`M ${-hw * 0.95},${-hh * 0.58} Q 0,${-hh * 0.74} ${hw * 0.95},${-hh * 0.58} L ${hw * 0.9},${-hh * 0.76} Q 0,${-hh * 0.9} ${-hw * 0.9},${-hh * 0.76} Z`} fill="#000" opacity={0.18} />
 				{!back && <path d={starPath(tx, -hh * 0.86, hw * 0.13)} fill={band ?? '#d8261e'} />}
+			</g>
+		);
+	}
+	if (type === 'top') {
+		// a top hat (цилиндр): a brim, a tall crown, a band
+		return (
+			<g>
+				<path d={`M ${-hw * 0.84},${-hh * 0.64} L ${-hw * 0.9},${-hh * 2.02} Q 0,${-hh * 2.1} ${hw * 0.9},${-hh * 2.02} L ${hw * 0.84},${-hh * 0.64} Z`} fill={color} />
+				<path d={`M ${-hw * 0.85},${-hh * 0.7} L ${hw * 0.85},${-hh * 0.7} L ${hw * 0.86},${-hh * 0.94} L ${-hw * 0.86},${-hh * 0.94} Z`} fill={band ?? '#5a1a1e'} />
+				<ellipse cx={0} cy={-hh * 0.62} rx={hw * 1.36} ry={hh * 0.14} fill={color} />
+				<path d={`M ${-hw * 0.55},${-hh * 1.9} L ${-hw * 0.5},${-hh * 1.05}`} stroke="#fff" strokeOpacity={0.16} strokeWidth={hw * 0.12} strokeLinecap="round" />
+			</g>
+		);
+	}
+	if (type === 'chef') {
+		// a chef's toque: a white band and a puffed top
+		return (
+			<g>
+				{[-0.5, 0.06, 0.56].map((k, i) => (
+					<circle key={i} cx={hw * k} cy={-hh * (1.38 + (i === 1 ? 0.14 : 0))} r={hw * 0.6} fill={color} />
+				))}
+				<path d={`M ${-hw * 0.98},${-hh * 0.52} L ${-hw * 0.92},${-hh * 1.08} L ${hw * 0.92},${-hh * 1.08} L ${hw * 0.98},${-hh * 0.52} Z`} fill={color} />
+				<path d={`M ${-hw * 0.98},${-hh * 0.52} L ${hw * 0.98},${-hh * 0.52} L ${hw * 0.97},${-hh * 0.64} L ${-hw * 0.97},${-hh * 0.64} Z`} fill="#000" opacity={0.08} />
+				{[-0.4, 0.05, 0.5].map((k, i) => (
+					<path key={i} d={`M ${hw * k},${-hh * 1.08} Q ${hw * (k + 0.06)},${-hh * 1.3} ${hw * (k - 0.02)},${-hh * 1.52}`} stroke="#000" strokeOpacity={0.08} strokeWidth={hw * 0.05} fill="none" />
+				))}
 			</g>
 		);
 	}

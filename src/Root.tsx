@@ -25,6 +25,7 @@ import {Rayon2, Rayon2Audio, RR2} from './r2/Main';
 import {RW1, Vek20, Vek20Audio} from './w1/Main';
 import {RU1, Sssr1, Sssr1Audio} from './u1/Main';
 import {SHORTS, shortDuration, SssrShort, SssrShortAudio} from './u1/shorts';
+import {Chips1, Chips1Audio, RC1} from './c1/Main';
 import {FPS, H, SHOTS, W} from './timeline';
 import * as Scenes from './scenes';
 
@@ -67,6 +68,8 @@ export const RemotionRoot: React.FC = () => (
 		{/* covers for the long video (all parts as one film) */}
 		<Composition id="CoverPapaFilm" component={CoverPapaFilm} durationInFrames={1} fps={FPS} width={1280} height={720} />
 		<Composition id="CoverPapaFilmV" component={CoverPapaFilmV} durationInFrames={1} fps={FPS} width={W} height={H} />
+		<Composition id="Chips1" component={Chips1} durationInFrames={RC1.total} fps={FPS} width={W} height={H} />
+		<Composition id="Chips1Audio" component={Chips1Audio} durationInFrames={RC1.total} fps={FPS} width={W} height={H} />
 		<Composition id="CoverSssr" component={CoverSssr} durationInFrames={1} fps={FPS} width={1280} height={720} />
 		{/* every shot on its own for quick previews */}
 		{SHOTS.map((s) => {

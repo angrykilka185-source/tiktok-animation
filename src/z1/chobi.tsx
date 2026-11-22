@@ -415,10 +415,11 @@ export const C25: React.FC = () => {
 			}
 		>
 			{f >= heat && <g transform={`translate(1370,470) scale(${0.8 * pop(f, heat, 12)})`}>{<Heater on={on} />}</g>}
-			{/* the trembling marks */}
+			{/* the trembling marks (they quiver, they do not blink) */}
 			{[0, 1, 2, 3].map((i) => {
 				const sd = i % 2 ? 1 : -1;
-				return Math.floor(g / 3) % 2 === i % 2 ? <path key={i} d={`M ${px(sd * (178 + (i > 1 ? 26 : 0)))},${py(-540 + i * 64)} l ${sd * 30},0`} stroke={INK} strokeWidth={8} strokeLinecap="round" /> : null;
+				const q = Math.sin(g * 0.9 + i * 1.7) * 5;
+				return <path key={i} d={`M ${px(sd * (178 + (i > 1 ? 26 : 0))) + sd * q},${py(-540 + i * 64)} l ${sd * 30},0`} stroke={INK} strokeWidth={8} strokeLinecap="round" opacity={0.75} />;
 			})}
 			{/* the warmth of the muscles rising off his shoulders */}
 			{wv > 0 &&
@@ -429,7 +430,7 @@ export const C25: React.FC = () => {
 					}),
 				)}
 			<Stand k={k} b={b}>
-				<Choby x={HX} y={FEET} s={S} jaw={jaw} blink={blink} f={g} shiver={1.4} cold={0.85} look={[0.25, 0.05]} armR={HUG} armL={mirror(HUG)} />
+				<Choby x={HX} y={FEET} s={S} jaw={jaw} blink={blink} f={g} shiver={1.2} cold={0.85} look={[0.25, 0.05]} armR={HUG} armL={mirror(HUG)} />
 			</Stand>
 		</Page>
 	);
@@ -729,7 +730,7 @@ export const C64: React.FC = () => {
 	const layers = w(n, 'слоями') - 6;
 	const calm = ease(f, 0, 14, 1, 0);
 	// the cap the wind took falls back onto his head
-	const capY = interpolate(f, [2, 26], [-900, 0], {...clamp, easing: Easing.bounce});
+	const capY = interpolate(f, [2, 38], [-900, 0], {...clamp, easing: Easing.bounce});
 	const armR = armAt(1, f, [[0, 'down'], [layers, 'point']], g);
 	const poof = (at: number, x: number, y: number) =>
 		f >= at && f < at + 12 ? <circle cx={x} cy={y} r={30 + (f - at) * 9} fill="none" stroke={YEL} strokeWidth={8} opacity={1 - (f - at) / 12} /> : null;
@@ -751,7 +752,7 @@ export const C64: React.FC = () => {
 			{poof(layers + 8, px(-90), py(-226))}
 			{poof(layers + 8, px(116), py(-420))}
 			<Stand k={k} b={b} lean={4 * calm}>
-				<Choby x={HX} y={FEET} s={S} jaw={jaw} blink={blink} tilt={tilt} f={g} capAt={f < 26 ? [0, capY, 0] : undefined} scarf={f >= layers + 2} mittens={f >= layers + 8} look={f < 22 ? [0.05, -0.9] : [0.6, -0.1]} armR={armR} armL="hip" />
+				<Choby x={HX} y={FEET} s={S} jaw={jaw} blink={blink} tilt={tilt} f={g} capAt={f < 38 ? [0, capY, 0] : undefined} scarf={f >= layers + 2} mittens={f >= layers + 8} look={f < 30 ? [0.05, -0.9] : [0.6, -0.1]} armR={armR} armL="hip" />
 			</Stand>
 		</Page>
 	);

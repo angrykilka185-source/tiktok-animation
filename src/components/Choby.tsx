@@ -191,7 +191,7 @@ export const Choby: React.FC<{
 	inner,
 	outer,
 }) => {
-	const sx = shiver ? Math.sin(f * 2.1) * 9 * shiver : 0;
+	const sx = shiver ? Math.sin(f * 1.3) * 8 * shiver : 0;
 	const chatter = shiver ? Math.abs(Math.sin(f * 1.7)) * 0.3 * shiver : 0;
 	const jo = Math.max(0, Math.min(1, jaw + chatter)) * 22;
 	const cheek = cold > 0 ? mixHex('#f0868e', '#8fb8ff', Math.min(1, cold)) : '#f0868e';

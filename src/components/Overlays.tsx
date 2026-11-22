@@ -258,18 +258,18 @@ export const SignPlaques: React.FC<{ep: Episode}> = ({ep}) => {
 const RED = '#ff3b30';
 const QUOTE = '#ffd34a';
 // solid: the words still to come keep a full outline (readable over snow and white rooms), only their colour is dimmed
-const CapWords: React.FC<{words: CapWord[]; wide?: boolean; solid?: boolean}> = ({words, wide = false, solid = false}) => {
+const CapWords: React.FC<{words: CapWord[]; wide?: boolean; solid?: boolean; box?: [number, number]}> = ({words, wide = false, solid = false, box}) => {
 	const f = useCurrentFrame();
 	const len = words.reduce((a, w) => a + w.w.length + 1, 0);
 	// a long single word («ТЕПЛОКОНТРОЛЬ», «ТЯП-ЛЯПОВСКИЙ») would run off the frame or break at its hyphen
 	const longest = Math.max(...words.map((w) => w.w.length));
 	// 16:9: one line low in the frame, a little smaller
-	const W = wide ? 1500 : 880;
+	const W = box ? box[1] : wide ? 1500 : 880;
 	return (
 		<div
 			style={{
 				position: 'absolute',
-				left: wide ? 210 : 30,
+				left: box ? box[0] : wide ? 210 : 30,
 				width: W,
 				top: wide ? 880 : 1170,
 				textAlign: 'center',
@@ -306,10 +306,10 @@ const CapWords: React.FC<{words: CapWord[]; wide?: boolean; solid?: boolean}> = 
 	);
 };
 
-export const Captions: React.FC<{captions: CapChunk[]; wide?: boolean; solid?: boolean}> = ({captions, wide, solid}) => {
+export const Captions: React.FC<{captions: CapChunk[]; wide?: boolean; solid?: boolean; box?: [number, number]}> = ({captions, wide, solid, box}) => {
 	const f = useCurrentFrame();
 	const ch = captions.find((c) => f >= c.from - 2 && f < c.to);
-	return ch ? <CapWords words={ch.words} wide={wide} solid={solid} /> : null;
+	return ch ? <CapWords words={ch.words} wide={wide} solid={solid} box={box} /> : null;
 };
 
 // ------------------------------ rule cards ---------------------------------

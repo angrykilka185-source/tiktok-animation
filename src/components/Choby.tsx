@@ -5,7 +5,8 @@
 //   jaw   0…1  the mouth opens (talking: drive it from the voice envelope)
 //   look  [-1…1, -1…1] where the pupils look;  blink 0…1;  tilt — the head tilt in degrees
 //   armR  'pointer' | 'wave' | 'point' (a finger up: «запомни») | 'down' | 'hip';   armL  'hip' | 'down' | 'wave' | 'point'
-//   bust  draw only from the pelvis up;  shiver 0…1 (with f) — trembling from the cold;  capTilt — the mortarboard's own tilt
+//   bust  draw only from the pelvis up;  shiver 0…1 (with f) — trembling and chattering teeth;  cold 0…1 — the cheeks turn blue
+//   capTilt — the mortarboard's own tilt
 import React from 'react';
 
 export const BONE = '#f3eee2';
@@ -13,8 +14,14 @@ export const BONE_SH = '#e3dbca';
 export const BONE_D = '#bdb29c';
 const INK = '#1d2024';
 
+const mixHex = (a: string, b: string, t: number) => {
+	const p = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+	const [x, y] = [p(a), p(b)];
+	return '#' + x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, '0')).join('');
+};
+
 type ArmR = 'pointer' | 'wave' | 'point' | 'down' | 'hip';
-type ArmL = 'hip' | 'down' | 'wave' | 'point';
+type ArmL = 'hip' | 'down' | 'wave' | 'point' | 'pointer';
 
 const Bone: React.FC<{a: [number, number]; b: [number, number]; w?: number}> = ({a, b, w = 20}) => (
 	<g>
@@ -68,9 +75,12 @@ export const Choby: React.FC<{
 	shiver?: number;
 	f?: number;
 	capTilt?: number;
-}> = ({x, y, s = 1, jaw = 0.15, look = [0, 0], blink = 0, tilt = 0, armR = 'pointer', armL = 'hip', bust = false, blush = true, shiver = 0, f = 0, capTilt = 0}) => {
-	const sx = shiver ? Math.sin(f * 2.1) * 3 * shiver : 0;
-	const jo = Math.max(0, Math.min(1, jaw)) * 22;
+	cold?: number;
+}> = ({x, y, s = 1, jaw = 0.15, look = [0, 0], blink = 0, tilt = 0, armR = 'pointer', armL = 'hip', bust = false, blush = true, shiver = 0, f = 0, capTilt = 0, cold = 0}) => {
+	const sx = shiver ? Math.sin(f * 2.1) * 9 * shiver : 0;
+	const chatter = shiver ? Math.abs(Math.sin(f * 1.7)) * 0.3 * shiver : 0;
+	const jo = Math.max(0, Math.min(1, jaw + chatter)) * 22;
+	const cheek = cold > 0 ? mixHex('#f0868e', '#8fb8ff', Math.min(1, cold)) : '#f0868e';
 	const arm = (side: 1 | -1, pose: ArmR | ArmL) => {
 		const sh: [number, number] = [side * 62, -380];
 		let el: [number, number];
@@ -173,7 +183,7 @@ export const Choby: React.FC<{
 					<rect key={k} x={tx - 5.5} y={-466 + Math.abs(tx) * -0.06} width={11} height={13} rx={4} fill="#fffdf6" stroke={BONE_D} strokeWidth={2.2} />
 				))}
 				{/* pink cheeks */}
-				{blush && [-1, 1].map((sd) => <ellipse key={sd} cx={sd * 100} cy={-500} rx={22} ry={12} fill="#f0868e" opacity={0.5} />)}
+				{blush && [-1, 1].map((sd) => <ellipse key={sd} cx={sd * 100} cy={-500} rx={22} ry={12} fill={cheek} opacity={0.55} />)}
 				{/* big shiny eyes */}
 				{[-1, 1].map((sd) => (
 					<g key={sd}>

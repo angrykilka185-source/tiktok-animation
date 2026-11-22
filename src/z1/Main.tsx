@@ -6,6 +6,7 @@ import edit from './edit.json';
 import {HUDZ, ZTick} from './kit';
 import * as Scenes from './scenes';
 import {SFXZ1} from './SFX';
+import {HostChoby} from './host';
 import {shotStart as s, SHOTS, TOTAL} from './timeline';
 import {VOICE_CAPTIONS, w} from './voice';
 
@@ -51,6 +52,30 @@ export const Zamerznut: React.FC = () => (
 
 export const ZamerznutAudio: React.FC = () => (
 	<AbsoluteFill style={{background: '#000'}}>
+		<SFXZ1 r={RZ1} />
+	</AbsoluteFill>
+);
+
+// the same film hosted by Чоби (the channel's skeleton teacher) in the corner; the captions move right to clear him
+export const ZamerznutChobi: React.FC = () => (
+	<AbsoluteFill style={{background: '#000'}}>
+		<KickLayer times={KICKS}>
+			{SHOTS.map((sh) => {
+				const C = (Scenes as unknown as Record<string, React.FC>)[`S${String(sh.index).padStart(2, '0')}`];
+				const from = Math.round(RZ1.fwd(sh.from));
+				const to = Math.round(RZ1.fwd(sh.from + sh.duration));
+				return (
+					<Sequence key={sh.index} from={from} durationInFrames={Math.max(1, to - from)} name={`Кадр ${sh.index}`}>
+						<Retimed r={RZ1} newFrom={from} oldFrom={sh.from} oldDur={sh.duration}>
+							{C ? <C /> : <AbsoluteFill style={{background: '#223'}} />}
+						</Retimed>
+					</Sequence>
+				);
+			})}
+		</KickLayer>
+		<HUDZ ticks={TICKS} show={[Math.round(RZ1.fwd(s(3))) + 6, Math.round(RZ1.fwd(s(46)))]} timer={[at(13, 0), Math.round(RZ1.fwd(s(46)))]} />
+		<HostChoby shotAt={(n) => Math.round(RZ1.fwd(s(n)))} wordAt={(n, word) => at(n, word)} shots={SHOTS.length} />
+		<Captions captions={VOICE_CAPTIONS} wide solid box={[380, 1460]} />
 		<SFXZ1 r={RZ1} />
 	</AbsoluteFill>
 );

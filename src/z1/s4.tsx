@@ -261,7 +261,7 @@ export const S65: React.FC = () => {
 	return (
 		<AbsoluteFill style={{background: 'radial-gradient(ellipse at 50% 45%, #13284a 0%, #040912 80%)'}}>
 			<Stage16 bg="transparent">
-				<g transform={`translate(520,460) scale(${pop(f, 4, 12)})`}>
+				<g transform={`translate(700,460) scale(${pop(f, 4, 12)})`}>
 					<ellipse cx={-120} cy={60} rx={110} ry={40} fill="#f4f2ee" />
 					<path d="M -220,40 Q -120,140 -20,40 Z" fill="#e8a838" />
 					<rect x={40} y={-10} width={200} height={110} rx={50} fill="#c8843a" />
@@ -270,7 +270,7 @@ export const S65: React.FC = () => {
 					<path d="M 0,170 q -40,-60 0,-120 q 50,60 0,120 Z" fill="#ff8a3a" transform="translate(0,40)" />
 				</g>
 				{f >= ph && (
-					<g transform={`translate(1400,470) scale(${pop(f, ph, 12)})`}>
+					<g transform={`translate(1460,470) scale(${pop(f, ph, 12)})`}>
 						<rect x={-120} y={-230} width={240} height={460} rx={34} fill="#14161c" />
 						<rect x={-104} y={-206} width={208} height={412} rx={22} fill="#1e2a40" />
 						<rect x={-60} y={-40} width={110} height={56} rx={10} fill="none" stroke="#fff" strokeWidth={8} />
@@ -285,8 +285,8 @@ export const S65: React.FC = () => {
 					</g>
 				)}
 			</Stage16>
-			<Plaque f={f} at={w(n, 'топливо') - 4} x={520} y={820 - 30} text="ЕДА = ТОПЛИВО ДЛЯ ДРОЖИ" color="#ff8a3a" size={40} />
-			{f >= ph && <Plaque f={f} at={ph + 10} x={1400} y={820 - 30} text="ТЕЛЕФОН — ВО ВНУТРЕННИЙ КАРМАН" color={ICE} size={34} />}
+			<Plaque f={f} at={w(n, 'топливо') - 4} x={700} y={820 - 30} text="ЕДА = ТОПЛИВО ДЛЯ ДРОЖИ" color="#ff8a3a" size={40} />
+			{f >= ph && <Plaque f={f} at={ph + 10} x={1460} y={820 - 30} text="ТЕЛЕФОН — ВО ВНУТРЕННИЙ КАРМАН" color={ICE} size={34} />}
 		</AbsoluteFill>
 	);
 };
@@ -542,7 +542,7 @@ export const S73: React.FC = () => {
 		<AbsoluteFill style={{background: 'radial-gradient(ellipse at 50% 45%, #13284a 0%, #040912 80%)'}}>
 			<Stage16 bg="transparent">
 				{f >= a && (
-					<g transform="translate(600,470)">
+					<g transform="translate(720,470)">
 						<circle r={170} fill="#0e1830" />
 						<circle cx={-20} cy={10} r={80} fill="#f4fbff" stroke="#cfe0f8" strokeWidth={6} />
 						<ellipse cx={60} cy={-30} rx={70} ry={50} fill="#efbf98" />
@@ -550,7 +550,7 @@ export const S73: React.FC = () => {
 					</g>
 				)}
 				{f >= b && (
-					<g transform="translate(1320,470)">
+					<g transform="translate(1400,470)">
 						<circle r={170} fill="#0e1830" />
 						<g transform="scale(0.9)">
 							<rect x={-16} y={-150} width={32} height={50} rx={6} fill="#4a2e1a" />
@@ -560,8 +560,8 @@ export const S73: React.FC = () => {
 					</g>
 				)}
 			</Stage16>
-			{f >= a && <Plaque f={f} at={a} x={600} y={800} text="НЕ РАСТИРАЙ СНЕГОМ" color={RED} size={42} />}
-			{f >= b && <Plaque f={f} at={b} x={1320} y={800} text="НИКАКОГО АЛКОГОЛЯ" color={RED} size={42} />}
+			{f >= a && <Plaque f={f} at={a} x={720} y={800} text="НЕ РАСТИРАЙ СНЕГОМ" color={RED} size={42} />}
+			{f >= b && <Plaque f={f} at={b} x={1400} y={800} text="НИКАКОГО АЛКОГОЛЯ" color={RED} size={42} />}
 		</AbsoluteFill>
 	);
 };
@@ -572,7 +572,7 @@ export const S74: React.FC = () => {
 	return (
 		<AbsoluteFill style={{background: 'radial-gradient(ellipse at 50% 45%, #2a2a3a 0%, #0a0a12 80%)'}}>
 			<Stage16 bg="transparent">
-				<g transform={`translate(600,520) scale(${pop(f, 4, 12)})`}>
+				<g transform={`translate(720,520) scale(${pop(f, 4, 12)})`}>
 					<path d="M -120,-140 L 120,-140 L 100,140 Q 98,160 78,160 L -78,160 Q -98,160 -100,140 Z" fill="#f4f2ee" stroke="#1d1d24" strokeWidth={6} />
 					<path d="M 120,-80 Q 210,-80 200,0 Q 190,70 112,70" stroke="#f4f2ee" strokeWidth={26} fill="none" />
 					<rect x={-104} y={-120} width={208} height={40} fill="#b8743a" />
@@ -584,7 +584,7 @@ export const S74: React.FC = () => {
 					<rect x={230} y={130} width={60} height={60} rx={8} fill="#fff" stroke="#c8c4ba" strokeWidth={4} />
 				</g>
 				{f >= amb && (
-					<g transform={`translate(${lerp(f, amb, amb + 30, 2100, 1400, Easing.out(Easing.cubic))},560)`}>
+					<g transform={`translate(${lerp(f, amb, amb + 30, 2100, 1440, Easing.out(Easing.cubic))},560)`}>
 						<rect x={-260} y={-200} width={520} height={260} rx={30} fill="#f4f6f8" stroke="#1d1d24" strokeWidth={6} />
 						<rect x={-260} y={-40} width={520} height={40} fill={RED} />
 						<path d="M -20,-150 h 40 v 40 h 40 v 40 h -40 v 40 h -40 v -40 h -40 v -40 h 40 Z" fill={RED} />
@@ -595,8 +595,8 @@ export const S74: React.FC = () => {
 					</g>
 				)}
 			</Stage16>
-			<Plaque f={f} at={w(n, 'чай') - 4} x={600} y={850 - 40} text="ТЁПЛЫЙ СЛАДКИЙ ЧАЙ" color="#ffb84a" size={40} />
-			{f >= amb && <Plaque f={f} at={amb + 8} x={1400} y={850 - 40} text="СКОРАЯ: 103 ИЛИ 112" color={RED} size={40} />}
+			<Plaque f={f} at={w(n, 'чай') - 4} x={720} y={850 - 40} text="ТЁПЛЫЙ СЛАДКИЙ ЧАЙ" color="#ffb84a" size={40} />
+			{f >= amb && <Plaque f={f} at={amb + 8} x={1440} y={850 - 40} text="СКОРАЯ: 103 ИЛИ 112" color={RED} size={40} />}
 		</AbsoluteFill>
 	);
 };

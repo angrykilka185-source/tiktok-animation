@@ -6,7 +6,7 @@ import edit from './edit.json';
 import {HUDZ, ZTick} from './kit';
 import * as Scenes from './scenes';
 import {SFXZ1} from './SFX';
-import {HostChoby} from './host';
+import {CHOBI_FIRST, CHOBI_LAST, CHOBI_SHOTS, IRIS} from './chobi';
 import {shotStart as s, SHOTS, TOTAL} from './timeline';
 import {VOICE_CAPTIONS, w} from './voice';
 
@@ -56,17 +56,22 @@ export const ZamerznutAudio: React.FC = () => (
 	</AbsoluteFill>
 );
 
-// the same film hosted by Чоби (the channel's skeleton teacher) in the corner; the captions move right to clear him
+// the same film with Чоби (the channel's skeleton teacher): now and then it cuts to his white page, where he shows it on
+// himself (src/z1/chobi.tsx). A circle opens onto his page over the last frames of the shot before it (that shot plays
+// on underneath), and his last page of a visit closes over the first frames of the next shot.
 export const ZamerznutChobi: React.FC = () => (
 	<AbsoluteFill style={{background: '#000'}}>
 		<KickLayer times={KICKS}>
 			{SHOTS.map((sh) => {
-				const C = (Scenes as unknown as Record<string, React.FC>)[`S${String(sh.index).padStart(2, '0')}`];
+				const n = sh.index;
+				const ch = CHOBI_SHOTS[n];
+				const C = ch ?? (Scenes as unknown as Record<string, React.FC>)[`S${String(n).padStart(2, '0')}`];
+				const extra = (!ch && CHOBI_FIRST.has(n + 1)) || (ch && CHOBI_LAST.has(n) && n < SHOTS.length) ? IRIS : 0;
 				const from = Math.round(RZ1.fwd(sh.from));
-				const to = Math.round(RZ1.fwd(sh.from + sh.duration));
+				const to = Math.round(RZ1.fwd(sh.from + sh.duration)) + extra;
 				return (
-					<Sequence key={sh.index} from={from} durationInFrames={Math.max(1, to - from)} name={`Кадр ${sh.index}`}>
-						<Retimed r={RZ1} newFrom={from} oldFrom={sh.from} oldDur={sh.duration}>
+					<Sequence key={n} from={from} durationInFrames={Math.max(1, to - from)} name={`Кадр ${n}${ch ? ' · Чоби' : ''}`} style={ch ? {zIndex: 2} : undefined}>
+						<Retimed r={RZ1} newFrom={from} oldFrom={sh.from} oldDur={sh.duration + extra}>
 							{C ? <C /> : <AbsoluteFill style={{background: '#223'}} />}
 						</Retimed>
 					</Sequence>
@@ -74,8 +79,7 @@ export const ZamerznutChobi: React.FC = () => (
 			})}
 		</KickLayer>
 		<HUDZ ticks={TICKS} show={[Math.round(RZ1.fwd(s(3))) + 6, Math.round(RZ1.fwd(s(46)))]} timer={[at(13, 0), Math.round(RZ1.fwd(s(46)))]} />
-		<HostChoby shotAt={(n) => Math.round(RZ1.fwd(s(n)))} wordAt={(n, word) => at(n, word)} shots={SHOTS.length} />
-		<Captions captions={VOICE_CAPTIONS} wide solid box={[380, 1460]} />
+		<Captions captions={VOICE_CAPTIONS} wide solid />
 		<SFXZ1 r={RZ1} />
 	</AbsoluteFill>
 );

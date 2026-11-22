@@ -200,7 +200,7 @@ export const S41: React.FC = () => {
 };
 
 // ============================================================ 42. «Сердце бьётся всё медленнее и сбивается с ритма… может остановиться в любую секунду.» =====
-const ECG: React.FC<{f: number; x: number; y: number; w: number; rate: number; irregular?: number; flat?: number; color?: string}> = ({f, x, y, w: ww, rate, irregular = 0, flat = 0, color = '#5aff8a'}) => {
+export const ECG: React.FC<{f: number; x: number; y: number; w: number; rate: number; irregular?: number; flat?: number; color?: string}> = ({f, x, y, w: ww, rate, irregular = 0, flat = 0, color = '#5aff8a'}) => {
 	const pts: string[] = [];
 	const per = 30 / rate;
 	for (let i = 0; i <= ww; i += 6) {

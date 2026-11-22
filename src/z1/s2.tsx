@@ -755,7 +755,7 @@ export const S33: React.FC = () => {
 };
 
 // ============================================================ 34. «Кажется, что стало легче… Обогреватель выключился.» =====
-const Heater: React.FC<{on: number}> = ({on}) => (
+export const Heater: React.FC<{on: number}> = ({on}) => (
 	<g>
 		{[0, 1, 2, 3, 4, 5].map((k) => (
 			<rect key={k} x={-210 + k * 72} y={-150} width={56} height={300} rx={22} fill={mix('#4a4e5a', '#ff6a3a', on)} stroke="#1d1d24" strokeWidth={6} />

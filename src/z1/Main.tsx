@@ -44,7 +44,7 @@ export const Zamerznut: React.FC = () => (
 			})}
 		</KickLayer>
 		<HUDZ ticks={TICKS} show={[Math.round(RZ1.fwd(s(3))) + 6, Math.round(RZ1.fwd(s(46)))]} timer={[at(13, 0), Math.round(RZ1.fwd(s(46)))]} />
-		<Captions captions={VOICE_CAPTIONS} wide />
+		<Captions captions={VOICE_CAPTIONS} wide solid />
 		<SFXZ1 r={RZ1} />
 	</AbsoluteFill>
 );

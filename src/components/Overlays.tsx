@@ -257,7 +257,8 @@ export const SignPlaques: React.FC<{ep: Episode}> = ({ep}) => {
 // Reference style: 2-3 words, upcoming words dimmed, key words red, quotes yellow.
 const RED = '#ff3b30';
 const QUOTE = '#ffd34a';
-const CapWords: React.FC<{words: CapWord[]; wide?: boolean}> = ({words, wide = false}) => {
+// solid: the words still to come keep a full outline (readable over snow and white rooms), only their colour is dimmed
+const CapWords: React.FC<{words: CapWord[]; wide?: boolean; solid?: boolean}> = ({words, wide = false, solid = false}) => {
 	const f = useCurrentFrame();
 	const len = words.reduce((a, w) => a + w.w.length + 1, 0);
 	// a long single word («ТЕПЛОКОНТРОЛЬ», «ТЯП-ЛЯПОВСКИЙ») would run off the frame or break at its hyphen
@@ -291,8 +292,8 @@ const CapWords: React.FC<{words: CapWord[]; wide?: boolean}> = ({words, wide = f
 							display: 'inline-block',
 							margin: '0 11px',
 							transform: `scale(${active ? 0.78 + 0.22 * p : 0.96})`,
-							opacity: active ? 1 : 0.4,
-							color: active ? color : '#cfc9db',
+							opacity: active || solid ? 1 : 0.4,
+							color: active ? color : solid ? '#a39db3' : '#cfc9db',
 							textShadow:
 								'0 6px 0 rgba(0,0,0,0.35), 0 0 18px rgba(0,0,0,0.55), 3px 3px 0 #22222a, -3px 3px 0 #22222a, 3px -3px 0 #22222a, -3px -3px 0 #22222a',
 						}}
@@ -305,10 +306,10 @@ const CapWords: React.FC<{words: CapWord[]; wide?: boolean}> = ({words, wide = f
 	);
 };
 
-export const Captions: React.FC<{captions: CapChunk[]; wide?: boolean}> = ({captions, wide}) => {
+export const Captions: React.FC<{captions: CapChunk[]; wide?: boolean; solid?: boolean}> = ({captions, wide, solid}) => {
 	const f = useCurrentFrame();
 	const ch = captions.find((c) => f >= c.from - 2 && f < c.to);
-	return ch ? <CapWords words={ch.words} wide={wide} /> : null;
+	return ch ? <CapWords words={ch.words} wide={wide} solid={solid} /> : null;
 };
 
 // ------------------------------ rule cards ---------------------------------

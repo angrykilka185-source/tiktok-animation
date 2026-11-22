@@ -191,7 +191,8 @@ const BEDS: Bed[] = [
 	{from: s(75), to: s(77), file: 'wind_cold', vol: 0.11, fade: 24},
 ];
 
-const SFX_GAIN = HAS_VOICE ? 0.6 : 1;
+// this voice-over sits at about -20 LUFS (4 dB under the usual -16): the effects follow it down
+const SFX_GAIN = HAS_VOICE ? 0.38 : 1;
 
 export const SFXZ1: React.FC<{r: Remap}> = ({r}) => (
 	<>

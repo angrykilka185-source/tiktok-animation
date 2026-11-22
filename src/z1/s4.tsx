@@ -380,7 +380,7 @@ const IceTop: React.FC = () => (
 			<path key={k} d={`M ${rnd(k) * 1920},${rnd(k + 5) * 1080} l ${60 + rnd(k + 2) * 80},${20 - rnd(k + 3) * 40}`} stroke="#c0d4e6" strokeWidth={4} />
 		))}
 		<rect x={0} y={900} width={1920} height={180} fill="#e8d8b8" />
-		<text x={960} y={1010} textAnchor="middle" fontFamily={HEAVY} fontWeight={900} fontSize={40} fill="#8a7a5a">
+		<text x={60} y={1050} textAnchor="start" fontFamily={HEAVY} fontWeight={900} fontSize={36} fill="#8a7a5a">
 			БЕРЕГ
 		</text>
 	</g>

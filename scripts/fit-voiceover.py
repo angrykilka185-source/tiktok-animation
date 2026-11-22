@@ -60,6 +60,9 @@ MAX_INNER_GAP = float(os.environ.get('INNER_GAP', '0.22'))  # longest pause kept
 # a recording made by a person (not by ElevenLabs) may hold a re-read paragraph, a false start, a cough:
 # with --retakes they are left out before matching (scripts/retakes.py; the last take of a paragraph is kept)
 RETAKES = '--retakes' in sys.argv
+LINES_JSON = sys.argv[sys.argv.index('--lines') + 1] if '--lines' in sys.argv else None  # line borders found beforehand
+PHRASES = '--phrases' in sys.argv  # align by every pause against the punctuation (scripts/align_phrases.py)
+MAX_SEGS = int(os.environ.get('MAX_SEGS', '8'))  # phrases one line may span (an expressive voice pauses a lot)
 DRY = '--dry' in sys.argv  # print how the recording matches the script, write nothing
 LEAD = 0.5  # a line may start this much before its planned moment (s)
 LATE = 1.0  # ...and end this much after the next line's planned moment (s)
@@ -141,11 +144,14 @@ def main(src):
     rate = sum(e - s for s, e in segs) / sum(C)
     INF = 1e18
 
+    # prefix sums: speech in phrases k..j-1, and the inner-pause penalty
+    SP = np.concatenate(([0.0], np.cumsum([b - a for a, b in segs])))
+    GP = np.concatenate(([0.0], np.cumsum([max(0, g - 0.35) * 2 for g in gaps])))
+
     def cost(i, k, j):
-        sp = sum(segs[q][1] - segs[q][0] for q in range(k, j))
+        sp = SP[j] - SP[k]
         c = math.log(sp / (rate * C[i])) ** 2 * 4
-        for q in range(k, j - 1):
-            c += max(0, gaps[q] - 0.35) * 2
+        c += GP[j - 1] - GP[k]
         if j < n:
             c += max(0, 0.45 - gaps[j - 1]) * 3
         return c
@@ -158,7 +164,7 @@ def main(src):
             for k in range(n):
                 if dp[i][k] >= INF:
                     continue
-                for j in range(k + 1, min(n, k + 8) + 1):
+                for j in range(k + 1, min(n, k + MAX_SEGS) + 1):
                     if n - j < m - i - 1:
                         break
                     v = dp[i][k] + cost(i, k, j)
@@ -175,7 +181,42 @@ def main(src):
         groups.reverse()
         return groups
 
-    groups = match()
+    nb_prev = nb_next = None
+    if LINES_JSON:
+        # line borders found beforehand (scripts/align_tts.py): every phrase goes to the line it overlaps most;
+        # phrases outside every line (a title, instructions read by mistake) are left out
+        known = json.load(open(LINES_JSON, encoding='utf-8'))['lines']
+        assert len(known) == len(lines), f'{len(known)} line borders for {len(lines)} lines'
+        owner = []
+        for a_, b_ in segs:
+            ov = [max(0.0, min(b_, e + 0.12) - max(a_, s0 - 0.12)) for s0, e in known]
+            i = int(np.argmax(ov))
+            owner.append(i if ov[i] > 0.5 * (b_ - a_) else -1)
+        keep = [q for q in range(len(segs)) if owner[q] >= 0]
+        left = [segs[q] for q in range(len(segs)) if owner[q] < 0]
+        print(f'  {len(left)} phrases belong to no line ({sum(b_ - a_ for a_, b_ in left):.1f}s of speech left out)')
+        # a kept phrase may not grow into a left-out one (a title read right after a line)
+        nb_prev = {i: (segs[q - 1][1] + 0.02 if q > 0 else 0.0) for i, q in enumerate(keep)}
+        nb_next = {i: (segs[q + 1][0] - 0.02 if q + 1 < len(segs) else None) for i, q in enumerate(keep)}
+        segs = [segs[q] for q in keep]
+        owner = [owner[q] for q in keep]
+        n = len(segs)
+        groups = []
+        for i in range(m):
+            qs = [q for q in range(n) if owner[q] == i]
+            if not qs:
+                sys.exit(f'line {lines[i]["id"]} got no speech')
+            if qs != list(range(qs[0], qs[-1] + 1)):
+                sys.exit(f'line {lines[i]["id"]}: its phrases are not together')
+            groups.append((qs[0], qs[-1] + 1))
+        print('lines taken from', os.path.basename(LINES_JSON))
+    elif PHRASES:
+        from align_phrases import align_lines
+        groups, score = align_lines(segs, [l['text'] for l in lines])
+        n = len(segs)
+        print(f'aligned by the pauses and the punctuation (score {score:.1f})')
+    else:
+        groups = match()
     odd = []
     for i, (k, j) in enumerate(groups):
         sp = sum(segs[q][1] - segs[q][0] for q in range(k, j))
@@ -227,6 +268,9 @@ def main(src):
         for q in range(k, j):
             prev_end = segs[q - 1][1] + 0.02 if q > 0 else 0.0
             next_start = segs[q + 1][0] - 0.02 if q + 1 < len(segs) else total
+            if nb_prev is not None:
+                prev_end = max(prev_end, nb_prev[q])
+                next_start = min(next_start, nb_next[q] if nb_next[q] is not None else total)
             a = ext_start(segs[q][0], prev_end)
             b = ext_end(segs[q][1], next_start)
             if q > k:

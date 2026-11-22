@@ -14,7 +14,7 @@ step=$(( (N + P - 1) / P ))
 pids=()
 for i in $(seq 0 $((P-1))); do
   a=$(( i * step )); b=$(( (i+1) * step - 1 )); [ $b -ge $N ] && b=$((N-1))
-  npx remotion render "$COMP" "$tmp/part$i.mp4" --frames=$a-$b --gl=swangle --concurrency=1 --muted --log=error > "$tmp/part$i.log" 2>&1 &
+  npx remotion render "$COMP" "$tmp/part$i.mp4" --frames=$a-$b --gl=${GL:-swangle} --concurrency=1 --muted --log=error > "$tmp/part$i.log" 2>&1 &
   pids+=($!)
 done
 npx remotion render "$AUD" "$tmp/audio.wav" --codec=wav --concurrency=1 --log=error

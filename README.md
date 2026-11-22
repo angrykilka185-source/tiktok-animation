@@ -431,6 +431,11 @@ BASE_TEMPO=1.0 INNER_GAP=0.35 python3 scripts/fit-voiceover.py assets/zamerznut-
 scripts/render-parallel.sh Zamerznut ZamerznutAudio out/zamerznut-raw.mp4 4
 ```
 
+Сцену 10 (шлюпку спускают вдоль борта) режим `--gl=swangle` рисовал с ошибкой: в части кадров кусок стены с людьми
+повторялся в нижней трети кадра. С `--gl=angle` чисто, поэтому она перерендерена отдельно и вклеена
+(`find-flicker.py` по готовому фильму — 0 сбоев; 2 кадра в сцене 15 — это задуманный удар сердца).
+Режим для всего рендера теперь можно выбрать: `GL=angle scripts/render-parallel.sh …`.
+
 Для живой записи с дублями есть `--retakes` (`scripts/retakes.py`: убирает кашель и ранние дубли абзаца) и
 `--dry` (показать, как запись легла на текст, ничего не записывая). Главы для YouTube — `deliverables/zamerznut-glavy.txt`.
 

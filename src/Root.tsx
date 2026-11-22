@@ -19,6 +19,7 @@ import {Film1, RF1} from './f1/Main';
 import {CoverPapaFilm, CoverPapaFilmV} from './covers/PapaFilm';
 import {CoverSssr} from './covers/Sssr';
 import {HostConcepts} from './covers/Hosts';
+import {ChannelAvatar, ChannelBanner} from './covers/Channel';
 import {TgkOpros, RT1} from './t1/Main';
 import {Film2, RF2} from './f2/Main';
 import {Rayon1, Rayon1Audio, RR1} from './r1/Main';
@@ -76,6 +77,8 @@ export const RemotionRoot: React.FC = () => (
 		<Composition id="Chips1Audio" component={Chips1Audio} durationInFrames={RC1.total} fps={FPS} width={W} height={H} />
 		<Composition id="CoverSssr" component={CoverSssr} durationInFrames={1} fps={FPS} width={1280} height={720} />
 		<Composition id="HostConcepts" component={HostConcepts} durationInFrames={1} fps={FPS} width={1920} height={1080} />
+		<Composition id="ChannelAvatar" component={ChannelAvatar} durationInFrames={1} fps={FPS} width={1024} height={1024} />
+		<Composition id="ChannelBanner" component={ChannelBanner} durationInFrames={1} fps={FPS} width={2560} height={1440} />
 		{/* every shot on its own for quick previews */}
 		{SHOTS.map((s) => {
 			const C = (Scenes as unknown as Record<string, React.FC>)[`S${String(s.index).padStart(2, '0')}`];

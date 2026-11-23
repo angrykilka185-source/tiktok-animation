@@ -34,7 +34,8 @@ const mixHex = (a: string, b: string, t: number) => {
 };
 
 export type Pose = 'pointer' | 'wave' | 'point' | 'down' | 'hip';
-export type ArmSpec = {el: [number, number]; ha: [number, number]; hang?: number; fist?: boolean; finger?: boolean; curl?: number; item?: React.ReactNode; itemAng?: number};
+// front: the arm is drawn over the head (a hand over the eyes, on the cap, at the mouth)
+export type ArmSpec = {el: [number, number]; ha: [number, number]; hang?: number; fist?: boolean; finger?: boolean; curl?: number; item?: React.ReactNode; itemAng?: number; front?: boolean};
 
 const Bone: React.FC<{a: [number, number]; b: [number, number]; w?: number}> = ({a, b, w = 20}) => (
 	<g>
@@ -128,6 +129,7 @@ export const mixArm = (a: ArmSpec, b: ArmSpec, t: number): ArmSpec => {
 		curl: L(a.curl ?? 0, b.curl ?? 0),
 		fist: first ? a.fist : b.fist,
 		finger: first ? a.finger : b.finger,
+		front: a.front || b.front,
 		item: it ? <g transform={`scale(${k})`}>{it}</g> : undefined,
 		itemAng: first ? a.itemAng : b.itemAng,
 	};
@@ -256,6 +258,7 @@ export const Choby: React.FC<{
 			</g>
 		);
 	};
+	const isFront = (a: Pose | ArmSpec) => typeof a === 'object' && !!a.front;
 	const heartEl = heart ? (
 		<g transform={`translate(0,-330) scale(${(heart.size ?? 1) * (1 + 0.16 * Math.max(0, heart.beat))})`}>
 			<circle r={58} fill="#ff6a70" opacity={0.18 * Math.max(0, heart.beat)} />
@@ -312,8 +315,8 @@ export const Choby: React.FC<{
 			{/* collarbones and arms */}
 			<Bone a={[-62, -386]} b={[62, -386]} w={18} />
 			{torso}
-			{arm(-1, armL)}
-			{arm(1, armR)}
+			{!isFront(armL) && arm(-1, armL)}
+			{!isFront(armR) && arm(1, armR)}
 			{cloak}
 			{/* the neck and the red bow tie (or a striped scarf) */}
 			<rect x={-13} y={-424} width={26} height={22} rx={7} fill={BONE} stroke={BONE_D} strokeWidth={3.5} />
@@ -418,6 +421,8 @@ export const Choby: React.FC<{
 					</g>
 				)}
 			</g>
+			{isFront(armL) && arm(-1, armL)}
+			{isFront(armR) && arm(1, armR)}
 			{outer}
 		</g>
 	);

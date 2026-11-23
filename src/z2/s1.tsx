@@ -4,7 +4,8 @@ import React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
 import {clamp, lerp, pop} from '../anim';
 import {Person} from '../components/Person';
-import {arm, Blowing, camAt, Chip, Dunes, Flask, HEAVY, HeatGrade, Layer, Marker, mixPal, NOON, Plaque, RED, rnd, Rock, RUNNER, Shimmer, Sky, Stage16, STORM, StormHaze, SunDisk, YEL, You} from './kit';
+import {BONE, BONE_D, BONE_SH} from '../components/Choby';
+import {arm, armTo, Blowing, camAt, Chip, Dunes, Flask, HEAVY, HeatGrade, Layer, Marker, mixPal, NOON, Plaque, RED, rnd, Rock, RUNNER, Shimmer, Sky, Stage16, STORM, StormHaze, SunDisk, YEL, You} from './kit';
 import {SHOTS} from './timeline';
 import {w} from './voice';
 
@@ -81,11 +82,18 @@ export const S02: React.FC = () => {
 					<Flask level={0} s={2.6} id="j2f" />
 				</g>
 				<g transform={`translate(${960 - out * 1300},${520 + shake}) rotate(${-8 + shake * 0.4})`}>
-					<path d="M 60,120 L 520,700 L 760,520 L 170,40 Z" fill={RUNNER.top} />
-					<path d="M 60,120 L 170,40 L 230,90 L 110,170 Z" fill={RUNNER.topDark} />
-					<rect x={-98} y={-10} width={196} height={150} rx={60} fill={RUNNER.skin} stroke="#b9784e" strokeWidth={6} />
-					{[-60, -20, 20, 60].map((x) => (
-						<line key={x} x1={x} y1={4} x2={x} y2={40} stroke="#b9784e" strokeWidth={6} strokeLinecap="round" />
+					{/* Гога's bony forearm and fist */}
+					<line x1={110} y1={120} x2={700} y2={700} stroke={BONE_D} strokeWidth={112} strokeLinecap="round" />
+					<line x1={110} y1={120} x2={700} y2={700} stroke={BONE} strokeWidth={92} strokeLinecap="round" />
+					<line x1={140} y1={112} x2={720} y2={680} stroke={BONE_SH} strokeWidth={34} strokeLinecap="round" />
+					<circle cx={104} cy={112} r={70} fill={BONE} stroke={BONE_D} strokeWidth={10} />
+					<rect x={-100} y={-12} width={200} height={156} rx={66} fill={BONE} stroke={BONE_D} strokeWidth={10} />
+					<path d="M 0,-12 L 34,-12 C 70,-12 100,18 100,60 L 100,80 C 100,116 70,144 34,144 L 0,144 Z" fill={BONE_SH} opacity={0.8} />
+					{[-56, 0, 56].map((x) => (
+						<circle key={x} cx={x} cy={-6} r={30} fill={BONE} stroke={BONE_D} strokeWidth={8} />
+					))}
+					{[-28, 28].map((x) => (
+						<line key={x} x1={x} y1={26} x2={x} y2={74} stroke={BONE_D} strokeWidth={8} strokeLinecap="round" />
 					))}
 				</g>
 			</Stage16>
@@ -216,7 +224,7 @@ export const S07: React.FC = () => {
 			<Stage16 bg="#f6e6c4">
 				<Sky id="j7" p={NOON} />
 				<Dunes p={NOON} />
-				<g transform={`translate(${-slide * 900},0)`}>
+				<g transform={`translate(${-slide * 1500},0)`}>
 					{/* Гога from behind: the backpack, its things popping out */}
 					<You x={760} y={1330} s={1.3} f={f} back pack />
 					{f >= food && (
@@ -324,18 +332,19 @@ export const S09: React.FC = () => {
 			<Stage16 bg="#c8742e">
 				<Sky id="j9" p={STORM} />
 				<Dunes p={STORM} />
-				{lie < 1 && (
-					<g opacity={1 - lie}>
-						<You x={960} y={1170} s={1.08} f={f} tilt={-4} pack face={{eyes: 'closed', brows: 'worried', mouth: 'tight'}} armL={arm([-128, -470], [-40, -572], {fist: true})} armR="down" />
-					</g>
-				)}
-				{lie > 0 && (
-					<g opacity={lie}>
-						<Rock x={980} y={1030} s={2.2} color="#7a5032" />
-						<You x={800} y={1130 + (1 - lie) * 120} s={0.86} f={f} bust tilt={10} pack face={{eyes: 'closed', brows: 'worried', mouth: 'tight'}} armL={arm([-150, -560], [-60, -690], {fist: true})} armR={arm([150, -560], [60, -690], {fist: true})} />
-						<Rock x={980} y={1080} s={2.0} color="#8a5c3a" />
-					</g>
-				)}
+				<Rock x={1130} y={1030} s={2.2} color="#7a5032" />
+				<You
+					x={880}
+					y={1150 + lie * 190}
+					s={1}
+					f={f}
+					tilt={-4 + lie * 14}
+					pack
+					face={{eyes: 'closed', brows: 'worried', mouth: 'tight'}}
+					armL={armTo(-1, f, down, arm([-128, -470], [-40, -572], {fist: true, front: true}), arm([-150, -560], [-60, -690], {fist: true, front: true}), 16)}
+					armR={armTo(1, f, down, 'down', arm([150, -560], [60, -690], {fist: true, front: true}), 16)}
+				/>
+				<Rock x={1070} y={1080} s={2.0} color="#8a5c3a" />
 			</Stage16>
 			<StormHaze f={f} k={0.62 - lie * 0.12} />
 			<AbsoluteFill style={{background: 'linear-gradient(180deg, rgba(200,116,46,0) 45%, rgba(200,116,46,0.95) 75%)', opacity: fog * (1 - lie)}} />
@@ -433,7 +442,7 @@ export const S11: React.FC = () => {
 						f={f}
 						pack
 						face={{eyes: 'wide', brows: 'worried', mouth: 'flat', look: [look, 0]}}
-						armR={f >= flask ? arm([150, -430], [190, -540], {fist: true, item: <Flask level={0.08} s={1.1} tilt={180 + Math.sin(f / 2.5) * 16} id="j11f" />}) : 'down'}
+						armR={armTo(1, f, flask - 2, 'down', arm([150, -430], [190, -540], {fist: true, item: <Flask level={0.08} s={1.1} tilt={180 + Math.sin(f / 2.5) * 16} id="j11f" />}), 10)}
 					/>
 				</Layer>
 			</Stage16>
@@ -471,7 +480,7 @@ export const S15: React.FC = () => {
 						walk={f * 0.28}
 						pack
 						face={{eyes: f >= thirst ? 'narrow' : 'open', brows: f >= thirst ? 'worried' : 'neutral', mouth: f >= thirst ? 'open' : 'flat', look: [0.5, 0], sweat: 0.6}}
-						armR={f >= thirst ? arm([118, -352], [36, -424], {fist: true}) : 'down'}
+						armR={armTo(1, f, thirst - 2, 'down', arm([118, -352], [36, -424], {fist: true, front: true}), 10)}
 					/>
 				</Layer>
 			</Stage16>

@@ -6,7 +6,7 @@ import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
 import {clamp, pop} from '../anim';
 import {HEAVY} from '../components/Overlays';
 import {Person, type ArmPose, type Face} from '../components/Person';
-import type {ArmSpec, Pose} from '../components/Choby';
+import {armPose, mixArm, type ArmSpec, type Pose} from '../components/Choby';
 import {Goga, type Brows} from '../components/Goga';
 import {camT as camTf, mix, rnd} from '../z1/kit';
 
@@ -218,6 +218,11 @@ export const You: React.FC<{
 };
 // hand angles: 0 — the fingers down; a hand pointing along (dx, dy) has hang = atan2(-dx, dy) in degrees
 export const hangTo = (dx: number, dy: number) => (Math.atan2(-dx, dy) * 180) / Math.PI;
+// an arm that moves smoothly from pose a to pose b over `dur` frames from `at` (no snapping from pose to pose)
+export const armTo = (side: 1 | -1, f: number, at: number, a: Pose | ArmSpec, b: Pose | ArmSpec, dur = 9): ArmSpec => {
+	const t = interpolate(f, [at, at + dur], [0, 1], {...clamp, easing: (x) => x * x * (3 - 2 * x)});
+	return mixArm(armPose(side, a, f), armPose(side, b, f), t);
+};
 // an arm from its elbow and hand (Choby units), the hand pointing on along the forearm
 export const arm = (el: [number, number], ha: [number, number], extra: Partial<ArmSpec> = {}): ArmSpec => ({el, ha, hang: hangTo(ha[0] - el[0], ha[1] - el[1]), ...extra});
 

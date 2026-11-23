@@ -4,7 +4,7 @@
 import React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
 import {clamp, lerp, pop} from '../anim';
-import {arm, camAt, Chip, Dunes, Flask, HEAVY, HeatGrade, Layer, mix, mixPal, Moon, NIGHT, NOON, Plaque, RED, rnd, Rock, RUNNER, Shimmer, Sky, Stage16, SunDisk, SUNSET, YEL, DAWN, HOT, You} from './kit';
+import {arm, armTo, camAt, Chip, Dunes, Flask, HEAVY, HeatGrade, Layer, mix, mixPal, Moon, NIGHT, NOON, Plaque, RED, rnd, Rock, RUNNER, Shimmer, Sky, Stage16, SunDisk, SUNSET, YEL, DAWN, HOT, You} from './kit';
 import {SHOTS} from './timeline';
 import {w} from './voice';
 
@@ -185,8 +185,8 @@ export const S22: React.FC = () => {
 					<rect x={-50} y={-110} width={100} height={210} rx={24} fill="#eaf5ff" stroke="#2a6aa8" strokeWidth={6} />
 					<rect x={-44} y={-104 + 198 * (1 - lvl)} width={88} height={198 * lvl} rx={18} fill="#5fb0f0" />
 				</g>
-				{fast && (
-					<You x={1460} y={1060} s={0.74} f={f} walk={f * 0.4} pack face={{eyes: 'narrow', brows: 'worried', mouth: 'open', look: [0.3, 0], sweat: 1}} />
+				{f >= walk - 4 && (
+					<You x={interpolate(f, [walk - 4, walk + 22], [2140, 1460], {...clamp, easing: (x) => 1 - (1 - x) * (1 - x)})} y={1060} s={0.74} f={f} walk={f * 0.4} pack face={{eyes: 'narrow', brows: 'worried', mouth: 'open', look: [-0.3, 0], sweat: 1}} />
 				)}
 			</Stage16>
 			<Chip f={f} at={4} x={860} y={190} text="ДО 1 Л ПОТА В ЧАС" color={RED} size={52} />
@@ -435,7 +435,7 @@ export const S28: React.FC = () => {
 				<Sky id="j28" p={mixPal(NOON, SUNSET, 0.6)} />
 				<Dunes p={mixPal(NOON, SUNSET, 0.6)} />
 				<Rock x={1250} y={1000} s={1.2} color="#7a5032" />
-				<You x={900} y={1150 - up * 90} s={0.95} f={f} pack tilt={f >= dark ? 8 : 0} face={{eyes: f >= dark ? 'closed' : 'open', brows: 'worried', mouth: 'flat'}} />
+				<You x={900} y={1150 - up * 90} s={0.95} f={f} pack tilt={interpolate(f, [dark, dark + 10], [0, 8], clamp)} face={{eyes: f >= dark ? 'closed' : 'open', brows: 'worried', mouth: 'flat'}} />
 			</Stage16>
 			<AbsoluteFill style={{background: `radial-gradient(circle ${Math.round(r)}px at 50% 45%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.96) 100%)`}} />
 			<Chip f={f} at={dark + 10} x={960} y={200} text="ДАВЛЕНИЕ ПАДАЕТ" color={RED} size={52} />
@@ -500,7 +500,7 @@ export const S30: React.FC = () => {
 				<SunDisk x={1300} y={sunY} r={80} color="#ffc890" glow={1 - t} />
 				<Dunes p={p} />
 				<g transform={`translate(${shiver},0)`}>
-					<You x={760} y={1010} s={0.66} f={f} pack cold={f >= cold ? 0.7 : 0} shiver={f >= cold ? 0.3 : 0} face={{eyes: 'narrow', brows: 'worried', mouth: 'tight', look: [0.3, 0]}} armL={f >= cold ? arm([-100, -318], [-18, -345], {fist: true}) : 'down'} armR={f >= cold ? arm([100, -318], [18, -345], {fist: true}) : 'down'} />
+					<You x={760} y={1010} s={0.66} f={f} pack cold={f >= cold ? 0.7 : 0} shiver={f >= cold ? 0.3 : 0} face={{eyes: 'narrow', brows: 'worried', mouth: 'tight', look: [0.3, 0]}} armL={armTo(-1, f, cold, 'down', arm([-100, -318], [-18, -345], {fist: true}), 12)} armR={armTo(1, f, cold, 'down', arm([100, -318], [18, -345], {fist: true}), 12)} />
 				</g>
 			</Stage16>
 			<Chip f={f} at={cold} x={1300} y={300} text="НОЧЬЮ ≈ 10°" color="#3a78e0" size={54} />

@@ -102,7 +102,7 @@ export const S39: React.FC = () => {
 				<Lake f={f} x={1180 + away * 60} y={622 - away * 6} w={620 * (1 - away * 0.45)} o={lo} />
 				<Shimmer f={f} y={640} k={1.4} />
 				<Dunes p={HOT} only={[1, 2]} />
-				<You x={lerp(f, run, len(n), 700, 820)} y={lerp(f, run, len(n), 1080, 960)} s={lerp(f, run, len(n), 0.8, 0.5)} f={f} walk={f >= run ? f * 0.5 : undefined} back pack />
+				<You x={lerp(f, run, len(n), 700, 820)} y={lerp(f, run, len(n), 1080, 960)} s={lerp(f, run, len(n), 0.8, 0.5)} f={f} walk={f >= run ? (f - run) * 0.5 : undefined} back pack />
 			</Stage16>
 			<Plaque f={f} at={lake + 4} x={960} y={200} text="ОЗЕРО?!" color="#7fc4ff" size={64} to={run + 6} />
 			<Plaque f={f} at={run + 16} x={960} y={200} text="ОНО ОТОДВИГАЕТСЯ" color={YEL} size={54} />

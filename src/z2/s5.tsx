@@ -4,7 +4,7 @@
 import React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
 import {clamp, lerp, pop} from '../anim';
-import {BONE, BONE_D} from '../components/Choby';
+import {BONE, BONE_D, mixArm} from '../components/Choby';
 import {Person} from '../components/Person';
 import {arm, camAt, Chip, DAWN, Dunes, Flask, HEAVY, HeatGrade, HOT, Layer, mix, mixPal, Moon, NIGHT, Plaque, RED, RUNNER, Shimmer, Sky, Stage16, SunDisk, SUNSET, YEL, You} from './kit';
 import {SHOTS} from './timeline';
@@ -79,11 +79,11 @@ export const S66: React.FC = () => {
 					<rect x={-200} y={820} width={2400} height={400} fill="#7ab05a" />
 					<rect x={-200} y={820} width={2400} height={12} fill="#fff" opacity={0.7} />
 					<Shimmer f={f} y={780} k={1.2} />
-					{f >= foot && (
+					{f >= foot - 4 && (
 						<g>
-							<You x={560} y={1060} s={0.52} f={f} walk={f * 0.4} dry={0.5} face={{eyes: 'open', mouth: 'open', brows: 'neutral', look: [0.5, 0.3], sweat: 1}} />
-							<Person kind="son" id="j66b" x={980} y={1060} scale={0.4} breathe={f} walk={f * 0.42 + 1} face={{eyes: 'open', mouth: 'open', brows: 'worried', blush: true, sweat: 1}} />
-							<g transform={`translate(${ballX},${ballY})`}>
+							<You x={interpolate(f, [foot - 4, foot + 16], [-220, 560], {...clamp, easing: (x) => 1 - (1 - x) * (1 - x)})} y={1060} s={0.52} f={f} walk={f * 0.4} dry={0.5} face={{eyes: 'open', mouth: 'open', brows: 'neutral', look: [0.5, 0.3], sweat: 1}} />
+							<Person kind="son" id="j66b" x={interpolate(f, [foot - 4, foot + 16], [2140, 980], {...clamp, easing: (x) => 1 - (1 - x) * (1 - x)})} y={1060} scale={0.4} breathe={f} walk={f * 0.42 + 1} face={{eyes: 'open', mouth: 'open', brows: 'worried', blush: true, sweat: 1}} />
+							<g transform={`translate(${ballX},${ballY}) scale(${pop(f, foot + 10, 10)})`}>
 								<Ball />
 							</g>
 						</g>
@@ -454,6 +454,9 @@ export const S77: React.FC = () => {
 	const save = w(n, 'экономь') - 6;
 	const flaskAt = w(n, 'фляге') - 8;
 	const lvl = interpolate(f, [drink, drink + 40], [0.8, 0.35], clamp);
+	const up = interpolate(f, [drink - 6, drink + 6], [0, 1], {...clamp, easing: (x) => x * x * (3 - 2 * x)});
+	const fx = lerp(up, 0, 1, 150, 91);
+	const fy = lerp(up, 0, 1, -250, -506);
 	return (
 		<AbsoluteFill>
 			<Stage16 bg="#f6e6c4">
@@ -466,16 +469,14 @@ export const S77: React.FC = () => {
 					s={0.9}
 					f={f}
 					face={{eyes: f >= drink ? 'closed' : 'open', mouth: f >= drink ? 'o' : 'flat', brows: 'neutral', look: [0.3, -0.3]}}
-					armR={f >= drink ? arm([150, -396], [60, -470], {fist: true}) : arm([112, -318], [150, -250], {fist: true, item: <Flask level={lvl} s={0.85} tilt={0} id="j77f" />})}
+					armR={mixArm(arm([112, -318], [150, -250], {fist: true}), arm([150, -396], [60, -470], {fist: true}), up)}
 					outer={
-						f >= drink ? (
-							<g>
-								<g transform="translate(91,-506)">
-									<Flask level={lvl} s={0.85} tilt={230} id="j77f" />
-								</g>
-								<ellipse cx={50} cy={-470} rx={19} ry={17} fill={BONE} stroke={BONE_D} strokeWidth={4} />
+						<g>
+							<g transform={`translate(${fx},${fy})`}>
+								<Flask level={lvl} s={0.85} tilt={-130 * up} id="j77f" />
 							</g>
-						) : undefined
+							<ellipse cx={lerp(up, 0, 1, 150, 50)} cy={lerp(up, 0, 1, -250, -470)} rx={19} ry={17} fill={BONE} stroke={BONE_D} strokeWidth={4} />
+						</g>
 					}
 				/>
 				{f >= flaskAt && (
@@ -515,7 +516,7 @@ export const S78: React.FC = () => {
 					<path d="M -110,-10 C -110,-60 -40,-70 20,-60 L 90,-40 L 200,-36 L 210,-60 L 230,-60 L 230,0 L 90,-10 C 60,30 -110,30 -110,-10 Z" fill="#e8402e" stroke={INK} strokeWidth={6} />
 					<line x1={-180 * Math.cos(f / 1.3)} y1={-82} x2={180 * Math.cos(f / 1.3)} y2={-82} stroke={INK} strokeWidth={8} strokeLinecap="round" />
 				</g>
-				<You x={360} y={1060} s={0.56} f={f} armR={arm([124, -470], [160, -600], {fist: true, item: <rect x={-30} y={-60} width={60} height={46} rx={7} fill="#cfe8ff" stroke={INK} strokeWidth={5} />})} face={{eyes: 'narrow', mouth: 'flat', brows: 'neutral', look: [0.7, -0.6]}} />
+				<You x={360} y={1060} s={0.56} f={f} armR={arm([124, -470], [160, -600], {fist: true, front: true, item: <rect x={-30} y={-60} width={60} height={46} rx={7} fill="#cfe8ff" stroke={INK} strokeWidth={5} />})} face={{eyes: 'narrow', mouth: 'flat', brows: 'neutral', look: [0.7, -0.6]}} />
 				{glint > 0 && (
 					<g transform={`translate(${360 + 0.56 * 160},${1060 - 0.56 * 640})`} opacity={glint}>
 						<path d="M 0,-60 L 10,-10 L 60,0 L 10,10 L 0,60 L -10,10 L -60,0 L -10,-10 Z" fill="#fffbe0" />

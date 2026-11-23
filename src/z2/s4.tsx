@@ -207,7 +207,11 @@ export const S51: React.FC = () => {
 						<Shrine />
 					</g>
 				)}
-				{f >= shrine && <Mauro kind="dad" id="j51m" x={1060} y={1040} scale={0.32} breathe={f} back walk={f * 0.2} />}
+				{f < shrine ? (
+					<Mauro kind="dad" id="j51w" x={lerp(f, 0, shrine, 560, 1000)} y={lerp(f, 0, shrine, 1000, 1040)} scale={lerp(f, 0, shrine, 0.36, 0.32)} breathe={f} walk={f * 0.18} face={{eyes: 'narrow', mouth: 'flat', brows: 'worried', blush: false, look: [0.6, 0]}} />
+				) : (
+					<Mauro kind="dad" id="j51m" x={lerp(f, shrine, shrine + 40, 1000, 1060)} y={1040} scale={0.32} breathe={f} back walk={f * 0.2} />
+				)}
 			</Stage16>
 			<Chip f={f} at={2} x={960} y={190} text="ПИЛ СОБСТВЕННУЮ МОЧУ" color="#b8741e" size={48} to={shrine - 2} />
 			<Plaque f={f} at={shrine + 8} x={960} y={190} text="МАЛЕНЬКОЕ СВЯТИЛИЩЕ" color={YEL} size={52} />
@@ -415,7 +419,7 @@ export const S53: React.FC = () => {
 						look: [-0.6, 0.4],
 					}}
 				/>
-				<g transform="translate(1220,980) rotate(-90)">
+				<g transform="translate(1220,872) rotate(-90)">
 					<Mauro
 						kind="dad"
 						id="j53m"
@@ -736,6 +740,19 @@ export const S62: React.FC = () => {
 	return (
 		<AbsoluteFill style={{background: '#f4efe6'}}>
 			<svg width={1920} height={1080} viewBox="0 0 1920 1080" style={{position: 'absolute', inset: 0}}>
+				{f < six + 10 && (
+					<g opacity={interpolate(f, [six - 2, six + 8], [1, 0], clamp)} transform={`translate(960,560) scale(${pop(f, 3, 12)})`}>
+						<rect x={-170} y={-220} width={340} height={430} rx={24} fill="#fff" stroke="#1d1d24" strokeWidth={6} />
+						<rect x={-140} y={-190} width={280} height={310} rx={12} fill="#ece4f8" />
+						<path d="M -116,120 C -116,36 -64,6 0,6 C 64,6 116,36 116,120 Z" fill="#8a5ad8" />
+						<path d="M -72,-64 C -78,-150 78,-150 72,-64 C 84,-14 74,36 54,48 L -54,48 C -74,36 -84,-14 -72,-64 Z" fill="#5e3a9e" />
+						<circle cx={0} cy={-58} r={58} fill="#8a5ad8" />
+						<path d="M -60,-70 C -56,-118 56,-118 60,-70 C 30,-96 -30,-96 -60,-70 Z" fill="#5e3a9e" />
+						<text x={0} y={178} textAnchor="middle" fontFamily={HEAVY} fontWeight={900} fontSize={34} fill="#1d1d24">
+							2007
+						</text>
+					</g>
+				)}
 				{Array.from({length: 6}).map((_, i) => {
 					const at = six + i * 5;
 					return f >= at ? (

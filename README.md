@@ -571,7 +571,9 @@ python3 scripts/voice-env.py z2 j01 … j88
 GL=angle scripts/render-parallel.sh Zhazhda ZhazhdaAudio out/zhazhda-raw.mp4 4
 ```
 
-Громкость — −14 LUFS, лёгкая копия до 45 МБ — как у «Замёрзнуть насмерть» (x264 в два прохода, 540 кбит/с).
+Громкость −14 LUFS: loudnorm в два прохода, потом лимитер на −2,5 dBFS, чтобы после AAC пик оставался ниже
+0 dBTP (вышло −2,2 dBTP). Лёгкая копия ≈ 40 МБ — как у «Замёрзнуть насмерть» (x264 в два прохода, 540 кбит/с).
+`find-flicker.py` отмечает 4 кадра, и все они — естественное моргание Гоги и Чоби (глаза закрываются на 1–2 кадра).
 Главы и описание для YouTube — `deliverables/zhazhda-glavy.txt`, `deliverables/zhazhda-opisanie.txt`.
 
 ## Фильм «Что будет, если ты попадёшь в XX век» (≈5:30, отдельное длинное видео)

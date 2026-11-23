@@ -1732,3 +1732,88 @@ write('heart_one', lowpass(beat(1), 400), 0.95);
 	add(x, ping([2800, 4200, 6300], 0.7, 0.15, 0.6), 0.01);
 	write('glint', room(x, 0.3, 1), 0.35);
 }
+
+// ===================================================== «Каково это — оказаться погребённым заживо» =====
+// earth pouring in: a gritty low rush with little stones
+{
+	const dur = 2.4;
+	const x = buf(dur);
+	const lo = lowpass(lowpass(noiseBuf(x.length), 300), 500);
+	const grit = bandpass(noiseBuf(x.length), 900, 4000);
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		const e = Math.min(1, t / 0.15) * Math.min(1, (dur - t) / 0.5);
+		x[i] = (lo[i] * 4 + grit[i] * 0.35) * e;
+	}
+	for (let k = 0; k < 40; k++) add(x, click(0.01, 600 + rnd() * 1600, 2), 0.05 + rnd() * (dur - 0.4), 0.4 + rnd() * 0.6);
+	write('dirt', room(x, 0.25, 1.2), 0.55);
+}
+// a lighter: the flint click, the soft whoosh of the flame
+{
+	const x = buf(0.9);
+	add(x, click(0.02, 3200, 6), 0.02, 1);
+	add(x, click(0.015, 2400, 5), 0.05, 0.6);
+	const fl = bandpass(noiseBuf(Math.ceil(0.7 * SR)), 300, 2500);
+	for (let i = 0; i < fl.length; i++) {
+		const t = i / SR;
+		fl[i] *= Math.min(1, t / 0.08) * Math.exp(-Math.max(0, t - 0.1) / 0.25) * 0.5;
+	}
+	add(x, fl, 0.08, 1);
+	write('lighter', room(x, 0.15, 0.6), 0.45);
+}
+// a hand bell ringing
+{
+	const x = buf(1.8);
+	for (let k = 0; k < 4; k++) add(x, ping([1320, 2640, 3960, 1980], 1.2, 0.5, 0.7), k * 0.16, 1 - k * 0.15);
+	write('bell', room(x, 0.3, 1.4), 0.4);
+}
+// a stone knocking on a metal pipe: three clanks
+{
+	const x = buf(1.2);
+	for (let k = 0; k < 3; k++) add(x, ping([980, 2450, 4100], 0.35, 0.12, 0.8), 0.03 + k * 0.32, 1);
+	write('clank', room(x, 0.2, 1.2), 0.45);
+}
+// a shovel in wet sand: two scrapes
+{
+	const x = buf(1.3);
+	for (let k = 0; k < 2; k++) {
+		const s = bandpass(noiseBuf(Math.ceil(0.35 * SR)), 500, 3500);
+		for (let i = 0; i < s.length; i++) s[i] *= Math.sin((Math.PI * i) / s.length) * 0.7;
+		add(x, s, 0.05 + k * 0.55, 1);
+		add(x, thump(110, 0.2, 0.05, 0.4), 0.38 + k * 0.55, 0.5);
+	}
+	write('dig', x, 0.4);
+}
+// gas leaking from a pipe: a steady hiss
+{
+	const dur = 2.5;
+	const x = highpass(noiseBuf(Math.ceil(dur * SR)), 2500);
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		x[i] *= Math.min(1, t / 0.2) * Math.min(1, (dur - t) / 0.4) * (0.8 + 0.2 * Math.sin(2 * Math.PI * 3 * t));
+	}
+	write('hiss', x, 0.3);
+}
+// a calm slow breath in through the nose, and out (the box breathing): soft air, no voice
+for (const [name, rising] of [
+	['inhale', true],
+	['exhale', false],
+]) {
+	const dur = 2.6;
+	const x = buf(dur);
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		const c = t / dur;
+		const a = rising ? Math.sin((Math.PI / 2) * Math.min(1, c / 0.8)) * Math.min(1, (1 - c) / 0.12) : Math.min(1, c / 0.06) * (1 - c) ** 1.4;
+		x[i] = noise() * a;
+	}
+	const y = add(reso(x, rising ? 900 : 600, 1.2), reso(x, rising ? 2200 : 1500, 1.8), 0, 0.4);
+	write(name, room(lowpass(y, rising ? 3200 : 2400), 0.25), 0.35);
+}
+// a fist on the coffin lid from inside: one dull wooden thud
+{
+	const x = buf(0.7);
+	add(x, thump(85, 0.35, 0.07, 0.4), 0, 1);
+	add(x, reso(click(0.05, 340, 1), 360, 5), 0, 0.5);
+	write('thud', room(lowpass(x, 1800), 0.35, 0.9), 0.8);
+}

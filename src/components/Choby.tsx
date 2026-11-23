@@ -378,7 +378,8 @@ export const Choby: React.FC<{
 								<circle cx={sd * 58 - 12 + look[0] * 12} cy={-544 + look[1] * 12} r={6} fill="#fff" opacity={0.85} />
 							</g>
 						)}
-						{blink > 0 && <rect x={sd * 58 - 46} y={-616} width={92} height={100 * Math.min(1, blink)} fill={BONE} />}
+						{/* the lid stops short of the bottom: a closed eye keeps a thin dark lash line, it never vanishes */}
+						{blink > 0 && <rect x={sd * 58 - 46} y={-616} width={92} height={100 * Math.min(0.82, blink)} fill={BONE} />}
 					</g>
 				))}
 				{/* a little heart-shaped nose */}

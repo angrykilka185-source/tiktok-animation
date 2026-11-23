@@ -33,6 +33,7 @@ import {SHORTS, shortDuration, SssrShort, SssrShortAudio} from './u1/shorts';
 import {Chips1, Chips1Audio, RC1} from './c1/Main';
 import {RZ1, Zamerznut, ZamerznutAudio, ZamerznutChobi} from './z1/Main';
 import {RZ2, Zhazhda, ZhazhdaAudio} from './z2/Main';
+import {RZ3, Zakopan, ZakopanAudio} from './z3/Main';
 import {FPS, H, SHOTS, W} from './timeline';
 import * as Scenes from './scenes';
 
@@ -80,6 +81,8 @@ export const RemotionRoot: React.FC = () => (
 		<Composition id="ZamerznutChobi" component={ZamerznutChobi} durationInFrames={RZ1.total} fps={FPS} width={1920} height={1080} />
 		<Composition id="Zhazhda" component={Zhazhda} durationInFrames={RZ2.total} fps={FPS} width={1920} height={1080} />
 		<Composition id="ZhazhdaAudio" component={ZhazhdaAudio} durationInFrames={RZ2.total} fps={FPS} width={1920} height={1080} />
+		<Composition id="Zakopan" component={Zakopan} durationInFrames={RZ3.total} fps={FPS} width={1920} height={1080} />
+		<Composition id="ZakopanAudio" component={ZakopanAudio} durationInFrames={RZ3.total} fps={FPS} width={1920} height={1080} />
 		<Composition id="Chips1" component={Chips1} durationInFrames={RC1.total} fps={FPS} width={W} height={H} />
 		<Composition id="Chips1Audio" component={Chips1Audio} durationInFrames={RC1.total} fps={FPS} width={W} height={H} />
 		<Composition id="CoverSssr" component={CoverSssr} durationInFrames={1} fps={FPS} width={1280} height={720} />

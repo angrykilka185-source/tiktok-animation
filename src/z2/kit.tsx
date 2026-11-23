@@ -171,12 +171,14 @@ export const You: React.FC<{
 	brain?: number;
 	inner?: React.ReactNode;
 	outer?: React.ReactNode;
+	chest?: number;
 }> = (p) => {
 	const fc = p.face ?? {};
 	const eyes = fc.eyes ?? 'open';
 	const f = p.f ?? 0;
 	const ph = (f + (p.seed ?? 0) * 37) % 101;
-	const nat = ph < 6 ? 1 - Math.abs(ph - 3) / 3 : 0;
+	// a blink: the lid comes down over three frames, stays shut for two, lifts over two
+	const nat = ph >= 0 && ph < 7 ? [0, 0.4, 0.75, 1, 1, 0.6, 0.3][Math.floor(ph)] : 0;
 	const blink = p.blink ?? (eyes === 'closed' ? 1 : eyes === 'narrow' ? 0.36 : nat);
 	const BR: Record<string, Brows> = {worried: -1, raised: 'raised', angry: 'angry', neutral: 0};
 	const brows: Brows = p.brows ?? BR[fc.brows ?? 'neutral'] ?? 0;
@@ -207,7 +209,7 @@ export const You: React.FC<{
 			cold={p.cold ?? 0}
 			shiver={p.shiver ?? 0}
 			noCap={p.noCap}
-			chest={1 + Math.sin(f / 14) * 0.015}
+			chest={p.chest ?? 1 + Math.sin(f / 14) * 0.015}
 			heart={p.heart}
 			heartOver={p.heartOver}
 			brain={p.brain}

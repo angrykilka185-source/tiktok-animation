@@ -1,8 +1,8 @@
 // The channel «Чоби» in the white style of the covers (a white page, a soft yellow glow with faint rays, everything a
 // sticker with a white edge and a soft shadow):
 //   ChannelAvatarW 1024×1024 — Чоби close up, waving (reads at 48 px; safe for the circle crop)
-//   ChannelBannerW 2560×1440 — a white page in pale squares (a school exercise book); Чоби with his pointer shows the
-//     name CHOBI; round them stickers of what the channel explains: the Titanic and the iceberg, a thermometer, a bag of
+//   ChannelBannerW 2560×1440 — a white page in pale squares (a school exercise book); the name CHOBI right in the centre
+//     (a yellow 3D body, a glossy face, a white sticker edge, glints), Чоби on the left shows it with his pointer; round them stickers of what the channel explains: the Titanic and the iceberg, a thermometer, a bag of
 //     chips, the pioneer badge, a brain, a heart, a lightbulb, «?»… Чоби and the name sit in YouTube's safe area
 //     (1546×423 in the middle: phones), the stickers fill the band beside it (computers, 2560×423) and the rest (TVs).
 // Render: npx remotion still ChannelAvatarW out/cover/avatar-w.png ; npx remotion still ChannelBannerW out/cover/banner-w.png
@@ -151,6 +151,61 @@ const Thermometer: React.FC = () => (
 	</g>
 );
 
+// a four-pointed glint
+const Sparkle: React.FC<{x: number; y: number; r: number; color?: string}> = ({x, y, r, color = '#ffffff'}) => {
+	const k = r * 0.16;
+	return <path d={`M ${x},${y - r} Q ${x + k},${y - k} ${x + r},${y} Q ${x + k},${y + k} ${x},${y + r} Q ${x - k},${y + k} ${x - r},${y} Q ${x - k},${y - k} ${x},${y - r} Z`} fill={color} />;
+};
+
+// the name with effects: a dark glossy face on a yellow 3D body, a white sticker edge with a soft shadow round the
+// whole word, a shine on the upper part of the letters, glints
+const Logo: React.FC<{x: number; y: number; size: number; text?: string}> = ({x, y, size, text = 'CHOBI'}) => {
+	const D = Math.round(size * 0.045);
+	const font = {fontFamily: HEAVY, fontWeight: 900, fontSize: size, textAnchor: 'middle' as const};
+	const t = (key: string, dx: number, dy: number, props: React.SVGProps<SVGTextElement>) => (
+		<text key={key} x={x + dx} y={y + dy} {...font} {...props}>
+			{text}
+		</text>
+	);
+	return (
+		<g>
+			<defs>
+				<linearGradient id="logoFace" x1="0" y1="0" x2="0" y2="1">
+					<stop offset="0" stopColor="#3c3c56" />
+					<stop offset="0.55" stopColor="#1b1b26" />
+					<stop offset="1" stopColor="#0b0b11" />
+				</linearGradient>
+				<linearGradient id="logoSide" x1="0" y1="0" x2="1" y2="1">
+					<stop offset="0" stopColor="#ffd94e" />
+					<stop offset="1" stopColor="#eaa20e" />
+				</linearGradient>
+				<clipPath id="logoClip">{t('c', 0, 0, {})}</clipPath>
+				<filter id="logoSh" x="-10%" y="-40%" width="120%" height="190%" colorInterpolationFilters="sRGB">
+					<feGaussianBlur in="SourceAlpha" stdDeviation={14} />
+					<feOffset dx={0} dy={16} result="b" />
+					<feFlood floodColor="#3a2a00" floodOpacity={0.3} />
+					<feComposite in2="b" operator="in" />
+					<feMerge>
+						<feMergeNode />
+						<feMergeNode in="SourceGraphic" />
+					</feMerge>
+				</filter>
+			</defs>
+			{/* the white sticker edge round the whole 3D word, with a soft shadow */}
+			<g filter="url(#logoSh)">
+				{t('w0', 0, 0, {fill: '#fff', stroke: '#fff', strokeWidth: size * 0.13, strokeLinejoin: 'round'})}
+				{t('w1', D, D, {fill: '#fff', stroke: '#fff', strokeWidth: size * 0.13, strokeLinejoin: 'round'})}
+			</g>
+			{/* the 3D body: the deepest layers a shade darker */}
+			{Array.from({length: D}).map((_, i) => t(`d${i}`, D - i, D - i, {fill: i < 2 ? '#c98a08' : 'url(#logoSide)'}))}
+			{/* the face, and the shine on its upper part */}
+			{t('f', 0, 0, {fill: 'url(#logoFace)'})}
+			<rect x={x - size * 3} y={y - size * 0.74} width={size * 6} height={size * 0.28} fill="#ffffff" opacity={0.17} clipPath="url(#logoClip)" />
+			<rect x={x - size * 3} y={y - size * 0.74} width={size * 6} height={size * 0.05} fill="#ffffff" opacity={0.22} clipPath="url(#logoClip)" />
+		</g>
+	);
+};
+
 // pale squares of a school exercise book
 const Grid: React.FC<{w: number; h: number; step: number}> = ({w, h, step}) => (
 	<g stroke="#e8eff7" strokeWidth={2}>
@@ -210,7 +265,7 @@ export const ChannelAvatarW: React.FC = () => (
 // YouTube shows: phones 1546×423 in the middle (x 507…2053, y 508…931), computers the whole width of that band,
 // TVs everything
 export const ChannelBannerW: React.FC = () => {
-	const CX = 905;
+	const CX = 650;
 	const FY = 926;
 	const s = 0.5;
 	return (
@@ -220,7 +275,7 @@ export const ChannelBannerW: React.FC = () => {
 					<StickerFilter id="chw-stk" />
 				</defs>
 				<Grid w={2560} h={1440} step={64} />
-				<Glow id="chw-bn" cx={1290} cy={735} r={760} />
+				<Glow id="chw-bn" cx={1280} cy={720} r={760} />
 				{/* the band beside the middle (computers): the stickers of the topics */}
 				<St x={255} y={655} r={-5}>
 					<TitanicCard />
@@ -228,7 +283,7 @@ export const ChannelBannerW: React.FC = () => {
 				<St x={118} y={812} r={-10} s={0.5}>
 					<ChipsBag s={1} />
 				</St>
-				<St x={432} y={796} r={10}>
+				<St x={448} y={828} r={10}>
 					<Thermometer />
 				</St>
 				<St x={2172} y={668} r={10} s={0.4}>
@@ -274,25 +329,26 @@ export const ChannelBannerW: React.FC = () => {
 				<St x={2400} y={1160} r={8} s={0.8}>
 					<Ask mark="!" />
 				</St>
-				{/* the middle (phones): Чоби shows the name with his pointer and waves */}
+				{/* the middle (phones): the name right in the centre with its effects; Чоби on the left shows it with his
+				    pointer and waves, «?» and a star on the right */}
 				<ellipse cx={CX} cy={FY + 4} rx={92} ry={10} fill="#000" opacity={0.08} />
 				<g filter="url(#chw-stk)">
 					<Choby x={CX} y={FY} s={s} jaw={0.3} look={[0.15, 0.05]} armR="pointer" pointerAng={60} armL="wave" f={0} />
 				</g>
-				<St x={700} y={604} r={-8} s={0.62}>
+				<St x={1878} y={628} r={8} s={0.66}>
 					<Ask />
 				</St>
-				<St x={2018} y={566} r={12} s={0.42}>
+				<St x={1992} y={838} r={12} s={0.46}>
 					<Star />
 				</St>
-				<g fontFamily={HEAVY} fontWeight={900} fontSize={250} textAnchor="middle">
-					<text x={1612} y={846} fill={YEL}>
-						CHOBI
-					</text>
-					<text x={1600} y={834} fill={INK}>
-						CHOBI
-					</text>
-				</g>
+				<Logo x={1272} y={808} size={250} />
+				{/* glints on the letters and sparkles round the name */}
+				<Sparkle x={880} y={672} r={22} />
+				<Sparkle x={1262} y={664} r={26} />
+				<Sparkle x={1480} y={676} r={16} />
+				<Sparkle x={828} y={600} r={30} color={YEL} />
+				<Sparkle x={1748} y={602} r={24} color={YEL} />
+				<Sparkle x={1716} y={890} r={18} color={YEL} />
 			</svg>
 		</AbsoluteFill>
 	);

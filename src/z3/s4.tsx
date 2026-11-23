@@ -10,8 +10,8 @@ import {w} from './voice';
 
 const len = (n: number) => SHOTS[n - 1].duration;
 
-// a rescue dog in an orange vest, sniffing (its nose at the origin's left)
-const Dog: React.FC<{f: number}> = ({f}) => (
+// a rescue dog in an orange vest, sniffing (its nose at the origin's left); `run` — the trot phase (the legs swing)
+const Dog: React.FC<{f: number; run?: number}> = ({f, run}) => (
 	<g>
 		<path d={`M 150,-60 q 50,${-30 + Math.sin(f / 3) * 14} 70,-60`} stroke="#8a5a2e" strokeWidth={16} fill="none" strokeLinecap="round" />
 		<ellipse cx={60} cy={-60} rx={110} ry={50} fill="#a0662e" />
@@ -19,8 +19,8 @@ const Dog: React.FC<{f: number}> = ({f}) => (
 		<text x={60} y={-58} textAnchor="middle" fontFamily={HEAVY} fontWeight={900} fontSize={22} fill="#fff">
 			SOS
 		</text>
-		{[-10, 30, 100, 140].map((x) => (
-			<rect key={x} x={x} y={-30} width={20} height={60} rx={8} fill="#8a5a2e" />
+		{[-10, 30, 100, 140].map((x, k) => (
+			<rect key={x} x={x} y={-30} width={20} height={60} rx={8} fill="#8a5a2e" transform={run === undefined ? undefined : `rotate(${Math.sin(run + (k % 2 ? Math.PI : 0) + (k > 1 ? Math.PI / 2 : 0)) * 24} ${x + 10} -30)`} />
 		))}
 		<g transform={`translate(-50,${-80 + Math.sin(f / 4) * 6})`}>
 			<ellipse cx={0} cy={0} rx={50} ry={40} fill="#a0662e" />
@@ -38,6 +38,11 @@ export const S65: React.FC = () => {
 	const n = 65;
 	const dogs = w(n, 'собаки') - 8;
 	const smell = w(n, 'чуют') - 6;
+	// the dog trots in from the right over the rubble and stops above Гога
+	const D0 = dogs - 20;
+	const D1 = dogs + 14;
+	const dx = interpolate(f, [D0, D1], [2150, 1060], {...clamp, easing: (t) => t * (1.5 - 0.5 * t)});
+	const trot = f >= D0 && f < D1 ? (10 * Math.PI * (f - D0)) / (D1 - D0) : undefined;
 	return (
 		<AbsoluteFill>
 			<Stage16 bg="#3a3a40">
@@ -46,9 +51,9 @@ export const S65: React.FC = () => {
 				<g transform="translate(1180,700) rotate(-90)">
 					<You x={0} y={0} s={0.42} f={f} face={{eyes: 'open', brows: 'worried', mouth: 'tight', look: [0, -0.6]}} />
 				</g>
-				{f >= dogs && (
-					<g transform={`translate(${interpolate(f, [dogs, dogs + 30], [1500, 1060], clamp)},270) scale(${pop(f, dogs, 10)})`}>
-						<Dog f={f} />
+				{f >= D0 && (
+					<g transform={`translate(${dx},${270 + (trot === undefined ? 0 : -Math.abs(Math.sin(trot)) * 8)})`}>
+						<Dog f={f} run={trot} />
 					</g>
 				)}
 				{f >= smell &&

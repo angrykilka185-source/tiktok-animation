@@ -231,7 +231,7 @@ export const S05: React.FC = () => {
 					</div>
 				</div>
 			)}
-			<StopChobi n={n} f={f} at={0} to={len(n) - 12} />
+			<StopChobi n={n} f={f} at={0} to={len(n) - 20} />
 		</AbsoluteFill>
 	);
 };
@@ -350,7 +350,7 @@ export const S13: React.FC = () => {
 				</Layer>
 			</Stage16>
 			<Vig k={0.55} />
-			<StopChobi n={n} f={f} at={IRIS} to={len(n) - 4} label="ОШИБКА №1 · КРИК" />
+			<StopChobi n={n} f={f} at={IRIS} to={len(n) - 18} label="ОШИБКА №1 · КРИК" />
 		</AbsoluteFill>
 	);
 };
@@ -388,7 +388,10 @@ export const S15: React.FC = () => {
 	const n = 15;
 	const nobody = w(n, 'никто') - 6;
 	const man = w(n, 'человек') - 14;
-	const px = lerp(f, man, len(n), 1520, 1400);
+	// a passer-by walks in from the right and stops right above the grave (nine steps: both feet down when he stops)
+	const W0 = man - 70;
+	const px = interpolate(f, [W0, man + 10], [2260, 1250], {...clamp, easing: (t) => t * (1.3 - 0.3 * t)});
+	const pwalk = f >= W0 && f < man + 10 ? (9 * Math.PI * (f - W0)) / (man + 10 - W0) : undefined;
 	return (
 		<AbsoluteFill>
 			<Stage16 bg="#060a1e">
@@ -400,11 +403,7 @@ export const S15: React.FC = () => {
 					extra={
 						<g>
 							<Waves f={f} x={980} y={760} dir={-90} color="#fff" damp={1} n={5} />
-							{f >= man && (
-								<g opacity={interpolate(f, [man, man + 10], [0, 1], clamp)}>
-									<Person kind="dad" id="z15p" x={px} y={G + 8} scale={0.2} silhouette="#0d1530" walk={f * 0.2} />
-								</g>
-							)}
+							{f >= W0 && <Person kind="dad" id="z15p" x={px} y={G + 8} scale={0.2} silhouette="#2a3560" walk={pwalk} />}
 						</g>
 					}
 				/>
@@ -441,7 +440,7 @@ export const S16: React.FC = () => {
 				</Stage16>
 			</AbsoluteFill>
 			<Vig k={0.55} />
-			<StopChobi n={n} f={f} at={2} to={len(n) - 4} label="ОШИБКА №2 · КРЫШКА" />
+			<StopChobi n={n} f={f} at={2} to={len(n) - 18} label="ОШИБКА №2 · КРЫШКА" />
 		</AbsoluteFill>
 	);
 };
@@ -595,7 +594,7 @@ export const S20: React.FC = () => {
 				</Layer>
 			</Stage16>
 			<Vig k={0.55} />
-			<StopChobi n={n} f={f} at={2} to={len(n) - 2} label="ОШИБКА №3 · ОГОНЬ" />
+			<StopChobi n={n} f={f} at={2} to={len(n) - 18} label="ОШИБКА №3 · ОГОНЬ" />
 		</AbsoluteFill>
 	);
 };

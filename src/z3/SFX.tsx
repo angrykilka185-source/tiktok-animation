@@ -4,7 +4,7 @@
 import React from 'react';
 import {Audio, interpolate, Sequence, staticFile} from 'remotion';
 import type {Remap} from '../edit';
-import {CHOBI_VISITS, IRIS} from './chobiKit';
+import {CHOBI_VISITS, IRIS, STOP_WALK} from './chobiKit';
 import {shotStart as s, SHOTS} from './timeline';
 import {HAS_VOICE, VOICE, w} from './voice';
 
@@ -42,12 +42,13 @@ const peaks = (from: number, to: number, per: number, file: string, vol: number,
 	}
 	return out;
 };
-// Чоби steps in from the right: «Стоп, Гога!» — a referee's whistle, his bubble pops, he slides out at `to`
+// Чоби walks in from the right (his steps), raises his palm — a referee's whistle — «Стоп, Гога!» pops out, and he
+// walks back out at `to` (no steps when he is still there at the cut)
 const stop = (n: number, from: number, to: number): Cue[] => [
-	{at: s(n) + from, file: 'whistle', vol: 0.22},
-	{at: s(n) + from + 2, file: 'whoosh', vol: 0.25},
-	{at: s(n) + from + 6, file: 'pop', vol: 0.3},
-	{at: s(n) + to, file: 'whoosh', vol: 0.15},
+	{at: s(n) + from, file: 'steps', vol: 0.2, len: STOP_WALK + 4},
+	{at: s(n) + from + STOP_WALK - 2, file: 'whistle', vol: 0.22},
+	{at: s(n) + from + STOP_WALK + 2, file: 'pop', vol: 0.3},
+	...(to < len(n) ? [{at: s(n) + to, file: 'steps', vol: 0.15, len: STOP_WALK + 4}] : []),
 ];
 // the HUD crosses out one more of Гога's mistakes
 const MISTAKE = (n: number) => ({at: at(n, 'ошибка'), file: 'stamp', vol: 0.4});
@@ -79,7 +80,7 @@ const CUES: Cue[] = [
 	{at: at(4, 'щёлкает', -2), file: 'lighter', vol: 0.55},
 	// «Стоп, Гога!» — the picture freezes; three mistakes; the air drains
 	{at: s(5) - 3, file: 'slowdown', vol: 0.3},
-	...stop(5, 0, len(5) - 12),
+	...stop(5, 0, len(5) - 20),
 	...rep(at(5, 'три', -4), 3, 6, 'stamp', 0.35),
 	{at: at(5, 'воздух', -6), file: 'decline', vol: 0.35},
 	// Чоби's intro
@@ -109,15 +110,15 @@ const CUES: Cue[] = [
 	{at: s(12) + 36, file: 'heart_one', vol: 0.25},
 	{at: at(12, 'не', -6), file: 'decline', vol: 0.3},
 	// mistake one: the scream
-	...stop(13, IRIS, len(13) - 4),
+	...stop(13, IRIS, len(13) - 18),
 	MISTAKE(13),
 	{at: at(14, 'глубокие', -6), file: 'inhale', vol: 0.3, len: 30},
 	{at: at(14, 'резкие', -6), file: 'exhale', vol: 0.3, len: 30},
 	AIR_DROP(14, 'воздух'),
 	{at: at(15, 'никто', -6), file: 'stamp', vol: 0.35},
-	{at: at(15, 'человек', -14), file: 'steps_slow', vol: 0.3},
+	{at: at(15, 'человек', -84), file: 'steps_slow', vol: 0.22, len: 80},
 	// mistake two: banging on the lid
-	...stop(16, 2, len(16) - 4),
+	...stop(16, 2, len(16) - 18),
 	...peaks(s(16), end(16), 3.2, 'thud', 0.35),
 	{at: at(16, 'колотит'), file: 'stamp', vol: 0.4},
 	AIR_DROP(17, 'дышит'),
@@ -136,7 +137,7 @@ const CUES: Cue[] = [
 	{at: at(19, 'давит', -4), file: 'dirt', vol: 0.3},
 	{at: at(19, 'вдохнуть', -4), file: 'gasp', vol: 0.3},
 	// mistake three: the lighter
-	...stop(20, 2, len(20) - 2),
+	...stop(20, 2, len(20) - 18),
 	{at: s(20) + 2, file: 'lighter', vol: 0.5},
 	{at: at(20, 'зажигалка'), file: 'stamp', vol: 0.4},
 	{at: s(21), file: 'fire', vol: 0.18, len: len(21)},
@@ -196,7 +197,7 @@ const CUES: Cue[] = [
 	{at: at(36, 'дёрнул', 6), file: 'bell', vol: 0.4},
 	// the waiting mortuaries: strings with bells, a guard
 	{at: at(37, 'пальцам', -8), file: 'bell', vol: 0.18},
-	{at: at(37, 'сторож', -8), file: 'steps_slow', vol: 0.3},
+	{at: at(37, 'сторож', -44), file: 'steps_slow', vol: 0.3, len: 40},
 	// Gogol
 	{at: at(38, 'гоголя', -6), file: 'pop', vol: 0.3},
 	{at: at(38, 'вскрыли', -6), file: 'dig', vol: 0.3},
@@ -206,7 +207,7 @@ const CUES: Cue[] = [
 	{at: at(39, 'родственники', -10), file: 'pop', vol: 0.3},
 	{at: at(40, 'завещании', -6), file: 'tear', vol: 0.2},
 	{at: at(40, 'не', 10), file: 'pop', vol: 0.3},
-	...rep(at(41, 'свидетели', -4), 3, 10, 'pop', 0.25),
+	...rep(at(41, 'свидетели', -4), 3, 12, 'pop', 0.25),
 	{at: at(41, 'мифом', -6), file: 'stamp', vol: 0.5},
 	// «Гога, просыпайся» — only a nightmare
 	{at: at(42, 'просыпайся', -4), file: 'gasp', vol: 0.4},
@@ -261,6 +262,7 @@ const CUES: Cue[] = [
 	MISTAKE(54),
 	{at: at(54, 'туннели', -8), file: 'pop', vol: 0.3},
 	{at: at(54, 'дети', -6), file: 'kids', vol: 0.12, len: 90},
+	{at: at(55, 'сбоку', -36), file: 'steps', vol: 0.25, len: 32},
 	...rep(at(55, 'сбоку', -6), 2, 16, 'dig', 0.3, 30),
 	{at: at(55, 'лицо', -6), file: 'inhale', vol: 0.3, len: 40},
 	// the trench and the silo
@@ -287,7 +289,7 @@ const CUES: Cue[] = [
 	{at: at(61, 'зажигалка', -8), file: 'lighter', vol: 0.55},
 	// mistake seven: the gas
 	{at: s(62) - 3, file: 'slowdown', vol: 0.3},
-	...stop(62, 0, len(62) - 16),
+	...stop(62, 0, len(62) - 20),
 	{at: at(62, 'газ', -6), file: 'hiss', vol: 0.35, len: Math.max(30, len(62) - w(62, 'газ', -6))},
 	{at: at(62, 'искра', -6), file: 'sparks', vol: 0.4},
 	{at: at(62, 'взрыв', -4), file: 'boom', vol: 0.3},
@@ -301,7 +303,7 @@ const CUES: Cue[] = [
 	{at: at(64, 'кричи', -6), file: 'pop', vol: 0.3},
 	{at: at(64, 'заряд', -8), file: 'lowbat', vol: 0.35},
 	// the dogs; seventeen days; hold on
-	{at: at(65, 'собаки', -8), file: 'steps', vol: 0.25},
+	{at: at(65, 'собаки', -26), file: 'steps', vol: 0.22, len: 36},
 	{at: at(65, 'собаки', 10), file: 'bark', vol: 0.4},
 	{at: at(65, 'чуют', -6), file: 'inhale', vol: 0.2, len: 24},
 	{at: at(65, 'чуют', 24), file: 'bark', vol: 0.3},

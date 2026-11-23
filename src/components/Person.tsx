@@ -193,6 +193,16 @@ export const solveArm = (pose: ArmPose | undefined, L1: number, L2: number, side
 	return {shoulder: base + bend * a, elbow: -bend * (180 - b)};
 };
 
+// the shoulder and elbow angles that a target pose solves to for this kind of person — so a scene can blend an arm
+// smoothly from hanging ({shoulder: side · −6, elbow: side · 4}) into a target pose instead of snapping to it
+export const armAngles = (kind: Kind, side: -1 | 1, target: [number, number], bend?: 1 | -1) => {
+	const sp = SPECS[kind];
+	const sw = sp.shoulderW / 2;
+	const sx = side < 0 ? -sw + sp.armW / 2 - 4 : sw - sp.armW / 2 + 4;
+	const sy = -sp.leg - sp.torso + sp.armW / 2;
+	return solveArm({target: [target[0] - sx, target[1] - sy], bend}, sp.upper, sp.fore + sp.armW * 0.56 * 0.8, side);
+};
+
 // ---------------------------------------------------------------------------
 export const Head: React.FC<{
 	kind: Kind;

@@ -89,7 +89,7 @@ export const Stand: React.FC<{k: number; b?: number; lean?: number; dy?: number;
 );
 
 // the white page: a warm floor, drifting specks of sand, his shadow; the circle that opens and closes a visit
-export const Page: React.FC<{n: number; f: number; snow?: boolean; shadow?: number; children?: React.ReactNode; html?: React.ReactNode}> = ({n, f, snow = true, shadow = 1, children, html}) => {
+export const Page: React.FC<{n: number; f: number; snow?: boolean; shadow?: number; sx?: number; children?: React.ReactNode; html?: React.ReactNode}> = ({n, f, snow = true, shadow = 1, sx = HX, children, html}) => {
 	const g = shotStart(n) + f;
 	const L = len(n);
 	let r = 1e4;
@@ -118,7 +118,7 @@ export const Page: React.FC<{n: number; f: number; snow?: boolean; shadow?: numb
 							const y = ((i * 137) % 860) + 60 + Math.sin((g + i * 30) / 50) * 14;
 							return <circle key={i} cx={x} cy={y} r={3 + (i % 3) * 2} fill="#e6d2ae" opacity={0.75} />;
 						})}
-					<ellipse cx={HX} cy={FEET + 6} rx={150 * shadow} ry={16 * shadow} fill="#000" opacity={0.1} />
+					<ellipse cx={sx} cy={FEET + 6} rx={150 * shadow} ry={16 * shadow} fill="#000" opacity={0.1} />
 					{/* a puff of dust when he springs up */}
 					{CHOBI_FIRST.has(n) &&
 						f >= 2 &&
@@ -153,25 +153,48 @@ export const Line: React.FC<{f: number; at: number; x: number; y: number; text: 
 		</div>
 	);
 
-// Чоби steps into a story shot from the right with his hand up — «Стоп, Гога!» — and names the mistake; he talks with
-// the voice and slides back out at `to`
-export const StopChobi: React.FC<{n: number; f: number; at: number; to: number; label?: string; bubble?: string}> = ({n, f, at, to, label, bubble = 'СТОП, ГОГА!'}) => {
-	if (f < at - 1 || f > to + 14) return null;
-	const k = sm((f - at) / 10) * (1 - sm((f - to) / 12));
-	const x = 1960 - k * 400;
+// Чоби walks into a story shot from the right — all of him, his feet on the bottom edge, his shadow under him — stops,
+// raises his palm towards Гога («Стоп, Гога!», a bubble from his mouth) and names the mistake; he talks with the voice and
+// walks back out at `to` (out of the frame by to + STOP_WALK)
+export const STOP_WALK = 14;
+const STOP_S = 0.8; // his size in the story shots
+const STOP_FEET = 1032; // where his feet stand
+const STOP_X = 1650; // where he stops
+export const StopChobi: React.FC<{n: number; f: number; at: number; to: number; label?: string; labelAt?: number; bubble?: string}> = ({n, f, at, to, label, labelAt = 0, bubble = 'СТОП, ГОГА!'}) => {
+	if (f < at - 1 || f > to + STOP_WALK + 1) return null;
+	const W = STOP_WALK;
+	const inT = sm((f - at) / W);
+	const outT = sm((f - to) / W);
+	const x = 2160 - (2160 - STOP_X) * inT + (2160 - STOP_X) * outT;
+	// three steps in, three steps out: the phase runs 0 → 3π, so both feet are down when he stops or sets off
+	const walkIn = f >= at && f < at + W;
+	const walkOut = f >= to && f < to + W;
+	const walk = walkIn ? (3 * Math.PI * (f - at)) / W : walkOut ? (3 * Math.PI * (f - to)) / W : undefined;
 	const g = shotStart(n) + f;
-	const hand: ArmSpec = {el: [-118, -352], ha: [-140, -440], hang: -194};
+	const stand = at + W;
+	// the palm comes up once he stands, and goes down before he leaves
+	const palm: ArmSpec = {el: [-118, -352], ha: [-140, -440], hang: -194};
+	const armL = f >= stand && f < to ? armAt(-1, f, [[0, 'down'], [stand, palm], [to - 8, 'down']], g, 8) : 'down';
+	const say = f >= stand && f < to ? pop(f, stand + 2, 10) * (1 - sm((f - (to - 8)) / 8)) : 0;
+	// his head (the bubble's tail points at his mouth)
+	const headX = x;
+	const headY = STOP_FEET - STOP_S * 600;
+	const bx = headX - 250;
+	const by = headY - 150;
 	return (
 		<AbsoluteFill>
 			<svg width={1920} height={1080} viewBox="0 0 1920 1080" style={{position: 'absolute', inset: 0}}>
-				<ellipse cx={x} cy={1080} rx={300} ry={60} fill="#000" opacity={0.25 * k} />
-				<Choby x={x} y={1110} s={1.15} bust jaw={jawAt(n, f)} blink={blinkAt(g)} f={g} armL={hand} armR="down" look={[-0.8, 0.1]} tilt={-6} />
+				<ellipse cx={x} cy={STOP_FEET + 4} rx={105} ry={18} fill="#000" opacity={0.28} />
+				<Choby x={x} y={STOP_FEET} s={STOP_S} jaw={jawAt(n, f)} blink={blinkAt(g)} f={g} armL={armL} armR="down" look={[-0.8, 0.1]} tilt={walk === undefined ? -4 : 0} walk={walk} />
+				{say > 0.02 && <path d={`M ${bx + 110},${by + 40} L ${headX - 118},${headY - 10} L ${bx + 180},${by + 34} Z`} fill="#fff" stroke="#16161c" strokeWidth={7} strokeLinejoin="round" opacity={Math.min(1, say * 1.5)} />}
 			</svg>
-			<div style={{position: 'absolute', left: x - 330, top: 160, transform: `translate(-50%,-50%) scale(${pop(f, at + 6, 10) * k})`, background: '#fff', color: RED, border: '7px solid #16161c', borderRadius: 26, padding: '10px 26px', fontFamily: HEAVY, fontWeight: 900, fontSize: 54, whiteSpace: 'nowrap', boxShadow: '0 10px 26px rgba(0,0,0,0.35)'}}>
-				{bubble}
-			</div>
-			{label && f >= at + 10 && (
-				<div style={{position: 'absolute', left: x - 330, top: 250, transform: `translate(-50%,-50%) rotate(-3deg) scale(${pop(f, at + 10, 10) * k})`, background: RED, color: '#fff', border: '5px solid #fff', borderRadius: 14, padding: '6px 20px', fontFamily: HEAVY, fontWeight: 900, fontSize: 38, whiteSpace: 'nowrap', boxShadow: '0 8px 20px rgba(0,0,0,0.35)'}}>
+			{say > 0.02 && (
+				<div style={{position: 'absolute', left: bx, top: by, transform: `translate(-50%,-50%) scale(${say})`, transformOrigin: '70% 100%', background: '#fff', color: RED, border: '7px solid #16161c', borderRadius: 26, padding: '8px 24px', fontFamily: HEAVY, fontWeight: 900, fontSize: 50, whiteSpace: 'nowrap', boxShadow: '0 10px 26px rgba(0,0,0,0.35)'}}>
+					{bubble}
+				</div>
+			)}
+			{label && say > 0.02 && f >= Math.max(stand + 8, labelAt) && (
+				<div style={{position: 'absolute', left: bx - 40, top: by - 100, transform: `translate(-50%,-50%) rotate(-3deg) scale(${pop(f, Math.max(stand + 8, labelAt), 10) * Math.min(1, say * 1.2)})`, background: RED, color: '#fff', border: '5px solid #fff', borderRadius: 14, padding: '6px 20px', fontFamily: HEAVY, fontWeight: 900, fontSize: 36, whiteSpace: 'nowrap', boxShadow: '0 8px 20px rgba(0,0,0,0.35)'}}>
 					{label}
 				</div>
 			)}

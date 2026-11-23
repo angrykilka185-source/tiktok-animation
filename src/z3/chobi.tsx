@@ -14,7 +14,17 @@ import {w} from './voice';
 const BLUE = '#2f86e0';
 const GREEN = '#3aa86a';
 const ORANGE = '#f08a2a';
-const GX = 1600; // Гога on the page
+const GX = 1660; // Гога on the page (the same spot on every page: no jumps at the cuts)
+// Чоби steps aside (or back) at the start of a page instead of jumping at the cut: two steps over `dur` frames
+const stepX = (f: number, from: number, to: number, at = 0, dur = 14) => {
+	const t = Math.max(0, Math.min(1, (f - at) / dur));
+	return {x: from + (to - from) * (0.5 - 0.5 * Math.cos(Math.PI * t)), walk: f >= at && f < at + dur ? (2 * Math.PI * (f - at)) / dur : undefined};
+};
+// Гога walks onto the page from the right (he never pops out of thin air): where he is at frame f, and his step phase
+const gogaIn = (f: number, at: number, toX: number, dur = 20) => {
+	const t = Math.max(0, Math.min(1, (f - at) / dur));
+	return {x: 2180 + (toX - 2180) * t * (2 - t), walk: f >= at && f < at + dur ? (6 * Math.PI * (f - at)) / dur : undefined};
+};
 const html = (x: number, y: number, s: number, extra: React.CSSProperties = {}): React.CSSProperties => ({position: 'absolute', left: x, top: y, transform: `translate(-50%,-50%) scale(${s})`, fontFamily: HEAVY, fontWeight: 900, whiteSpace: 'nowrap', ...extra});
 const pill = (bg: string): React.CSSProperties => ({background: bg, color: '#fff', padding: '10px 26px', borderRadius: 18, boxShadow: '0 8px 20px rgba(0,0,0,0.18)'});
 
@@ -84,11 +94,8 @@ export const C06: React.FC = () => {
 				</>
 			}
 		>
-			{f >= goga && (
-				<g transform={`translate(${1700},${FEET}) scale(${pop(f, goga, 11)}) translate(-1700,${-FEET})`}>
-					<You x={1700} y={FEET} s={0.5} f={g} brows={1} face={{eyes: 'open', mouth: 'smile', look: [-0.6, 0]}} />
-				</g>
-			)}
+			{f >= goga && <ellipse cx={gogaIn(f, goga, 1700).x} cy={FEET + 6} rx={65} ry={14} fill="#000" opacity={0.09} />}
+			{f >= goga && <You x={gogaIn(f, goga, 1700).x} y={FEET} s={0.5} f={g} walk={gogaIn(f, goga, 1700).walk} brows={1} face={{eyes: 'open', mouth: 'smile', look: [-0.6, 0]}} />}
 			<Stand k={k} b={b}>
 				<Choby x={HX} y={FEET} s={S} jaw={jaw} blink={blink} tilt={tilt} f={g} look={f < t ? [0.1, 0.1] : [0.75, -0.2]} armR={armR} armL="hip" />
 			</Stand>
@@ -356,9 +363,8 @@ export const C27: React.FC = () => {
 	const armR = armAt(1, f, [[0, 'down'], [2, PRESENT]], g);
 	return (
 		<Page n={n} f={f}>
-			<g transform={`translate(${GX},${FEET}) scale(${pop(f, 2, 12)}) translate(${-GX},${-FEET})`}>
-				<You x={GX} y={FEET} s={0.85} f={g} face={{eyes: 'wide', brows: 'worried', mouth: 'open', look: [-0.6, 0], sweat: 0.6}} />
-			</g>
+			<ellipse cx={gogaIn(f, 0, GX).x} cy={FEET + 6} rx={110} ry={14} fill="#000" opacity={0.09} />
+			<You x={gogaIn(f, 0, GX).x} y={FEET} s={0.85} f={g} walk={gogaIn(f, 0, GX).walk} face={{eyes: 'wide', brows: 'worried', mouth: 'open', look: [-0.6, 0], sweat: 0.6}} />
 			<Stand k={1} b={b}>
 				<Choby x={HX} y={FEET} s={S} jaw={jaw} blink={blink} tilt={tilt} f={g} look={[0.8, 0]} armR={armR} armL="hip" />
 			</Stand>
@@ -384,6 +390,7 @@ export const C28: React.FC = () => {
 			}
 		>
 			<BoxBreath x={1095} y={520} a={380} t={t} />
+			<ellipse cx={GX} cy={FEET + 6} rx={110} ry={14} fill="#000" opacity={0.09} />
 			<You x={GX} y={FEET} s={0.85} f={g} chest={chest} face={{eyes: 'narrow', brows: 'neutral', mouth: ph === 2 ? 'o' : 'tight', look: [-0.5, 0]}} />
 			<Stand k={1} b={1}>
 				<Choby x={HX} y={FEET} s={S} jaw={jaw} blink={blink} tilt={tilt} f={g} look={[0.8, 0]} armR={armR} armL="hip" chest={chest} />
@@ -415,6 +422,7 @@ export const C29: React.FC = () => {
 				</>
 			}
 		>
+			<ellipse cx={GX} cy={FEET + 6} rx={110} ry={14} fill="#000" opacity={0.09} />
 			<You x={GX} y={FEET} s={0.85} f={g} chest={1 + Math.sin(g / 26) * 0.05} face={{eyes: 'open', brows: 'neutral', mouth: 'smile', look: [-0.5, 0]}} />
 			<Stand k={1} b={b}>
 				<Choby x={HX} y={FEET} s={S} jaw={jaw} blink={blink} tilt={tilt} f={g} look={[0.75, -0.1]} armR={armAt(1, f, [[0, PRESENT], [pulse, HEART_PT]], g)} armL="hip" heart={f >= pulse ? {beat: Math.max(0, Math.sin((g / 12) * Math.PI)) ** 4} : undefined} heartOver />
@@ -617,7 +625,7 @@ export const C51: React.FC = () => {
 	}
 	return (
 		<Page
-			n={n}
+			sx={stepX(f, HX, HX - 100).x} n={n}
 			f={f}
 			html={
 				<>
@@ -638,7 +646,7 @@ export const C51: React.FC = () => {
 			{f >= m15 && <circle cx={pt(15, 90)[0]} cy={pt(15, 90)[1]} r={16} fill={GREEN} stroke="#fff" strokeWidth={5} />}
 			{f >= m35 && <circle cx={pt(35, 33)[0]} cy={pt(35, 33)[1]} r={16} fill={RED} stroke="#fff" strokeWidth={5} />}
 			<Stand k={1} b={b}>
-				<Choby x={HX - 100} y={FEET} s={S} jaw={jaw} blink={blink} tilt={tilt} f={g} look={[0.8, -0.1]} armR={PRESENT} armL="hip" />
+				<Choby x={stepX(f, HX, HX - 100).x} walk={stepX(f, HX, HX - 100).walk} y={FEET} s={S} jaw={jaw} blink={blink} tilt={tilt} f={g} look={[0.8, -0.1]} armR={PRESENT} armL="hip" />
 			</Stand>
 		</Page>
 	);
@@ -720,9 +728,8 @@ export const C68: React.FC = () => {
 	const {f, g, k, jaw, blink, tilt, b} = useHost(n);
 	return (
 		<Page n={n} f={f} shadow={k} html={<>{f >= 10 && <div style={html(1120, 300, pop(f, 10, 11), {fontSize: 72, color: INK, textShadow: `5px 5px 0 ${YEL}`})}>ПОВТОРИМ</div>}</>}>
-			<g transform={`translate(${GX},${FEET}) scale(${pop(f, 4, 12)}) translate(${-GX},${-FEET})`}>
-				<You x={GX} y={FEET} s={0.8} f={g} face={{eyes: 'open', brows: 'neutral', mouth: 'flat', look: [-0.6, 0]}} />
-			</g>
+			<ellipse cx={gogaIn(f, 4, GX).x} cy={FEET + 6} rx={104} ry={14} fill="#000" opacity={0.09} />
+			<You x={gogaIn(f, 4, GX).x} y={FEET} s={0.8} f={g} walk={gogaIn(f, 4, GX).walk} face={{eyes: 'open', brows: 'neutral', mouth: 'flat', look: [-0.6, 0]}} />
 			<Stand k={k} b={b}>
 				<Choby x={HX} y={FEET} s={S} jaw={jaw} blink={blink} tilt={tilt} f={g} look={[0.8, 0]} armR={armAt(1, f, [[0, 'wave'], [12, 'point']], g)} armL="hip" />
 			</Stand>
@@ -738,7 +745,7 @@ export const C69: React.FC = () => {
 	const TXT = ['НЕ ТРАТЬ ВОЗДУХ НА КРИК', 'ДЫШИ КВАДРАТОМ', 'НИКАКОГО ОГНЯ', 'СТУЧИ — НЕ КРИЧИ', 'НЕ ЛЕЗЬ, ГДЕ ЗАСЫПЛЕТ'];
 	return (
 		<Page
-			n={n}
+			sx={stepX(f, HX, HX - 60).x} n={n}
 			f={f}
 			html={
 				<>
@@ -748,9 +755,10 @@ export const C69: React.FC = () => {
 				</>
 			}
 		>
-			<You x={GX + 60} y={FEET} s={0.8} f={g} face={{eyes: 'open', brows: 'neutral', mouth: 'flat', look: [-0.7, -0.1]}} />
+			<ellipse cx={GX} cy={FEET + 6} rx={104} ry={14} fill="#000" opacity={0.09} />
+			<You x={GX} y={FEET} s={0.8} f={g} face={{eyes: 'open', brows: 'neutral', mouth: 'flat', look: [-0.7, -0.1]}} />
 			<Stand k={1} b={b}>
-				<Choby x={HX - 60} y={FEET} s={S} jaw={jaw} blink={blink} tilt={tilt} f={g} look={[0.8, -0.1]} armR={armAt(1, f, [[0, 'point'], [L[0], PRESENT]], g)} armL="hip" />
+				<Choby x={stepX(f, HX, HX - 60).x} walk={stepX(f, HX, HX - 60).walk} y={FEET} s={S} jaw={jaw} blink={blink} tilt={tilt} f={g} look={[0.8, -0.1]} armR={armAt(1, f, [[0, 'point'], [L[0], PRESENT]], g)} armL="hip" />
 			</Stand>
 		</Page>
 	);
@@ -764,10 +772,11 @@ export const C70: React.FC = () => {
 	const nod = Math.sin(f / 3) * 8 * Math.max(0, 1 - f / 40);
 	const got = w(n, 'запомнил') - 6;
 	return (
-		<Page n={n} f={f} html={<>{f >= got && <div style={html(GX, 230, pop(f, got, 10), {...pill(GREEN), fontSize: 44})}>ЗАПОМНИЛ ✓</div>}</>}>
+		<Page sx={stepX(f, HX - 60, HX).x} n={n} f={f} html={<>{f >= got && <div style={html(GX, 230, pop(f, got, 10), {...pill(GREEN), fontSize: 44})}>ЗАПОМНИЛ ✓</div>}</>}>
+			<ellipse cx={GX} cy={FEET + 6} rx={104} ry={14} fill="#000" opacity={0.09} />
 			<You x={GX} y={FEET} s={0.8} f={g} tilt={nod} brows={1} face={{eyes: 'open', mouth: 'smile', look: [-0.5, 0]}} />
 			<Stand k={1} b={b}>
-				<Choby x={HX} y={FEET} s={S} jaw={jaw} blink={blink} tilt={tilt} f={g} look={[0.8, 0]} armR={PRESENT} armL="hip" />
+				<Choby x={stepX(f, HX - 60, HX).x} walk={stepX(f, HX - 60, HX).walk} y={FEET} s={S} jaw={jaw} blink={blink} tilt={tilt} f={g} look={[0.8, 0]} armR={PRESENT} armL="hip" />
 			</Stand>
 		</Page>
 	);
@@ -796,6 +805,7 @@ export const C71: React.FC = () => {
 					<rect x={-14} y={36} width={28} height={16} rx={4} fill="#9aa4b0" stroke={INK} strokeWidth={4} />
 				</g>
 			)}
+			<ellipse cx={GX} cy={FEET + 6} rx={104} ry={14} fill="#000" opacity={0.09} />
 			<You x={GX} y={FEET} s={0.8} f={g} brows={1} face={{eyes: 'open', mouth: 'smile', look: [-0.5, -0.2]}} />
 			<Stand k={1} b={b}>
 				<Choby x={HX} y={FEET} s={S} jaw={jaw} blink={blink} tilt={tilt} f={g} look={[0.75, -0.2]} armR={armAt(1, f, [[0, 'down'], [know, 'point']], g)} armL="hip" />
@@ -822,6 +832,7 @@ export const C72: React.FC = () => {
 				</>
 			}
 		>
+			<ellipse cx={GX} cy={FEET + 6} rx={104} ry={14} fill="#000" opacity={0.09} />
 			<You x={GX} y={FEET} s={0.8} f={g} face={{eyes: 'open', mouth: 'smile', brows: 'raised', look: [-0.5, -0.2]}} />
 			<Stand k={1} b={b}>
 				<Choby x={HX} y={FEET} s={S} jaw={jaw} blink={blink} tilt={tilt} f={g} look={[0.75, -0.2]} armR={SHRUG} armL={mirror(SHRUG)} />
@@ -846,7 +857,7 @@ export const C73: React.FC = () => {
 	const XC = 1100;
 	return (
 		<Page
-			n={n}
+			sx={stepX(f, HX, HX - 60).x} n={n}
 			f={f}
 			html={
 				<>
@@ -866,9 +877,10 @@ export const C73: React.FC = () => {
 				</>
 			}
 		>
-			<You x={GX + 60} y={FEET} s={0.8} f={g} brows={1} face={{eyes: 'open', mouth: 'smile', look: [-0.5, -0.1]}} armR={armAt(1, f, [[0, 'down'], [link, 'wave']], g)} />
+			<ellipse cx={GX} cy={FEET + 6} rx={104} ry={14} fill="#000" opacity={0.09} />
+			<You x={GX} y={FEET} s={0.8} f={g} brows={1} face={{eyes: 'open', mouth: 'smile', look: [-0.5, -0.1]}} armR={armAt(1, f, [[0, 'down'], [link, 'wave']], g)} />
 			<Stand k={1} b={b}>
-				<Choby x={HX - 60} y={FEET} s={S} jaw={jaw} blink={blink} tilt={tilt} f={g} look={f >= press && f < tgk ? [0.8, -0.1] : [0.1, 0.1]} armR={armR} armL="hip" />
+				<Choby x={stepX(f, HX, HX - 60).x} walk={stepX(f, HX, HX - 60).walk} y={FEET} s={S} jaw={jaw} blink={blink} tilt={tilt} f={g} look={f >= press && f < tgk ? [0.8, -0.1] : [0.1, 0.1]} armR={armR} armL="hip" />
 			</Stand>
 		</Page>
 	);

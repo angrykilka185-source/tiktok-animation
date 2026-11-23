@@ -3,8 +3,8 @@
 import React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
 import {clamp, lerp, pop} from '../anim';
-import {Person} from '../components/Person';
-import {StopChobi} from './chobiKit';
+import {armAngles, Person, type ArmPose, type Kind} from '../components/Person';
+import {STOP_WALK, StopChobi} from './chobiKit';
 import {arm, armTo, AvalancheFront, Beach, Chip, GrainPile, HEAVY, INK, Lighter, Mountains, Phone, Plaque, RED, Rope, Rubble, Stage16, Vig, Waves, YEL, You} from './kit';
 import {SHOTS} from './timeline';
 import {w} from './voice';
@@ -95,6 +95,14 @@ export const S46: React.FC = () => {
 						<You x={0} y={0} s={0.55} f={f} face={{eyes: 'wide', brows: 'raised', mouth: f >= scream ? 'o' : 'open', look: [-0.8, -0.2]}} armL={arm([-120, -440], [-170 + Math.sin(f / 2) * 30, -540], {})} armR={arm([120, -440], [170 - Math.sin(f / 2) * 30, -540], {})} outer={f >= mouth ? <ellipse cx={0} cy={-440} rx={40} ry={26} fill="#fff" stroke="#cfe0ef" strokeWidth={4} /> : undefined} />
 					</g>
 				)}
+				{/* once the front has reached him, snow flies past in front of him: he is inside the avalanche, not on top of it */}
+				{!swallowed && front > GOGA46 - 150 &&
+					Array.from({length: 26}).map((_, k) => {
+						const t = ((f * 0.045 + k * 0.137) % 1);
+						const cy = slopeY(GOGA46) - 520 + ((k * 97) % 560);
+						const op = interpolate(front, [GOGA46 - 150, GOGA46 + 250], [0, 0.85], clamp);
+						return <circle key={k} cx={GOGA46 - 420 + t * 840} cy={cy + Math.sin(t * 6 + k) * 30} r={12 + (k % 4) * 9} fill={k % 3 ? '#ffffff' : '#e6eef7'} opacity={op * (1 - Math.abs(t - 0.5) * 1.4)} />;
+					})}
 				{swallowed && (
 					<g>
 						<rect x={-100} y={-100} width={2200} height={1300} fill="#eef4fb" />
@@ -306,6 +314,18 @@ export const S55: React.FC = () => {
 	const face = w(n, 'лицо') - 6;
 	const freed = interpolate(f, [face, face + 30], [0, 1], clamp);
 	const dig = Math.sin(f / 3);
+	// they run in from off the frame and stop at the edges of the hole (six strides, feet down when they stop)
+	const R0 = side - 30;
+	const running = f >= R0 && f < side;
+	const runX = interpolate(f, [R0, side], [1260, 360], {...clamp, easing: (t) => t * (1.5 - 0.5 * t)});
+	// once there, their arms rise from hanging into digging over 8 frames (no snap)
+	const u = interpolate(f, [side, side + 8], [0, 1], {...clamp, easing: (t) => t * t * (3 - 2 * t)});
+	const digArm = (kind: Kind, s: -1 | 1, target: [number, number], bend: 1 | -1): ArmPose | undefined => {
+		if (running) return undefined;
+		if (u >= 1) return {target, bend};
+		const a = armAngles(kind, s, target, bend);
+		return {shoulder: s * -6 + (a.shoulder - s * -6) * u, elbow: s * 4 + (a.elbow - s * 4) * u};
+	};
 	return (
 		<AbsoluteFill>
 			<Stage16 bg="#bfe3fb">
@@ -313,11 +333,17 @@ export const S55: React.FC = () => {
 				<rect x={HOLE.x - HOLE.w / 2} y={HOLE.top} width={HOLE.w} height={380} fill="#8a6a3a" />
 				<You x={HOLE.x} y={HOLE.top + 380} s={0.52} f={f} face={{eyes: 'open', brows: 'worried', mouth: 'open', look: [0.4, -0.4]}} />
 				<path d={`M ${HOLE.x - HOLE.w / 2 - 40},${HOLE.top + 380} L ${HOLE.x - HOLE.w / 2 - 40},${HOLE.top + 130 + freed * 90} C ${HOLE.x - 80},${HOLE.top + 100 + freed * 120} ${HOLE.x + 80},${HOLE.top + 100 + freed * 120} ${HOLE.x + HOLE.w / 2 + 40},${HOLE.top + 130 + freed * 90} L ${HOLE.x + HOLE.w / 2 + 40},${HOLE.top + 380} Z`} fill="#d9b06a" />
-				{f >= side &&
+				{/* two people run in from both sides and dig from the side, sand flying from their hands */}
+				{f >= R0 &&
 					([-1, 1] as const).map((sd) => (
-						<g key={sd} opacity={pop(f, side, 10)}>
-							<Person kind={sd < 0 ? 'mom' : 'dad'} id={`z55h${sd}`} x={HOLE.x + sd * 360} y={HOLE.top + 20} scale={0.36} face={{eyes: 'open', mouth: 'flat', brows: 'worried', blush: false, look: [-sd * 0.8, 0.6]}} armL={{target: [sd < 0 ? 160 : -160, -300 + dig * 40], bend: sd < 0 ? -1 : 1}} armR={{target: [sd < 0 ? 200 : -200, -280 - dig * 40], bend: sd < 0 ? -1 : 1}} />
-							<path d={`M ${HOLE.x + sd * 280},${HOLE.top - 120} l ${-sd * 70},40 m ${sd * 10},-34 l ${-sd * 10},34 l ${sd * 36},4`} stroke="#3aa86a" strokeWidth={10} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+						<g key={sd}>
+							<Person kind={sd < 0 ? 'mom' : 'dad'} id={`z55h${sd}`} x={HOLE.x + sd * runX} y={HOLE.top + 20} walk={running ? (6 * Math.PI * (f - R0)) / (side - R0) : undefined} scale={0.36} face={{eyes: 'open', mouth: 'flat', brows: 'worried', blush: false, look: [-sd * 0.8, 0.6]}} armL={digArm(sd < 0 ? 'mom' : 'dad', -1, [sd < 0 ? 160 : -160, -300 + dig * 40], sd < 0 ? -1 : 1)} armR={digArm(sd < 0 ? 'mom' : 'dad', 1, [sd < 0 ? 200 : -200, -280 - dig * 40], sd < 0 ? -1 : 1)} />
+							{f >= side && <g opacity={pop(f, side, 10)}><path d={`M ${HOLE.x + sd * 280},${HOLE.top - 120} l ${-sd * 70},40 m ${sd * 10},-34 l ${-sd * 10},34 l ${sd * 36},4`} stroke="#3aa86a" strokeWidth={10} fill="none" strokeLinecap="round" strokeLinejoin="round" /></g>}
+							{f >= side &&
+								[0, 1, 2, 3].map((k) => {
+									const t = ((f - side) / 14 + k / 4) % 1;
+									return <circle key={k} cx={HOLE.x + sd * (HOLE.w / 2 + 10 + t * 130)} cy={HOLE.top - 10 - Math.sin(t * Math.PI) * 90} r={7 + (k % 2) * 4} fill="#c99a52" opacity={1 - t} />;
+								})}
 						</g>
 					))}
 			</Stage16>
@@ -480,7 +506,17 @@ export const S59: React.FC = () => {
 	const six = w(n, 'ошибка') - 4;
 	const never = w(n, 'никогда') - 6;
 	const rope = w(n, 'страховочным') - 8;
-	const right = f >= rope;
+	// the partner walks in from the right once Чоби has gone (no crossing), then the line goes over the bin to Гога
+	const P0 = Math.max(rope - 34, never + 20 + STOP_WALK + 2);
+	const P1 = P0 + 30;
+	const px = interpolate(f, [P0, P1], [2120, 1680], {...clamp, easing: (t) => t * (1.4 - 0.4 * t)});
+	const pwalk = f >= P0 && f < P1 ? (8 * Math.PI * (f - P0)) / (P1 - P0) : undefined;
+	const D0 = Math.max(rope, P1 + 2);
+	const drop = interpolate(f, [D0, D0 + 16], [0, 1], clamp);
+	const u = interpolate(f, [P1, P1 + 8], [0, 1], {...clamp, easing: (t) => t * t * (3 - 2 * t)});
+	const hold = armAngles('dad', -1, [-220, -900], -1);
+	const holdArm: ArmPose = u >= 1 ? {target: [-220, -900], bend: -1} : {shoulder: 6 + (hold.shoulder - 6) * u, elbow: -4 + (hold.elbow + 4) * u};
+	const right = f >= D0;
 	return (
 		<AbsoluteFill style={{background: '#2a2620'}}>
 			<svg width={1920} height={1080} viewBox="0 0 1920 1080" style={{position: 'absolute', inset: 0}}>
@@ -488,19 +524,27 @@ export const S59: React.FC = () => {
 				<rect x={860} y={40} width={200} height={40} fill="#9aa1ae" />
 				<GrainPile x={960} y={1080} w={980} h={330} f={f} />
 				<You x={960} y={760} s={0.5} f={f} brows={right ? 0 : 1} face={{eyes: 'open', mouth: right ? 'flat' : 'smile', look: [0.2, -0.4]}} />
-				{right && (
-					<g opacity={interpolate(f, [rope, rope + 10], [0, 1], clamp)}>
-						<path d="M 920,640 L 1000,640 L 1000,700 L 920,700 Z" fill="none" stroke="#f08a2a" strokeWidth={8} />
-						<Rope a={[960, 620]} b={[960, 80]} sag={0} />
-						<path d="M 960,80 L 1520,80 L 1600,560" stroke="#c9a35a" strokeWidth={5} fill="none" strokeDasharray="14 8" />
-						<rect x={1470} y={900} width={450} height={180} fill="#4a463e" />
-						<Person kind="dad" id="z59p" x={1680} y={920} scale={0.36} colors={{top: '#f08a2a', topDark: '#d47222', pants: '#2a3040', shoes: '#1d1410', hair: '#3a2a20', skin: '#e8c8a0'}} face={{eyes: 'open', mouth: 'flat', brows: 'neutral', blush: false, look: [-0.8, 0.6]}} armL={{target: [-220, -900], bend: -1}} />
+				{/* outside the bin: the ground where the partner stands */}
+				<rect x={1470} y={900} width={450} height={180} fill="#4a463e" />
+				{f >= P0 && <Person kind="dad" id="z59p" x={px} y={920} walk={pwalk} scale={0.36} colors={{top: '#f08a2a', topDark: '#d47222', pants: '#2a3040', shoes: '#1d1410', hair: '#3a2a20', skin: '#e8c8a0'}} face={{eyes: 'open', mouth: 'flat', brows: 'neutral', blush: false, look: [-0.8, 0.6]}} armL={f >= P1 ? holdArm : undefined} />}
+				{/* the line runs from his hands over the top of the bin and down through the hatch to Гога's harness */}
+				{f >= D0 && (
+					<g>
+						<path d={`M 1600,560 L 1520,80 L ${1032 + 488 * (1 - Math.min(1, drop * 2))},80`} stroke="#c9a35a" strokeWidth={5} fill="none" strokeDasharray="14 8" />
+						{/* the rope comes down beside him (not over his face) to the ring of his harness */}
+						{drop > 0.5 && <Rope a={[1032, 80 + 570 * (drop - 0.5) * 2]} b={[1032, 80]} sag={0} />}
+						{drop >= 1 && (
+							<g opacity={pop(f, D0 + 16, 8)}>
+								<path d="M 912,640 L 1036,640 L 1036,700 L 912,700 Z" fill="none" stroke="#f08a2a" strokeWidth={8} />
+								<circle cx={1032} cy={650} r={10} fill="none" stroke="#9aa1ae" strokeWidth={5} />
+							</g>
+						)}
 					</g>
 				)}
 			</svg>
 			<StopChobi n={n} f={f} at={six} to={never + 20} label="ОШИБКА №6 · ПО ЗЕРНУ" />
-			<Chip f={f} at={rope + 6} x={420} y={300} text="СТРАХОВОЧНЫЙ ТРОС" color="#f08a2a" size={40} />
-			<Chip f={f} at={rope + 14} x={1620} y={320} text="НАПАРНИК СНАРУЖИ" color="#3aa86a" size={36} />
+			<Chip f={f} at={D0 + 6} x={420} y={300} text="СТРАХОВОЧНЫЙ ТРОС" color="#f08a2a" size={40} />
+			<Chip f={f} at={P1 + 4} x={1620} y={320} text="НАПАРНИК СНАРУЖИ" color="#3aa86a" size={36} />
 		</AbsoluteFill>
 	);
 };
@@ -600,7 +644,7 @@ export const S62: React.FC = () => {
 			</svg>
 			<Chip f={f} at={gas + 2} x={470} y={250} text="ГАЗ!" color="#7aa82a" size={56} />
 			<Chip f={f} at={spark + 4} x={470} y={560} text="ИСКРА = ВЗРЫВ" color={RED} size={44} />
-			<StopChobi n={n} f={f} at={0} to={len(n) - 16} label={f >= seven ? 'ОШИБКА №7 · ОГОНЬ' : undefined} />
+			<StopChobi n={n} f={f} at={0} to={len(n) - 20} label="ОШИБКА №7 · ОГОНЬ" labelAt={seven} />
 		</AbsoluteFill>
 	);
 };

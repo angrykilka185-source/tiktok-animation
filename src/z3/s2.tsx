@@ -325,10 +325,16 @@ export const S37: React.FC = () => {
 	const n = 37;
 	const strings = w(n, 'пальцам') - 8;
 	const guard = w(n, 'сторож') - 8;
+	// the guard walks in from the right with his lamp (six steps, both feet down when he stops)
+	const G0 = guard - 36;
+	const gx = interpolate(f, [G0, guard + 4], [2120, 1700], {...clamp, easing: (t) => t * (1.4 - 0.4 * t)});
+	const gwalk = f >= G0 && f < guard + 4 ? (6 * Math.PI * (f - G0)) / (guard + 4 - G0) : undefined;
 	return (
 		<AbsoluteFill style={{filter: 'sepia(0.7)'}}>
 			<Paper>
 				<rect x={0} y={760} width={1920} height={320} fill="#b89a6a" />
+				{/* a beam under the ceiling: the bells hang from it */}
+				{f >= strings && <rect x={60} y={150} width={1420} height={24} rx={6} fill="#6a4a2a" opacity={pop(f, strings, 10)} />}
 				{[0, 1, 2].map((k) => {
 					const x = 300 + k * 460;
 					return (
@@ -336,9 +342,15 @@ export const S37: React.FC = () => {
 							<rect x={x - 180} y={640} width={360} height={60} rx={10} fill="#8a6440" />
 							<rect x={x - 190} y={680} width={20} height={110} fill="#6a4a2a" />
 							<rect x={x + 170} y={680} width={20} height={110} fill="#6a4a2a" />
-							<path d={`M ${x - 170},640 C ${x - 60},600 ${x + 60},600 ${x + 170},640 Z`} fill="#fbf3e0" stroke={SEPIA_D} strokeWidth={4} />
-							<ellipse cx={x - 150} cy={624} rx={34} ry={24} fill="#e8d2b0" />
+							{/* a person lies under the sheet: the body's outline, the head on the pillow */}
+							<ellipse cx={x - 152} cy={630} rx={30} ry={14} fill="#fffaf0" stroke={SEPIA_D} strokeWidth={3} />
+							<path d={`M ${x - 130},640 C ${x - 120},596 ${x - 40},590 ${x + 10},606 C ${x + 60},620 ${x + 110},598 ${x + 170},612 L ${x + 170},640 Z`} fill="#fbf3e0" stroke={SEPIA_D} strokeWidth={4} />
+							<ellipse cx={x - 150} cy={612} rx={30} ry={26} fill="#e8d2b0" stroke={SEPIA_D} strokeWidth={2} />
+							<path d={`M ${x - 176},604 C ${x - 172},584 ${x - 128},582 ${x - 124},600 C ${x - 140},594 ${x - 160},594 ${x - 176},604 Z`} fill="#6a4a2a" />
 							{f >= strings && <Rope a={[x + 100, 628]} b={[x + 100, 240]} sag={0} />}
+							{f >= strings && <line x1={x + 100} y1={174} x2={x + 100} y2={212} stroke="#6a4a2a" strokeWidth={5} />}
+							{/* the hand under the sheet with the string tied to a finger */}
+							<ellipse cx={x + 100} cy={634} rx={13} ry={9} fill="#e8d2b0" stroke={SEPIA_D} strokeWidth={2} />
 							{f >= strings && (
 								<g transform={`translate(${x + 100},210) scale(${pop(f, strings + k * 4, 10)})`}>
 									<Bell s={0.5} swing={Math.sin(f / 9 + k) * 3} />
@@ -347,9 +359,9 @@ export const S37: React.FC = () => {
 						</g>
 					);
 				})}
-				{f >= guard && (
-					<g opacity={pop(f, guard, 10)}>
-						<Person kind="dad" id="z37g" x={1700} y={900} scale={0.42} colors={{top: '#3a4a6a', topDark: '#2a3a5a', pants: '#2a3040', shoes: '#1d1410', hair: '#5a4a3a', skin: '#e8c8a0'}} hat={{type: 'kepi', color: '#2a3a5a'}} moustache="#5a4a3a" plain kneePatch={false} face={{eyes: 'open', mouth: 'flat', brows: 'neutral', blush: false, look: [-0.6, 0]}} armR={{target: [140, -560], bend: 1}} itemR={<g><rect x={-16} y={-30} width={32} height={46} rx={6} fill="#ffcf6a" stroke="#3a2a14" strokeWidth={4} /><circle cy={-8} r={22} fill="#ffcf6a" opacity={0.4} /></g>} />
+				{f >= G0 && (
+					<g>
+						<Person kind="dad" id="z37g" x={gx} y={900} scale={0.42} walk={gwalk} colors={{top: '#3a4a6a', topDark: '#2a3a5a', pants: '#2a3040', shoes: '#1d1410', hair: '#5a4a3a', skin: '#e8c8a0'}} hat={{type: 'kepi', color: '#2a3a5a'}} moustache="#5a4a3a" plain kneePatch={false} face={{eyes: 'open', mouth: 'flat', brows: 'neutral', blush: false, look: [-0.6, 0]}} armR={{target: [140, -560], bend: 1}} itemR={<g><rect x={-16} y={-30} width={32} height={46} rx={6} fill="#ffcf6a" stroke="#3a2a14" strokeWidth={4} /><circle cy={-8} r={22} fill="#ffcf6a" opacity={0.4} /></g>} />
 					</g>
 				)}
 			</Paper>
@@ -513,18 +525,21 @@ export const S41: React.FC = () => {
 	const said = ['«Череп повёрнут!»', '«Всё было на месте»', '«Черепа не было!»'];
 	return (
 		<Paper>
-			{said.map((t, k) =>
-				f >= wit + k * 10 ? (
-					<g key={k} transform={`translate(${400 + k * 560},${360 + (k % 2) * 120}) scale(${pop(f, wit + k * 10, 10)})`}>
+			{/* the three witnesses stand there from the start; what each of them said pops up in turn */}
+			{said.map((t, k) => (
+				<g key={k} transform={`translate(${400 + k * 560},${300 + (k % 2) * 90})`}>
 						<Person kind="dad" id={`z41w${k}`} x={0} y={420} scale={0.34} colors={{top: ['#3a2a20', '#2a3a4a', '#4a3a2a'][k], topDark: '#1d1410', pants: '#2a2a30', shoes: '#1d1410', hair: '#5a4a3a', skin: '#e8c8a0'}} plain kneePatch={false} hat={k === 1 ? {type: 'peak', color: '#2a3a4a'} : undefined} face={{eyes: 'open', mouth: 'open', brows: k === 2 ? 'raised' : 'neutral', blush: false}} />
-						<rect x={-200} y={-120} width={400} height={90} rx={20} fill="#fffaf0" stroke={SEPIA_D} strokeWidth={5} />
-						<path d="M -20,-30 L 0,0 L 20,-30 Z" fill="#fffaf0" stroke={SEPIA_D} strokeWidth={5} />
-						<text x={0} y={-62} textAnchor="middle" fontFamily={HEAVY} fontWeight={900} fontSize={34} fill="#3a2a14">
-							{t}
-						</text>
-					</g>
-				) : null,
-			)}
+					{f >= wit + k * 12 && (
+						<g transform={`scale(${pop(f, wit + k * 12, 10)})`}>
+							<rect x={-200} y={-120} width={400} height={90} rx={20} fill="#fffaf0" stroke={SEPIA_D} strokeWidth={5} />
+							<path d="M -20,-30 L 0,0 L 20,-30 Z" fill="#fffaf0" stroke={SEPIA_D} strokeWidth={5} />
+							<text x={0} y={-62} textAnchor="middle" fontFamily={HEAVY} fontWeight={900} fontSize={34} fill="#3a2a14">
+								{t}
+							</text>
+						</g>
+					)}
+				</g>
+			))}
 			{f >= myth && (
 				<g transform={`translate(960,190) rotate(-6) scale(${pop(f, myth, 9)})`}>
 					<rect x={-180} y={-70} width={360} height={140} rx={22} fill={RED} stroke="#fff" strokeWidth={12} />

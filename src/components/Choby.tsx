@@ -15,6 +15,10 @@
 //   handFrost 0…1 — only the fingers freeze, glassFrost 0…1 — only the glasses frost over (both default to frost)
 //   scarf  a striped scarf;  mittens — red mittens on the hands;  inner / outer — extra drawing in his own units
 //          (inner: inside the ribcage, behind the ribs; outer: on top of everything)
+// For other characters of the same family (his brother Гога, src/components/Goga.tsx): glasses / tie: false — no glasses,
+//   no bow tie; hat — drawn instead of the mortarboard; face — extra drawing on the face (brows, freckles…); torso —
+//   clothes over the bones, under the arms; shoes — drawn instead of the bony feet; back — behind everything;
+//   cheek — the colour of the cheeks. All in his own units; hat and face turn with the head.
 import React from 'react';
 
 export const BONE = '#f3eee2';
@@ -160,6 +164,14 @@ export const Choby: React.FC<{
 	mittens?: boolean;
 	inner?: React.ReactNode;
 	outer?: React.ReactNode;
+	glasses?: boolean;
+	tie?: boolean;
+	hat?: React.ReactNode;
+	face?: React.ReactNode;
+	torso?: React.ReactNode;
+	shoes?: React.ReactNode;
+	back?: React.ReactNode;
+	cheek?: string;
 }> = ({
 	x,
 	y,
@@ -192,11 +204,20 @@ export const Choby: React.FC<{
 	mittens = false,
 	inner,
 	outer,
+	glasses = true,
+	tie = true,
+	hat,
+	face,
+	torso,
+	shoes,
+	back,
+	cheek: cheekColor,
 }) => {
 	const sx = shiver ? Math.sin(f * 1.3) * 8 * shiver : 0;
 	const chatter = shiver ? Math.abs(Math.sin(f * 1.7)) * 0.3 * shiver : 0;
 	const jo = Math.max(0, Math.min(1, jaw + chatter)) * 22;
-	const cheek = cold > 0 ? mixHex('#f0868e', '#8fb8ff', Math.min(1, cold)) : '#f0868e';
+	const cheek0 = cheekColor ?? '#f0868e';
+	const cheek = cold > 0 ? mixHex(cheek0, '#8fb8ff', Math.min(1, cold)) : cheek0;
 	const vcol = vessels ? mixHex('#3a78e0', '#e0303a', vessels.warm) : '';
 	const vline = (a: [number, number], b: [number, number], part: number) =>
 		vessels && part > 0 ? <line x1={a[0]} y1={a[1]} x2={a[0] + (b[0] - a[0]) * part} y2={a[1] + (b[1] - a[1]) * part} stroke={vcol} strokeWidth={6} strokeLinecap="round" opacity={0.9} /> : null;
@@ -230,6 +251,7 @@ export const Choby: React.FC<{
 	) : null;
 	return (
 		<g transform={`translate(${x + sx * s},${y}) scale(${s})`}>
+			{back}
 			{!bust && (
 				<g>
 					<Bone a={[-30, -185]} b={[-34, -105]} w={22} />
@@ -238,8 +260,12 @@ export const Choby: React.FC<{
 					<Bone a={[34, -105]} b={[36, -32]} w={22} />
 					{vline([-30, -185], [-36, -32], vessels ? vessels.reach : 0)}
 					{vline([30, -185], [36, -32], vessels ? vessels.reach : 0)}
-					<ellipse cx={-46} cy={-16} rx={36} ry={18} fill={BONE} stroke={BONE_D} strokeWidth={4.5} />
-					<ellipse cx={46} cy={-16} rx={36} ry={18} fill={BONE_SH} stroke={BONE_D} strokeWidth={4.5} />
+					{shoes ?? (
+						<>
+							<ellipse cx={-46} cy={-16} rx={36} ry={18} fill={BONE} stroke={BONE_D} strokeWidth={4.5} />
+							<ellipse cx={46} cy={-16} rx={36} ry={18} fill={BONE_SH} stroke={BONE_D} strokeWidth={4.5} />
+						</>
+					)}
 				</g>
 			)}
 			{/* pelvis */}
@@ -271,6 +297,7 @@ export const Choby: React.FC<{
 			{heart && heartOver && heartEl}
 			{/* collarbones and arms */}
 			<Bone a={[-62, -386]} b={[62, -386]} w={18} />
+			{torso}
 			{arm(-1, armL)}
 			{arm(1, armR)}
 			{/* the neck and the red bow tie (or a striped scarf) */}
@@ -286,11 +313,13 @@ export const Choby: React.FC<{
 					<path d="M 58,-300 l -4,16 M 66,-302 l -2,16 M 74,-304 l 0,16 M 82,-305 l 2,16" stroke="#d23436" strokeWidth={5} strokeLinecap="round" />
 				</g>
 			) : (
-				<g transform="translate(0,-398)">
-					<path d="M -4,0 L -40,-18 L -40,18 Z" fill="#d23436" />
-					<path d="M 4,0 L 40,-18 L 40,18 Z" fill="#b8282a" />
-					<rect x={-10} y={-9} width={20} height={18} rx={6} fill="#9a1e20" />
-				</g>
+				tie && (
+					<g transform="translate(0,-398)">
+						<path d="M -4,0 L -40,-18 L -40,18 Z" fill="#d23436" />
+						<path d="M 4,0 L 40,-18 L 40,18 Z" fill="#b8282a" />
+						<rect x={-10} y={-9} width={20} height={18} rx={6} fill="#9a1e20" />
+					</g>
+				)
 			)}
 			{/* the head */}
 			<g transform={`rotate(${tilt} 0 -430)`}>
@@ -331,14 +360,17 @@ export const Choby: React.FC<{
 				))}
 				{/* a little heart-shaped nose */}
 				<path d="M 0,-498 C -16,-510 -15,-528 -6,-528 C -2,-528 0,-524 0,-520 C 0,-524 2,-528 6,-528 C 15,-528 16,-510 0,-498 Z" fill={INK} />
+				{face}
 				{/* round glasses (they frost over in the cold) */}
-				{(glassFrost ?? frost) > 0 && [-1, 1].map((sd) => <circle key={sd} cx={sd * 58} cy={-566} r={55} fill="#eaf6ff" opacity={0.55 * (glassFrost ?? frost)} />)}
-				<g fill="none" stroke="#2a2a30" strokeWidth={6}>
-					<circle cx={-58} cy={-566} r={58} />
-					<circle cx={58} cy={-566} r={58} />
-					<path d="M -4,-572 Q 0,-580 4,-572" />
-					<path d="M -116,-572 L -144,-586 M 116,-572 L 144,-586" />
-				</g>
+				{glasses && (glassFrost ?? frost) > 0 && [-1, 1].map((sd) => <circle key={sd} cx={sd * 58} cy={-566} r={55} fill="#eaf6ff" opacity={0.55 * (glassFrost ?? frost)} />)}
+				{glasses && (
+					<g fill="none" stroke="#2a2a30" strokeWidth={6}>
+						<circle cx={-58} cy={-566} r={58} />
+						<circle cx={58} cy={-566} r={58} />
+						<path d="M -4,-572 Q 0,-580 4,-572" />
+						<path d="M -116,-572 L -144,-586 M 116,-572 L 144,-586" />
+					</g>
+				)}
 				{/* hoarfrost on the skull */}
 				{frost > 0 && (
 					<g opacity={Math.min(1, frost * 1.3)}>
@@ -355,7 +387,8 @@ export const Choby: React.FC<{
 						return <path key={k} d="M 0,-14 C 8,-2 8,8 0,10 C -8,8 -8,-2 0,-14 Z" fill="#7fc4ff" opacity={sweat * (1 - t)} transform={`translate(${[-150, 150, -120][k] + (k === 1 ? 10 : -10) * t},${-600 + t * 70})`} />;
 					})}
 				{/* the oversized mortarboard with its tassel (icicles hang from it in the frost) */}
-				{cap && (
+				{hat}
+				{!hat && cap && (
 					<g transform={capAt ? `translate(${capAt[0]},${capAt[1]}) rotate(${capAt[2]} 0 -690)` : `rotate(${capTilt} 0 -690)`}>
 						<Mortarboard tassel={Math.sin(f / 9) * 0.6} />
 						{frost > 0.2 &&

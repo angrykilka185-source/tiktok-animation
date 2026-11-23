@@ -1593,3 +1593,142 @@ write('heart_one', lowpass(beat(1), 400), 0.95);
 	}
 	writeLoop('cries', loopify(room(lowpass(x, 1800), 0.55, 2.6), 1), 0.4);
 }
+
+// ===================================================== «Каково это — умереть от жажды» =====
+// the desert wind: a warm low rush with a thin hiss of sand on the swells; loops at 8 s
+{
+	const dur = 9;
+	const x = buf(dur);
+	const lo = lowpass(lowpass(noiseBuf(x.length), 260), 260);
+	const mid = reso(noiseBuf(x.length), 480, 0.7);
+	const hiss = bandpass(noiseBuf(x.length), 1200, 5000);
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		const sw = 0.55 + 0.45 * Math.sin((2 * Math.PI * t) / 4.5 + 0.4);
+		const g = 0.5 + 0.5 * Math.sin((2 * Math.PI * t) / 3 + 1.1);
+		x[i] = lo[i] * 2.2 * (0.7 + 0.3 * sw) + mid[i] * 0.55 * sw + hiss[i] * 0.3 * (sw * g) ** 2;
+	}
+	writeLoop('desert_wind', loopify(room(highpass(highpass(lowpass(x, 3000), 140), 140), 0.15, 1.2), 1), 0.45);
+}
+// a sandstorm: a roar that surges in gusts, and the grit of sand; loops at 6 s
+{
+	const dur = 7;
+	const x = buf(dur);
+	const roar = lowpass(lowpass(noiseBuf(x.length), 500), 700);
+	const body = reso(noiseBuf(x.length), 650, 0.7);
+	const grit = bandpass(noiseBuf(x.length), 1800, 8000);
+	let gv = 0.6;
+	let target = 0.6;
+	for (let i = 0; i < x.length; i++) {
+		if (i % 6615 === 0) target = 0.35 + rnd() * 0.65;
+		gv += (target - gv) * 0.00008;
+		x[i] = roar[i] * 6 * gv + body[i] * 0.5 * gv + grit[i] * 0.3 * gv * gv;
+	}
+	writeLoop('sandstorm', loopify(room(x, 0.2, 1.6), 1), 0.6);
+}
+// one drop of water: a small rising «plip»
+{
+	const x = buf(0.5);
+	const d = buf(0.25);
+	let ph = 0;
+	for (let i = 0; i < d.length; i++) {
+		const t = i / SR;
+		ph += (2 * Math.PI * (650 + 1100 * Math.min(1, t / 0.05))) / SR;
+		d[i] = Math.sin(ph) * Math.min(1, t / 0.002) * Math.exp(-t / 0.05);
+	}
+	add(x, d, 0.01, 1);
+	write('drip', room(x, 0.3, 0.8), 0.5);
+}
+// water poured into a glass: the stream and the bubbles, rising in pitch as it fills
+{
+	const dur = 2.2;
+	const x = buf(dur);
+	const stream = bandpass(noiseBuf(x.length), 500, 4000);
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		x[i] = stream[i] * 0.35 * Math.min(1, t / 0.08) * Math.min(1, (dur - t) / 0.3);
+	}
+	for (let k = 0; k < 26; k++) {
+		const t0 = 0.05 + rnd() * (dur - 0.4);
+		add(x, chirp(500 + (t0 / dur) * 900 + rnd() * 250, 0.06, 0.5, 0.018), t0, 0.35 + rnd() * 0.3);
+	}
+	write('pour', room(x, 0.25, 0.8), 0.5);
+}
+// heat: a dry sizzle with tiny crackles
+{
+	const dur = 1.6;
+	const x = buf(dur);
+	const h = highpass(noiseBuf(x.length), 3000);
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		x[i] = h[i] * 0.25 * Math.sin((Math.PI * t) / dur) ** 0.7 * (0.7 + 0.3 * Math.sin(2 * Math.PI * 9 * t));
+	}
+	for (let k = 0; k < 70; k++) add(x, click(0.004, 4000 + rnd() * 3000, 4), 0.05 + rnd() * (dur - 0.15), 0.2 + rnd() * 0.5);
+	write('sizzle', x, 0.35);
+}
+// a kettle comes to the boil and whistles
+{
+	const dur = 1.8;
+	const x = buf(dur);
+	const br = reso(noiseBuf(x.length), 2300, 18);
+	let ph = 0;
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		ph += (2 * Math.PI * (2050 + 250 * Math.min(1, t / 0.5) + 15 * Math.sin(2 * Math.PI * 5 * t))) / SR;
+		x[i] = (Math.sin(ph) * 0.5 + br[i] * 0.4) * Math.min(1, t / 0.45) * Math.min(1, (dur - t) / 0.15);
+	}
+	write('kettle', room(x, 0.2, 0.8), 0.2);
+}
+// bats: high squeaks and the flutter of wings
+{
+	const dur = 1.3;
+	const x = buf(dur);
+	for (let k = 0; k < 9; k++) add(x, chirp(3800 + rnd() * 2000, 0.05, -0.35, 0.02), 0.05 + rnd() * 1.0, 0.4 + rnd() * 0.5);
+	const fl = lowpass(noiseBuf(x.length), 900);
+	for (let i = 0; i < fl.length; i++) {
+		const t = i / SR;
+		fl[i] *= (0.5 + 0.5 * Math.sin(2 * Math.PI * 18 * t)) * Math.sin((Math.PI * t) / dur) * 2.5;
+	}
+	add(x, fl, 0, 1);
+	write('bats', room(x, 0.35, 1.2), 0.45);
+}
+// the mirage: a glassy shimmer that trembles
+{
+	const dur = 2.4;
+	const x = buf(dur);
+	[1046, 1318, 1568, 2093].forEach((f, k) => {
+		for (let i = 0; i < x.length; i++) {
+			const t = i / SR;
+			x[i] += Math.sin(2 * Math.PI * f * t + k) * (0.5 + 0.5 * Math.sin(2 * Math.PI * (5 + k) * t)) * Math.sin((Math.PI * t) / dur) ** 1.5 * 0.25;
+		}
+	});
+	write('shimmer', room(x, 0.45, 1.8), 0.3);
+}
+// a pinch of salt from a shaker
+{
+	const x = buf(0.8);
+	for (let k = 0; k < 3; k++) {
+		const b = bandpass(noiseBuf(Math.ceil(0.09 * SR)), 3000, 9000);
+		for (let i = 0; i < b.length; i++) b[i] *= Math.sin((Math.PI * i) / b.length);
+		add(x, b, 0.03 + k * 0.2, 0.8);
+	}
+	write('salt', x, 0.35);
+}
+// a small fire at night: a low rumble and crackles
+{
+	const dur = 2.5;
+	const x = buf(dur);
+	const r = lowpass(lowpass(noiseBuf(x.length), 400), 400);
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		x[i] = r[i] * 2.5 * Math.min(1, t / 0.2) * Math.min(1, (dur - t) / 0.4);
+	}
+	for (let k = 0; k < 60; k++) add(x, click(0.006 + rnd() * 0.01, 1500 + rnd() * 3500, 2), 0.05 + rnd() * (dur - 0.3), 1 + rnd() * 2);
+	write('fire', x, 0.4);
+}
+// a glint of sunlight off a mirror
+{
+	const x = buf(0.8);
+	add(x, ping([2800, 4200, 6300], 0.7, 0.15, 0.6), 0.01);
+	write('glint', room(x, 0.3, 1), 0.35);
+}

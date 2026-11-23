@@ -2,7 +2,8 @@
 // each other (YouTube Studio → «Тестирование обложек»):
 //   CoverZamerznut  — the channel's white page: Чоби frozen into a block of ice up to the neck (his ribs show through
 //                     the ice), hoarfrost and icicles on the cap, blue cheeks, chattering teeth; the title on the left
-//                     «КАКОВО ЭТО — / ЗАМЁРЗНУТЬ / НАСМЕРТЬ» (icicles hang from «ЗАМЁРЗНУТЬ»), the chips 36,6° → 28°.
+//                     «КАКОВО ЭТО — / ЗАМЁРЗНУТЬ / НАСМЕРТЬ» (icicles hang from «ЗАМЁРЗНУТЬ», a saturated blue so it reads on
+//                     the white), the chips 36,6° → 28°.
 //   CoverZamerznutB — night: the Titanic going down on the horizon with its lights on, Чоби in the black water up to
 //                     his chest among the ice floes; «ВОДА −2°».
 // Render: npx remotion still CoverZamerznut out/cover/zamerznut.png --scale=1.5   (→ 1920×1080)
@@ -94,9 +95,8 @@ const Title: React.FC<{x: number; y: number; dark?: boolean}> = ({x, y, dark = f
 		<g fontFamily={HEAVY} fontWeight={900}>
 			<defs>
 				<linearGradient id="ttlIce" x1="0" y1="0" x2="0" y2="1">
-					<stop offset="0" stopColor="#7cc8ff" />
-					<stop offset="0.55" stopColor="#2f86e0" />
-					<stop offset="1" stopColor="#1a5cc0" />
+					<stop offset="0" stopColor="#3b97f0" />
+					<stop offset="1" stopColor="#1450b4" />
 				</linearGradient>
 				<linearGradient id="ttlIceL" x1="0" y1="0" x2="0" y2="1">
 					<stop offset="0" stopColor="#ffffff" />
@@ -119,16 +119,17 @@ const Title: React.FC<{x: number; y: number; dark?: boolean}> = ({x, y, dark = f
 						</g>
 					);
 				})}
-				<text x={x} y={y + 138} fontSize={112} textLength={W2} lengthAdjust="spacing" fill={dark ? '#2f86e0' : ICE_D}>
+				<text x={x} y={y + 138} fontSize={112} textLength={W2} lengthAdjust="spacing" fill={dark ? '#2f86e0' : '#0a2c66'}>
 					ЗАМЁРЗНУТЬ
 				</text>
 				<text x={x} y={y + 130} fontSize={112} textLength={W2} lengthAdjust="spacing" fill={dark ? 'url(#ttlIceL)' : 'url(#ttlIce)'}>
 					ЗАМЁРЗНУТЬ
 				</text>
-				{/* snow lying on the letters */}
-				{[0.02, 0.13, 0.23, 0.34, 0.44, 0.53, 0.63, 0.73, 0.84, 0.93].map((t, i) => (
-					<ellipse key={i} cx={x + W2 * (t + 0.035)} cy={y + 52} rx={24 + rnd(i + 3) * 8} ry={7} fill="#ffffff" opacity={dark ? 0.95 : 0.9} />
-				))}
+				{/* snow lying on the letters (only at night: on the white page it hid their tops) */}
+				{dark &&
+					[0.02, 0.13, 0.23, 0.34, 0.44, 0.53, 0.63, 0.73, 0.84, 0.93].map((t, i) => (
+						<ellipse key={i} cx={x + W2 * (t + 0.035)} cy={y + 52} rx={24 + rnd(i + 3) * 8} ry={7} fill="#ffffff" opacity={0.95} />
+					))}
 			</g>
 			{/* «НАСМЕРТЬ»: red with a dark-red 3D edge */}
 			<text x={x - 4} y={y + 300} fontSize={136} textLength={800} lengthAdjust="spacing" fill={RED_D}>

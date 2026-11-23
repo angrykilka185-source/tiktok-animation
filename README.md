@@ -486,6 +486,17 @@ npx remotion still ChannelBanner out/cover/banner.png
 GL=angle scripts/render-parallel.sh ZamerznutChobi ZamerznutAudio out/zamerznut-chobi-raw.mp4 4
 ```
 
+Обложки (1280×720, две — для теста в YouTube Studio) — `src/covers/Zamerznut.tsx`:
+`CoverZamerznut` — белая страница канала: Чоби вмёрз в глыбу льда по шею (сквозь лёд видны рёбра), иней и
+сосульки на шапочке, синие щёки; слева «КАКОВО ЭТО — / ЗАМЁРЗНУТЬ / НАСМЕРТЬ» (с «ЗАМЁРЗНУТЬ» свисают сосульки)
+и «36,6° → 28°». `CoverZamerznutB` — ночь: на горизонте тонет «Титаник» с огнями, Чоби по грудь в чёрной воде
+среди льдин, «ВОДА −2°».
+
+```bash
+npx remotion still CoverZamerznut out/cover/zamerznut.png --scale=1.5
+npx remotion still CoverZamerznutB out/cover/zamerznut-b.png --scale=1.5
+```
+
 ## Фильм «Что будет, если ты попадёшь в XX век» (≈5:30, отдельное длинное видео)
 
 Код: `src/w1/` (композиции `Vek20`, `Vek20Audio`). Ты просыпаешься в 1901 году; на телефоне 100 % и сообщение

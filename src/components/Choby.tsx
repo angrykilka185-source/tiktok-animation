@@ -12,7 +12,7 @@
 //   heart  {beat 0…1, size} — a red heart inside the ribcage (heartOver: drawn over the ribs, to show it);  brain 0…1 — a pink brain glowing in the skull
 //   vessels {warm 0…1 (blue → red), reach 0…1 (how far into the arms and legs)}
 //   chest  1… the ribcage breathes in;  frost 0…1 — hoarfrost, icicles, frosted glasses;  sweat 0…1 (with f)
-//   handFrost 0…1 — only the fingers freeze (defaults to frost)
+//   handFrost 0…1 — only the fingers freeze, glassFrost 0…1 — only the glasses frost over (both default to frost)
 //   scarf  a striped scarf;  mittens — red mittens on the hands;  inner / outer — extra drawing in his own units
 //          (inner: inside the ribcage, behind the ribs; outer: on top of everything)
 import React from 'react';
@@ -154,6 +154,7 @@ export const Choby: React.FC<{
 	chest?: number;
 	frost?: number;
 	handFrost?: number;
+	glassFrost?: number;
 	sweat?: number;
 	scarf?: boolean;
 	mittens?: boolean;
@@ -185,6 +186,7 @@ export const Choby: React.FC<{
 	chest = 1,
 	frost = 0,
 	handFrost,
+	glassFrost,
 	sweat = 0,
 	scarf = false,
 	mittens = false,
@@ -330,7 +332,7 @@ export const Choby: React.FC<{
 				{/* a little heart-shaped nose */}
 				<path d="M 0,-498 C -16,-510 -15,-528 -6,-528 C -2,-528 0,-524 0,-520 C 0,-524 2,-528 6,-528 C 15,-528 16,-510 0,-498 Z" fill={INK} />
 				{/* round glasses (they frost over in the cold) */}
-				{frost > 0 && [-1, 1].map((sd) => <circle key={sd} cx={sd * 58} cy={-566} r={55} fill="#eaf6ff" opacity={0.55 * frost} />)}
+				{(glassFrost ?? frost) > 0 && [-1, 1].map((sd) => <circle key={sd} cx={sd * 58} cy={-566} r={55} fill="#eaf6ff" opacity={0.55 * (glassFrost ?? frost)} />)}
 				<g fill="none" stroke="#2a2a30" strokeWidth={6}>
 					<circle cx={-58} cy={-566} r={58} />
 					<circle cx={58} cy={-566} r={58} />

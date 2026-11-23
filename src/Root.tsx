@@ -18,6 +18,7 @@ import {Knopka1, RK1} from './k1/Main';
 import {Film1, RF1} from './f1/Main';
 import {CoverPapaFilm, CoverPapaFilmV} from './covers/PapaFilm';
 import {CoverSssr} from './covers/Sssr';
+import {CoverZamerznut, CoverZamerznutB} from './covers/Zamerznut';
 import {HostConcepts} from './covers/Hosts';
 import {ChannelAvatar, ChannelBanner} from './covers/Channel';
 import {TgkOpros, RT1} from './t1/Main';
@@ -77,6 +78,8 @@ export const RemotionRoot: React.FC = () => (
 		<Composition id="Chips1" component={Chips1} durationInFrames={RC1.total} fps={FPS} width={W} height={H} />
 		<Composition id="Chips1Audio" component={Chips1Audio} durationInFrames={RC1.total} fps={FPS} width={W} height={H} />
 		<Composition id="CoverSssr" component={CoverSssr} durationInFrames={1} fps={FPS} width={1280} height={720} />
+		<Composition id="CoverZamerznut" component={CoverZamerznut} durationInFrames={1} fps={FPS} width={1280} height={720} />
+		<Composition id="CoverZamerznutB" component={CoverZamerznutB} durationInFrames={1} fps={FPS} width={1280} height={720} />
 		<Composition id="HostConcepts" component={HostConcepts} durationInFrames={1} fps={FPS} width={1920} height={1080} />
 		<Composition id="ChannelAvatar" component={ChannelAvatar} durationInFrames={1} fps={FPS} width={1024} height={1024} />
 		<Composition id="ChannelBanner" component={ChannelBanner} durationInFrames={1} fps={FPS} width={2560} height={1440} />

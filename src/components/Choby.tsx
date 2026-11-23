@@ -17,8 +17,9 @@
 //          (inner: inside the ribcage, behind the ribs; outer: on top of everything)
 // For other characters of the same family (his brother Гога, src/components/Goga.tsx): glasses / tie: false — no glasses,
 //   no bow tie; hat — drawn instead of the mortarboard; face — extra drawing on the face (brows, freckles…); torso —
-//   clothes over the bones, under the arms; shoes — drawn instead of the bony feet; back — behind everything;
-//   cheek — the colour of the cheeks. All in his own units; hat and face turn with the head.
+//   clothes over the bones, under the arms; shoe(side) — drawn instead of a bony foot (it goes with the foot); behind —
+//   drawn behind everything; cloak — over the arms (sleeves); cheek — the colour of the cheeks. All in his own units; hat and face turn with the head.
+//   walk — the walk phase in radians (the feet step, the hanging arms swing, he bobs); back — seen from behind (no face).
 import React from 'react';
 
 export const BONE = '#f3eee2';
@@ -169,9 +170,12 @@ export const Choby: React.FC<{
 	hat?: React.ReactNode;
 	face?: React.ReactNode;
 	torso?: React.ReactNode;
-	shoes?: React.ReactNode;
-	back?: React.ReactNode;
+	shoe?: (side: 1 | -1) => React.ReactNode;
+	behind?: React.ReactNode;
+	cloak?: React.ReactNode;
 	cheek?: string;
+	walk?: number;
+	back?: boolean;
 }> = ({
 	x,
 	y,
@@ -209,11 +213,19 @@ export const Choby: React.FC<{
 	hat,
 	face,
 	torso,
-	shoes,
-	back,
+	shoe,
+	behind,
+	cloak,
 	cheek: cheekColor,
+	walk,
+	back = false,
 }) => {
 	const sx = shiver ? Math.sin(f * 1.3) * 8 * shiver : 0;
+	const walking = walk !== undefined;
+	const ph = walk ?? 0;
+	const bob = walking ? -Math.abs(Math.sin(ph)) * 6 : 0;
+	// while walking, a foot lifts (one, then the other) and the hanging arm on the other side swings forward
+	const lift = (sd: 1 | -1) => (walking ? Math.max(0, Math.sin(ph + (sd < 0 ? 0 : Math.PI))) : 0);
 	const chatter = shiver ? Math.abs(Math.sin(f * 1.7)) * 0.3 * shiver : 0;
 	const jo = Math.max(0, Math.min(1, jaw + chatter)) * 22;
 	const cheek0 = cheekColor ?? '#f0868e';
@@ -223,7 +235,9 @@ export const Choby: React.FC<{
 		vessels && part > 0 ? <line x1={a[0]} y1={a[1]} x2={a[0] + (b[0] - a[0]) * part} y2={a[1] + (b[1] - a[1]) * part} stroke={vcol} strokeWidth={6} strokeLinecap="round" opacity={0.9} /> : null;
 	const arm = (side: 1 | -1, pose: Pose | ArmSpec) => {
 		const sh: [number, number] = [side * 62, -380];
-		const p = armPose(side, pose, f, pointerAng);
+		const p0 = armPose(side, pose, f, pointerAng);
+		const sw = walking && pose === 'down' ? lift((-side) as 1 | -1) : 0;
+		const p = sw ? {...p0, el: [p0.el[0] - side * sw * 6, p0.el[1] - sw * 8] as [number, number], ha: [p0.ha[0] - side * sw * 14, p0.ha[1] - sw * 26] as [number, number], hang: -side * sw * 30} : p0;
 		const {el, ha} = p;
 		const hang = p.hang ?? 0;
 		const fist = !!p.fist;
@@ -250,24 +264,24 @@ export const Choby: React.FC<{
 		</g>
 	) : null;
 	return (
-		<g transform={`translate(${x + sx * s},${y}) scale(${s})`}>
-			{back}
-			{!bust && (
-				<g>
-					<Bone a={[-30, -185]} b={[-34, -105]} w={22} />
-					<Bone a={[-34, -105]} b={[-36, -32]} w={22} />
-					<Bone a={[30, -185]} b={[34, -105]} w={22} />
-					<Bone a={[34, -105]} b={[36, -32]} w={22} />
-					{vline([-30, -185], [-36, -32], vessels ? vessels.reach : 0)}
-					{vline([30, -185], [36, -32], vessels ? vessels.reach : 0)}
-					{shoes ?? (
-						<>
-							<ellipse cx={-46} cy={-16} rx={36} ry={18} fill={BONE} stroke={BONE_D} strokeWidth={4.5} />
-							<ellipse cx={46} cy={-16} rx={36} ry={18} fill={BONE_SH} stroke={BONE_D} strokeWidth={4.5} />
-						</>
-					)}
-				</g>
-			)}
+		<g transform={`translate(${x + sx * s},${y + bob * s}) scale(${s})`}>
+			{behind}
+			{!bust &&
+				([-1, 1] as const).map((sd) => {
+					const l = lift(sd);
+					const K: [number, number] = [sd * (34 + l * 10), -105 - l * 22];
+					const A: [number, number] = [sd * (36 + l * 4), -32 - l * 36];
+					return (
+						<g key={sd}>
+							<Bone a={[sd * 30, -185]} b={K} w={22} />
+							<Bone a={K} b={A} w={22} />
+							{vline([sd * 30, -185], A, vessels ? vessels.reach : 0)}
+							<g transform={l ? `translate(${A[0] - sd * 36},${A[1] + 32})` : undefined}>
+								{shoe ? shoe(sd) : <ellipse cx={sd * 46} cy={-16} rx={36} ry={18} fill={sd < 0 ? BONE : BONE_SH} stroke={BONE_D} strokeWidth={4.5} />}
+							</g>
+						</g>
+					);
+				})}
 			{/* pelvis */}
 			<path d="M -66,-212 C -72,-182 -46,-166 -20,-172 L 0,-182 L 20,-172 C 46,-166 72,-182 66,-212 C 36,-200 -36,-200 -66,-212 Z" fill={BONE} stroke={BONE_D} strokeWidth={5} />
 			<path d="M 0,-202 L 20,-172 C 46,-166 72,-182 66,-212 C 42,-203 20,-201 0,-202 Z" fill={BONE_SH} />
@@ -300,6 +314,7 @@ export const Choby: React.FC<{
 			{torso}
 			{arm(-1, armL)}
 			{arm(1, armR)}
+			{cloak}
 			{/* the neck and the red bow tie (or a striped scarf) */}
 			<rect x={-13} y={-424} width={26} height={22} rx={7} fill={BONE} stroke={BONE_D} strokeWidth={3.5} />
 			{scarf ? (
@@ -324,9 +339,10 @@ export const Choby: React.FC<{
 			{/* the head */}
 			<g transform={`rotate(${tilt} 0 -430)`}>
 				{/* the jaw: a dark mouth opens behind the teeth */}
-				<path d={`M -50,-456 C -46,${-428 + jo} 46,${-428 + jo} 50,-456 Z`} fill="#3a2226" />
+				{!back && <path d={`M -50,-456 C -46,${-428 + jo} 46,${-428 + jo} 50,-456 Z`} fill="#3a2226" />}
 				<path d={`M -56,${-452 + jo} C -52,${-418 + jo} 52,${-418 + jo} 56,${-452 + jo} L 44,${-448 + jo} L -44,${-448 + jo} Z`} fill={BONE} stroke={BONE_D} strokeWidth={5} />
-				{[-28, -14, 0, 14, 28].map((tx, k) => (
+				{!back &&
+					[-28, -14, 0, 14, 28].map((tx, k) => (
 					<rect key={`l${k}`} x={tx - 5.5} y={-452 + jo + Math.abs(tx) * 0.06} width={11} height={11} rx={4} fill="#fffdf6" stroke={BONE_D} strokeWidth={2.2} />
 				))}
 				{/* the round skull */}
@@ -339,14 +355,18 @@ export const Choby: React.FC<{
 					</g>
 				)}
 				<ellipse cx={-70} cy={-650} rx={34} ry={16} fill="#fff" opacity={0.5} transform="rotate(-22 -70 -650)" />
+				{/* seen from behind: only a faint seam on the back of the skull */}
+				{back && <path d="M -96,-560 C -60,-590 60,-590 96,-560" stroke={BONE_D} strokeWidth={4} fill="none" opacity={0.6} />}
 				{/* upper teeth on a little smile */}
-				{[-28, -14, 0, 14, 28].map((tx, k) => (
+				{!back &&
+					[-28, -14, 0, 14, 28].map((tx, k) => (
 					<rect key={k} x={tx - 5.5} y={-466 + Math.abs(tx) * -0.06} width={11} height={13} rx={4} fill="#fffdf6" stroke={BONE_D} strokeWidth={2.2} />
 				))}
 				{/* pink cheeks (blue in the cold) */}
-				{blush && [-1, 1].map((sd) => <ellipse key={sd} cx={sd * 100} cy={-500} rx={22} ry={12} fill={cheek} opacity={0.55} />)}
+				{!back && blush && [-1, 1].map((sd) => <ellipse key={sd} cx={sd * 100} cy={-500} rx={22} ry={12} fill={cheek} opacity={0.55} />)}
 				{/* big shiny eyes */}
-				{[-1, 1].map((sd) => (
+				{!back &&
+					[-1, 1].map((sd) => (
 					<g key={sd}>
 						<ellipse cx={sd * 58} cy={-566} rx={44} ry={48} fill={INK} />
 						{blink < 0.6 && (
@@ -359,11 +379,11 @@ export const Choby: React.FC<{
 					</g>
 				))}
 				{/* a little heart-shaped nose */}
-				<path d="M 0,-498 C -16,-510 -15,-528 -6,-528 C -2,-528 0,-524 0,-520 C 0,-524 2,-528 6,-528 C 15,-528 16,-510 0,-498 Z" fill={INK} />
-				{face}
+				{!back && <path d="M 0,-498 C -16,-510 -15,-528 -6,-528 C -2,-528 0,-524 0,-520 C 0,-524 2,-528 6,-528 C 15,-528 16,-510 0,-498 Z" fill={INK} />}
+				{!back && face}
 				{/* round glasses (they frost over in the cold) */}
-				{glasses && (glassFrost ?? frost) > 0 && [-1, 1].map((sd) => <circle key={sd} cx={sd * 58} cy={-566} r={55} fill="#eaf6ff" opacity={0.55 * (glassFrost ?? frost)} />)}
-				{glasses && (
+				{!back && glasses && (glassFrost ?? frost) > 0 && [-1, 1].map((sd) => <circle key={sd} cx={sd * 58} cy={-566} r={55} fill="#eaf6ff" opacity={0.55 * (glassFrost ?? frost)} />)}
+				{!back && glasses && (
 					<g fill="none" stroke="#2a2a30" strokeWidth={6}>
 						<circle cx={-58} cy={-566} r={58} />
 						<circle cx={58} cy={-566} r={58} />

@@ -4,7 +4,7 @@ import React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
 import {clamp, lerp, pop} from '../anim';
 import {Person} from '../components/Person';
-import {Blowing, camAt, Chip, Dunes, Flask, HEAVY, HeatGrade, Layer, Marker, mixPal, NOON, Plaque, RED, rnd, Rock, Runner, RUNNER, Shimmer, Sky, Stage16, STORM, StormHaze, SunDisk, YEL} from './kit';
+import {arm, Blowing, camAt, Chip, Dunes, Flask, HEAVY, HeatGrade, Layer, Marker, mixPal, NOON, Plaque, RED, rnd, Rock, RUNNER, Shimmer, Sky, Stage16, STORM, StormHaze, SunDisk, YEL, You} from './kit';
 import {SHOTS} from './timeline';
 import {w} from './voice';
 
@@ -158,8 +158,12 @@ export const S06: React.FC = () => {
 						const me = i === 5;
 						return (
 							<g key={i}>
-								{me && <circle cx={x} cy={y - 330} r={16} fill={RED} stroke="#fff" strokeWidth={4} />}
+								{me && <circle cx={x} cy={y - 318} r={16} fill={RED} stroke="#fff" strokeWidth={4} />}
+								{me ? (
+									<You x={x} y={y} s={0.37} f={f} walk={f * 0.34 + i} pack face={{eyes: 'open', mouth: 'smile', brows: 'neutral', look: [0.6, 0]}} />
+								) : (
 								<Person kind="dad" id={`j6r${i}`} x={x} y={y} scale={0.27} colors={{top: c, topDark: c, pants: '#2b2d33', shoes: '#e8e6e0', hair: '#3a2a20', skin: i % 3 ? '#e8b48e' : '#c98a60'}} cap="#f4efe4" backpack plain kneePatch={false} walk={f * 0.34 + i} breathe={f} headTurn={0.6} face={{eyes: 'open', mouth: 'flat', brows: 'neutral', blush: false}} />
+								)}
 							</g>
 						);
 					})}
@@ -213,20 +217,20 @@ export const S07: React.FC = () => {
 				<Sky id="j7" p={NOON} />
 				<Dunes p={NOON} />
 				<g transform={`translate(${-slide * 900},0)`}>
-					{/* you from behind: the backpack, its things popping out */}
-					<Person kind="dad" id="j7you" x={760} y={1250} scale={0.72} colors={RUNNER} cap="#f4efe4" backpack plain kneePatch={false} back breathe={f} />
+					{/* Гога from behind: the backpack, its things popping out */}
+					<You x={760} y={1330} s={1.3} f={f} back pack />
 					{f >= food && (
-						<g transform={`translate(560,380) scale(${pop(f, food, 10)})`}>
+						<g transform={`translate(520,720) scale(${pop(f, food, 10)})`}>
 							<FoodPack c="#e8352e" />
 						</g>
 					)}
 					{f >= food + 5 && (
-						<g transform={`translate(470,480) rotate(-10) scale(${pop(f, food + 5, 10)})`}>
+						<g transform={`translate(430,810) rotate(-10) scale(${pop(f, food + 5, 10)})`}>
 							<FoodPack c="#3aa86a" />
 						</g>
 					)}
 					{f >= bag && (
-						<g transform={`translate(980,370) rotate(8) scale(${pop(f, bag, 10)})`}>
+						<g transform={`translate(1030,700) rotate(8) scale(${pop(f, bag, 10)})`}>
 							<SleepingBag />
 						</g>
 					)}
@@ -245,8 +249,8 @@ export const S07: React.FC = () => {
 					))}
 				</g>
 			</Stage16>
-			<Chip f={f} at={food + 4} x={520} y={260} text="ЕДА" color="#e8352e" size={44} to={water} />
-			<Chip f={f} at={bag + 4} x={1000} y={250} text="СПАЛЬНИК" color="#3a6ad8" size={44} to={water} />
+			<Chip f={f} at={food + 4} x={470} y={610} text="ЕДА" color="#e8352e" size={44} to={water} />
+			<Chip f={f} at={bag + 4} x={1060} y={590} text="СПАЛЬНИК" color="#3a6ad8" size={44} to={water} />
 			<Plaque f={f} at={water + 10} x={1200} y={230} text="ВОДА — СТРОГО ПО ЛИТРАМ" color="#5fb0f0" size={48} />
 			<HeatGrade k={0.4} />
 		</AbsoluteFill>
@@ -294,9 +298,10 @@ export const S08: React.FC = () => {
 				</Layer>
 				<Dunes p={p} cam={cam} />
 				<Layer cam={cam}>
-					{[0, 1, 2].map((i) => (
+					{[0, 2].map((i) => (
 						<Person key={i} kind="dad" id={`j8r${i}`} x={700 + i * 260} y={980} scale={0.32} colors={{...RUNNER, top: ['#2f86e0', RUNNER.top, '#3aa86a'][i], topDark: ['#2f86e0', RUNNER.topDark, '#3aa86a'][i]}} cap="#f4efe4" backpack plain kneePatch={false} back breathe={f} />
 					))}
+					<You x={960} y={980} s={0.44} f={f} back pack />
 				</Layer>
 				<Blowing f={f} k={wall * 0.8} n={60} />
 			</Stage16>
@@ -321,13 +326,13 @@ export const S09: React.FC = () => {
 				<Dunes p={STORM} />
 				{lie < 1 && (
 					<g opacity={1 - lie}>
-						<Runner id="j9you" x={960} y={1180} s={0.78} f={f} tilt={-4} face={{eyes: 'closed', brows: 'worried', mouth: 'tight'}} armL={{target: [20, -1000], bend: -1}} armR={{target: [150, -470]}} />
+						<You x={960} y={1170} s={1.08} f={f} tilt={-4} pack face={{eyes: 'closed', brows: 'worried', mouth: 'tight'}} armL={arm([-128, -470], [-40, -572], {fist: true})} armR="down" />
 					</g>
 				)}
 				{lie > 0 && (
 					<g opacity={lie}>
 						<Rock x={980} y={1030} s={2.2} color="#7a5032" />
-						<Runner id="j9you2" x={760} y={1060 + (1 - lie) * 120} s={0.6} f={f} hideLegs tilt={10} face={{eyes: 'closed', brows: 'worried', mouth: 'tight'}} armL={{target: [10, -990], bend: -1}} armR={{target: [40, -980], bend: 1}} />
+						<You x={800} y={1130 + (1 - lie) * 120} s={0.86} f={f} bust tilt={10} pack face={{eyes: 'closed', brows: 'worried', mouth: 'tight'}} armL={arm([-150, -560], [-60, -690], {fist: true})} armR={arm([150, -560], [60, -690], {fist: true})} />
 						<Rock x={980} y={1080} s={2.0} color="#8a5c3a" />
 					</g>
 				)}
@@ -390,7 +395,7 @@ export const S10: React.FC = () => {
 				<SunDisk x={1500} y={200} r={60} glow={0.6} />
 				<Dunes p={p} />
 				<Rock x={700} y={1040} s={1.6} color="#8a5c3a" />
-				<Runner id="j10you" x={540} y={1150 - rise * 90} s={0.62} f={f} turn={rise * 0.5} face={{eyes: rise > 0.5 ? 'wide' : 'closed', pupil: 0.8, brows: rise > 0.5 ? 'raised' : 'worried', mouth: rise > 0.5 ? 'o' : 'tight', look: [0.6, 0]}} />
+				<You x={520} y={1120 - rise * 80} s={0.84} f={f} pack face={{eyes: rise > 0.5 ? 'wide' : 'closed', brows: rise > 0.5 ? 'raised' : 'worried', mouth: rise > 0.5 ? 'o' : 'tight', look: [0.7, 0]}} />
 			</Stage16>
 			<StormHaze f={f} k={clear} />
 			<svg width={1920} height={1080} viewBox="0 0 1920 1080" style={{position: 'absolute', inset: 0}}>
@@ -421,16 +426,14 @@ export const S11: React.FC = () => {
 				<Dunes p={NOON} cam={cam} />
 				<Shimmer f={f} y={640} />
 				<Layer cam={cam}>
-					<Runner
-						id="j11you"
+					<You
 						x={960}
-						y={1000}
-						s={0.5}
+						y={1010}
+						s={0.68}
 						f={f}
-						turn={look}
-						face={{eyes: 'wide', pupil: 0.8, brows: 'worried', mouth: 'flat', look: [look, 0]}}
-						armR={f >= flask ? {target: [190, -820], bend: 1} : {target: [150, -460]}}
-						itemR={f >= flask ? <Flask level={0.08} s={1.4} tilt={180 + Math.sin(f / 2.5) * 16} id="j11f" /> : undefined}
+						pack
+						face={{eyes: 'wide', brows: 'worried', mouth: 'flat', look: [look, 0]}}
+						armR={f >= flask ? arm([150, -430], [190, -540], {fist: true, item: <Flask level={0.08} s={1.1} tilt={180 + Math.sin(f / 2.5) * 16} id="j11f" />}) : 'down'}
 					/>
 				</Layer>
 			</Stage16>
@@ -460,16 +463,15 @@ export const S15: React.FC = () => {
 				<Dunes p={NOON} cam={cam} />
 				<Shimmer f={f} y={640} />
 				<Layer cam={cam}>
-					<Runner
-						id="j15you"
+					<You
 						x={x}
 						y={1010}
-						s={0.5}
+						s={0.66}
 						f={f}
 						walk={f * 0.28}
-						turn={0.5}
+						pack
 						face={{eyes: f >= thirst ? 'narrow' : 'open', brows: f >= thirst ? 'worried' : 'neutral', mouth: f >= thirst ? 'open' : 'flat', look: [0.5, 0], sweat: 0.6}}
-						armR={f >= thirst ? {target: [30, -930], bend: 1} : undefined}
+						armR={f >= thirst ? arm([118, -352], [36, -424], {fist: true}) : 'down'}
 					/>
 				</Layer>
 			</Stage16>

@@ -4,8 +4,9 @@
 import React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
 import {clamp, lerp, pop} from '../anim';
+import {BONE, BONE_D} from '../components/Choby';
 import {Person} from '../components/Person';
-import {camAt, Chip, DAWN, Dunes, Flask, HEAVY, HeatGrade, HOT, Layer, mix, mixPal, Moon, NIGHT, Plaque, RED, Runner, RUNNER, Shimmer, Sky, Stage16, SunDisk, SUNSET, YEL} from './kit';
+import {arm, camAt, Chip, DAWN, Dunes, Flask, HEAVY, HeatGrade, HOT, Layer, mix, mixPal, Moon, NIGHT, Plaque, RED, RUNNER, Shimmer, Sky, Stage16, SunDisk, SUNSET, YEL, You} from './kit';
 import {SHOTS} from './timeline';
 import {w} from './voice';
 
@@ -80,7 +81,7 @@ export const S66: React.FC = () => {
 					<Shimmer f={f} y={780} k={1.2} />
 					{f >= foot && (
 						<g>
-							<Person kind="boy" id="j66a" x={560} y={1060} scale={0.4} breathe={f} walk={f * 0.4} face={{eyes: 'open', mouth: 'open', brows: 'neutral', blush: true, sweat: 1}} />
+							<You x={560} y={1060} s={0.52} f={f} walk={f * 0.4} dry={0.5} face={{eyes: 'open', mouth: 'open', brows: 'neutral', look: [0.5, 0.3], sweat: 1}} />
 							<Person kind="son" id="j66b" x={980} y={1060} scale={0.4} breathe={f} walk={f * 0.42 + 1} face={{eyes: 'open', mouth: 'open', brows: 'worried', blush: true, sweat: 1}} />
 							<g transform={`translate(${ballX},${ballY})`}>
 								<Ball />
@@ -171,13 +172,13 @@ export const S70: React.FC = () => {
 				<SunDisk x={1600} y={150} r={60} />
 				<Blocks />
 				<rect x={-200} y={820} width={2400} height={400} fill="#7ab05a" />
-				<Person kind="son" id="j70a" x={560} y={1220} scale={0.8} breathe={f} face={{eyes: 'narrow', mouth: 'open', brows: 'worried', blush: true, sweat: 1}} />
+				<You x={560} y={1230} s={1.12} f={f} dry={0.5} face={{eyes: 'narrow', mouth: 'open', brows: 'worried', look: [0.5, 0], sweat: 1}} />
 				{/* the salt in the sweat drops */}
 				{f >= away &&
 					[0, 1, 2].map((i) => {
 						const t = ((f - away + i * 9) % 27) / 27;
-						const x = 520 + i * 50;
-						const y = 520 + t * 160;
+						const x = 376 + i * 34;
+						const y = 560 + t * 170;
 						return (
 							<g key={i} opacity={1 - t}>
 								<path d={`M ${x},${y - 22} C ${x + 14},${y - 6} ${x + 16},${y + 4} ${x},${y + 14} C ${x - 16},${y + 4} ${x - 14},${y - 6} ${x},${y - 22} Z`} fill="#9fd8ff" stroke={INK} strokeWidth={3} />
@@ -287,7 +288,7 @@ export const S72: React.FC = () => {
 				<SunDisk x={1600} y={150} r={66} />
 				<Dunes p={HOT} />
 				<Shimmer f={f} y={640} />
-				<Runner id="j72you" x={520} y={1080} s={0.6} f={f} turn={0.5} face={{eyes: 'open', mouth: 'flat', brows: 'raised', look: [0.8, -0.2]}} />
+				<You x={520} y={1080} s={0.8} f={f} face={{eyes: 'open', mouth: 'flat', brows: 'raised', look: [0.8, -0.2]}} />
 			</Stage16>
 			{f >= w(n, 'запомни') - 6 && (
 				<div style={{position: 'absolute', left: 1220, top: 500, transform: `translate(-50%,-50%) rotate(-2deg) scale(${pop(f, w(n, 'запомни') - 6, 12)})`, width: 720, padding: '34px 40px', background: '#fff8ec', border: '8px solid #1d1d24', borderRadius: 26, fontFamily: HEAVY, fontWeight: 900, color: INK, boxShadow: '0 16px 40px rgba(0,0,0,0.3)'}}>
@@ -333,7 +334,7 @@ export const S73: React.FC = () => {
 					))}
 					{f >= spot && <circle cx={0} cy={-60} r={360 + ring * 140} fill="none" stroke={RED} strokeWidth={8} opacity={1 - ring} />}
 				</g>
-				<Runner id="j73you" x={1500} y={1060} s={0.42} f={f} turn={-0.4} face={{eyes: 'open', mouth: 'flat', brows: 'neutral', look: [-0.6, 0]}} />
+				<You x={1580} y={1060} s={0.56} f={f} face={{eyes: 'open', mouth: 'flat', brows: 'neutral', look: [-0.7, 0]}} />
 			</Stage16>
 			<Plaque f={f} at={2} x={960} y={190} text="ОСТАВАЙСЯ У МАШИНЫ" color={YEL} size={54} to={spot - 4} />
 			<Plaque f={f} at={spot + 4} x={960} y={190} text="ЕЁ ЛЕГЧЕ ЗАМЕТИТЬ" color={RED} size={54} to={shade - 4} />
@@ -357,18 +358,18 @@ export const S74: React.FC = () => {
 				{t > 0 && <g opacity={t}><Moon x={1500} y={180} /></g>}
 				<Dunes p={mixPal(HOT, NIGHT, t)} />
 				{t < 0.5 ? (
-					<g opacity={1 - t * 2}>
+					<g opacity={1 - t * 2} transform="translate(0,-120)">
 						<path d="M 500,700 L 1000,680 L 1010,720 L 510,740 Z" fill="#f4efe4" stroke={INK} strokeWidth={6} />
 						<line x1={510} y1={740} x2={510} y2={940} stroke="#6a4a2a" strokeWidth={10} />
 						<line x1={1000} y1={720} x2={1000} y2={930} stroke="#6a4a2a" strokeWidth={10} />
 						<ellipse cx={760} cy={940} rx={300} ry={30} fill="#000" opacity={0.25} />
-						<g transform="translate(640,930) rotate(-90)">
-							<Runner id="j74a" x={0} y={0} s={0.36} f={f} face={{eyes: 'closed', mouth: 'flat', brows: 'neutral'}} />
+						<g transform="translate(900,900) rotate(-90)">
+							<You x={0} y={0} s={0.48} f={f} face={{eyes: 'closed', mouth: 'flat', brows: 'neutral'}} />
 						</g>
 					</g>
 				) : (
 					<g opacity={(t - 0.5) * 2}>
-						<Runner id="j74b" x={lerp(f, night, len(n), 760, 980)} y={1000} s={0.5} f={f} walk={f * 0.3} turn={0.5} face={{eyes: 'open', mouth: 'flat', brows: 'neutral'}} />
+						<You x={lerp(f, night, len(n), 760, 980)} y={1000} s={0.66} f={f} walk={f * 0.3} face={{eyes: 'open', mouth: 'flat', brows: 'neutral', look: [0.5, 0]}} />
 					</g>
 				)}
 			</Stage16>
@@ -390,8 +391,8 @@ export const S75: React.FC = () => {
 				<SunDisk x={960} y={140} r={64} />
 				<Dunes p={HOT} />
 				{/* without a shirt — burnt; covered up — right */}
-				<Person kind="dad" id="j75a" x={560} y={1120} scale={0.55} colors={{top: '#e0805a', topDark: '#d07050', pants: '#2b2d33', shoes: '#e8e6e0', hair: '#3a2a20', skin: '#e0805a'}} plain kneePatch={false} breathe={f} face={{eyes: 'narrow', mouth: 'open', brows: 'worried', blush: true, sweat: 1}} />
-				<Person kind="dad" id="j75b" x={1360} y={1120} scale={0.55} colors={{top: '#f4efe4', topDark: '#e4dcc8', pants: '#e4dcc8', shoes: '#c8b898', hair: '#3a2a20', skin: RUNNER.skin}} hat={{type: 'scarf', color: '#f4efe4'}} apron="#f4efe4" breathe={f} face={{eyes: 'open', mouth: 'flat', brows: 'neutral', blush: false}} />
+				<You x={560} y={1110} s={0.8} f={f} outfit="none" noCap dry={1} face={{eyes: 'narrow', mouth: 'open', brows: 'worried', look: [0.3, -0.2], sweat: 1}} outer={<ellipse cx={0} cy={-575} rx={150} ry={124} fill="#ff4a2a" opacity={0.14} />} />
+				<You x={1360} y={1110} s={0.8} f={f} outfit="robe" seed={3} face={{eyes: 'open', mouth: 'smile', brows: 'neutral', look: [-0.3, 0]}} />
 				{[0, 1].map((i) => (
 					<g key={i} transform={`translate(${i ? 1560 : 760},360) scale(${pop(f, 4 + i * 6, 10)})`}>
 						<circle r={56} fill={i ? GREEN : RED} stroke="#fff" strokeWidth={6} />
@@ -413,22 +414,22 @@ export const S76: React.FC = () => {
 	const nose = w(n, 'носом') - 8;
 	const S = 1.6;
 	const X = 960;
-	const Y = 2080;
+	const Y = 1346;
 	return (
 		<AbsoluteFill>
 			<Stage16 bg="#f6e6c4">
 				<Sky id="j76" p={HOT} />
 				<Dunes p={HOT} />
-				<Runner id="j76you" x={X} y={Y} s={S} f={f} hideLegs face={{eyes: 'open', mouth: 'tight', brows: 'neutral', look: [0, 0]}} />
+				<You x={X} y={Y} s={S} f={f} bust face={{eyes: 'open', mouth: 'tight', brows: 'neutral', look: [0, 0.1]}} />
 				{f >= nose &&
 					[-1, 1].map((sd) =>
 						[0, 1].map((i) => {
 							const t = ((f - nose + i * 12) % 24) / 24;
-							return <path key={`${sd}${i}`} d={`M ${X + sd * 20},${Y - 1000 * S + t * 0} l ${sd * (20 + t * 40)},${30 + t * 60}`} stroke="#9fd8ff" strokeWidth={8} strokeLinecap="round" opacity={1 - t} />;
+							return <path key={`${sd}${i}`} d={`M ${X + sd * 16},${Y - 500 * S} l ${sd * (20 + t * 40)},${30 + t * 60}`} stroke="#9fd8ff" strokeWidth={8} strokeLinecap="round" opacity={1 - t} />;
 						}),
 					)}
 				{/* a crossed-out chatter bubble */}
-				<g transform={`translate(1500,360) scale(${pop(f, 4, 11)})`}>
+				<g transform={`translate(1580,400) scale(${pop(f, 4, 11)})`}>
 					<path d="M -150,-80 Q -150,-120 -110,-120 L 110,-120 Q 150,-120 150,-80 L 150,30 Q 150,70 110,70 L -30,70 L -80,120 L -70,70 L -110,70 Q -150,70 -150,30 Z" fill="#fff8ec" stroke={INK} strokeWidth={7} />
 					<text x={0} y={-10} textAnchor="middle" fontFamily={HEAVY} fontWeight={900} fontSize={46} fill={INK}>
 						БЛА-БЛА
@@ -459,7 +460,24 @@ export const S77: React.FC = () => {
 				<Sky id="j77" p={HOT} />
 				<SunDisk x={1600} y={150} r={60} />
 				<Dunes p={HOT} />
-				<Runner id="j77you" x={760} y={1120} s={0.66} f={f} turn={0.2} face={{eyes: f >= drink ? 'closed' : 'open', mouth: f >= drink ? 'o' : 'flat', brows: 'neutral', look: [0.3, -0.3]}} armR={f >= drink ? {target: [70, -1000], bend: 1} : {target: [150, -460]}} itemR={<Flask level={lvl} s={1.4} tilt={f >= drink ? 150 : 180} id="j77f" />} />
+				<You
+					x={760}
+					y={1100}
+					s={0.9}
+					f={f}
+					face={{eyes: f >= drink ? 'closed' : 'open', mouth: f >= drink ? 'o' : 'flat', brows: 'neutral', look: [0.3, -0.3]}}
+					armR={f >= drink ? arm([150, -396], [60, -470], {fist: true}) : arm([112, -318], [150, -250], {fist: true, item: <Flask level={lvl} s={0.85} tilt={0} id="j77f" />})}
+					outer={
+						f >= drink ? (
+							<g>
+								<g transform="translate(91,-506)">
+									<Flask level={lvl} s={0.85} tilt={230} id="j77f" />
+								</g>
+								<ellipse cx={50} cy={-470} rx={19} ry={17} fill={BONE} stroke={BONE_D} strokeWidth={4} />
+							</g>
+						) : undefined
+					}
+				/>
 				{f >= flaskAt && (
 					<g transform={`translate(1420,700) scale(${pop(f, flaskAt, 11)})`}>
 						<Flask level={0.95} s={2.2} id="j77g" />
@@ -497,9 +515,9 @@ export const S78: React.FC = () => {
 					<path d="M -110,-10 C -110,-60 -40,-70 20,-60 L 90,-40 L 200,-36 L 210,-60 L 230,-60 L 230,0 L 90,-10 C 60,30 -110,30 -110,-10 Z" fill="#e8402e" stroke={INK} strokeWidth={6} />
 					<line x1={-180 * Math.cos(f / 1.3)} y1={-82} x2={180 * Math.cos(f / 1.3)} y2={-82} stroke={INK} strokeWidth={8} strokeLinecap="round" />
 				</g>
-				<Runner id="j78a" x={360} y={1060} s={0.42} f={f} turn={0.5} armR={{target: [170, -980], bend: 1}} itemR={<rect x={-26} y={-40} width={52} height={40} rx={6} fill="#cfe8ff" stroke={INK} strokeWidth={4} />} face={{eyes: 'narrow', mouth: 'flat', brows: 'neutral', look: [0.7, -0.6]}} />
+				<You x={360} y={1060} s={0.56} f={f} armR={arm([124, -470], [160, -600], {fist: true, item: <rect x={-30} y={-60} width={60} height={46} rx={7} fill="#cfe8ff" stroke={INK} strokeWidth={5} />})} face={{eyes: 'narrow', mouth: 'flat', brows: 'neutral', look: [0.7, -0.6]}} />
 				{glint > 0 && (
-					<g transform={`translate(${360 + 0.42 * 170 + 10},${1060 - 0.42 * 1000 - 20})`} opacity={glint}>
+					<g transform={`translate(${360 + 0.56 * 160},${1060 - 0.56 * 640})`} opacity={glint}>
 						<path d="M 0,-60 L 10,-10 L 60,0 L 10,10 L 0,60 L -10,10 L -60,0 L -10,-10 Z" fill="#fffbe0" />
 						<line x1={20} y1={-20} x2={300} y2={-380} stroke="#fffbe0" strokeWidth={6} opacity={0.6} />
 					</g>
@@ -575,8 +593,8 @@ export const S83: React.FC = () => {
 	return (
 		<AbsoluteFill style={{background: '#fff4e2'}}>
 			<svg width={1920} height={1080} viewBox="0 0 1920 1080" style={{position: 'absolute', inset: 0}}>
-				<g transform="translate(700,640) rotate(-90)">
-					<Runner id="j83p" x={0} y={0} s={0.5} f={f} face={{eyes: 'closed', mouth: 'open', brows: 'neutral'}} />
+				<g transform="translate(720,640) rotate(-90)">
+					<You x={0} y={0} s={0.66} f={f} face={{eyes: 'closed', mouth: 'open', brows: 'neutral'}} />
 				</g>
 				<g transform="translate(1180,320) rotate(-120)">
 					<path d="M -60,-90 L 60,-90 L 50,90 L -50,90 Z" fill="#dff1ff" stroke={INK} strokeWidth={7} />

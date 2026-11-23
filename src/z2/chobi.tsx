@@ -9,7 +9,7 @@ import {Choby, type ArmSpec} from '../components/Choby';
 import {HEAVY} from '../components/Overlays';
 import {armAt, ease, EAT_BITE, EAT_REST, FAN, HEART_PT, HX, INK, len, Line, mirror, Page, PRESENT, px, py, S, SHRUG, Stand, Title, useHost, FEET} from './chobiKit';
 import {Plaque, RED, YEL} from './kit';
-import {Runner} from './kit';
+import {You} from './kit';
 import {w} from './voice';
 
 const BLUE = '#2f86e0';
@@ -1078,7 +1078,7 @@ export const C79: React.FC = () => {
 				<path d="M -320,-250 A 320,120 0 0 1 320,-250 Z" fill={RED} stroke={INK} strokeWidth={8} />
 				<path d="M -110,-250 A 110,120 0 0 1 110,-250" fill="none" stroke={INK} strokeWidth={6} />
 				<g transform="translate(190,40) rotate(-90)">
-					<Runner id="c79p" x={0} y={0} s={0.36} f={g} face={{eyes: 'closed', brows: 'worried', mouth: 'open', sweat: 0.4}} />
+					<You x={0} y={0} s={0.48} f={g} dry={0.6} face={{eyes: 'closed', brows: 'worried', mouth: 'open', sweat: 0.4}} />
 				</g>
 			</g>
 			<Stand k={k} b={b}>

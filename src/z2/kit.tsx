@@ -6,6 +6,8 @@ import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
 import {clamp, pop} from '../anim';
 import {HEAVY} from '../components/Overlays';
 import {Person, type ArmPose, type Face} from '../components/Person';
+import type {ArmSpec, Pose} from '../components/Choby';
+import {Goga, type Brows} from '../components/Goga';
 import {camT as camTf, mix, rnd} from '../z1/kit';
 
 export {BigTitle, camAt, camT, CX, CY, E, ES, H, ICE, INK, Layer, mix, Plaque, RED, rnd, Stage16, W, YEL} from '../z1/kit';
@@ -134,6 +136,90 @@ export const StormHaze: React.FC<{f: number; k: number}> = ({f, k}) =>
 			</AbsoluteFill>
 		</>
 	);
+
+// ============================================================ «ты» — Гога, Чоби's brother =====
+// The film happens to Гога (src/components/Goga.tsx). The Runner's face words map onto him: eyes open / narrow / closed /
+// wide, brows neutral / worried / raised / angry, mouth tight / flat / smile / open / o; look; sweat. He blinks now and
+// then while his eyes are open, and breathes. dry 0…1 — a red flush. Arms are his own (Choby units: shoulders at (±62, −380)).
+export type YouFace = {eyes?: string; mouth?: string; brows?: string; look?: [number, number]; sweat?: number; pupil?: number};
+export const You: React.FC<{
+	x: number;
+	y: number;
+	s?: number;
+	f?: number;
+	walk?: number;
+	face?: YouFace;
+	tilt?: number;
+	turn?: number;
+	back?: boolean;
+	bust?: boolean;
+	armL?: Pose | ArmSpec;
+	armR?: Pose | ArmSpec;
+	dry?: number;
+	pack?: boolean;
+	outfit?: 'vest' | 'none' | 'robe';
+	frost?: number;
+	cold?: number;
+	shiver?: number;
+	seed?: number;
+	jaw?: number;
+	blink?: number;
+	brows?: Brows;
+	noCap?: boolean;
+	heart?: {beat: number; size?: number};
+	heartOver?: boolean;
+	brain?: number;
+	inner?: React.ReactNode;
+	outer?: React.ReactNode;
+}> = (p) => {
+	const fc = p.face ?? {};
+	const eyes = fc.eyes ?? 'open';
+	const f = p.f ?? 0;
+	const ph = (f + (p.seed ?? 0) * 37) % 101;
+	const nat = ph < 6 ? 1 - Math.abs(ph - 3) / 3 : 0;
+	const blink = p.blink ?? (eyes === 'closed' ? 1 : eyes === 'narrow' ? 0.36 : nat);
+	const BR: Record<string, Brows> = {worried: -1, raised: 'raised', angry: 'angry', neutral: 0};
+	const brows: Brows = p.brows ?? BR[fc.brows ?? 'neutral'] ?? 0;
+	const MO: Record<string, number> = {tight: 0, flat: 0.06, smile: 0.2, open: 0.45, o: 0.7};
+	const jaw = p.jaw ?? MO[fc.mouth ?? 'flat'] ?? 0.06;
+	const look: [number, number] = fc.look ?? [(p.turn ?? 0) * 0.7, 0];
+	return (
+		<Goga
+			x={p.x}
+			y={p.y}
+			s={p.s ?? 1}
+			f={f}
+			walk={p.walk}
+			tilt={p.tilt ?? 0}
+			back={p.back}
+			bust={p.bust}
+			armL={p.armL ?? 'down'}
+			armR={p.armR ?? 'down'}
+			blink={blink}
+			brows={brows}
+			jaw={jaw}
+			look={look}
+			sweat={fc.sweat ?? 0}
+			hot={(p.dry ?? 0) * 0.8}
+			pack={p.pack}
+			outfit={p.outfit}
+			frost={p.frost ?? 0}
+			cold={p.cold ?? 0}
+			shiver={p.shiver ?? 0}
+			noCap={p.noCap}
+			chest={1 + Math.sin(f / 14) * 0.015}
+			heart={p.heart}
+			heartOver={p.heartOver}
+			brain={p.brain}
+			inner={p.inner}
+			outer={p.outer}
+		/>
+	);
+};
+// hand angles: 0 — the fingers down; a hand pointing along (dx, dy) has hang = atan2(-dx, dy) in degrees
+export const hangTo = (dx: number, dy: number) => (Math.atan2(-dx, dy) * 180) / Math.PI;
+// an arm from its elbow and hand (Choby units), the hand pointing on along the forearm
+export const arm = (el: [number, number], ha: [number, number], extra: Partial<ArmSpec> = {}): ArmSpec => ({el, ha, hang: hangTo(ha[0] - el[0], ha[1] - el[1]), ...extra});
 
 // ============================================================ the runner («ты») =====
 export const RUNNER = {top: '#f08a2a', topDark: '#d47222', pants: '#2b2d33', shoes: '#e8e6e0', hair: '#3a2a20', skin: '#dfa274'};

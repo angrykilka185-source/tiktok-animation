@@ -4,7 +4,7 @@
 import React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
 import {clamp, lerp, pop} from '../anim';
-import {camAt, Chip, Dunes, Flask, HEAVY, HeatGrade, Layer, mix, mixPal, Moon, NIGHT, NOON, Plaque, RED, rnd, Rock, Runner, RUNNER, Shimmer, Sky, Stage16, SunDisk, SUNSET, YEL, DAWN, HOT} from './kit';
+import {arm, camAt, Chip, Dunes, Flask, HEAVY, HeatGrade, Layer, mix, mixPal, Moon, NIGHT, NOON, Plaque, RED, rnd, Rock, RUNNER, Shimmer, Sky, Stage16, SunDisk, SUNSET, YEL, DAWN, HOT, You} from './kit';
 import {SHOTS} from './timeline';
 import {w} from './voice';
 
@@ -81,7 +81,7 @@ export const S20: React.FC = () => {
 				<SunDisk x={1250} y={sunY} r={70} />
 				<Dunes p={NOON} />
 				<Shimmer f={f} y={640} />
-				<Runner id="j20you" x={760} y={1250} s={0.85} f={f} turn={0.3} face={{eyes: 'narrow', brows: 'worried', mouth: 'flat', look: [0.4, -0.3], sweat: f >= sweat ? 1 : 0.3}} />
+				<You x={760} y={1250} s={1.25} f={f} pack face={{eyes: 'narrow', brows: 'worried', mouth: 'flat', look: [0.4, -0.3], sweat: f >= sweat ? 1 : 0.3}} />
 				{/* a cool breeze from the «air conditioner» */}
 				{f >= ac && (
 					<g>
@@ -186,9 +186,7 @@ export const S22: React.FC = () => {
 					<rect x={-44} y={-104 + 198 * (1 - lvl)} width={88} height={198 * lvl} rx={18} fill="#5fb0f0" />
 				</g>
 				{fast && (
-					<g transform={`translate(1460,${1080}) `}>
-						<Runner id="j22you" x={0} y={40} s={0.55} f={f} walk={f * 0.4} turn={0.4} face={{eyes: 'narrow', brows: 'worried', mouth: 'open', sweat: 1}} />
-					</g>
+					<You x={1460} y={1060} s={0.74} f={f} walk={f * 0.4} pack face={{eyes: 'narrow', brows: 'worried', mouth: 'open', look: [0.3, 0], sweat: 1}} />
 				)}
 			</Stage16>
 			<Chip f={f} at={4} x={860} y={190} text="ДО 1 Л ПОТА В ЧАС" color={RED} size={52} />
@@ -331,7 +329,7 @@ export const S25: React.FC = () => {
 				<Dunes p={SUNSET} cam={cam} />
 				<Layer cam={cam}>
 					<ellipse cx={lerp(f, 0, len(n), 820, 900) - 220} cy={985} rx={260} ry={14} fill="#3a1808" opacity={0.35} />
-					<Runner id="j25you" x={lerp(f, 0, len(n), 820, 900)} y={990} s={0.46} f={f} walk={f * 0.2} turn={0.5} tilt={6} face={{eyes: 'narrow', brows: 'worried', mouth: 'flat', sweat: 0.4}} />
+					<You x={lerp(f, 0, len(n), 820, 900)} y={990} s={0.6} f={f} walk={f * 0.2} tilt={6} pack face={{eyes: 'narrow', brows: 'worried', mouth: 'flat', look: [0.4, 0], sweat: 0.4}} />
 				</Layer>
 			</Stage16>
 			<Plaque f={f} at={3} x={960} y={200} text="ВЕЧЕР ПЕРВОГО ДНЯ" color="#f7b062" size={54} />
@@ -347,32 +345,32 @@ export const S26: React.FC = () => {
 	const glue = w(n, 'слюна') - 4;
 	const tongue = w(n, 'язык') - 4;
 	const head = w(n, 'болит') - 4;
-	const S = 1.55;
+	const S = 1.6;
 	const X = 960;
-	const Y = 2010;
-	const mouthY = Y - 975 * S;
+	const Y = 1346;
+	const mouthY = Y - 444 * S;
 	const pain = f >= head ? 0.6 + 0.4 * Math.abs(Math.sin((f - head) / 5)) : 0;
 	return (
 		<AbsoluteFill>
 			<Stage16 bg="#f6e6c4">
 				<Sky id="j26" p={mixPal(NOON, SUNSET, 0.5)} />
 				<Dunes p={mixPal(NOON, SUNSET, 0.5)} />
-				<Runner id="j26you" x={X} y={Y} s={S} f={f} hideLegs dry={0.5} face={{eyes: f >= head ? 'closed' : 'narrow', brows: 'worried', mouth: 'open', sweat: 0.3}} />
+				<You x={X} y={Y} s={S} f={f} bust pack dry={0.5} face={{eyes: f >= head ? 'closed' : 'narrow', brows: 'worried', mouth: 'open', sweat: 0.3}} />
 				{/* sticky saliva between the lips */}
 				{f >= glue &&
 					[-18, 0, 20].map((dx, i) => (
-						<path key={i} d={`M ${X + dx * S},${mouthY - 12} Q ${X + dx * S + 4},${mouthY + 6} ${X + dx * S},${mouthY + 20}`} stroke="#fffdf6" strokeWidth={5} fill="none" opacity={0.9 * pop(f, glue + i * 3, 12)} />
+						<path key={i} d={`M ${X + dx * S},${mouthY - 14} Q ${X + dx * S + 5},${mouthY + 2} ${X + dx * S},${mouthY + 16}`} stroke="#fffdf6" strokeWidth={6} fill="none" opacity={0.95 * pop(f, glue + i * 3, 12)} />
 					))}
 				{/* the headache */}
 				{pain > 0 &&
 					[-1, 1].map((sd) => (
-						<path key={sd} d={`M ${X + sd * 200},${Y - 1150 * S + 40} l ${sd * 30},-20 l ${sd * -10},-24 l ${sd * 34},-18`} stroke={RED} strokeWidth={10} fill="none" strokeLinecap="round" strokeLinejoin="round" opacity={pain} transform={`translate(${sd * 10 * pain},0)`} />
+						<path key={sd} d={`M ${X + sd * 258},${Y - 560 * S} l ${sd * 30},-20 l ${sd * -10},-24 l ${sd * 34},-18`} stroke={RED} strokeWidth={10} fill="none" strokeLinecap="round" strokeLinejoin="round" opacity={pain} transform={`translate(${sd * 10 * pain},0)`} />
 					))}
 			</Stage16>
 			<Chip f={f} at={4} x={420} y={300} text="ВО РТУ СУХО" color="#a8561e" size={46} />
 			<Chip f={f} at={glue + 4} x={420} y={410} text="СЛЮНА КАК КЛЕЙ" color="#8a7a6a" size={46} />
 			<Chip f={f} at={tongue + 4} x={420} y={520} text="ЯЗЫК ЛИПНЕТ" color="#c9603a" size={46} />
-			<Chip f={f} at={head + 4} x={1500} y={300} text="БОЛИТ ГОЛОВА" color={RED} size={46} />
+			<Chip f={f} at={head + 4} x={1560} y={240} text="БОЛИТ ГОЛОВА" color={RED} size={46} />
 			<HeatGrade k={0.4} />
 		</AbsoluteFill>
 	);
@@ -437,7 +435,7 @@ export const S28: React.FC = () => {
 				<Sky id="j28" p={mixPal(NOON, SUNSET, 0.6)} />
 				<Dunes p={mixPal(NOON, SUNSET, 0.6)} />
 				<Rock x={1250} y={1000} s={1.2} color="#7a5032" />
-				<Runner id="j28you" x={900} y={1180 - up * 110} s={0.7} f={f} tilt={f >= dark ? 8 : 0} face={{eyes: f >= dark ? 'closed' : 'open', brows: 'worried', mouth: 'flat'}} />
+				<You x={900} y={1150 - up * 90} s={0.95} f={f} pack tilt={f >= dark ? 8 : 0} face={{eyes: f >= dark ? 'closed' : 'open', brows: 'worried', mouth: 'flat'}} />
 			</Stage16>
 			<AbsoluteFill style={{background: `radial-gradient(circle ${Math.round(r)}px at 50% 45%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.96) 100%)`}} />
 			<Chip f={f} at={dark + 10} x={960} y={200} text="ДАВЛЕНИЕ ПАДАЕТ" color={RED} size={52} />
@@ -502,7 +500,7 @@ export const S30: React.FC = () => {
 				<SunDisk x={1300} y={sunY} r={80} color="#ffc890" glow={1 - t} />
 				<Dunes p={p} />
 				<g transform={`translate(${shiver},0)`}>
-					<Runner id="j30you" x={760} y={1010} s={0.5} f={f} turn={0.4} face={{eyes: 'narrow', brows: 'worried', mouth: 'tight'}} armL={f >= cold ? {target: [60, -800], bend: -1} : undefined} armR={f >= cold ? {target: [-60, -800], bend: 1} : undefined} />
+					<You x={760} y={1010} s={0.66} f={f} pack cold={f >= cold ? 0.7 : 0} shiver={f >= cold ? 0.3 : 0} face={{eyes: 'narrow', brows: 'worried', mouth: 'tight', look: [0.3, 0]}} armL={f >= cold ? arm([-100, -318], [-18, -345], {fist: true}) : 'down'} armR={f >= cold ? arm([100, -318], [18, -345], {fist: true}) : 'down'} />
 				</g>
 			</Stage16>
 			<Chip f={f} at={cold} x={1300} y={300} text="НОЧЬЮ ≈ 10°" color="#3a78e0" size={54} />
@@ -578,7 +576,7 @@ export const S32: React.FC = () => {
 						))}
 						<Moon x={260} y={-220} r={40} />
 						<path d="M -420,120 Q -200,60 0,100 T 420,90 L 420,300 L -420,300 Z" fill="#20274a" />
-						<Runner id="j32a" x={-40} y={240} s={0.32} f={f} walk={f * 0.3} turn={0.4} face={{eyes: 'open', mouth: 'flat', brows: 'neutral'}} />
+						<You x={-250} y={206} s={0.42} f={f} walk={f * 0.3} pack face={{eyes: 'open', mouth: 'flat', brows: 'neutral', look: [0.5, 0]}} />
 					</g>,
 					'НОЧЬЮ — ИДТИ',
 					'#7fc4ff',
@@ -595,8 +593,8 @@ export const S32: React.FC = () => {
 						<line x1={-190} y1={20} x2={-190} y2={150} stroke="#6a4a2a" strokeWidth={8} />
 						<line x1={200} y1={0} x2={200} y2={140} stroke="#6a4a2a" strokeWidth={8} />
 						<ellipse cx={0} cy={150} rx={210} ry={26} fill="#000" opacity={0.25} />
-						<g transform="translate(-60,140) rotate(-90)">
-							<Runner id="j32b" x={0} y={0} s={0.28} f={f} face={{eyes: 'closed', mouth: 'flat', brows: 'neutral'}} />
+						<g transform="translate(150,146) rotate(-90)">
+							<You x={0} y={0} s={0.36} f={f} face={{eyes: 'closed', mouth: 'flat', brows: 'neutral'}} />
 						</g>
 					</g>,
 					'ДНЁМ — В ТЕНИ',
@@ -644,7 +642,7 @@ export const S33: React.FC = () => {
 				</Layer>
 				<Dunes p={NIGHT} cam={cam} />
 				<Layer cam={cam}>
-					<Runner id="j33you" x={lerp(f, 0, len(n), 860, 980)} y={960} s={0.42} f={f} walk={f * 0.26} back />
+					<You x={lerp(f, 0, len(n), 860, 980)} y={960} s={0.55} f={f} walk={f * 0.26} back pack />
 				</Layer>
 			</Stage16>
 		</AbsoluteFill>
@@ -664,7 +662,7 @@ export const S34: React.FC = () => {
 				<SunDisk x={1400} y={lerp(f, 0, 40, 520, 260)} r={74} />
 				<Dunes p={p} />
 				<Shimmer f={f} y={640} k={t} />
-				<Runner id="j34you" x={lerp(f, 0, len(n), 900, 960)} y={1000} s={0.5} f={f} walk={f * 0.18} tilt={10} turn={0.3} dry={0.5} face={{eyes: 'narrow', brows: 'worried', mouth: 'open', sweat: 0.2}} />
+				<You x={lerp(f, 0, len(n), 900, 960)} y={1000} s={0.66} f={f} walk={f * 0.18} tilt={10} pack dry={0.5} face={{eyes: 'narrow', brows: 'worried', mouth: 'open', look: [0.3, 0], sweat: 0.2}} />
 			</Stage16>
 			<Plaque f={f} at={2} x={960} y={200} text="ДЕНЬ ВТОРОЙ" color={YEL} size={58} />
 			<HeatGrade k={0.7} />

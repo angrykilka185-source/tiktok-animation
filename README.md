@@ -450,10 +450,17 @@ scripts/render-parallel.sh Zamerznut ZamerznutAudio out/zamerznut-raw.mp4 4
 - Аватарка `ChannelAvatar` (1024×1024) и шапка `ChannelBanner` (2560×1440, белый фон, CHOBI латиницей; Чоби и
   название — в безопасной зоне YouTube 1546×423) — `src/covers/Channel.tsx`.
 - Первые наброски трёх ведущих (профессор, молодой учёный, скелет) — `src/covers/Hosts.tsx` (`HostConcepts`).
+- Белый стиль (как обложки) — `src/covers/ChannelW.tsx`: аватарка `ChannelAvatarW` (Чоби крупно, машет, мягкий жёлтый
+  свет с лучами, всё «наклейкой» с белой каймой и тенью) и шапка `ChannelBannerW` (белый лист в клетку; Чоби указкой
+  показывает на CHOBI; вокруг наклейки тем: «Титаник» с айсбергом, градусник, чипсы, пионерский значок, мозг,
+  сердце, лампочка, «?», а для ТВ сверху и снизу ещё монета, песочные часы, молния, кубик льда, телефон, колба).
+  Чоби и название — в безопасной зоне телефона, наклейки — в полосе, которую видно на компьютере.
 
 ```bash
 npx remotion still ChannelAvatar out/cover/avatar.png
 npx remotion still ChannelBanner out/cover/banner.png
+npx remotion still ChannelAvatarW out/cover/avatar-w.png
+npx remotion still ChannelBannerW out/cover/banner-w.png
 ```
 
 ### «Каково это — замёрзнуть насмерть» с Чоби (`ZamerznutChobi`)

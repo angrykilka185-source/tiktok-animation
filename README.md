@@ -493,6 +493,15 @@ npx remotion still ChannelBannerW out/cover/banner-w.png
 GL=angle scripts/render-parallel.sh ZamerznutChobi ZamerznutAudio out/zamerznut-chobi-raw.mp4 4
 ```
 
+Готовый файл (≈110 МБ) из приложения не скачивается, поэтому есть лёгкая копия
+`deliverables/zamerznut-nasmert-chobi-lite.mp4` (45 МБ: те же 1080p и звук; x264 в два прохода, `slow`,
+`-tune animation`, видео 540 кбит/с, AAC 128 кбит/с; на глаз от оригинала не отличается):
+
+```bash
+ffmpeg -i deliverables/zamerznut-nasmert-chobi.mp4 -c:v libx264 -preset slow -tune animation -b:v 540k -maxrate 1400k -bufsize 2800k -pass 1 -an -f mp4 /dev/null
+ffmpeg -i deliverables/zamerznut-nasmert-chobi.mp4 -c:v libx264 -preset slow -tune animation -b:v 540k -maxrate 1400k -bufsize 2800k -pass 2 -c:a aac -b:a 128k -movflags +faststart deliverables/zamerznut-nasmert-chobi-lite.mp4
+```
+
 Обложки (1280×720, две — для теста в YouTube Studio) — `src/covers/Zamerznut.tsx`:
 `CoverZamerznut` — белая страница канала: Чоби вмёрз в глыбу льда по шею (сквозь лёд видны рёбра), иней и
 сосульки на шапочке, синие щёки; слева «КАКОВО ЭТО — / ЗАМЁРЗНУТЬ / НАСМЕРТЬ» (с «ЗАМЁРЗНУТЬ» свисают сосульки)

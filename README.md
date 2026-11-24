@@ -717,13 +717,18 @@ GL=angle scripts/render-parallel.sh Zakopan ZakopanAudio out/zakopan-raw.mp4 4
   которая остаётся видна и в сетке профиля (3:4).
 - `CoverZakopan` — для YouTube 1280×720 (→ 1920×1080), на белом фоне канала: только гроб с Гогой (без земли), мягкий
   тёплый свет зажигалки и тень под гробом; слева надпись поменьше «ОН / ЖИВ!» и стрелка от неё к лицу Гоги.
+- `CoverZakopan2m` и `CoverZakopanZhivoj` — та же белая страница с Гогой, другие надписи: «2 МЕТРА / ПОД ЗЕМЛЁЙ»
+  («2 МЕТРА» красным) и «ЖИВОЙ / ПОД ЗЕМЛЁЙ». Слова длиннее, поэтому гроб сдвинут чуть вправо; стрелка — к лицу Гоги.
 - `CoverZakopanB` — первый вариант (могила в разрезе), не используется.
 
 ```bash
 npx remotion still CoverZakopanV out/cover/zakopan-v.png
 npx remotion still CoverZakopan out/cover/zakopan-a.png --scale=1.5
+npx remotion still CoverZakopan2m out/cover/zakopan-2m.png --scale=1.5
+npx remotion still CoverZakopanZhivoj out/cover/zakopan-zhivoj.png --scale=1.5
 ```
-Готовые JPG: `deliverables/zakopan-oblozhka-vertikalnaya.jpg`, `deliverables/zakopan-oblozhka.jpg`.
+Готовые JPG: `deliverables/zakopan-oblozhka-vertikalnaya.jpg`, `deliverables/zakopan-oblozhka.jpg`,
+`deliverables/zakopan-oblozhka-2-metra-pod-zemlej.jpg`, `deliverables/zakopan-oblozhka-zhivoj-pod-zemlej.jpg`.
 
 ### Обложка-рентген «ЗАКОПАЛИ» (`src/covers/ZakopanXray.tsx`)
 

@@ -4,6 +4,7 @@
 //                   other palm pressed against the lid, earth trickling down; «ОН ЖИВ!» above, «2 ЧАСА ВОЗДУХА» below.
 //   CoverZakopan  — for YouTube, 1280×720, on the channel's white page: only the coffin with Гога in it (no earth),
 //                   a smaller «ОН / ЖИВ!» on the left, an arrow from it to his face.
+//   CoverZakopan2m, CoverZakopanZhivoj — the same page with «2 МЕТРА / ПОД ЗЕМЛЁЙ» and «ЖИВОЙ / ПОД ЗЕМЛЁЙ».
 //   CoverZakopanB — the grave in section (night, the mound, Чоби on top, two metres of earth, the coffin deep down).
 // Render: npx remotion still CoverZakopanV out/cover/zakopan-v.png
 //         npx remotion still CoverZakopan out/cover/zakopan-a.png --scale=1.5   (→ 1920×1080)
@@ -162,9 +163,9 @@ const Arrow: React.FC<{a: [number, number]; c: [number, number]; b: [number, num
 	);
 };
 
-// ============================================================ A: YouTube 16:9 — the white page, only the coffin; «ОН ЖИВ!» =====
-export const CoverZakopan: React.FC = () => {
-	const cx = 860;
+// ============================================================ YouTube 16:9 — the white page, only the coffin =====
+// the coffin with Гога on the channel's white page; the caption goes on the left (children)
+const WhitePage: React.FC<{id: string; cx?: number; children: React.ReactNode}> = ({id, cx = 860, children}) => {
 	const cy = 430;
 	const k = 1.16;
 	const lx = cx + LIGHT_AT[0] * k;
@@ -173,7 +174,7 @@ export const CoverZakopan: React.FC = () => {
 		<AbsoluteFill style={{background: '#ffffff', overflow: 'hidden'}}>
 			<svg width={1280} height={720} viewBox="0 0 1280 720" style={{position: 'absolute', inset: 0}}>
 				<defs>
-					<filter id="czw-sh" x="-30%" y="-30%" width="160%" height="160%" colorInterpolationFilters="sRGB">
+					<filter id={`${id}-sh`} x="-30%" y="-30%" width="160%" height="160%" colorInterpolationFilters="sRGB">
 						<feGaussianBlur in="SourceAlpha" stdDeviation={16} />
 						<feOffset dx={10} dy={18} result="b" />
 						<feFlood floodColor="#2a1a0e" floodOpacity={0.32} />
@@ -183,24 +184,49 @@ export const CoverZakopan: React.FC = () => {
 							<feMergeNode in="SourceGraphic" />
 						</feMerge>
 					</filter>
-					<radialGradient id="czw-glow" cx={lx} cy={ly} r={300} gradientUnits="userSpaceOnUse">
+					<radialGradient id={`${id}-glow`} cx={lx} cy={ly} r={300} gradientUnits="userSpaceOnUse">
 						<stop offset="0" stopColor="#ffb547" stopOpacity={0.45} />
 						<stop offset="0.5" stopColor="#ffb547" stopOpacity={0.12} />
 						<stop offset="1" stopColor="#ffb547" stopOpacity={0} />
 					</radialGradient>
 				</defs>
-				<g transform={`translate(${cx},${cy}) scale(${k})`} filter="url(#czw-sh)">
-					<CoffinGoga id="czw" dirt={false} />
+				<g transform={`translate(${cx},${cy}) scale(${k})`} filter={`url(#${id}-sh)`}>
+					<CoffinGoga id={id} dirt={false} />
 				</g>
 				{/* the warm light of the lighter on his face (soft: the page stays white) */}
-				<rect x={0} y={0} width={1280} height={720} fill="url(#czw-glow)" />
-				<AliveWord x={70} y={318} w={210} size={130} text="ОН" onWhite />
-				<AliveWord x={64} y={470} w={330} size={150} text="ЖИВ!" red onWhite />
-				<Arrow a={[300, 236]} c={[500, 120]} b={[688, 292]} w={13} />
+				<rect x={0} y={0} width={1280} height={720} fill={`url(#${id}-glow)`} />
+				{children}
 			</svg>
 		</AbsoluteFill>
 	);
 };
+
+// A: «ОН ЖИВ!»
+export const CoverZakopan: React.FC = () => (
+	<WhitePage id="czw">
+		<AliveWord x={70} y={318} w={210} size={130} text="ОН" onWhite />
+		<AliveWord x={64} y={470} w={330} size={150} text="ЖИВ!" red onWhite />
+		<Arrow a={[300, 236]} c={[500, 120]} b={[688, 292]} w={13} />
+	</WhitePage>
+);
+
+// «2 МЕТРА / ПОД ЗЕМЛЁЙ» and «ЖИВОЙ / ПОД ЗЕМЛЁЙ»: longer words, so the coffin moves a little to the right
+const SHIFT = 45;
+const FACE: [number, number] = [688 + SHIFT, 292];
+export const CoverZakopan2m: React.FC = () => (
+	<WhitePage id="cz2" cx={860 + SHIFT}>
+		<AliveWord x={50} y={335} w={505} size={122} text="2 МЕТРА" red onWhite />
+		<AliveWord x={54} y={453} w={500} size={88} text="ПОД ЗЕМЛЁЙ" onWhite />
+		<Arrow a={[312, 222]} c={[520, 100]} b={FACE} w={13} />
+	</WhitePage>
+);
+export const CoverZakopanZhivoj: React.FC = () => (
+	<WhitePage id="cz3" cx={860 + SHIFT}>
+		<AliveWord x={52} y={335} w={440} size={130} text="ЖИВОЙ" red onWhite />
+		<AliveWord x={54} y={453} w={500} size={88} text="ПОД ЗЕМЛЁЙ" onWhite />
+		<Arrow a={[300, 222]} c={[520, 100]} b={FACE} w={13} />
+	</WhitePage>
+);
 
 // ============================================================ V: vertical 9:16 (TikTok, Shorts) — «ОН ЖИВ!» over the coffin =====
 export const CoverZakopanV: React.FC = () => {

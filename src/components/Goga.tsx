@@ -8,7 +8,7 @@
 //   brows   -1 worried … 0 … 1 cheeky (the left brow goes up), or 'raised' (surprised) / 'angry'
 //   hot 0…1 — a red flush;  noCap — without the cap;  pack — a backpack (the straps in front, the bag from behind,
 //   a rolled sleeping bag on top);  outfit — 'vest' (his own), 'none' (only the shorts), 'robe' (a white desert robe and
-//   a head scarf: the way the nomads dress)
+//   a head scarf: the way the nomads dress), 'winter' (a puffy jacket, snow trousers, boots, a knitted hat, mittens, a scarf)
 import React from 'react';
 import {Choby} from './Choby';
 
@@ -161,8 +161,69 @@ const Shorts: React.FC<{back?: boolean}> = ({back}) => (
 	</g>
 );
 
+// winter: a puffy orange jacket (quilted, a zip), dark-blue snow trousers, brown boots with fur tops, a red knitted hat
+// with a white cuff and a pompom, red mittens and the striped scarf
+export const WINTER = {
+	jacket: '#f08a2a',
+	jacketD: '#d26f16',
+	jacketLine: '#a4520a',
+	sleeves: {c: '#f08a2a', d: '#d26f16', line: '#a4520a'},
+	pants: {c: '#2b4f9e', d: '#22407f', line: '#16295a'},
+	boot: '#6a4026',
+	bootD: '#55321c',
+	bootLine: '#3a2414',
+	fur: '#f3ead8',
+};
+const Jacket: React.FC<{back?: boolean}> = ({back}) => (
+	<g>
+		<path d="M -84,-418 C -112,-410 -120,-380 -118,-340 L -114,-168 C -114,-152 -102,-142 -86,-142 L 86,-142 C 102,-142 114,-152 114,-168 L 118,-340 C 120,-380 112,-410 84,-418 Z" fill={WINTER.jacket} stroke={WINTER.jacketLine} strokeWidth={5} strokeLinejoin="round" />
+		<path d="M 0,-418 L 84,-418 C 112,-410 120,-380 118,-340 L 114,-168 C 114,-152 102,-142 86,-142 L 0,-142 Z" fill={WINTER.jacketD} />
+		{[-358, -300, -242].map((y) => (
+			<path key={y} d={`M -116,${y} C -40,${y + 9} 40,${y + 9} 116,${y}`} stroke={WINTER.jacketLine} strokeWidth={4} fill="none" opacity={0.55} />
+		))}
+		{!back && <path d="M 0,-412 L 0,-150" stroke={WINTER.jacketLine} strokeWidth={5} />}
+		{!back && <rect x={-7} y={-396} width={14} height={22} rx={4} fill="#d8d8de" stroke={WINTER.jacketLine} strokeWidth={3} />}
+		<rect x={-114} y={-168} width={228} height={26} rx={11} fill={WINTER.jacketLine} opacity={0.75} />
+	</g>
+);
+// a winter boot with a fur top, the toe outwards (from behind: the heel)
+export const WinterBoot: React.FC<{side: 1 | -1; back?: boolean}> = ({side, back}) => (
+	<g transform={`translate(${side * 46},-16) scale(${side},1)`}>
+		{back ? (
+			<g>
+				<path d="M -40,10 L 36,10 C 42,10 44,2 40,-2 L -42,-2 C -46,2 -46,10 -40,10 Z" fill={WINTER.bootLine} />
+				<path d="M -40,0 L -36,-56 L 32,-56 L 36,0 Z" fill={side < 0 ? WINTER.boot : WINTER.bootD} stroke={WINTER.bootLine} strokeWidth={4} strokeLinejoin="round" />
+				<rect x={-44} y={-70} width={84} height={22} rx={10} fill={WINTER.fur} stroke="#cfc4ad" strokeWidth={3} />
+			</g>
+		) : (
+			<g>
+				<path d="M -34,10 L 52,10 C 60,10 62,0 58,-4 L -37,-4 C -41,0 -41,10 -34,10 Z" fill={WINTER.bootLine} />
+				<path d="M -36,-2 L -32,-58 L 18,-58 L 20,-30 C 38,-24 56,-18 58,-4 L -36,-4 Z" fill={side < 0 ? WINTER.boot : WINTER.bootD} stroke={WINTER.bootLine} strokeWidth={4} strokeLinejoin="round" />
+				<rect x={-40} y={-72} width={66} height={22} rx={10} fill={WINTER.fur} stroke="#cfc4ad" strokeWidth={3} />
+			</g>
+		)}
+	</g>
+);
+// the red knitted hat with a white cuff and a pompom (it turns with the head; «Г» on the cuff in front)
+export const Beanie: React.FC<{back?: boolean}> = ({back}) => (
+	<g transform="translate(0,-10)">
+		<circle cx={0} cy={-790} r={30} fill="#fbf7ee" stroke="#cfc4ad" strokeWidth={4} />
+		<path d="M -146,-646 C -156,-724 -92,-772 0,-772 C 92,-772 156,-724 146,-646 Z" fill={GOGA.cap} stroke="#9c1f25" strokeWidth={4} />
+		<path d={back ? 'M 0,-772 C -92,-772 -156,-724 -146,-646 L 0,-646 Z' : 'M 0,-772 C 92,-772 156,-724 146,-646 L 0,-646 Z'} fill={GOGA.capD} />
+		{[-96, -48, 0, 48, 96].map((x) => (
+			<path key={x} d={`M ${x},-656 C ${x * 0.94},-704 ${x * 0.7},-742 ${x * 0.34},-764`} stroke="#9c1f25" strokeWidth={3.5} fill="none" opacity={0.35} />
+		))}
+		<rect x={-158} y={-676} width={316} height={46} rx={21} fill="#fbf7ee" stroke="#cfc4ad" strokeWidth={4} />
+		{!back && (
+			<text x={0} y={-640} textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight={900} fontSize={34} fill={GOGA.cap}>
+				Г
+			</text>
+		)}
+	</g>
+);
+
 // what he wears over the bones (drawn under the arms)
-export const GogaClothes: React.FC<{outfit?: 'vest' | 'none' | 'robe'; back?: boolean; pack?: boolean}> = ({outfit = 'vest', back = false, pack = false}) => {
+export const GogaClothes: React.FC<{outfit?: 'vest' | 'none' | 'robe' | 'winter'; back?: boolean; pack?: boolean}> = ({outfit = 'vest', back = false, pack = false}) => {
 	if (outfit === 'robe')
 		return (
 			<g>
@@ -215,7 +276,7 @@ export const GogaClothes: React.FC<{outfit?: 'vest' | 'none' | 'robe'; back?: bo
 		));
 	return (
 		<g>
-			<Shorts back={back} />
+			{outfit === 'winter' ? <Jacket back={back} /> : <Shorts back={back} />}
 			{vest}
 			{bag}
 		</g>
@@ -257,10 +318,11 @@ export type GogaProps = Omit<ChobyProps, 'glasses' | 'tie' | 'hat' | 'face' | 't
 	hot?: number;
 	noCap?: boolean;
 	pack?: boolean;
-	outfit?: 'vest' | 'none' | 'robe';
+	outfit?: 'vest' | 'none' | 'robe' | 'winter';
 };
 export const Goga: React.FC<GogaProps> = ({brows = 0.5, hot = 0, noCap = false, pack = false, outfit = 'vest', frost = 0, armR = 'down', armL = 'down', back = false, behind, ...rest}) => {
 	const robe = outfit === 'robe';
+	const winter = outfit === 'winter';
 	return (
 		<Choby
 			{...rest}
@@ -271,7 +333,7 @@ export const Goga: React.FC<GogaProps> = ({brows = 0.5, hot = 0, noCap = false, 
 			glasses={false}
 			tie={false}
 			cap={false}
-			hat={robe ? <HeadScarf /> : noCap ? undefined : <GogaCap frost={frost} back={back} />}
+			hat={robe ? <HeadScarf /> : noCap ? undefined : winter ? <Beanie back={back} /> : <GogaCap frost={frost} back={back} />}
 			face={<GogaFace brows={brows} hot={hot} />}
 			torso={<GogaClothes outfit={outfit} back={back} pack={pack} />}
 			cloak={robe ? <RobeSleeves /> : undefined}
@@ -281,7 +343,11 @@ export const Goga: React.FC<GogaProps> = ({brows = 0.5, hot = 0, noCap = false, 
 					{robe && <ScarfTails />}
 				</>
 			}
-			shoe={(sd) => <GogaShoe side={sd} back={back} />}
+			shoe={(sd) => (winter ? <WinterBoot side={sd} back={back} /> : <GogaShoe side={sd} back={back} />)}
+			scarf={winter || rest.scarf}
+			mittens={winter || rest.mittens}
+			sleeves={winter ? WINTER.sleeves : rest.sleeves}
+			pants={winter ? WINTER.pants : rest.pants}
 			cheek={hot > 0 ? mix('#f0868e', '#ff3030', hot) : undefined}
 		/>
 	);

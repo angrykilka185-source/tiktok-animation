@@ -157,7 +157,8 @@ export const You: React.FC<{
 	armR?: Pose | ArmSpec;
 	dry?: number;
 	pack?: boolean;
-	outfit?: 'vest' | 'none' | 'robe';
+	outfit?: 'vest' | 'none' | 'robe' | 'winter';
+	spread?: number;
 	frost?: number;
 	cold?: number;
 	shiver?: number;
@@ -205,6 +206,7 @@ export const You: React.FC<{
 			hot={(p.dry ?? 0) * 0.8}
 			pack={p.pack}
 			outfit={p.outfit}
+			spread={p.spread}
 			frost={p.frost ?? 0}
 			cold={p.cold ?? 0}
 			shiver={p.shiver ?? 0}

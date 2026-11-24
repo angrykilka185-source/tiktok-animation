@@ -13,7 +13,8 @@
 //   vessels {warm 0…1 (blue → red), reach 0…1 (how far into the arms and legs)}
 //   chest  1… the ribcage breathes in;  frost 0…1 — hoarfrost, icicles, frosted glasses;  sweat 0…1 (with f)
 //   handFrost 0…1 — only the fingers freeze, glassFrost 0…1 — only the glasses frost over (both default to frost)
-//   scarf  a striped scarf;  mittens — red mittens on the hands;  inner / outer — extra drawing in his own units
+//   scarf  a striped scarf;  mittens — red mittens on the hands;  sleeves / pants {c, d, line} — the arms / the legs in
+//          cloth tubes (winter clothes);  spread 0…1 — the legs wide apart;  inner / outer — extra drawing in his own units
 //          (inner: inside the ribcage, behind the ribs; outer: on top of everything)
 // For other characters of the same family (his brother Гога, src/components/Goga.tsx): glasses / tie: false — no glasses,
 //   no bow tie; hat — drawn instead of the mortarboard; face — extra drawing on the face (brows, freckles…); torso —
@@ -46,6 +47,18 @@ const Bone: React.FC<{a: [number, number]; b: [number, number]; w?: number}> = (
 		))}
 	</g>
 );
+
+// a sleeve or a trouser leg: a thick soft tube along the bones (c — the near half, d — the far one, line — the outline)
+export type Cloth = {c: string; d: string; line: string};
+const Tube: React.FC<{pts: [number, number][]; w: number; cl: Cloth; dark?: boolean}> = ({pts, w, cl, dark = false}) => {
+	const d = pts.map(([x, y], k) => `${k ? 'L' : 'M'} ${x},${y}`).join(' ');
+	return (
+		<g fill="none" strokeLinecap="round" strokeLinejoin="round">
+			<path d={d} stroke={cl.line} strokeWidth={w + 9} />
+			<path d={d} stroke={dark ? cl.d : cl.c} strokeWidth={w} />
+		</g>
+	);
+};
 
 // a small rounded bony hand pointing along `ang` (degrees, 0 = down): a palm and three stubby fingers (curl 0…1 bends them)
 const Hand: React.FC<{at: [number, number]; ang?: number; fist?: boolean; finger?: boolean; curl?: number; mitten?: boolean; frost?: number}> = ({at, ang = 0, fist = false, finger = false, curl = 0, mitten = false, frost = 0}) => {
@@ -165,6 +178,9 @@ export const Choby: React.FC<{
 	sweat?: number;
 	scarf?: boolean;
 	mittens?: boolean;
+	sleeves?: Cloth;
+	pants?: Cloth;
+	spread?: number;
 	inner?: React.ReactNode;
 	outer?: React.ReactNode;
 	glasses?: boolean;
@@ -208,6 +224,9 @@ export const Choby: React.FC<{
 	sweat = 0,
 	scarf = false,
 	mittens = false,
+	sleeves,
+	pants,
+	spread = 0,
 	inner,
 	outer,
 	glasses = true,
@@ -249,8 +268,14 @@ export const Choby: React.FC<{
 		const reach = vessels ? vessels.reach : 0;
 		return (
 			<g>
-				<Bone a={sh} b={el} />
-				<Bone a={el} b={ha} />
+				{sleeves ? (
+					<Tube pts={[sh, el, [ha[0] + (el[0] - ha[0]) * 0.22, ha[1] + (el[1] - ha[1]) * 0.22]]} w={46} cl={sleeves} dark={side > 0} />
+				) : (
+					<>
+						<Bone a={sh} b={el} />
+						<Bone a={el} b={ha} />
+					</>
+				)}
 				{vline(sh, el, Math.min(1, reach * 2))}
 				{vline(el, ha, Math.max(0, reach * 2 - 1))}
 				{extra}
@@ -272,14 +297,22 @@ export const Choby: React.FC<{
 			{!bust &&
 				([-1, 1] as const).map((sd) => {
 					const l = lift(sd);
-					const K: [number, number] = [sd * (34 + l * 10), -105 - l * 22];
-					const A: [number, number] = [sd * (36 + l * 4), -32 - l * 36];
+					// spread 0…1: the feet slide apart (lying on the belly, the legs wide — he is hard to turn over)
+					const K: [number, number] = [sd * (34 + l * 10 + spread * 62), -105 - l * 22 - spread * 34];
+					const A: [number, number] = [sd * (36 + l * 4 + spread * 128), -32 - l * 36 - spread * 80];
+					const moved = l || spread;
 					return (
 						<g key={sd}>
-							<Bone a={[sd * 30, -185]} b={K} w={22} />
-							<Bone a={K} b={A} w={22} />
+							{pants ? (
+								<Tube pts={[[sd * 34, -196], K, A]} w={54} cl={pants} dark={sd > 0} />
+							) : (
+								<>
+									<Bone a={[sd * 30, -185]} b={K} w={22} />
+									<Bone a={K} b={A} w={22} />
+								</>
+							)}
 							{vline([sd * 30, -185], A, vessels ? vessels.reach : 0)}
-							<g transform={l ? `translate(${A[0] - sd * 36},${A[1] + 32})` : undefined}>
+							<g transform={moved ? `translate(${A[0] - sd * 36},${A[1] + 32})` : undefined}>
 								{shoe ? shoe(sd) : <ellipse cx={sd * 46} cy={-16} rx={36} ry={18} fill={sd < 0 ? BONE : BONE_SH} stroke={BONE_D} strokeWidth={4.5} />}
 							</g>
 						</g>

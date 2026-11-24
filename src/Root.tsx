@@ -24,6 +24,7 @@ import {HostConcepts} from './covers/Hosts';
 import {ChannelAvatar, ChannelBanner} from './covers/Channel';
 import {ChannelAvatarW, ChannelBannerW} from './covers/ChannelW';
 import {GogaSheet} from './covers/Goga';
+import {BearSheet} from './covers/BearSheet';
 import {TgkOpros, RT1} from './t1/Main';
 import {Film2, RF2} from './f2/Main';
 import {Rayon1, Rayon1Audio, RR1} from './r1/Main';
@@ -35,6 +36,7 @@ import {Chips1, Chips1Audio, RC1} from './c1/Main';
 import {RZ1, Zamerznut, ZamerznutAudio, ZamerznutChobi} from './z1/Main';
 import {RZ2, Zhazhda, ZhazhdaAudio} from './z2/Main';
 import {RZ3, Zakopan, ZakopanAudio} from './z3/Main';
+import {Medved, MedvedAudio, RZ4} from './z4/Main';
 import {FPS, H, SHOTS, W} from './timeline';
 import * as Scenes from './scenes';
 
@@ -84,6 +86,8 @@ export const RemotionRoot: React.FC = () => (
 		<Composition id="ZhazhdaAudio" component={ZhazhdaAudio} durationInFrames={RZ2.total} fps={FPS} width={1920} height={1080} />
 		<Composition id="Zakopan" component={Zakopan} durationInFrames={RZ3.total} fps={FPS} width={1920} height={1080} />
 		<Composition id="ZakopanAudio" component={ZakopanAudio} durationInFrames={RZ3.total} fps={FPS} width={1920} height={1080} />
+		<Composition id="Medved" component={Medved} durationInFrames={RZ4.total} fps={FPS} width={1920} height={1080} />
+		<Composition id="MedvedAudio" component={MedvedAudio} durationInFrames={RZ4.total} fps={FPS} width={1920} height={1080} />
 		<Composition id="Chips1" component={Chips1} durationInFrames={RC1.total} fps={FPS} width={W} height={H} />
 		<Composition id="Chips1Audio" component={Chips1Audio} durationInFrames={RC1.total} fps={FPS} width={W} height={H} />
 		<Composition id="CoverSssr" component={CoverSssr} durationInFrames={1} fps={FPS} width={1280} height={720} />
@@ -98,6 +102,7 @@ export const RemotionRoot: React.FC = () => (
 		<Composition id="ChannelAvatarW" component={ChannelAvatarW} durationInFrames={1} fps={FPS} width={1024} height={1024} />
 		<Composition id="ChannelBannerW" component={ChannelBannerW} durationInFrames={1} fps={FPS} width={2560} height={1440} />
 		<Composition id="GogaSheet" component={GogaSheet} durationInFrames={1} fps={FPS} width={1920} height={1080} />
+		<Composition id="BearSheet" component={BearSheet} durationInFrames={1} fps={FPS} width={1920} height={1080} />
 		{/* every shot on its own for quick previews */}
 		{SHOTS.map((s) => {
 			const C = (Scenes as unknown as Record<string, React.FC>)[`S${String(s.index).padStart(2, '0')}`];

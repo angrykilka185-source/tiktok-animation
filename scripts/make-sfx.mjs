@@ -1817,3 +1817,250 @@ for (const [name, rising] of [
 	add(x, reso(click(0.05, 340, 1), 360, 5), 0, 0.5);
 	write('thud', room(lowpass(x, 1800), 0.35, 0.9), 0.8);
 }
+// ===================================================== «Каково это — умереть от лап медведя» =====
+// a rough low voice: a buzzing source with jitter (f0 may glide: f0s = [start, mid, end]) through mouth formants
+const beastVoice = (dur, f0s, rough, formants) => {
+	const x = buf(dur);
+	let ph = 0;
+	for (let i = 0; i < x.length; i++) {
+		const t = i / SR;
+		const c = t / dur;
+		const f0 = c < 0.5 ? f0s[0] + (f0s[1] - f0s[0]) * (c / 0.5) : f0s[1] + (f0s[2] - f0s[1]) * ((c - 0.5) / 0.5);
+		const jit = 1 + 0.07 * Math.sin(2 * Math.PI * 6.3 * t) + 0.05 * noise();
+		ph += (2 * Math.PI * f0 * jit) / SR;
+		let s = 0;
+		for (let h = 1; h <= 16; h++) s += Math.sin(ph * h) / h;
+		x[i] = s * (1 - rough) + noise() * rough * 1.6;
+	}
+	const y = new Float32Array(x.length);
+	for (const [f, q, g] of formants) add(y, reso(x, f, q), 0, g);
+	return y;
+};
+// a bear's growl: low, rough, it swells and fades with a slow tremble
+{
+	const dur = 1.9;
+	const y = beastVoice(dur, [64, 72, 58], 0.45, [
+		[250, 2, 1],
+		[520, 3, 0.55],
+		[950, 4, 0.2],
+	]);
+	for (let i = 0; i < y.length; i++) {
+		const t = i / SR;
+		const c = t / dur;
+		y[i] *= Math.sin(Math.PI * Math.min(1, c * 1.15)) ** 0.7 * (0.75 + 0.25 * Math.sin(2 * Math.PI * 9 * t));
+	}
+	write('growl', room(lowpass(y, 2400), 0.25, 1.2), 0.75);
+}
+// a bear's roar: the jaw opens (the formants open up), the pitch rises and falls, a breathy rush on top
+{
+	const dur = 2.1;
+	const closed = beastVoice(dur, [95, 150, 85], 0.5, [
+		[330, 2, 1],
+		[800, 3, 0.5],
+	]);
+	const open = beastVoice(dur, [95, 150, 85], 0.5, [
+		[640, 1.6, 1],
+		[1250, 2.5, 0.6],
+		[2300, 4, 0.2],
+	]);
+	const breath = bandpass(noiseBuf(closed.length), 500, 3500);
+	const y = buf(dur);
+	for (let i = 0; i < y.length; i++) {
+		const t = i / SR;
+		const c = t / dur;
+		const o = Math.sin(Math.PI * Math.min(1, c * 1.3)) ** 1.5;
+		const a = Math.min(1, t / 0.08) * Math.min(1, (dur - t) / 0.6);
+		y[i] = (closed[i] * (1 - o) + open[i] * o + breath[i] * 0.35 * o) * a;
+	}
+	write('roar', room(lowpass(y, 4200), 0.3, 1.4), 0.9);
+}
+// a bear huffing: two forceful «whoof»s of breath through the nose
+{
+	const x = buf(1.0);
+	for (const at of [0, 0.42]) {
+		const n = Math.ceil(0.32 * SR);
+		const b = new Float32Array(n);
+		for (let i = 0; i < n; i++) {
+			const t = i / SR;
+			b[i] = noise() * Math.min(1, t / 0.012) * Math.exp(-t / 0.09);
+		}
+		const y = add(reso(b, 380, 1.4), reso(b, 950, 2.2), 0, 0.5);
+		add(x, y, at, 1);
+		add(x, thump(58, 0.3, 0.06, 0.2), at, 0.4);
+	}
+	write('huff', room(lowpass(x, 3000), 0.2), 0.8);
+}
+// teeth clacking: three hard bony clacks
+{
+	const x = buf(0.5);
+	for (const [at, g] of [
+		[0, 1],
+		[0.11, 0.85],
+		[0.2, 0.95],
+	]) {
+		add(x, click(0.04, 2600, 7), at, g);
+		add(x, click(0.04, 1250, 4), at, g * 0.7);
+		add(x, thump(140, 0.06, 0.015, 0.2), at, g * 0.4);
+	}
+	write('jaw', room(x, 0.2, 0.7), 0.8);
+}
+// a dry twig snapping underfoot: the crack and a few splinters
+{
+	const x = buf(0.45);
+	add(x, click(0.03, 3600, 1.8), 0.012, 1);
+	add(x, click(0.03, 1500, 1.5), 0.016, 0.6);
+	let t = 0.042;
+	for (let k = 0; k < 6; k++) {
+		add(x, click(0.015, 2500 + rnd() * 3000, 2), t, 0.25 + rnd() * 0.25);
+		t += 0.015 + rnd() * 0.03;
+	}
+	write('twig', room(lowpass(x, 7000), 0.2, 0.8), 0.85);
+}
+// a heavy animal galloping: thumps in pairs (the front paws, the hind paws) and the ground rumbling
+{
+	const dur = 2.4;
+	const x = buf(dur);
+	for (let t = 0.02; t < dur - 0.25; t += 0.34) {
+		add(x, thump(52, 0.3, 0.07, 0.5), t, 1);
+		add(x, thump(60, 0.3, 0.06, 0.5), t + 0.1, 0.8);
+		add(x, bandpass(noiseBuf(Math.ceil(0.08 * SR)), 300, 2000), t + 0.01, 0.06);
+	}
+	const r = lowpass(lowpass(noiseBuf(x.length), 120), 120);
+	for (let i = 0; i < x.length; i++) x[i] += r[i] * 2.2 * Math.min(1, i / SR / 0.3);
+	write('gallop', room(x, 0.2, 1.2), 0.8);
+}
+// a bear's slow heavy steps on the forest floor (four)
+{
+	const x = buf(1.6);
+	for (let k = 0; k < 4; k++) {
+		add(x, thump(55, 0.3, 0.07, 0.35), k * 0.38, k % 2 ? 0.75 : 1);
+		add(x, bandpass(noiseBuf(Math.ceil(0.1 * SR)), 400, 2500), k * 0.38 + 0.01, 0.05);
+	}
+	write('paws', room(x, 0.2, 1.0), 0.7);
+}
+// sniffing: four quick sniffs through the nose
+{
+	const x = buf(0.7);
+	for (let k = 0; k < 4; k++) {
+		const n = Math.ceil(0.07 * SR);
+		const b = new Float32Array(n);
+		for (let i = 0; i < n; i++) b[i] = noise() * Math.sin((Math.PI * i) / n) ** 0.6;
+		add(x, add(reso(b, 1700, 2.4), reso(b, 3800, 3), 0, 0.5), k * 0.13, k === 3 ? 0.7 : 1);
+	}
+	write('sniff', room(x, 0.15, 0.6), 0.6);
+}
+// bear spray: the hard «пшшш» of the can
+{
+	const dur = 1.5;
+	const n = Math.ceil(dur * SR);
+	const hi = highpass(noiseBuf(n), 2200);
+	const mid = bandpass(noiseBuf(n), 700, 5000);
+	const x = buf(dur);
+	for (let i = 0; i < n; i++) {
+		const t = i / SR;
+		const a = Math.min(1, t / 0.015) * (t < 0.9 ? 1 : Math.exp(-(t - 0.9) / 0.18)) * (0.9 + 0.1 * Math.sin(2 * Math.PI * 17 * t));
+		x[i] = (hi[i] * 0.8 + mid[i] * 0.5) * a;
+	}
+	write('spray', room(x, 0.15, 0.8), 0.6);
+}
+// leaves of a bush rustling
+{
+	const dur = 1.3;
+	const x = buf(dur);
+	for (let k = 0; k < 90; k++) {
+		const at = rnd() * (dur - 0.08);
+		const n = Math.ceil((0.01 + rnd() * 0.03) * SR);
+		const b = new Float32Array(n);
+		for (let i = 0; i < n; i++) b[i] = noise() * Math.sin((Math.PI * i) / n);
+		add(x, bandpass(b, 1500, 6500), at, (0.3 + rnd() * 0.7) * Math.sin((Math.PI * at) / dur));
+	}
+	write('rustle', room(x, 0.2, 0.8), 0.5);
+}
+// skis gliding on snow: two long swishes
+{
+	const dur = 2.0;
+	const n = Math.ceil(dur * SR);
+	const s = bandpass(noiseBuf(n), 500, 3200);
+	const x = buf(dur);
+	for (let i = 0; i < n; i++) {
+		const t = i / SR;
+		const a = Math.max(0, Math.sin((Math.PI * t) / 1.0)) ** 2 * (t < 1 ? 1 : 0.8);
+		x[i] = s[i] * a;
+	}
+	write('ski', room(x, 0.15), 0.4);
+}
+// steps in deep snow: four crunches
+{
+	const x = buf(1.8);
+	for (let k = 0; k < 4; k++) {
+		const at = k * 0.42;
+		for (let j = 0; j < 26; j++) add(x, click(0.008, 1800 + rnd() * 3500, 1.5), at + rnd() * 0.13, 0.15 + rnd() * 0.2);
+		add(x, thump(80, 0.15, 0.04, 0.2), at, 0.4);
+	}
+	write('snowstep', room(lowpass(x, 7000), 0.15, 0.7), 0.6);
+}
+// the forest by day: birds calling here and there over a soft rustle of leaves; loops at 8 s
+{
+	const dur = 9;
+	const x = buf(dur);
+	const leaves = lowpass(bandpass(noiseBuf(x.length), 400, 3000), 2200);
+	for (let i = 0; i < x.length; i++) x[i] = leaves[i] * (0.05 + 0.03 * Math.sin((2 * Math.PI * i) / SR / 3.1));
+	let t = 0.2;
+	while (t < dur - 0.6) {
+		const f0 = 2400 + rnd() * 2600;
+		const count = 2 + Math.floor(rnd() * 4);
+		for (let k = 0; k < count; k++) {
+			const len = 0.05 + rnd() * 0.08;
+			const c = chirp(f0 * (1 + (rnd() - 0.5) * 0.15), len, rnd() > 0.5 ? 0.35 : -0.25, len * 0.6);
+			add(x, c, t + k * (len + 0.03), 0.18 + rnd() * 0.12);
+		}
+		t += 0.35 + rnd() * 1.1;
+	}
+	writeLoop('forest', loopify(room(x, 0.3, 1.6), 1), 0.4);
+}
+// a rubber toy squeaking (the plush bear)
+{
+	const x = buf(0.5);
+	for (const at of [0, 0.2]) {
+		const n = Math.ceil(0.13 * SR);
+		const b = new Float32Array(n);
+		let ph = 0;
+		for (let i = 0; i < n; i++) {
+			const c = i / n;
+			ph += (2 * Math.PI * (950 + 450 * Math.sin(Math.PI * c))) / SR;
+			b[i] = (Math.sin(ph) + 0.4 * Math.sin(2 * ph) + 0.2 * Math.sin(3 * ph)) * Math.sin(Math.PI * c) ** 0.5;
+		}
+		add(x, b, at, 1);
+	}
+	write('squeak', room(x, 0.15, 0.6), 0.5);
+}
+// an owl far away in the night: «hoo… hoo-hoo»
+{
+	const x = buf(1.8);
+	for (const [at, len] of [
+		[0, 0.45],
+		[0.75, 0.22],
+		[1.05, 0.5],
+	]) {
+		const n = Math.ceil(len * SR);
+		const b = new Float32Array(n);
+		let ph = 0;
+		for (let i = 0; i < n; i++) {
+			const c = i / n;
+			ph += (2 * Math.PI * (370 + 15 * Math.sin(2 * Math.PI * 6 * (i / SR)) - 30 * c)) / SR;
+			b[i] = (Math.sin(ph) + noise() * 0.08) * Math.sin(Math.PI * c) ** 0.7;
+		}
+		add(x, b, at, 1);
+	}
+	write('owl', room(lowpass(x, 1500), 0.45, 1.8), 0.4);
+}
+// chewing: wet crunches with the jaw working
+{
+	const x = buf(1.3);
+	for (let k = 0; k < 3; k++) {
+		const at = k * 0.4;
+		for (let j = 0; j < 14; j++) add(x, click(0.01, 900 + rnd() * 1800, 1.5), at + rnd() * 0.12, 0.2 + rnd() * 0.25);
+		add(x, thump(110, 0.12, 0.03, 0.3), at, 0.5);
+	}
+	write('chew', room(lowpass(x, 4000), 0.2, 0.7), 0.6);
+}

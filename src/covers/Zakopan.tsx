@@ -2,7 +2,8 @@
 //   CoverZakopanV — vertical 1080×1920 (TikTok, Shorts): we look down into the coffin, Гога on the satin pillow almost
 //                   the whole height, eyes wide with fear, the lit lighter in his hand (the warm light on his face), his
 //                   other palm pressed against the lid, earth trickling down; «ОН ЖИВ!» above, «2 ЧАСА ВОЗДУХА» below.
-//   CoverZakopan  — the same for YouTube, 1280×720: «ОН / ЖИВ!» on the left, an arrow to his face.
+//   CoverZakopan  — for YouTube, 1280×720, on the channel's white page: only the coffin with Гога in it (no earth),
+//                   a smaller «ОН / ЖИВ!» on the left, an arrow from it to his face.
 //   CoverZakopanB — the grave in section (night, the mound, Чоби on top, two metres of earth, the coffin deep down).
 // Render: npx remotion still CoverZakopanV out/cover/zakopan-v.png
 //         npx remotion still CoverZakopan out/cover/zakopan-a.png --scale=1.5   (→ 1920×1080)
@@ -77,7 +78,7 @@ const LIGHT_AT: [number, number] = (() => {
 // the lighter in his right hand, the left palm pressed against the lid
 const LIGHT: ArmSpec = {el: [150, -360], ha: [196, -486], hang: 190, fist: true, item: <Lighter f={9} lit={1} s={0.62} />, itemAng: 0};
 const PALM: ArmSpec = {el: [-150, -372], ha: [-196, -520], hang: -192};
-const CoffinGoga: React.FC<{id: string}> = ({id}) => (
+const CoffinGoga: React.FC<{id: string; dirt?: boolean}> = ({id, dirt = true}) => (
 	<g transform={`rotate(${TILT})`}>
 		<defs>
 			<clipPath id={`${id}in`}>
@@ -99,7 +100,7 @@ const CoffinGoga: React.FC<{id: string}> = ({id}) => (
 		{/* Гога: eyes wide with fear, the light of the lighter on his face */}
 		<You x={0} y={470} s={0.98} f={50} blink={0} face={{eyes: 'wide', brows: 'worried', mouth: 'o', look: [0.25, -0.15], sweat: 1}} armR={LIGHT} armL={PALM} />
 		{/* earth trickling down onto him from above */}
-		{Array.from({length: 26}).map((_, i) => {
+		{dirt && Array.from({length: 26}).map((_, i) => {
 			const t = rnd(i + 700);
 			return <circle key={i} cx={-214 + (rnd(i + 710) - 0.5) * 36 + t * 26} cy={-640 + t * 380} r={3 + rnd(i + 720) * 6} fill={i % 3 ? '#7a5230' : '#5a3a1e'} />;
 		})}
@@ -129,15 +130,18 @@ const Light: React.FC<{id: string; cx: number; cy: number; k: number; w: number;
 };
 
 // «ОН ЖИВ!»: white «ОН», red «ЖИВ!» with a white edge; each with a dark 3D edge under it; fixed widths
-const AliveWord: React.FC<{x: number; y: number; w: number; size: number; text: string; red?: boolean; anchor?: 'start' | 'middle'}> = ({x, y, w, size, text, red = false, anchor = 'start'}) => {
+const AliveWord: React.FC<{x: number; y: number; w: number; size: number; text: string; red?: boolean; anchor?: 'start' | 'middle'; onWhite?: boolean}> = ({x, y, w, size, text, red = false, anchor = 'start', onWhite = false}) => {
 	const common = {x, fontSize: size, textLength: w, lengthAdjust: 'spacingAndGlyphs' as const, textAnchor: anchor, strokeLinejoin: 'round' as const};
 	const d = Math.round(size * 0.07);
+	// on the white page: dark «ОН» with a grey edge, red «ЖИВ!» with a dark-red edge (no white outline)
+	const face = red ? RED : onWhite ? INK : '#ffffff';
+	const edge = red ? RED_D : onWhite ? '#9aa0aa' : INK;
 	return (
 		<g fontFamily={HEAVY} fontWeight={900}>
-			<text {...common} y={y + d} fill={red ? RED_D : INK} stroke={red ? RED_D : INK} strokeWidth={size * 0.13}>
+			<text {...common} y={y + d} fill={edge} stroke={edge} strokeWidth={size * (onWhite ? 0.04 : 0.13)}>
 				{text}
 			</text>
-			<text {...common} y={y} fill={red ? RED : '#ffffff'} stroke={red ? '#ffffff' : INK} strokeWidth={size * 0.07} paintOrder="stroke">
+			<text {...common} y={y} fill={face} stroke={onWhite ? face : red ? '#ffffff' : INK} strokeWidth={size * (onWhite ? 0.02 : 0.07)} paintOrder="stroke">
 				{text}
 			</text>
 		</g>
@@ -158,23 +162,41 @@ const Arrow: React.FC<{a: [number, number]; c: [number, number]; b: [number, num
 	);
 };
 
-// ============================================================ A: YouTube 16:9 — «ОН ЖИВ!», Гога big in the coffin =====
+// ============================================================ A: YouTube 16:9 — the white page, only the coffin; «ОН ЖИВ!» =====
 export const CoverZakopan: React.FC = () => {
-	const cx = 905;
-	const cy = 478;
-	const k = 1.3;
+	const cx = 860;
+	const cy = 430;
+	const k = 1.16;
+	const lx = cx + LIGHT_AT[0] * k;
+	const ly = cy + LIGHT_AT[1] * k;
 	return (
-		<AbsoluteFill style={{background: SOIL, overflow: 'hidden'}}>
+		<AbsoluteFill style={{background: '#ffffff', overflow: 'hidden'}}>
 			<svg width={1280} height={720} viewBox="0 0 1280 720" style={{position: 'absolute', inset: 0}}>
-				<Earth seed={3} />
-				<g transform={`translate(${cx},${cy}) scale(${k})`}>
-					<CoffinGoga id="cza" />
+				<defs>
+					<filter id="czw-sh" x="-30%" y="-30%" width="160%" height="160%" colorInterpolationFilters="sRGB">
+						<feGaussianBlur in="SourceAlpha" stdDeviation={16} />
+						<feOffset dx={10} dy={18} result="b" />
+						<feFlood floodColor="#2a1a0e" floodOpacity={0.32} />
+						<feComposite in2="b" operator="in" />
+						<feMerge>
+							<feMergeNode />
+							<feMergeNode in="SourceGraphic" />
+						</feMerge>
+					</filter>
+					<radialGradient id="czw-glow" cx={lx} cy={ly} r={300} gradientUnits="userSpaceOnUse">
+						<stop offset="0" stopColor="#ffb547" stopOpacity={0.45} />
+						<stop offset="0.5" stopColor="#ffb547" stopOpacity={0.12} />
+						<stop offset="1" stopColor="#ffb547" stopOpacity={0} />
+					</radialGradient>
+				</defs>
+				<g transform={`translate(${cx},${cy}) scale(${k})`} filter="url(#czw-sh)">
+					<CoffinGoga id="czw" dirt={false} />
 				</g>
-				<Light id="cza" cx={cx} cy={cy} k={k} w={1280} h={720} />
-				<AliveWord x={46} y={262} w={300} size={210} text="ОН" />
-				<AliveWord x={40} y={500} w={470} size={236} text="ЖИВ!" red />
-				<Arrow a={[470, 560]} c={[640, 610]} b={[742, 420]} />
-				<AirChip x={46} y={636} />
+				{/* the warm light of the lighter on his face (soft: the page stays white) */}
+				<rect x={0} y={0} width={1280} height={720} fill="url(#czw-glow)" />
+				<AliveWord x={70} y={318} w={210} size={130} text="ОН" onWhite />
+				<AliveWord x={64} y={470} w={330} size={150} text="ЖИВ!" red onWhite />
+				<Arrow a={[300, 236]} c={[500, 120]} b={[688, 292]} w={13} />
 			</svg>
 		</AbsoluteFill>
 	);

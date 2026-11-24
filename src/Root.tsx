@@ -19,7 +19,7 @@ import {Film1, RF1} from './f1/Main';
 import {CoverPapaFilm, CoverPapaFilmV} from './covers/PapaFilm';
 import {CoverSssr} from './covers/Sssr';
 import {CoverZamerznut, CoverZamerznutB} from './covers/Zamerznut';
-import {CoverZakopan, CoverZakopanB} from './covers/Zakopan';
+import {CoverZakopan, CoverZakopanB, CoverZakopanV} from './covers/Zakopan';
 import {HostConcepts} from './covers/Hosts';
 import {ChannelAvatar, ChannelBanner} from './covers/Channel';
 import {ChannelAvatarW, ChannelBannerW} from './covers/ChannelW';
@@ -91,6 +91,7 @@ export const RemotionRoot: React.FC = () => (
 		<Composition id="CoverZamerznutB" component={CoverZamerznutB} durationInFrames={1} fps={FPS} width={1280} height={720} />
 		<Composition id="CoverZakopan" component={CoverZakopan} durationInFrames={1} fps={FPS} width={1280} height={720} />
 		<Composition id="CoverZakopanB" component={CoverZakopanB} durationInFrames={1} fps={FPS} width={1280} height={720} />
+		<Composition id="CoverZakopanV" component={CoverZakopanV} durationInFrames={1} fps={FPS} width={1080} height={1920} />
 		<Composition id="HostConcepts" component={HostConcepts} durationInFrames={1} fps={FPS} width={1920} height={1080} />
 		<Composition id="ChannelAvatar" component={ChannelAvatar} durationInFrames={1} fps={FPS} width={1024} height={1024} />
 		<Composition id="ChannelBanner" component={ChannelBanner} durationInFrames={1} fps={FPS} width={2560} height={1440} />

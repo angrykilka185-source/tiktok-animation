@@ -1,11 +1,11 @@
-// Covers (YouTube thumbnails, 1280×720) for «Каково это — оказаться погребённым заживо» — two to test against each
-// other (YouTube Studio → «Тестирование обложек»):
-//   CoverZakopan  — we look down into the coffin: Гога on the satin pillow, eyes wide, the lit lighter in his hand
-//                   (the warm light on his face), his other palm pressed against the lid, earth trickling in through a
-//                   crack; the title on the left «КАКОВО ЭТО — / ПОХОРОНЕН / ЗАЖИВО», the chip «2 ЧАСА ВОЗДУХА».
-//   CoverZakopanB — the grave in section: the night, the mound and the marker, Чоби on top with his palm up
-//                   («СТОП, ГОГА!»), two metres of earth, and deep down the coffin with Гога lit by the lighter.
-// Render: npx remotion still CoverZakopan out/cover/zakopan-a.png --scale=1.5   (→ 1920×1080)
+// Covers for «Каково это — оказаться погребённым заживо»: the caption «ОН ЖИВ!», Гога big in the coffin.
+//   CoverZakopanV — vertical 1080×1920 (TikTok, Shorts): we look down into the coffin, Гога on the satin pillow almost
+//                   the whole height, eyes wide with fear, the lit lighter in his hand (the warm light on his face), his
+//                   other palm pressed against the lid, earth trickling down; «ОН ЖИВ!» above, «2 ЧАСА ВОЗДУХА» below.
+//   CoverZakopan  — the same for YouTube, 1280×720: «ОН / ЖИВ!» on the left, an arrow to his face.
+//   CoverZakopanB — the grave in section (night, the mound, Чоби on top, two metres of earth, the coffin deep down).
+// Render: npx remotion still CoverZakopanV out/cover/zakopan-v.png
+//         npx remotion still CoverZakopan out/cover/zakopan-a.png --scale=1.5   (→ 1920×1080)
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
 import {Choby, type ArmSpec} from '../components/Choby';
@@ -46,31 +46,6 @@ const Earth: React.FC<{w?: number; h?: number; y0?: number; seed?: number}> = ({
 	</g>
 );
 
-// the title on the left: «КАКОВО ЭТО —» small, «ПОХОРОНЕН» white and «ЗАЖИВО» red, each big line with a dark 3D edge;
-// the widths are fixed (textLength, the glyphs a little condensed) so the layout is exact
-const Title: React.FC<{x: number; y: number; w: number}> = ({x, y, w}) => {
-	const fit = {lengthAdjust: 'spacingAndGlyphs' as const, strokeLinejoin: 'round' as const};
-	return (
-		<g fontFamily={HEAVY} fontWeight={900}>
-			<text x={x + 4} y={y} fontSize={50} textLength={w * 0.74} {...fit} fill="#ffffff" stroke={INK} strokeWidth={10} paintOrder="stroke">
-				КАКОВО ЭТО —
-			</text>
-			<text x={x} y={y + 124} fontSize={104} textLength={w} {...fit} fill={INK} stroke={INK} strokeWidth={14}>
-				ПОХОРОНЕН
-			</text>
-			<text x={x} y={y + 116} fontSize={104} textLength={w} {...fit} fill="#ffffff" stroke={INK} strokeWidth={8} paintOrder="stroke">
-				ПОХОРОНЕН
-			</text>
-			<text x={x - 2} y={y + 270} fontSize={150} textLength={w} {...fit} fill={RED_D} stroke={RED_D} strokeWidth={16}>
-				ЗАЖИВО
-			</text>
-			<text x={x - 2} y={y + 260} fontSize={150} textLength={w} {...fit} fill={RED} stroke="#ffffff" strokeWidth={8} paintOrder="stroke">
-				ЗАЖИВО
-			</text>
-		</g>
-	);
-};
-
 // the chip: a stopwatch and «2 ЧАСА ВОЗДУХА»
 const AirChip: React.FC<{x: number; y: number}> = ({x, y}) => (
 	<g transform={`translate(${x},${y}) rotate(-3)`}>
@@ -87,63 +62,142 @@ const AirChip: React.FC<{x: number; y: number}> = ({x, y}) => (
 	</g>
 );
 
-// ============================================================ A: we look down into the coffin =====
+// ---------------------------------------------------------- the coffin seen from above, Гога in it -----
+// in its own units: the coffin's centre at (0, 0), the head end at y −330, the foot end at +520 (out of the frames)
+const OUTER = 'M -128,-330 L 128,-330 L 262,-170 L 176,520 L -176,520 L -262,-170 Z';
+const INNER = 'M -104,-302 L 104,-302 L 230,-160 L 150,520 L -150,520 L -230,-160 Z';
+const LINING = 'M -86,-280 L 86,-280 L 204,-150 L 130,520 L -130,520 L -204,-150 Z';
+const TILT = -5;
+// the warm light (between the flame and his face), in the coffin's units after its tilt
+const LIGHT_AT: [number, number] = (() => {
+	const [x, y] = [170, -150];
+	const a = (TILT * Math.PI) / 180;
+	return [x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) + y * Math.cos(a)];
+})();
+// the lighter in his right hand, the left palm pressed against the lid
+const LIGHT: ArmSpec = {el: [150, -360], ha: [196, -486], hang: 190, fist: true, item: <Lighter f={9} lit={1} s={0.62} />, itemAng: 0};
+const PALM: ArmSpec = {el: [-150, -372], ha: [-196, -520], hang: -192};
+const CoffinGoga: React.FC<{id: string}> = ({id}) => (
+	<g transform={`rotate(${TILT})`}>
+		<defs>
+			<clipPath id={`${id}in`}>
+				<path d={LINING} />
+			</clipPath>
+		</defs>
+		{/* the boards, the satin lining with its pleats, the pillow */}
+		<path d={OUTER} fill="#6e4224" stroke="#1c0f06" strokeWidth={8} strokeLinejoin="round" />
+		<path d={OUTER} fill="none" stroke="#8a5630" strokeWidth={3} transform="translate(0,4)" opacity={0.6} />
+		<path d={INNER} fill="#4a2c16" />
+		<path d={LINING} fill="#efe3c6" />
+		<g clipPath={`url(#${id}in)`}>
+			{Array.from({length: 22}).map((_, k) => (
+				<path key={k} d={`M ${-260 + k * 26},-300 q 10,300 -4,820`} stroke="#d9c79f" strokeWidth={6} fill="none" opacity={0.7} />
+			))}
+			<rect x={-150} y={-290} width={300} height={820} fill="#f6ecd4" opacity={0.35} />
+		</g>
+		<ellipse cx={0} cy={-236} rx={150} ry={70} fill="#fbf3df" stroke="#cdb98e" strokeWidth={4} />
+		{/* Гога: eyes wide with fear, the light of the lighter on his face */}
+		<You x={0} y={470} s={0.98} f={50} blink={0} face={{eyes: 'wide', brows: 'worried', mouth: 'o', look: [0.25, -0.15], sweat: 1}} armR={LIGHT} armL={PALM} />
+		{/* earth trickling down onto him from above */}
+		{Array.from({length: 26}).map((_, i) => {
+			const t = rnd(i + 700);
+			return <circle key={i} cx={-214 + (rnd(i + 710) - 0.5) * 36 + t * 26} cy={-640 + t * 380} r={3 + rnd(i + 720) * 6} fill={i % 3 ? '#7a5230' : '#5a3a1e'} />;
+		})}
+	</g>
+);
+// the warm light of the lighter and the darkness round it, for a coffin placed at (cx, cy) at scale k
+const Light: React.FC<{id: string; cx: number; cy: number; k: number; w: number; h: number}> = ({id, cx, cy, k, w, h}) => {
+	const lx = cx + LIGHT_AT[0] * k;
+	const ly = cy + LIGHT_AT[1] * k;
+	return (
+		<g>
+			<defs>
+				<radialGradient id={`${id}l`} cx={lx} cy={ly} r={430 * k} gradientUnits="userSpaceOnUse">
+					<stop offset="0" stopColor="#ffb547" stopOpacity={0.55} />
+					<stop offset="0.35" stopColor="#ff9a2a" stopOpacity={0.22} />
+					<stop offset="1" stopColor="#ff9a2a" stopOpacity={0} />
+				</radialGradient>
+				<radialGradient id={`${id}d`} cx={lx - 90 * k} cy={ly + 90 * k} r={Math.max(w, h) * 0.75} gradientUnits="userSpaceOnUse">
+					<stop offset="0.35" stopColor="#000" stopOpacity={0} />
+					<stop offset="1" stopColor="#000" stopOpacity={0.7} />
+				</radialGradient>
+			</defs>
+			<rect x={0} y={0} width={w} height={h} fill={`url(#${id}l)`} />
+			<rect x={0} y={0} width={w} height={h} fill={`url(#${id}d)`} />
+		</g>
+	);
+};
+
+// «ОН ЖИВ!»: white «ОН», red «ЖИВ!» with a white edge; each with a dark 3D edge under it; fixed widths
+const AliveWord: React.FC<{x: number; y: number; w: number; size: number; text: string; red?: boolean; anchor?: 'start' | 'middle'}> = ({x, y, w, size, text, red = false, anchor = 'start'}) => {
+	const common = {x, fontSize: size, textLength: w, lengthAdjust: 'spacingAndGlyphs' as const, textAnchor: anchor, strokeLinejoin: 'round' as const};
+	const d = Math.round(size * 0.07);
+	return (
+		<g fontFamily={HEAVY} fontWeight={900}>
+			<text {...common} y={y + d} fill={red ? RED_D : INK} stroke={red ? RED_D : INK} strokeWidth={size * 0.13}>
+				{text}
+			</text>
+			<text {...common} y={y} fill={red ? RED : '#ffffff'} stroke={red ? '#ffffff' : INK} strokeWidth={size * 0.07} paintOrder="stroke">
+				{text}
+			</text>
+		</g>
+	);
+};
+// a hand-drawn arrow: a curve from a to b (through c), a white edge round the red
+const Arrow: React.FC<{a: [number, number]; c: [number, number]; b: [number, number]; w?: number}> = ({a, c, b, w = 16}) => {
+	const ang = Math.atan2(b[1] - c[1], b[0] - c[0]);
+	const head = (r: number, sp: number) => `${b[0] - Math.cos(ang - sp) * r},${b[1] - Math.sin(ang - sp) * r} ${b[0]},${b[1]} ${b[0] - Math.cos(ang + sp) * r},${b[1] - Math.sin(ang + sp) * r}`;
+	const d = `M ${a[0]},${a[1]} Q ${c[0]},${c[1]} ${b[0] - Math.cos(ang) * w},${b[1] - Math.sin(ang) * w}`;
+	return (
+		<g strokeLinecap="round" strokeLinejoin="round" fill="none">
+			<path d={d} stroke="#ffffff" strokeWidth={w + 12} />
+			<polyline points={head(w * 3.2, 0.55)} stroke="#ffffff" strokeWidth={w + 12} />
+			<path d={d} stroke={RED} strokeWidth={w} />
+			<polyline points={head(w * 3.2, 0.55)} stroke={RED} strokeWidth={w} />
+		</g>
+	);
+};
+
+// ============================================================ A: YouTube 16:9 — «ОН ЖИВ!», Гога big in the coffin =====
 export const CoverZakopan: React.FC = () => {
-	const CX = 960;
-	const CY = 380;
-	const s = 0.98;
-	const FEET = CY + 470; // his feet (out of the frame); his head on the pillow near the top of the coffin
-	// the coffin from above: narrow head end, wide shoulders, the foot end below the frame
-	const outer = `M ${CX - 128},${CY - 330} L ${CX + 128},${CY - 330} L ${CX + 262},${CY - 170} L ${CX + 176},${CY + 520} L ${CX - 176},${CY + 520} L ${CX - 262},${CY - 170} Z`;
-	const inner = `M ${CX - 104},${CY - 302} L ${CX + 104},${CY - 302} L ${CX + 230},${CY - 160} L ${CX + 150},${CY + 520} L ${CX - 150},${CY + 520} L ${CX - 230},${CY - 160} Z`;
-	const lining = `M ${CX - 86},${CY - 280} L ${CX + 86},${CY - 280} L ${CX + 204},${CY - 150} L ${CX + 130},${CY + 520} L ${CX - 130},${CY + 520} L ${CX - 204},${CY - 150} Z`;
-	// the lighter in his right hand, the left palm pressed against the lid
-	const flame: [number, number] = [CX + 196, CY - 214];
-	const LIGHT: ArmSpec = {el: [150, -360], ha: [196, -486], hang: 190, fist: true, item: <Lighter f={9} lit={1} s={0.62} />, itemAng: 0};
-	const PALM: ArmSpec = {el: [-150, -372], ha: [-196, -520], hang: -192};
+	const cx = 905;
+	const cy = 478;
+	const k = 1.3;
 	return (
 		<AbsoluteFill style={{background: SOIL, overflow: 'hidden'}}>
 			<svg width={1280} height={720} viewBox="0 0 1280 720" style={{position: 'absolute', inset: 0}}>
-				<defs>
-					<radialGradient id="cza-light" cx={flame[0]} cy={flame[1]} r={560} gradientUnits="userSpaceOnUse">
-						<stop offset="0" stopColor="#ffb547" stopOpacity={0.55} />
-						<stop offset="0.35" stopColor="#ff9a2a" stopOpacity={0.22} />
-						<stop offset="1" stopColor="#ff9a2a" stopOpacity={0} />
-					</radialGradient>
-					<radialGradient id="cza-dark" cx={flame[0] - 120} cy={flame[1] + 120} r={900} gradientUnits="userSpaceOnUse">
-						<stop offset="0.35" stopColor="#000" stopOpacity={0} />
-						<stop offset="1" stopColor="#000" stopOpacity={0.7} />
-					</radialGradient>
-					<clipPath id="cza-in">
-						<path d={lining} />
-					</clipPath>
-				</defs>
 				<Earth seed={3} />
-				{/* the coffin: the boards, the satin lining with its pleats, the pillow */}
-				<g transform={`rotate(-5 ${CX} ${CY})`}>
-					<path d={outer} fill="#6e4224" stroke="#1c0f06" strokeWidth={8} strokeLinejoin="round" />
-					<path d={outer} fill="none" stroke="#8a5630" strokeWidth={3} transform={`translate(0,4)`} opacity={0.6} />
-					<path d={inner} fill="#4a2c16" />
-					<path d={lining} fill="#efe3c6" />
-					<g clipPath="url(#cza-in)">
-						{Array.from({length: 22}).map((_, k) => (
-							<path key={k} d={`M ${CX - 260 + k * 26},${CY - 300} q 10,300 -4,820`} stroke="#d9c79f" strokeWidth={6} fill="none" opacity={0.7} />
-						))}
-						<rect x={CX - 150} y={CY - 290} width={300} height={720} fill="#f6ecd4" opacity={0.35} />
-					</g>
-					<ellipse cx={CX} cy={CY - 236} rx={150} ry={70} fill="#fbf3df" stroke="#cdb98e" strokeWidth={4} />
-					{/* Гога: eyes wide, the light of the lighter on his face */}
-					<You x={CX} y={FEET} s={s} f={50} blink={0} face={{eyes: 'wide', brows: 'worried', mouth: 'o', look: [0.25, -0.15], sweat: 1}} armR={LIGHT} armL={PALM} />
+				<g transform={`translate(${cx},${cy}) scale(${k})`}>
+					<CoffinGoga id="cza" />
 				</g>
-				{/* earth trickling down onto him from above (through the lid we look through) */}
-				{Array.from({length: 26}).map((_, i) => {
-					const t = rnd(i + 700);
-					return <circle key={i} cx={CX - 214 + (rnd(i + 710) - 0.5) * 36 + t * 26} cy={-10 + t * 300} r={3 + rnd(i + 720) * 6} fill={i % 3 ? '#7a5230' : '#5a3a1e'} />;
-				})}
-				<rect x={0} y={0} width={1280} height={720} fill="url(#cza-light)" />
-				<rect x={0} y={0} width={1280} height={720} fill="url(#cza-dark)" />
-				<Title x={44} y={128} w={600} />
-				<AirChip x={48} y={560} />
+				<Light id="cza" cx={cx} cy={cy} k={k} w={1280} h={720} />
+				<AliveWord x={46} y={262} w={300} size={210} text="ОН" />
+				<AliveWord x={40} y={500} w={470} size={236} text="ЖИВ!" red />
+				<Arrow a={[470, 560]} c={[640, 610]} b={[742, 420]} />
+				<AirChip x={46} y={636} />
+			</svg>
+		</AbsoluteFill>
+	);
+};
+
+// ============================================================ V: vertical 9:16 (TikTok, Shorts) — «ОН ЖИВ!» over the coffin =====
+export const CoverZakopanV: React.FC = () => {
+	const cx = 540;
+	const cy = 1200;
+	const k = 1.95;
+	return (
+		<AbsoluteFill style={{background: SOIL, overflow: 'hidden'}}>
+			<svg width={1080} height={1920} viewBox="0 0 1080 1920" style={{position: 'absolute', inset: 0}}>
+				<Earth w={1080} h={1920} seed={5} />
+				<g transform={`translate(${cx},${cy}) scale(${k})`}>
+					<CoffinGoga id="czv" />
+				</g>
+				<Light id="czv" cx={cx} cy={cy} k={k} w={1080} h={1920} />
+				<AliveWord x={56} y={470} w={330} size={260} text="ОН" />
+				<AliveWord x={420} y={470} w={604} size={260} text="ЖИВ!" red />
+				<g transform="translate(188,1600) scale(1.5)">
+					<AirChip x={0} y={0} />
+				</g>
 			</svg>
 		</AbsoluteFill>
 	);
@@ -206,7 +260,8 @@ export const CoverZakopanB: React.FC = () => {
 				{/* Чоби on the grave, pointing down at it */}
 				<ellipse cx={cx + 118} cy={GR - 14} rx={70} ry={11} fill="#000" opacity={0.4} />
 				<Choby x={cx + 118} y={GR - 16} s={0.3} jaw={0.5} blink={0} f={9} look={[-0.5, 0.7]} armL={POINT} armR="hip" tilt={-8} />
-				<Title x={40} y={300} w={560} />
+				<AliveWord x={46} y={420} w={300} size={190} text="ОН" />
+				<AliveWord x={40} y={630} w={470} size={214} text="ЖИВ!" red />
 			</svg>
 		</AbsoluteFill>
 	);

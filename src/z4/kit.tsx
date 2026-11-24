@@ -96,9 +96,9 @@ export const Birch: React.FC<{x: number; y: number; h: number; leaves: string}> 
 		))}
 	</g>
 );
-// a bush (it shakes when something moves in it)
-export const Bush: React.FC<{x: number; y: number; s?: number; c: string; shake?: number}> = ({x, y, s = 1, c, shake = 0}) => (
-	<g transform={`translate(${x + Math.sin(shake * 3) * 6 * Math.min(1, Math.abs(shake))},${y}) scale(${s})`}>
+// a bush (it shakes when something moves in it; k scales the sway, so it can die down)
+export const Bush: React.FC<{x: number; y: number; s?: number; c: string; shake?: number; k?: number}> = ({x, y, s = 1, c, shake = 0, k = 1}) => (
+	<g transform={`translate(${x + Math.sin(shake * 3) * 6 * Math.min(1, Math.abs(shake)) * k},${y}) scale(${s})`}>
 		{[
 			[-60, -40, 50],
 			[0, -60, 62],

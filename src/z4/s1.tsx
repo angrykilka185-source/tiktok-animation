@@ -14,6 +14,23 @@ import {w} from './voice';
 const len = (n: number) => SHOTS[n - 1].duration;
 // Гога's step: the walk phase grows with the distance he covers (one step ≈ 70 px at s = 0.55)
 const stepPh = (dist: number, k = 1) => (dist / 44) * k;
+const ss = (t: number) => (t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t));
+// the thicket by the path that the bear comes out of — the same in shots 1–5 (no jumps at the cuts). phase: the sway
+// (it rustles when something moves in it), k: how strong
+const THICKET: [number, number, number, string][] = [
+	[1700, GROUND + 8, 1.8, '#3f8250'],
+	[1880, GROUND + 14, 2.1, '#3a7a4a'],
+	[2040, GROUND + 4, 1.8, '#3f8250'],
+];
+const Thicket: React.FC<{phase?: number; k?: number}> = ({phase = 0, k = 0}) => (
+	<>
+		{THICKET.map(([x, y, sc, c], i) => (
+			<Bush key={i} x={x} y={y} s={sc} c={c} shake={phase + i * 0.7} k={k * (i === 1 ? 1 : 0.75)} />
+		))}
+	</>
+);
+// where the bear stops on the path once it is out of the thicket (shots 2–4)
+const BEAR_OUT = 1290;
 
 // ============================================================ 1. the forest; Гога in headphones; branches crack ahead =====
 export const S01: React.FC = () => {
@@ -22,22 +39,24 @@ export const S01: React.FC = () => {
 	const crack = w(n, 'хрустят') - 6;
 	const gx = interpolate(f, [0, len(n)], [260, 760], clamp);
 	const shake = f >= crack ? (f - crack) / 4 : 0;
+	// the bear moving in the thicket (hidden behind it; it comes out in shot 2)
+	const inX = interpolate(f, [crack - 44, crack + 6], [2260, 1980], {...clamp, easing: (t) => 1 - (1 - t) * (1 - t)});
 	return (
 		<AbsoluteFill>
 			<Stage16 bg="#8fc8ee">
 				<Forest tone="day" seed={1} />
-				<Bush x={1560} y={GROUND + 6} s={1.5} c="#3f8250" shake={shake} />
-				<Bush x={1760} y={GROUND + 20} s={1.2} c="#3a7a4a" shake={shake * 0.7} />
+				{f >= crack - 44 && <Bear x={inX} y={GROUND + 10} s={0.78} pose={f < crack + 6 ? 'walk' : 'stand4'} amp={f < crack + 6 ? Math.min(1, (crack + 6 - f) / 10) : 1} ph={(2260 - inX) / 50} />}
+				<Thicket phase={shake} k={f >= crack ? 1 : 0} />
 				<You x={gx} y={GROUND} s={0.55} f={f} walk={stepPh(gx - 260)} face={{eyes: 'narrow', mouth: 'smile', brows: 'neutral', look: [0.3, 0]}} outer={<Headphones />} />
 				<Notes f={f} x={gx + 70} y={GROUND - 420} />
 				{f >= crack &&
 					[0, 1, 2].map((k) => (
-						<g key={k} transform={`translate(${1500 + k * 90},${GROUND - 260 - (k % 2) * 40}) scale(${pop(f, crack + k * 4, 9)})`}>
+						<g key={k} transform={`translate(${1660 + k * 110},${GROUND - 300 - (k % 2) * 40}) scale(${pop(f, crack + k * 4, 9)})`}>
 							<path d="M -24,0 L -6,-10 L 6,8 L 24,-4" stroke={INK} strokeWidth={7} fill="none" strokeLinecap="round" strokeLinejoin="round" />
 						</g>
 					))}
 			</Stage16>
-			<Chip f={f} at={crack + 6} x={1600} y={300} text="ХРУСТ…" color="#6a4628" size={46} />
+			<Chip f={f} at={crack + 6} x={1780} y={330} text="ХРУСТ…" color="#6a4628" size={46} />
 			<Chip f={f} at={w(n, 'наушниках') - 4} x={560} y={200} text="В НАУШНИКАХ" color="#2f86e0" size={44} />
 		</AbsoluteFill>
 	);
@@ -50,15 +69,22 @@ export const S02: React.FC = () => {
 	const look = w(n, 'поднимает') - 2;
 	const bear = w(n, 'медведь') - 10;
 	const kg = w(n, 'триста') - 6;
-	const bx = interpolate(f, [bear - 20, bear + 10], [1780, 1440], {...clamp, easing: (t) => t * (2 - t)});
-	const walking = f >= bear - 20 && f < bear + 10;
+	// it was moving in the thicket (shot 1); now it pushes out of it and walks onto the path
+	const crack1 = w(1, 'хрустят') - 6;
+	const phase = (len(1) - crack1 + f) / 4;
+	const out0 = bear - 34;
+	const out1 = bear + 16;
+	const t = interpolate(f, [out0, out1], [0, 1], clamp);
+	const bx = 1980 - (1980 - BEAR_OUT) * ss(t);
+	const walking = f >= out0 && f < out1;
+	const amp = Math.min(1, t * 5, (1 - t) * 4);
+	const kShake = interpolate(f, [out1, out1 + 16], [1, 0], clamp);
 	return (
 		<AbsoluteFill>
 			<Stage16 bg="#8fc8ee">
 				<Forest tone="day" seed={1} />
-				<Bush x={1640} y={GROUND + 10} s={1.5} c="#3f8250" />
-				<Bear x={bx} y={GROUND + 10} s={0.78} pose={walking ? 'walk' : 'stand4'} ph={(1780 - bx) / 50} head={f >= kg ? -6 : 0} />
-				<Bush x={1840} y={GROUND + 30} s={1.2} c="#3a7a4a" />
+				<Bear x={bx} y={GROUND + 10} s={0.78} pose={walking ? 'walk' : 'stand4'} amp={walking ? amp : 1} ph={(1980 - bx) / 50} head={f >= kg ? -6 : 0} />
+				<Thicket phase={phase} k={kShake} />
 				<You x={760} y={GROUND} s={0.55} f={f} face={{eyes: f >= look ? 'wide' : 'narrow', mouth: f >= bear ? 'o' : 'smile', brows: f >= look ? 'raised' : 'neutral', look: [0.8, 0], sweat: f >= bear ? 0.6 : 0}} outer={<Headphones />} />
 				{/* twenty steps between them */}
 				{f >= bear + 6 && (
@@ -69,7 +95,7 @@ export const S02: React.FC = () => {
 				)}
 			</Stage16>
 			<Chip f={f} at={bear + 8} x={1030} y={400} text="20 ШАГОВ" color={INK} size={44} />
-			<Chip f={f} at={kg} x={1500} y={560} text="≈ 300 КГ" color="#7a4a24" size={56} />
+			<Chip f={f} at={kg} x={1300} y={530} text="≈ 300 КГ" color="#7a4a24" size={56} />
 		</AbsoluteFill>
 	);
 };
@@ -83,15 +109,15 @@ export const S03: React.FC = () => {
 	const taller = w(n, 'выше') - 6;
 	const r = interpolate(f, [up, up + RISE], [0.6, 1], {...clamp, easing: (t) => 1 - (1 - t) * (1 - t)});
 	const cam = camAt(f, 0, len(n), {s: 1, cx: 960, cy: 540}, {s: 1.12, cx: 1060, cy: 560});
-	const BX = 1400;
+	const BX = BEAR_OUT - 40;
 	return (
 		<AbsoluteFill>
 			<Stage16 bg="#8fc8ee">
 				<Layer cam={cam}>
 					<Forest tone="day" seed={1} />
-					<Bush x={1640} y={GROUND + 10} s={1.5} c="#3f8250" />
+					<Thicket />
 					{f < up ? (
-						<Bear x={BX + 40} y={GROUND + 10} s={0.78} pose="stand4" head={-6} />
+						<Bear x={BEAR_OUT} y={GROUND + 10} s={0.78} pose="stand4" head={-6} />
 					) : (
 						<g transform={`translate(${BX},${GROUND + 10}) scale(1,${r}) translate(${-BX},${-GROUND - 10})`}>
 							<BearUp x={BX} y={GROUND + 10} s={0.9} up={f >= up + RISE ? 0.6 : 0} />
@@ -102,9 +128,9 @@ export const S03: React.FC = () => {
 					{/* how tall: Гога's head and the bear's */}
 					{f >= taller && (
 						<g opacity={pop(f, taller, 12)}>
-							<path d={`M 640,${GROUND - 450} L 1560,${GROUND - 450}`} stroke="#ffffff" strokeWidth={5} strokeDasharray="16 12" />
-							<path d={`M 640,${GROUND - 580} L 1560,${GROUND - 580}`} stroke={YEL} strokeWidth={5} strokeDasharray="16 12" />
-							<path d={`M 1600,${GROUND - 450} L 1600,${GROUND - 580} M 1586,${GROUND - 566} L 1600,${GROUND - 580} L 1614,${GROUND - 566}`} stroke={YEL} strokeWidth={7} fill="none" strokeLinecap="round" />
+							<path d={`M 640,${GROUND - 450} L ${BX + 170},${GROUND - 450}`} stroke="#ffffff" strokeWidth={5} strokeDasharray="16 12" />
+							<path d={`M 640,${GROUND - 580} L ${BX + 170},${GROUND - 580}`} stroke={YEL} strokeWidth={5} strokeDasharray="16 12" />
+							<path d={`M ${BX + 210},${GROUND - 450} L ${BX + 210},${GROUND - 580} M ${BX + 196},${GROUND - 566} L ${BX + 210},${GROUND - 580} L ${BX + 224},${GROUND - 566}`} stroke={YEL} strokeWidth={7} fill="none" strokeLinecap="round" />
 						</g>
 					)}
 				</Layer>
@@ -122,15 +148,15 @@ export const S04: React.FC = () => {
 	const turn = w(n, 'разворачивается') - 4;
 	const run = w(n, 'бежит') - 6;
 	const gx = f < run ? 760 : interpolate(f, [run, run + 30], [760, 470], clamp);
-	const BX = 1400;
+	const BX = BEAR_OUT - 40;
 	// the bear drops onto all fours and goes after him
 	const chase = run + 6;
-	const bx = interpolate(f, [chase, chase + 30], [BX - 40, 1120], clamp);
+	const bx = interpolate(f, [chase, chase + 30], [BEAR_OUT, BEAR_OUT - 240], clamp);
 	return (
 		<AbsoluteFill>
 			<Stage16 bg="#8fc8ee">
 				<Forest tone="day" seed={1} />
-				<Bush x={1640} y={GROUND + 10} s={1.5} c="#3f8250" />
+				<Thicket />
 				{f < chase ? <BearUp x={BX} y={GROUND + 10} s={0.9} up={0.6} mouth={f >= run ? 0.5 : 0} ears={f >= run ? 'back' : 'up'} /> : <Bear x={bx} y={GROUND + 10} s={0.78} pose="run" ph={(f - chase) * 0.55} mouth={0.5} ears="back" />}
 				<You
 					x={gx}
@@ -163,14 +189,14 @@ const end4 = () => {
 	const run = w(n, 'бежит') - 6;
 	const chase = run + 6;
 	const gx = interpolate(F, [run, run + 30], [760, 470], clamp);
-	return {F, gx, walk: stepPh(760 - gx, 0.8), bx: interpolate(F, [chase, chase + 30], [1360, 1120], clamp), ph: (F - chase) * 0.55};
+	return {F, gx, walk: stepPh(760 - gx, 0.8), bx: interpolate(F, [chase, chase + 30], [BEAR_OUT, BEAR_OUT - 240], clamp), ph: (F - chase) * 0.55};
 };
 const Freeze4: React.FC = () => {
 	const e = end4();
 	return (
 		<Stage16 bg="#8fc8ee">
 			<Forest tone="day" seed={1} />
-			<Bush x={1640} y={GROUND + 10} s={1.5} c="#3f8250" />
+			<Thicket />
 			<Bear x={e.bx} y={GROUND + 10} s={0.78} pose="run" ph={e.ph} mouth={0.5} ears="back" />
 			<You x={e.gx} y={GROUND} s={0.55} f={e.F} walk={e.walk} face={{eyes: 'wide', mouth: 'o', brows: 'raised', look: [-0.9, 0], sweat: 1}} outer={<Headphones />} />
 		</Stage16>

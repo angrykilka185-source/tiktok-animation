@@ -24,6 +24,7 @@ import {HostConcepts} from './covers/Hosts';
 import {ChannelAvatar, ChannelBanner} from './covers/Channel';
 import {ChannelAvatarW, ChannelBannerW} from './covers/ChannelW';
 import {GogaSheet} from './covers/Goga';
+import {CoverPitA, CoverPitB, CoverPitC} from './covers/ZakopanReal';
 import {BearSheet} from './covers/BearSheet';
 import {TgkOpros, RT1} from './t1/Main';
 import {Film2, RF2} from './f2/Main';
@@ -96,6 +97,9 @@ export const RemotionRoot: React.FC = () => (
 		<Composition id="CoverZakopan" component={CoverZakopan} durationInFrames={1} fps={FPS} width={1280} height={720} />
 		<Composition id="CoverZakopanB" component={CoverZakopanB} durationInFrames={1} fps={FPS} width={1280} height={720} />
 		<Composition id="CoverZakopanV" component={CoverZakopanV} durationInFrames={1} fps={FPS} width={1080} height={1920} />
+		<Composition id="CoverPitA" component={CoverPitA} durationInFrames={1} fps={FPS} width={1920} height={1080} />
+		<Composition id="CoverPitB" component={CoverPitB} durationInFrames={1} fps={FPS} width={1920} height={1080} />
+		<Composition id="CoverPitC" component={CoverPitC} durationInFrames={1} fps={FPS} width={1920} height={1080} />
 		<Composition id="HostConcepts" component={HostConcepts} durationInFrames={1} fps={FPS} width={1920} height={1080} />
 		<Composition id="ChannelAvatar" component={ChannelAvatar} durationInFrames={1} fps={FPS} width={1024} height={1024} />
 		<Composition id="ChannelBanner" component={ChannelBanner} durationInFrames={1} fps={FPS} width={2560} height={1440} />

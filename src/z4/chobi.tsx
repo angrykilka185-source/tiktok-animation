@@ -435,7 +435,7 @@ export const C33: React.FC = () => {
 	const run = w(n, 'беги') - 8;
 	const head = w(n, 'голова') - 6;
 	const stop = w(n, 'стой') - 8;
-	const shake = f >= run && f < head ? Math.sin(f * 2.2) * 4 : 0;
+	const shake = f >= run && f < head ? Math.sin(f * 0.9) * 4 : 0;
 	return (
 		<Page
 			n={n}

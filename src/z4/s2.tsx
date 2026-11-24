@@ -273,9 +273,10 @@ export const S26: React.FC = () => {
 	const e = p * p;
 	const s = 0.24 + e * 1.45;
 	const y = GROUND - 116 + e * 520;
-	const sh = e * 9;
-	const sx = Math.sin(f * 1.9) * sh;
-	const sy = Math.cos(f * 2.3) * sh;
+	// the ground shakes as it comes — a slow sway, not a jitter
+	const sh = e * 6;
+	const sx = Math.sin(f * 0.8) * sh;
+	const sy = Math.cos(f * 1.05) * sh;
 	return (
 		<AbsoluteFill>
 			<Stage16 bg="#8fc8ee">

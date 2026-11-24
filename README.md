@@ -725,6 +725,27 @@ npx remotion still CoverZakopan out/cover/zakopan-a.png --scale=1.5
 ```
 Готовые JPG: `deliverables/zakopan-oblozhka-vertikalnaya.jpg`, `deliverables/zakopan-oblozhka.jpg`.
 
+### Обложка-рентген «ЗАКОПАЛИ» (`src/covers/ZakopanXray.tsx`)
+
+В стиле ролика «ОТОРВАЛО»: белый фон, чёрно-белый рентген, одно слово от руки (шрифт Neucha) и тонкая стрелка.
+На рентгене гроб сверху: доски с волокнами, гвозди, ручки по бокам. Внутри скелет кричит (челюсть открыта) и
+упирается обеими ладонями в крышку; стрелка от слова показывает на пальцы.
+- `CoverXrayA` — «ЗАКОПАЛИ», `CoverXrayB` — «ЖИВОЙ» (для «Тест и сравнение» в YouTube Studio).
+- Картинка `public/covers/xray-a.jpg` не нарисована, а посчитана скриптами `scripts/xray-cover/` (`run.sh` скачивает
+  данные и собирает всё за ~6 минут):
+  - `stage_hr.py` — берёт настоящую КТ из открытого набора TotalSegmentator (субъект s1380, лицензия CC BY 4.0),
+    убирает стол, поднятые руки и посторонние предметы у лица, открывает челюсть, опускает плечевые кости и
+    просвечивает тело спереди прямо в кадр 1920×1080 с тонкой сеткой (края костей и кожи получаются чёткими);
+  - `stage_hands.py` — кисти и предплечья (их нет в КТ) из костей-капсул с плотным слоем по краю, тем же «рентгеном»;
+  - `stage_final.py` — гроб, общая кривая плёнки, подчёркивание краёв, зерно, белый фон снаружи.
+- В описание ролика нужна строка об источнике данных — она есть в `deliverables/zakopan-ctr.txt`.
+
+```bash
+npx remotion still CoverXrayA out/cover/xray-a.png
+npx remotion still CoverXrayB out/cover/xray-b.png
+```
+Готовые JPG 1280×720: `deliverables/zakopan-oblozhka-rentgen-zakopali.jpg`, `deliverables/zakopan-oblozhka-rentgen-zhivoj.jpg`.
+
 ## Фильм «Что будет, если ты попадёшь в XX век» (≈5:30, отдельное длинное видео)
 
 Код: `src/w1/` (композиции `Vek20`, `Vek20Audio`). Ты просыпаешься в 1901 году; на телефоне 100 % и сообщение

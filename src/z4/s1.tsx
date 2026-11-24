@@ -620,6 +620,9 @@ export const S18: React.FC = () => {
 	);
 };
 
+// the chase: how fast the forest slides by, and how long a strip of it is needed for the whole shot
+const RUN_V = 18;
+const RUN_W = 1920 + RUN_V * Math.ceil(SHOTS[18].duration) + 200;
 // ============================================================ 19. you cannot outrun a bear: seconds; what runs is prey; the chase instinct =====
 export const S19: React.FC = () => {
 	const f = useCurrentFrame();
@@ -635,11 +638,9 @@ export const S19: React.FC = () => {
 	return (
 		<AbsoluteFill>
 			<Stage16 bg="#8fc8ee">
-				<g transform={`translate(${-((f * 18) % 1920)},0)`}>
-					<Forest tone="day" seed={1} near={false} />
-					<g transform="translate(1920,0)">
-						<Forest tone="day" seed={1} near={false} />
-					</g>
+				{/* he runs to the left, away from the bear: the camera runs with him, so the forest slides by to the right (one long strip, no seam) */}
+				<g transform={`translate(${-(RUN_W - 1920) + f * RUN_V},0)`}>
+					<Forest tone="day" seed={1} near={false} w={RUN_W} />
 				</g>
 				<Bear x={gx + gap} y={GROUND + 10} s={0.78} pose="run" ph={f * 0.55} mouth={0.4} ears="back" />
 				<You x={gx} y={GROUND} s={0.55} f={f} walk={f * 0.75} face={{eyes: 'wide', mouth: 'o', brows: 'raised', look: [-0.9, 0], sweat: 1}} />

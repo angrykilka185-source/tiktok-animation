@@ -37,6 +37,7 @@ type Short = {
 	hook: string[]; // the title lines; a line starting with «*» is red
 	cta: string[]; // the end card headline (lines, «*» = red)
 	framing?: Record<number, number | Pan | Zoom>; // where the band looks, per shot (the film's x of its centre; default 960)
+	hud?: boolean; // the film's counters in the band's corners (default on; off where they would only cover the titles)
 };
 
 export const SHORTS: Short[] = [
@@ -61,6 +62,7 @@ export const SHORTS: Short[] = [
 		hook: ['ЗАЧЕМ В ГРОБ', '*КЛАЛИ', '*КОЛОКОЛЬЧИК'],
 		cta: ['ЭТО ЛИШЬ', '*ЧАСТЬ ИСТОРИИ'],
 		framing: {37: {from: 960, to: 1060, word: 'сторож', add: -8}},
+		hud: false, // the history part: «ОШИБКИ ГОГИ · 3/7» stands still there and would cover «ДОМА ОЖИДАНИЯ»
 	},
 	// Gogol's testament: the scroll reaches the right edge
 	{
@@ -68,6 +70,7 @@ export const SHORTS: Short[] = [
 		hook: ['ГОГОЛЯ', '*ПОХОРОНИЛИ', '*ЖИВЫМ?'],
 		cta: ['ЭТО ЛИШЬ', '*ЧАСТЬ ИСТОРИИ'],
 		framing: {40: 1020},
+		hud: false,
 	},
 	// the survival chart on Чоби's last page reaches the right edge
 	{
@@ -340,7 +343,7 @@ const viewAt = (f: number, framing: Short['framing']) => {
 };
 
 // the film in its virtual 1920×1080 frame, scaled into the band (the film's frame numbers)
-const FilmBand: React.FC<{framing: Short['framing']}> = ({framing}) => {
+const FilmBand: React.FC<{framing: Short['framing']; hud?: boolean}> = ({framing, hud = true}) => {
 	const f = useCurrentFrame();
 	const {cx, zoom, top, bottom} = viewAt(f, framing);
 	const k = K * zoom;
@@ -372,17 +375,11 @@ const FilmBand: React.FC<{framing: Short['framing']}> = ({framing}) => {
 			>
 				<ZakopanScenes />
 				{/* the counters, in the corners of what the band shows */}
-				<div
-					style={{
-						position: 'absolute',
-						left: crop,
-						top: 0,
-						width: srcW,
-						height: 1080,
-					}}
-				>
-					<ZakopanHud />
-				</div>
+				{hud && (
+					<div style={{position: 'absolute', left: crop, top: 0, width: srcW, height: 1080}}>
+						<ZakopanHud />
+					</div>
+				)}
 			</Sequence>
 		</>
 	);
@@ -430,7 +427,7 @@ export const ZakopanShort: React.FC<{n: number}> = ({n}) => {
 				}}
 			>
 				<Sequence from={-a} durationInFrames={b} name="фильм">
-					<FilmBand framing={sh.framing} />
+					<FilmBand framing={sh.framing} hud={sh.hud} />
 				</Sequence>
 			</div>
 			<Sequence from={-a} durationInFrames={b} name="субтитры">

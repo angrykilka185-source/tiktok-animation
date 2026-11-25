@@ -55,20 +55,26 @@ export const SHORTS: Short[] = [
 		cta: ['КАК ЕГО', '*СБЕРЕЧЬ?'],
 		framing: {10: 1000, 11: 1000, 12: 1000},
 	},
+	// «а сторож дежурил днём и ночью»: the band pans right to the watchman and his label
 	{
 		shots: [32, 37],
 		hook: ['ЗАЧЕМ В ГРОБ', '*КЛАЛИ', '*КОЛОКОЛЬЧИК'],
 		cta: ['ЭТО ЛИШЬ', '*ЧАСТЬ ИСТОРИИ'],
+		framing: {37: {from: 960, to: 1060, word: 'сторож', add: -8}},
 	},
+	// Gogol's testament: the scroll reaches the right edge
 	{
 		shots: [38, 41],
 		hook: ['ГОГОЛЯ', '*ПОХОРОНИЛИ', '*ЖИВЫМ?'],
 		cta: ['ЭТО ЛИШЬ', '*ЧАСТЬ ИСТОРИИ'],
+		framing: {40: 1020},
 	},
+	// the survival chart on Чоби's last page reaches the right edge
 	{
 		shots: [46, 51],
 		hook: ['ПОД ЛАВИНОЙ:', '*15 МИНУТ', '*НА СПАСЕНИЕ'],
 		cta: ['А ЕЩЁ', '*6 ОШИБОК'],
+		framing: {51: 1010},
 	},
 	// the three rules of shot 54 stand across the whole width
 	{

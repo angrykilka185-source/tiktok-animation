@@ -645,6 +645,24 @@ npx remotion still CoverMedved out/cover/medved.png --scale=1.5
 Готовые JPG 1280×720: `deliverables/medved-oblozhka-ne-begi.jpg`, `deliverables/medved-oblozhka-50-km-ch.jpg`,
 `deliverables/medved-oblozhka-lech-ili-dratsya.jpg`; названия и как их сравнить — `deliverables/medved-ctr.txt`.
 
+### Рентген-обложки «Медведь» (`src/covers/MedvedXray.tsx`)
+
+Как «ЗАКОПАЛИ»: белый фон, чёрно-белый рентген, одно слово от руки и тонкая стрелка. Человек кричит (челюсть
+открыта), огромная медвежья лапа — толстое предплечье с двумя костями, пять пальцев и длинные загнутые когти —
+впилась когтями в плечо у шеи; стрелка от слова показывает на когти.
+- `CoverMedvedXray` — «ЗАДРАЛ», `CoverMedvedXrayB` — «ОДИН УДАР».
+- Картинку `public/covers/xray-bear.jpg` собирает `scripts/xray-cover/bear.sh` (~4 минуты):
+  - `stage_hr.py` с `hr_bear.json` — тот же человек из открытой КТ, руки опущены, кадр ближе (голова, плечи, грудь);
+  - `stage_paw.py` — лапа медведя из костей с плотной стенкой и костным мозгом внутри, когти — костный стержень в
+    роговом чехле (отдельный канал, светлее мягких тканей); заодно мягкие ткани опущенных плеч человека;
+  - `stage_cutout.py` — кривая плёнки, подчёркивание краёв, зерно и чистый вырез по сглаженному силуэту на белом.
+- Шаблон рентген-обложки (шрифт, стрелка, раскладка) общий — `XrayCover` в `src/covers/kit.tsx`.
+
+```bash
+npx remotion still CoverMedvedXray out/cover/medved-xray.png
+```
+Готовые JPG 1280×720: `deliverables/medved-oblozhka-rentgen-zadral.jpg`, `deliverables/medved-oblozhka-rentgen-odin-udar.jpg`.
+
 ## Фильм «Каково это — оказаться погребённым заживо» (16:9, 9:03, с Чоби и Гогой)
 
 Код: `src/z3/` (композиции `Zakopan`, `ZakopanAudio`, **1920×1080**). Хук: темнота, Гога открывает глаза в гробу,

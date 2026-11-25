@@ -205,9 +205,16 @@ for dg in pw['digits']:
     nodes = [(p0, pw['r_digit'][0] * SC), (p1, pw['r_digit'][1] * SC)]
     pts = np.array([n_[0] for n_ in nodes]); rm = pw['r_digit'][0] * SC + 3
     add_soft(lambda p, nodes=nodes: chain_sdf(p, nodes), pts.min(0) - rm, pts.max(0) + rm, vox=0.8)
-# the person's lowered upper arms
+# the person's lowered upper arms (turned like the person when the CT is seen from another side)
+FR = json.load(open(FRAME))
+TH = np.deg2rad(FR.get('view_deg', 0.0)); RC = FR.get('rot_center_mm', [0.0, 0.0])
+def to_view(p):
+    x, y, z = p
+    h = RC[0] + (x - RC[0]) * np.cos(TH) + (y - RC[1]) * np.sin(TH)
+    d = RC[1] - (x - RC[0]) * np.sin(TH) + (y - RC[1]) * np.cos(TH)
+    return np.array([h, d, z], float)
 for arm_ in P['upper_arms']:
-    S_, E_ = np.array(arm_['shoulder'], float), np.array(arm_['elbow'], float)
+    S_, E_ = to_view(np.array(arm_['shoulder'], float)), to_view(np.array(arm_['elbow'], float))
     nodes = [(S_, arm_['r'][0]), (lerp(S_, E_, 0.5), arm_['r'][1]), (E_, arm_['r'][2])]
     pts = np.array([n_[0] for n_ in nodes]); rm = max(arm_['r']) + 2
     add_soft(lambda p, nodes=nodes: chain_sdf(p, nodes), pts.min(0) - rm, pts.max(0) + rm, vox=1.2)

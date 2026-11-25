@@ -105,14 +105,14 @@
   543
  ],
  "ct_region_px": [
-  251,
-  1401,
+  300,
+  1560,
   250,
   1080
  ],
  "y_mm_range": [
-  62,
-  478
+  40,
+  560
  ],
  "dy_mm": 0.6,
  "soft_sig": [
@@ -158,5 +158,23 @@
   0.22,
   -0.2,
   -0.95
- ]
+ ],
+ "view_deg": 90,
+ "rot_center_mm": [
+  237,
+  300
+ ],
+ "brow_z_vox": 455,
+ "brow_pad_mm": 11.0,
+ "face_rim_mm": 8.0,
+ "face_box_vox": [
+  88,
+  230,
+  222,
+  380,
+  456
+ ],
+ "face_feather_vox": 10,
+ "soft_jaw": true,
+ "drop_thin_back_y": 112
 }

@@ -20,6 +20,7 @@ import {CoverPapaFilm, CoverPapaFilmV} from './covers/PapaFilm';
 import {CoverSssr} from './covers/Sssr';
 import {CoverZamerznut, CoverZamerznutB} from './covers/Zamerznut';
 import {CoverZakopan, CoverZakopan2m, CoverZakopanB, CoverZakopanV, CoverZakopanZhivoj} from './covers/Zakopan';
+import {CoverMedved, CoverMedvedB, CoverMedvedC} from './covers/Medved';
 import {HostConcepts} from './covers/Hosts';
 import {ChannelAvatar, ChannelBanner} from './covers/Channel';
 import {ChannelAvatarW, ChannelBannerW} from './covers/ChannelW';
@@ -100,6 +101,9 @@ export const RemotionRoot: React.FC = () => (
 		<Composition id="CoverZakopan2m" component={CoverZakopan2m} durationInFrames={1} fps={FPS} width={1280} height={720} />
 		<Composition id="CoverZakopanZhivoj" component={CoverZakopanZhivoj} durationInFrames={1} fps={FPS} width={1280} height={720} />
 		<Composition id="CoverZakopanV" component={CoverZakopanV} durationInFrames={1} fps={FPS} width={1080} height={1920} />
+		<Composition id="CoverMedved" component={CoverMedved} durationInFrames={1} fps={FPS} width={1280} height={720} />
+		<Composition id="CoverMedvedB" component={CoverMedvedB} durationInFrames={1} fps={FPS} width={1280} height={720} />
+		<Composition id="CoverMedvedC" component={CoverMedvedC} durationInFrames={1} fps={FPS} width={1280} height={720} />
 		<Composition id="CoverPitA" component={CoverPitA} durationInFrames={1} fps={FPS} width={1920} height={1080} />
 		<Composition id="CoverPitB" component={CoverPitB} durationInFrames={1} fps={FPS} width={1920} height={1080} />
 		<Composition id="CoverPitC" component={CoverPitC} durationInFrames={1} fps={FPS} width={1920} height={1080} />

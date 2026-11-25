@@ -136,7 +136,8 @@ export const Bear: React.FC<{
 
 // standing up on its hind legs, seen from the front (taller than a person); the origin on the ground between its feet.
 // arms: 0 = the front paws hang at its sides, 1 = raised up and forward; head: tilt (degrees), up: the nose raised (sniffing)
-export const BearUp: React.FC<{x?: number; y?: number; s?: number; head?: number; up?: number; mouth?: number; ears?: 'up' | 'back'; fur?: Fur; arms?: number; eyes?: 'open' | 'closed'}> = ({x = 0, y = 0, s = 1, head = 0, up = 0, mouth = 0, ears = 'up', fur = 'brown', arms = 0, eyes = 'open'}) => {
+// angry / roar: see FrontHead; claw: the length of the claws on the front paws (1 = as in the film)
+export const BearUp: React.FC<{x?: number; y?: number; s?: number; head?: number; up?: number; mouth?: number; ears?: 'up' | 'back'; fur?: Fur; arms?: number; eyes?: 'open' | 'closed'; angry?: boolean; roar?: boolean; claw?: number}> = ({x = 0, y = 0, s = 1, head = 0, up = 0, mouth = 0, ears = 'up', fur = 'brown', arms = 0, eyes = 'open', angry = false, roar = false, claw = 1}) => {
 	const c = FURS[fur];
 	const arm = (sd: 1 | -1) => {
 		const a = sd * (8 + arms * 70);
@@ -144,7 +145,14 @@ export const BearUp: React.FC<{x?: number; y?: number; s?: number; head?: number
 			<g transform={`translate(${sd * 118},-450) rotate(${-a})`}>
 				<path d="M -38,-10 C -44,60 -38,130 -30,176 L 30,176 C 38,130 44,60 38,-10 Z" fill={c.fur} stroke={c.line} strokeWidth={6} strokeLinejoin="round" />
 				<ellipse cx={0} cy={182} rx={40} ry={24} fill={c.fur} stroke={c.line} strokeWidth={5} />
-				{[-2, -1, 0, 1, 2].map((k) => <path key={k} d={`M ${k * 13},198 q 0,10 -3,18`} stroke={CLAW} strokeWidth={4.5} fill="none" strokeLinecap="round" />)}
+				{claw > 1.3
+					? [-2, -1, 0, 1, 2].map((k) => {
+							// long hooked claws: a filled curved spike from the paw
+							const L = 18 * claw;
+							const x0 = k * 14;
+							return <path key={k} d={`M ${x0 - 5},194 C ${x0 - 5},${194 + L * 0.55} ${x0 - 3},${194 + L * 0.85} ${x0 - L * 0.22},${194 + L} C ${x0 + 1},${194 + L * 0.72} ${x0 + 5},${194 + L * 0.45} ${x0 + 5},194 Z`} fill={CLAW} stroke={c.line} strokeWidth={2.5} strokeLinejoin="round" />;
+						})
+					: [-2, -1, 0, 1, 2].map((k) => <path key={k} d={`M ${k * 13},198 q 0,${10 * claw} ${-3 * claw},${18 * claw}`} stroke={CLAW} strokeWidth={4.5 * Math.sqrt(claw)} fill="none" strokeLinecap="round" />)}
 			</g>
 		);
 	};
@@ -167,14 +175,15 @@ export const BearUp: React.FC<{x?: number; y?: number; s?: number; head?: number
 			{arm(1)}
 			{/* the head; sniffing, the nose goes up */}
 			<g transform={`translate(0,-500) rotate(${head}) translate(0,${-up * 10}) scale(0.82,${0.82 - up * 0.1})`}>
-				<FrontHead c={c} mouth={mouth} ears={ears} eyes={eyes} />
+				<FrontHead c={c} mouth={mouth} ears={ears} eyes={eyes} angry={angry} roar={roar} />
 			</g>
 		</g>
 	);
 };
 
 // the head seen from the front, about (0, 0) = the middle of the face: ears, face, muzzle, nose, eyes, the open mouth
-const FrontHead: React.FC<{c: (typeof FURS)[Fur]; mouth?: number; ears?: 'up' | 'back'; eyes?: 'open' | 'closed'}> = ({c, mouth = 0, ears = 'up', eyes = 'open'}) => {
+// angry: the brows come down at the nose and the muzzle wrinkles (a snarl); roar: the jaw drops wide, big fangs
+const FrontHead: React.FC<{c: (typeof FURS)[Fur]; mouth?: number; ears?: 'up' | 'back'; eyes?: 'open' | 'closed'; angry?: boolean; roar?: boolean}> = ({c, mouth = 0, ears = 'up', eyes = 'open', angry = false, roar = false}) => {
 	const jaw = mouth * 34;
 	return (
 		<g>
@@ -186,8 +195,22 @@ const FrontHead: React.FC<{c: (typeof FURS)[Fur]; mouth?: number; ears?: 'up' | 
 			))}
 			<path d="M -120,-30 C -130,-110 -70,-150 0,-150 C 70,-150 130,-110 120,-30 C 110,40 60,70 0,72 C -60,70 -110,40 -120,-30 Z" fill={c.fur} stroke={c.line} strokeWidth={6} />
 			<path d="M -62,8 C -66,-30 -34,-44 0,-44 C 34,-44 66,-30 62,8 C 58,46 30,60 0,60 C -30,60 -58,46 -62,8 Z" fill={c.muzzle} stroke={c.line} strokeWidth={4} />
+			{/* the roar: the jaw drops wide — a dark mouth, the tongue, two long fangs above and two below */}
+			{roar && (
+				<g>
+					<path d="M -58,14 C -60,62 -34,104 0,106 C 34,104 60,62 58,14 C 30,26 -30,26 -58,14 Z" fill="#3a0c14" stroke={c.line} strokeWidth={5} strokeLinejoin="round" />
+					<path d="M -30,92 C -18,70 18,70 30,92 C 18,104 -18,104 -30,92 Z" fill="#c0405a" />
+					{[-1, 1].map((sd) => (
+						<g key={sd}>
+							<path d={`M ${sd * 44},18 L ${sd * 36},58 L ${sd * 28},20 Z`} fill={TOOTH} stroke={c.line} strokeWidth={2.5} strokeLinejoin="round" />
+							<path d={`M ${sd * 40},100 L ${sd * 34},70 L ${sd * 26},101 Z`} fill={TOOTH} stroke={c.line} strokeWidth={2.5} strokeLinejoin="round" />
+							<path d={`M ${sd * 22},22 l ${sd * -4},12 l ${sd * -5},-12 Z`} fill={TOOTH} />
+						</g>
+					))}
+				</g>
+			)}
 			{/* the open mouth: dark, the teeth, the tongue */}
-			{mouth > 0.05 && (
+			{!roar && mouth > 0.05 && (
 				<g>
 					<path d={`M -40,20 C -36,${30 + jaw} 36,${30 + jaw} 40,20 C 20,26 -20,26 -40,20 Z`} fill="#4a1018" stroke={c.line} strokeWidth={4} />
 					<path d={`M -24,${24 + jaw * 0.8} C -10,${16 + jaw * 0.6} 10,${16 + jaw * 0.6} 24,${24 + jaw * 0.8}`} stroke="#c0405a" strokeWidth={10} fill="none" strokeLinecap="round" />
@@ -197,6 +220,13 @@ const FrontHead: React.FC<{c: (typeof FURS)[Fur]; mouth?: number; ears?: 'up' | 
 			)}
 			<path d="M -26,-22 C -26,-40 26,-40 26,-22 C 26,-6 10,2 0,2 C -10,2 -26,-6 -26,-22 Z" fill={NOSE} />
 			<ellipse cx={-8} cy={-28} rx={7} ry={4} fill="#ffffff" opacity={0.45} />
+			{/* the snarl: wrinkles over the nose, the brows down at the middle */}
+			{angry && (
+				<g stroke={c.line} strokeWidth={5} fill="none" strokeLinecap="round">
+					<path d="M -22,-48 q 22,-10 44,0 M -16,-58 q 16,-8 32,0" />
+					{[-1, 1].map((sd) => <path key={sd} d={`M ${sd * 82},-92 C ${sd * 60},-90 ${sd * 34},-80 ${sd * 18},-66`} strokeWidth={13} stroke={c.line} />)}
+				</g>
+			)}
 			{[-1, 1].map((sd) =>
 				eyes === 'open' ? (
 					<g key={sd}>

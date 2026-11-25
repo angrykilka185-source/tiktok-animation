@@ -36,6 +36,7 @@ import {Rayon2, Rayon2Audio, RR2} from './r2/Main';
 import {RW1, Vek20, Vek20Audio} from './w1/Main';
 import {RU1, Sssr1, Sssr1Audio} from './u1/Main';
 import {SHORTS, shortDuration, SssrShort, SssrShortAudio} from './u1/shorts';
+import {SHORTS as Z_SHORTS, shortDuration as zShortDuration, ZakopanShort, ZakopanShortAudio} from './z3/shorts';
 import {Chips1, Chips1Audio, RC1} from './c1/Main';
 import {RZ1, Zamerznut, ZamerznutAudio, ZamerznutChobi} from './z1/Main';
 import {RZ2, Zhazhda, ZhazhdaAudio} from './z2/Main';
@@ -77,6 +78,13 @@ export const RemotionRoot: React.FC = () => (
 			<React.Fragment key={i}>
 				<Composition id={`SssrShort${i + 1}`} component={SssrShort} defaultProps={{n: i + 1}} durationInFrames={shortDuration(i + 1)} fps={FPS} width={1080} height={1920} />
 				<Composition id={`SssrShort${i + 1}Audio`} component={SssrShortAudio} defaultProps={{n: i + 1}} durationInFrames={shortDuration(i + 1)} fps={FPS} width={1080} height={1920} />
+			</React.Fragment>
+		))}
+		{/* promo shorts from «Погребённым заживо» */}
+		{Z_SHORTS.map((_, i) => (
+			<React.Fragment key={`zs${i}`}>
+				<Composition id={`ZakopanShort${i + 1}`} component={ZakopanShort} defaultProps={{n: i + 1}} durationInFrames={zShortDuration(i + 1)} fps={FPS} width={1080} height={1920} />
+				<Composition id={`ZakopanShort${i + 1}Audio`} component={ZakopanShortAudio} defaultProps={{n: i + 1}} durationInFrames={zShortDuration(i + 1)} fps={FPS} width={1080} height={1920} />
 			</React.Fragment>
 		))}
 		<Composition id="TgkOpros" component={TgkOpros} durationInFrames={RT1.total} fps={FPS} width={W} height={H} />

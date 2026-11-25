@@ -31,26 +31,32 @@ const Hud: React.FC = () => {
 	return <HUDZ f={f} mist={MIST} show={[at(13, 0), Math.round(RZ3.fwd(s(68)))]} air={{show: [Math.round(RZ3.fwd(s(7))) + 6, Math.round(RZ3.fwd(s(32)))], ticks: AIR}} />;
 };
 
+// the picture alone (the scenes and Чоби's pages, with the camera kicks) — also played inside the vertical shorts
+export const ZakopanScenes: React.FC = () => (
+	<KickLayer times={KICKS}>
+		{SHOTS.map((sh) => {
+			const n = sh.index;
+			const ch = CHOBI_SHOTS[n];
+			const C = ch ?? (Scenes as unknown as Record<string, React.FC>)[`S${String(n).padStart(2, '0')}`];
+			// a scene plays on under the circle that opens onto Чоби's page; his last page of a visit closes over the next shot
+			const extra = (!ch && CHOBI_FIRST.has(n + 1)) || (ch && CHOBI_LAST.has(n) && n < SHOTS.length) ? IRIS : 0;
+			const from = Math.round(RZ3.fwd(sh.from));
+			const to = Math.round(RZ3.fwd(sh.from + sh.duration)) + extra;
+			return (
+				<Sequence key={n} from={from} durationInFrames={Math.max(1, to - from)} name={`Кадр ${n}${ch ? ' · Чоби' : ''}`} style={ch ? {zIndex: 2} : undefined}>
+					<Retimed r={RZ3} newFrom={from} oldFrom={sh.from} oldDur={sh.duration + extra}>
+						{C ? <C /> : <AbsoluteFill style={{background: '#223', color: '#fff', fontSize: 80, alignItems: 'center', justifyContent: 'center'}}>{n}</AbsoluteFill>}
+					</Retimed>
+				</Sequence>
+			);
+		})}
+	</KickLayer>
+);
+export const ZakopanHud = Hud;
+
 export const Zakopan: React.FC = () => (
 	<AbsoluteFill style={{background: '#000'}}>
-		<KickLayer times={KICKS}>
-			{SHOTS.map((sh) => {
-				const n = sh.index;
-				const ch = CHOBI_SHOTS[n];
-				const C = ch ?? (Scenes as unknown as Record<string, React.FC>)[`S${String(n).padStart(2, '0')}`];
-				// a scene plays on under the circle that opens onto Чоби's page; his last page of a visit closes over the next shot
-				const extra = (!ch && CHOBI_FIRST.has(n + 1)) || (ch && CHOBI_LAST.has(n) && n < SHOTS.length) ? IRIS : 0;
-				const from = Math.round(RZ3.fwd(sh.from));
-				const to = Math.round(RZ3.fwd(sh.from + sh.duration)) + extra;
-				return (
-					<Sequence key={n} from={from} durationInFrames={Math.max(1, to - from)} name={`Кадр ${n}${ch ? ' · Чоби' : ''}`} style={ch ? {zIndex: 2} : undefined}>
-						<Retimed r={RZ3} newFrom={from} oldFrom={sh.from} oldDur={sh.duration + extra}>
-							{C ? <C /> : <AbsoluteFill style={{background: '#223', color: '#fff', fontSize: 80, alignItems: 'center', justifyContent: 'center'}}>{n}</AbsoluteFill>}
-						</Retimed>
-					</Sequence>
-				);
-			})}
-		</KickLayer>
+		<ZakopanScenes />
 		<Hud />
 		<Captions captions={VOICE_CAPTIONS} wide solid />
 		<SFXZ3 r={RZ3} />

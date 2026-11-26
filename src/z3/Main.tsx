@@ -31,10 +31,11 @@ const Hud: React.FC = () => {
 	return <HUDZ f={f} mist={MIST} show={[at(13, 0), Math.round(RZ3.fwd(s(68)))]} air={{show: [Math.round(RZ3.fwd(s(7))) + 6, Math.round(RZ3.fwd(s(32)))], ticks: AIR}} />;
 };
 
-// the picture alone (the scenes and Чоби's pages, with the camera kicks) — also played inside the vertical shorts
-export const ZakopanScenes: React.FC = () => (
+// the picture alone (the scenes and Чоби's pages, with the camera kicks) — also played inside the vertical shorts,
+// where `only` keeps just the shots of the run (nothing of the shots around it shows through a circle)
+export const ZakopanScenes: React.FC<{only?: [number, number]}> = ({only}) => (
 	<KickLayer times={KICKS}>
-		{SHOTS.map((sh) => {
+		{SHOTS.filter((sh) => !only || (sh.index >= only[0] && sh.index <= only[1])).map((sh) => {
 			const n = sh.index;
 			const ch = CHOBI_SHOTS[n];
 			const C = ch ?? (Scenes as unknown as Record<string, React.FC>)[`S${String(n).padStart(2, '0')}`];

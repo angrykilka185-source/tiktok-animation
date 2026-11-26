@@ -1,7 +1,7 @@
 // Чоби's page for «Каково это — умереть от лап медведя» (the same as in «погребённым заживо», src/z3/chobiKit.tsx): the white page with
 // the circle that opens and closes a visit, his talking, blinking and breathing on the film's clock, the arm poses that
 // glide from one to the next on the words, the titles and the list lines. The scenes themselves are in chobi.tsx.
-import React from 'react';
+import React, {createContext, useContext} from 'react';
 import {AbsoluteFill, Easing, interpolate, useCurrentFrame} from 'remotion';
 import {clamp, pop} from '../anim';
 import {armPose, Choby, mixArm, type ArmSpec, type Pose} from '../components/Choby';
@@ -26,6 +26,9 @@ export const CHOBI_VISITS = [[6], [12, 13], [21, 22], [28], [31, 32, 33], [41], 
 export const CHOBI_FIRST = new Set(CHOBI_VISITS.map((v) => v[0]));
 export const CHOBI_LAST = new Set(CHOBI_VISITS.map((v) => v[v.length - 1]));
 export const IRIS = 12;
+// the shot whose page is already open when the picture starts (a vertical short that begins on it): no circle,
+// and Чоби is already up (no spring, no puff of dust)
+export const OpenPage = createContext(0);
 
 // ---------------------------------------------------------------------------------------------- helpers -----
 // the voice of shot n at shot-local frame f → how far the jaw opens
@@ -79,7 +82,8 @@ export const REACH: ArmSpec = {el: [122, -420], ha: [170, -495], hang: -147}; //
 export const useHost = (n: number) => {
 	const f = useCurrentFrame();
 	const g = shotStart(n) + f;
-	const k = CHOBI_FIRST.has(n) ? pop(f, 2, 10) : 1;
+	const open = useContext(OpenPage) === n; // (on a page that is already open he is already up)
+	const k = CHOBI_FIRST.has(n) && !open ? pop(f, 2, 10) : 1;
 	const jaw = jawAt(n, f);
 	return {f, g, k, jaw, blink: blinkAt(g), tilt: Math.sin(g / 23) * 3 + (jaw - 0.25) * 3, b: 1 + 0.012 * Math.sin(g / 14)};
 };
@@ -93,7 +97,8 @@ export const Page: React.FC<{n: number; f: number; snow?: boolean; shadow?: numb
 	const g = shotStart(n) + f;
 	const L = len(n);
 	let r = 1e4;
-	if (CHOBI_FIRST.has(n)) r = Math.min(r, interpolate(f, [0, IRIS], [0, 1500], {...clamp, easing: Easing.inOut(Easing.cubic)}));
+	const open = useContext(OpenPage) === n;
+	if (CHOBI_FIRST.has(n) && !open) r = Math.min(r, interpolate(f, [0, IRIS], [0, 1500], {...clamp, easing: Easing.inOut(Easing.cubic)}));
 	if (CHOBI_LAST.has(n)) {
 		const o = n === SHOTS.length ? L - IRIS - 4 : L;
 		r = Math.min(r, interpolate(f, [o, o + IRIS], [1500, 0], {...clamp, easing: Easing.in(Easing.cubic)}));
@@ -121,6 +126,7 @@ export const Page: React.FC<{n: number; f: number; snow?: boolean; shadow?: numb
 					<ellipse cx={sx} cy={FEET + 6} rx={150 * shadow} ry={16 * shadow} fill="#000" opacity={0.1} />
 					{/* a puff of dust when he springs up */}
 					{CHOBI_FIRST.has(n) &&
+						!open &&
 						f >= 2 &&
 						f < 22 &&
 						[-1, -0.4, 0.4, 1].map((d, i) => {

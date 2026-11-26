@@ -6,7 +6,7 @@ import edit from './edit.json';
 import {HUDB} from './kit';
 import * as Scenes from './scenes';
 import {CHOBI_SHOTS} from './chobi';
-import {CHOBI_FIRST, CHOBI_LAST, IRIS} from './chobiKit';
+import {CHOBI_FIRST, CHOBI_LAST, IRIS, OpenPage} from './chobiKit';
 import {SFXZ4} from './SFX';
 import {shotStart as s, SHOTS, TOTAL} from './timeline';
 import {VOICE_CAPTIONS, w} from './voice';
@@ -23,10 +23,13 @@ const Hud: React.FC = () => {
 	return <HUDB f={f} mist={MIST} show={[at(14, 0), Math.round(RZ4.fwd(s(61)))]} />;
 };
 
-export const Medved: React.FC = () => (
-	<AbsoluteFill style={{background: '#000'}}>
+// the picture alone (the scenes and Чоби's pages, with the camera kicks) — also played inside the vertical shorts,
+// where `only` keeps just the shots of the run (nothing of the shots around it shows through a circle) and a run
+// that begins on Чоби's page finds it already open
+export const MedvedScenes: React.FC<{only?: [number, number]}> = ({only}) => (
+	<OpenPage.Provider value={only?.[0] ?? 0}>
 		<KickLayer times={KICKS}>
-			{SHOTS.map((sh) => {
+			{SHOTS.filter((sh) => !only || (sh.index >= only[0] && sh.index <= only[1])).map((sh) => {
 				const n = sh.index;
 				const ch = CHOBI_SHOTS[n];
 				const C = ch ?? (Scenes as unknown as Record<string, React.FC>)[`S${String(n).padStart(2, '0')}`];
@@ -43,6 +46,13 @@ export const Medved: React.FC = () => (
 				);
 			})}
 		</KickLayer>
+	</OpenPage.Provider>
+);
+export const MedvedHud = Hud;
+
+export const Medved: React.FC = () => (
+	<AbsoluteFill style={{background: '#000'}}>
+		<MedvedScenes />
 		<Hud />
 		<Captions captions={VOICE_CAPTIONS} wide solid />
 		<SFXZ4 r={RZ4} />

@@ -12,8 +12,9 @@ if [ ! -f "$DATA/s1380/ct.nii.gz" ]; then
   unzip -q -o "$DATA/s1380.zip" -d "$DATA"
 fi
 # four figures (≈1.5–2.5 min each): front-on and turned a quarter, each with the mouth open and closed. All are the
-# coffin cover's person (arms cut above the shoulders, upper arms along the sides) framed down to the lower ribs;
-# the turned ones keep only the scalp above the brows (the scanner's head holder would show beside the forehead)
+# coffin cover's person framed down to the lower ribs, the raised arms lowered along the sides — outside the rib cage,
+# with a soft-tissue sleeve and a rounded shoulder ("arm" in crowd_hr.json); the turned ones keep only the scalp above
+# the brows (the scanner's head holder would show beside the forehead)
 python3 -I - "$HERE/crowd_hr.json" "$WORK" <<'PY'
 import sys, json
 base, work = sys.argv[1], sys.argv[2]
@@ -30,8 +31,8 @@ PY
 for f in front_open front turned_open turned; do
   python3 -I "$HERE/stage_hr.py" "$DATA/s1380" "$WORK/$f.npz" "$WORK/crowd_$f.json"
 done
-python3 -I "$HERE/stage_crowd.py" "$HERE/crowd.json" "$WORK/crowd.npz" "$WORK"   # lay them out, the middle one squeezed
-python3 -I "$HERE/stage_cutout.py" "$WORK/crowd.npz" "$HERE/tone_bear.json" "$WORK/xray-crowd.png"
+# lay them out back to front as separate cut-outs (the tone of «ЗАДРАЛ»), the middle one in front and squeezed
+python3 -I "$HERE/stage_crowd.py" "$HERE/crowd.json" "$WORK/xray-crowd.png" "$WORK" "$HERE/tone_bear.json"
 python3 -I -c "import sys; from PIL import Image; Image.open(sys.argv[1]).convert('RGB').save(sys.argv[2], quality=93, subsampling=0, optimize=True)" \
   "$WORK/xray-crowd.png" "$HERE/../../public/covers/xray-crowd.jpg"
 echo "public/covers/xray-crowd.jpg updated"

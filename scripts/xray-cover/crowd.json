@@ -1,5 +1,5 @@
 {
- "_comment": "«СДАВИЛИ»: seven people pressed shoulder to shoulder. Back row first (smaller, higher), then the sides, the middle one last (screaming, squeezed across the chest). x / y_top — the frame point of the midline and the head top; scale — frame px per render px (renders are 2 px/mm); tilt — degrees, + leans the head right; squeeze — rows under the head top where the chest narrows to k.",
+ "_comment": "«СДАВИЛИ»: seven people pressed shoulder to shoulder. Laid back to front as separate cut-outs: the back row first (smaller, higher, a little out of focus — blur), then the sides, the middle one last, in front of everybody (screaming, squeezed across the chest). x / y_top — the frame point of the midline and the head top; scale — frame px per render px (renders are 2 px/mm); tilt — degrees, + leans the head right; squeeze — rows under the head top where the chest narrows to k.",
  "W": 1920,
  "H": 1080,
  "figures": [
@@ -10,7 +10,8 @@
    "y_top": 268,
    "scale": 0.74,
    "mirror": true,
-   "tilt_deg": 6
+   "tilt_deg": 6,
+   "blur": 2.5
   },
   {
    "name": "back right",
@@ -19,7 +20,8 @@
    "y_top": 262,
    "scale": 0.74,
    "mirror": true,
-   "tilt_deg": -6
+   "tilt_deg": -6,
+   "blur": 2.5
   },
   {
    "name": "far left",
@@ -28,7 +30,8 @@
    "y_top": 398,
    "scale": 0.82,
    "mirror": true,
-   "tilt_deg": 11
+   "tilt_deg": 11,
+   "blur": 1.2
   },
   {
    "name": "far right",
@@ -37,7 +40,8 @@
    "y_top": 402,
    "scale": 0.82,
    "mirror": true,
-   "tilt_deg": -10
+   "tilt_deg": -10,
+   "blur": 1.2
   },
   {
    "name": "left",
@@ -71,5 +75,6 @@
     "y1": 540
    }
   }
- ]
+ ],
+ "layers": true
 }

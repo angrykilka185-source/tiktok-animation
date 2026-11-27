@@ -1,0 +1,75 @@
+{
+ "_comment": "«СДАВИЛИ»: seven people pressed shoulder to shoulder. Back row first (smaller, higher), then the sides, the middle one last (screaming, squeezed across the chest). x / y_top — the frame point of the midline and the head top; scale — frame px per render px (renders are 2 px/mm); tilt — degrees, + leans the head right; squeeze — rows under the head top where the chest narrows to k.",
+ "W": 1920,
+ "H": 1080,
+ "figures": [
+  {
+   "name": "back left",
+   "src": "turned_open.npz",
+   "x": 372,
+   "y_top": 268,
+   "scale": 0.74,
+   "mirror": true,
+   "tilt_deg": 6
+  },
+  {
+   "name": "back right",
+   "src": "front.npz",
+   "x": 1555,
+   "y_top": 262,
+   "scale": 0.74,
+   "mirror": true,
+   "tilt_deg": -6
+  },
+  {
+   "name": "far left",
+   "src": "turned.npz",
+   "x": 120,
+   "y_top": 398,
+   "scale": 0.82,
+   "mirror": true,
+   "tilt_deg": 11
+  },
+  {
+   "name": "far right",
+   "src": "front.npz",
+   "x": 1800,
+   "y_top": 402,
+   "scale": 0.82,
+   "mirror": true,
+   "tilt_deg": -10
+  },
+  {
+   "name": "left",
+   "src": "front.npz",
+   "x": 600,
+   "y_top": 352,
+   "scale": 0.86,
+   "mirror": false,
+   "tilt_deg": 13
+  },
+  {
+   "name": "right",
+   "src": "turned_open.npz",
+   "x": 1325,
+   "y_top": 338,
+   "scale": 0.87,
+   "mirror": false,
+   "tilt_deg": -13
+  },
+  {
+   "name": "middle",
+   "src": "front_open.npz",
+   "x": 960,
+   "y_top": 286,
+   "scale": 0.98,
+   "mirror": false,
+   "tilt_deg": 0,
+   "squeeze": {
+    "k": 0.68,
+    "y0": 330,
+    "y1": 540
+   }
+  }
+ ]
+}

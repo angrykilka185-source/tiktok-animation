@@ -87,22 +87,44 @@ SL = prox
 SR = np.array(P['shoulder_right_mm'], float)
 xm = P['mirror_x_mm']
 RT = R.T
+# 'arm' (crowd figures): the lowered upper arms move out sideways by shift_mm, to hang outside the rib cage
+ARM = P.get('arm')
+tL = np.array([-ARM['shift_mm'], 0.0, 0.0]) if ARM else np.zeros(3)
+tR = -tL
 # left: p_in = R^T (p_out - SL) + prox
-M_L = RT; off_L = (prox - RT @ SL) / VX
+M_L = RT; off_L = (prox - RT @ SL) / VX - M_L @ (tL / VX)
 new_L = ndi.affine_transform(hum_hu, M_L, offset=off_L, order=1, cval=-1000.0)
 # right: mirror about x = xm and shift to the right shoulder, then the same pose
 Fm = np.diag([-1.0, 1.0, 1.0])
 tt = np.array([2 * xm, SL[1] - SR[1], SL[2] - SR[2]])
 RTr = R_Rm.T
-M_R = RTr @ Fm; off_R = (RTr @ (tt - SL) + prox) / VX
+M_R = RTr @ Fm; off_R = (RTr @ (tt - SL) + prox) / VX - M_R @ (tR / VX)
 new_R = ndi.affine_transform(hum_hu, M_R, offset=off_R, order=1, cval=-1000.0)
 del hum_hu
 for nb in (new_L, new_R):
     hu = np.where(nb > hu, nb, hu)
 del new_L, new_R
 eR = R_Rm @ (dist_end - prox); eR[0] = -eR[0]
-print('ARMS', json.dumps({'shoulder_left': SL.round(1).tolist(), 'elbow_left': (SL + R @ (dist_end - prox)).round(1).tolist(),
-      'shoulder_right': SR.round(1).tolist(), 'elbow_right': (SR + eR).round(1).tolist()}))
+ARM_SEGS = [(SL + tL, SL + R @ (dist_end - prox) + tL), (SR + tR, SR + eR + tR)]  # shoulder joint -> elbow, mm
+print('ARMS', json.dumps({'shoulder_left': ARM_SEGS[0][0].round(1).tolist(), 'elbow_left': ARM_SEGS[0][1].round(1).tolist(),
+      'shoulder_right': ARM_SEGS[1][0].round(1).tolist(), 'elbow_right': ARM_SEGS[1][1].round(1).tolist()}))
+if ARM:
+    # the raised arms' flesh was cut away with them: each lowered upper arm gets a soft-tissue sleeve round its bone
+    # (a capsule from the shoulder joint to the elbow) and a rounded shoulder cap, with a soft 1.5 mm edge
+    r, rd = ARM['radius_mm'], ARM['deltoid_mm']
+    for a0, b0 in ARM_SEGS:
+        lo = np.floor((np.minimum(a0, b0) - max(r, rd) - 4) / VX).astype(int).clip(0)
+        hi = np.ceil((np.maximum(a0, b0) + max(r, rd) + 4) / VX).astype(int) + 1
+        hi = np.minimum(hi, hu.shape)
+        gx, gy, gz = np.meshgrid(*[np.arange(lo[i], hi[i]) * VX for i in range(3)], indexing='ij')
+        e = b0 - a0
+        t = np.clip(((gx - a0[0]) * e[0] + (gy - a0[1]) * e[1] + (gz - a0[2]) * e[2]) / (e @ e), 0, 1)
+        d = np.sqrt((gx - a0[0] - t * e[0]) ** 2 + (gy - a0[1] - t * e[1]) ** 2 + (gz - a0[2] - t * e[2]) ** 2)
+        dd = np.sqrt((gx - a0[0]) ** 2 + (gy - a0[1]) ** 2 + (gz - a0[2]) ** 2)
+        w = np.clip(np.maximum((r - d) / 1.5, (rd - dd) / 1.5) + 0.5, 0, 1).astype(np.float32)
+        box = hu[lo[0]:hi[0], lo[1]:hi[1], lo[2]:hi[2]]
+        hu[lo[0]:hi[0], lo[1]:hi[1], lo[2]:hi[2]] = np.maximum(box, -1000.0 + w * (1000.0 + ARM['hu']))
+        del gx, gy, gz, t, d, dd, w
 
 # ---- open the jaw: the lower face (mandible + chin, lips, tongue) turns about the jaw joint
 yy, zz = np.meshgrid(np.arange(NY), np.arange(NZ), indexing='ij')
@@ -177,6 +199,13 @@ delt = np.zeros_like(trunk2d)
 for (hx, hz) in P['humeral_heads_vox']:
     delt |= (xs2 - hx) ** 2 + (zs2 - hz) ** 2 < P['deltoid_r_vox'] ** 2
 sil = pad | neck2d | trunk2d | delt
+if ARM:
+    X2, Z2 = xs2 * VX, zs2 * VX
+    for a0, b0 in ARM_SEGS:
+        ex, ez = b0[0] - a0[0], b0[2] - a0[2]
+        t = np.clip(((X2 - a0[0]) * ex + (Z2 - a0[2]) * ez) / (ex * ex + ez * ez), 0, 1)
+        d2 = np.hypot(X2 - a0[0] - t * ex, Z2 - a0[2] - t * ez)
+        sil |= (d2 < ARM['radius_mm'] + 3) | (np.hypot(X2 - a0[0], Z2 - a0[2]) < ARM['deltoid_mm'] + 3)
 sil = ndi.gaussian_filter(sil.astype(np.float32), P['sil_smooth']) > 0.5
 hu = np.where(sil[:, None, :], hu, -1000.0).astype(np.float32)
 

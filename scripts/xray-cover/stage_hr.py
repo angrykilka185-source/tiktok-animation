@@ -55,7 +55,7 @@ vert = ndi.binary_dilation(vert, iterations=2)
 skd = ndi.binary_dilation(skm, iterations=2)
 junk = np.zeros(a.shape, bool)
 junk[:, :, z0h:] = (a[:, :, z0h:] > 200) & ~skd[:, :, z0h:] & ~vert[:, :, z0h:]
-if P.get('arm'):
+if P.get('arm') or P.get('keep_humeri'):
     # the raised upper arms reach up past the head: keep their bones whole, they are lowered further down
     hum = ndi.binary_dilation(seg('humerus_left') | seg('humerus_right'), iterations=2)
     junk &= ~hum

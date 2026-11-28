@@ -176,5 +176,6 @@
  ],
  "face_feather_vox": 10,
  "soft_jaw": true,
- "drop_thin_back_y": 112
+ "drop_thin_back_y": 112,
+ "keep_humeri": true
 }

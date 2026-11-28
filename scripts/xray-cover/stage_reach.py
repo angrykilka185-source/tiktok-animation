@@ -1,8 +1,7 @@
 # Step 2 of the «жажда» X-ray cover (the person seen from the side, an arm stretched out towards a glass of water):
 # the forearm and hand (outside the CT scan) built from signed-distance bones with a cortical shell, like stage_hands.py
 # (the hand lies flat in the picture, the palm towards the viewer — the classic AP radiograph, fingers apart), the soft
-# tissue of the reaching arm and of the arm that hangs, and a glass of water (a tapered tumbler with a thick base: the
-# walls in the bone channel, the water in the soft channel, a little exaggerated so that the water level shows).
+# tissue of the reaching arm and of the arm that hangs. (The glass of water is the next stage, stage_glass.py.)
 # Positions are in the frame's millimetres: x — the picture's horizontal axis, y — the depth (it does not matter, the
 # projection runs along it), z — up; «world» points (the CT's own axes) are turned into the view like stage_paw.py does.
 # Usage: python3 -I stage_reach.py hr.npz reach.npz reach.json hr.json
@@ -209,41 +208,6 @@ for hg in P.get('hang', []):
     pts = np.array([n_[0] for n_ in nodes]); rm = max(hg['r']) + 2
     add_soft(lambda p, nodes=nodes: chain_sdf(p, nodes), pts.min(0) - rm, pts.max(0) + rm, vox=1.2)
 
-# the glass of water
-GB = np.zeros_like(B)  # the glass walls (their own channel, added to the bone path)
-GS = np.zeros_like(S)  # the water
-if 'glass' in P:
-    g = P['glass']
-    h0, y0, z0 = g['base_c']
-    HT, rb, rt, wl, bt = g['height'], g['r_base'], g['r_top'], g['wall'], g['base_thick']
-    zw = z0 + bt + (HT - bt) * g['fill']
-    def r_o(z):
-        return rb + (rt - rb) * np.clip((z - z0) / HT, 0, 1)
-    def rho(p):
-        return np.hypot(p[..., 0] - h0, p[..., 1] - y0)
-    def sd_glass(p):
-        z = p[..., 2]
-        d_o = rho(p) - r_o(z)
-        d_i = rho(p) - (r_o(z) - wl)
-        side_ = np.maximum.reduce([d_o, -d_i, z - (z0 + HT), z0 - z])
-        base = np.maximum.reduce([d_o, z0 - z, z - (z0 + bt)])
-        return np.minimum(side_, base)
-    def sd_water(p):
-        z = p[..., 2]
-        return np.maximum.reduce([rho(p) - (r_o(z) - wl), (z0 + bt) - z, z - zw])
-    lo = np.array([h0 - rt - 4, y0 - rt - 4, z0 - 4]); hi = np.array([h0 + rt + 4, y0 + rt + 4, z0 + HT + 4])
-    gv = g.get('vox', 0.4)
-    ix0, iz0, patch = project(sd_glass, lo, hi, gv, lambda d: np.clip(0.5 - d / gv, 0, 1) * g['glass_hu'])
-    add(GB, ix0, iz0, patch)
-    ix0, iz0, patch = project(sd_water, lo, hi, gv, lambda d: np.clip(0.5 - d / gv, 0, 1) * g['water_k'])
-    add(GS, ix0, iz0, patch)
-    # a few bubbles and a small bright rim at the water line (a meniscus), drawn into the water channel
-    GS = ndi.gaussian_filter(GS, 0.8)
-    GB = ndi.gaussian_filter(GB, 0.7)
-    print('GLASS', h0, z0, 'water level z', round(zw, 1))
-B += GB
-S += GS
-
 BP = ndi.gaussian_filter(BP, P['proc_blur_px'])
 # trabecular mottle on the procedural bones
 noise = ndi.gaussian_filter(rng.standard_normal(BP.shape).astype(np.float32), 1.2)
@@ -251,5 +215,5 @@ BP *= 1 + 0.10 * noise / (noise.std() + 1e-6)
 B += BP
 S += ndi.gaussian_filter(SP_, 1.0) * P['arm_soft_k']
 img = lambda arr: np.flipud(arr.T)
-np.savez_compressed(OUT, B=B_img + img(B), S=S_img + img(S) + img(GS) * 0, BP=img(BP), SP=img(ndi.gaussian_filter(SP_, 1.0) * P['arm_soft_k']))
+np.savez_compressed(OUT, B=B_img + img(B), S=S_img + img(S), BP=img(BP), SP=img(ndi.gaussian_filter(SP_, 1.0) * P['arm_soft_k']))
 print('ok', BP.max(), SP_.max())

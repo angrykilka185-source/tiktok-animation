@@ -310,18 +310,20 @@
  ],
  "glass": {
   "base_c": [
-   954,
+   959,
    175.7,
-   500
+   466
   ],
-  "height": 190,
-  "r_base": 44,
-  "r_top": 56,
-  "wall": 3.0,
-  "base_thick": 14,
-  "fill": 0.78,
+  "height": 225,
+  "r_base": 50,
+  "r_top": 64,
+  "wall": 3.2,
+  "base_thick": 16,
+  "fill": 0.8,
   "glass_hu": 650,
-  "water_k": 2.2,
+  "water_k": 3.0,
+  "line_hu": 2500,
+  "line_mm": 1.2,
   "vox": 0.4
  }
 }

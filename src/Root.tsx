@@ -31,6 +31,7 @@ import {CoverXrayA, CoverXrayB} from './covers/ZakopanXray';
 import {CoverPitA, CoverPitB, CoverPitC} from './covers/ZakopanReal';
 import {BearSheet} from './covers/BearSheet';
 import {TgkOpros, RT1} from './t1/Main';
+import {FormatOpros, RQ1} from './q1/Main';
 import {Film2, RF2} from './f2/Main';
 import {Rayon1, Rayon1Audio, RR1} from './r1/Main';
 import {Rayon2, Rayon2Audio, RR2} from './r2/Main';
@@ -97,6 +98,7 @@ export const RemotionRoot: React.FC = () => (
 			</React.Fragment>
 		))}
 		<Composition id="TgkOpros" component={TgkOpros} durationInFrames={RT1.total} fps={FPS} width={W} height={H} />
+		<Composition id="FormatOpros" component={FormatOpros} durationInFrames={RQ1.total} fps={FPS} width={W} height={H} />
 		{/* covers for the long video (all parts as one film) */}
 		<Composition id="CoverPapaFilm" component={CoverPapaFilm} durationInFrames={1} fps={FPS} width={1280} height={720} />
 		<Composition id="CoverPapaFilmV" component={CoverPapaFilmV} durationInFrames={1} fps={FPS} width={W} height={H} />
